@@ -23,7 +23,7 @@ export const mockAssetsResponse: AssetsResponse = {
         },
       ],
       criticality: 'High',
-      owner: 'devops@lyft.com',
+      owner: 'devops@example.com',
       active: true,
     },
     {
@@ -47,7 +47,7 @@ export const mockAssetsResponse: AssetsResponse = {
         },
       ],
       criticality: 'Medium',
-      owner: 'data-eng@lyft.com',
+      owner: 'data-eng@example.com',
       active: true,
     },
     {
@@ -71,7 +71,7 @@ export const mockAssetsResponse: AssetsResponse = {
         },
       ],
       criticality: 'High',
-      owner: 'crm-ops@lyft.com',
+      owner: 'crm-ops@example.com',
       active: true,
     },
     {
@@ -82,7 +82,7 @@ export const mockAssetsResponse: AssetsResponse = {
       hardware: { vendor: 'Cisco', model: 'Catalyst 9500' },
       software: [],
       criticality: 'High',
-      owner: 'netops@lyft.com',
+      owner: 'netops@example.com',
       active: true,
     },
     {

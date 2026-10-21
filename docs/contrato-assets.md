@@ -58,7 +58,7 @@ la implemente. Por ahora el endpoint puede ser abierto en local.
         }
       ],
       "criticality": "High",
-      "owner": "devops@lyft.com",
+      "owner": "devops@example.com",
       "active": true
     }
   ]

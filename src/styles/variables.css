@@ -11,6 +11,15 @@
   --color-medium:   #F2C94C;
   --color-low:      #637180;
 
+  /* Navigation (extraídos del Figma) */
+  --color-nav-text:       #D6E2EC;   /* texto inactivo en sidebar */
+  --color-nav-text-dim:   #B9CAD8;   /* pie de página sidebar */
+  --color-nav-active-bg:  #0F516E;   /* fondo ítem activo */
+
+  /* Paneles / bordes */
+  --color-border-panel:  #D9E1E8;
+  --color-muted-bg:      #C9D3DC;   /* íconos y estados deshabilitados */
+
   /* Typography */
   --font-title: 'Archivo Black', sans-serif;
   --font-body:  'Work Sans', sans-serif;

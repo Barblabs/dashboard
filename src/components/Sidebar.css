@@ -1,60 +1,92 @@
 .sidebar {
-  width: 220px;
+  width: 232px;
   min-height: 100vh;
   background: var(--color-navy);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  padding: 28px 20px;
   flex-shrink: 0;
 }
 
+.sidebar__top {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Brand */
 .sidebar__brand {
-  padding: 28px 24px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+}
+
+.sidebar__logo {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
 }
 
 .sidebar__brand-name {
   font-family: var(--font-title);
-  font-size: 18px;
-  letter-spacing: 0.04em;
-  line-height: 1;
+  font-size: 19px;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.sidebar__brand-barb {
-  color: #ffffff;
-}
+.sidebar__brand-barb   { color: #ffffff; }
+.sidebar__brand-attack { color: var(--color-cyan); }
 
-.sidebar__brand-attack {
-  color: var(--color-cyan);
-}
-
+/* Navigation */
 .sidebar__nav {
-  padding: 16px 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .sidebar__nav-item {
-  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 6px;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--color-nav-text);
   cursor: pointer;
-  border-left: 3px solid transparent;
-  transition: color 0.15s, background 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 
 .sidebar__nav-item:hover {
-  color: rgba(255, 255, 255, 0.85);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.sidebar__nav-indicator {
+  width: 4px;
+  height: 20px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  background: transparent;
 }
 
 .sidebar__nav-item--active {
+  background: var(--color-nav-active-bg);
   color: #ffffff;
-  background: rgba(13, 234, 228, 0.1);
-  border-left-color: var(--color-cyan);
+  font-weight: 600;
+}
+
+.sidebar__nav-item--active .sidebar__nav-indicator {
+  background: var(--color-cyan);
+}
+
+/* Footer */
+.sidebar__footer {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-nav-text-dim);
 }

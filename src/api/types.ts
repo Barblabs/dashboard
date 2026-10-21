@@ -1,3 +1,5 @@
+/* ── Asset inventory ───────────────────────────────────── */
+
 export type AssetKind =
   | 'Server'
   | 'Virtual Machine'
@@ -39,4 +41,26 @@ export interface Asset {
 
 export interface AssetsResponse {
   assets: Asset[]
+}
+
+/* ── CMDB connection ───────────────────────────────────── */
+
+export interface CmdbConnection {
+  provider: 'itop'
+  url: string
+  user: string
+  lastSync: string | null
+}
+
+export interface CmdbTestResult {
+  ok: boolean
+  error?: string
+}
+
+export interface CmdbProvider {
+  id: string
+  name: string
+  description: string
+  initial: string
+  available: boolean
 }
