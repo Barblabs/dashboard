@@ -1,0 +1,22 @@
+# Local env — contains secrets
+.env
+.env.local
+
+# Build output
+dist/
+
+# Dependencies
+node_modules/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Claude Code local settings — no subir al repo
+.claude/settings.local.json
