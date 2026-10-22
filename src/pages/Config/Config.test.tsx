@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { App } from '../../App'
+import { i18n } from '../../i18n'
 import { saveConnection } from '../../mocks/handlers'
 import { server } from '../../test/server'
 
@@ -54,7 +55,7 @@ async function renderConnected() {
 
 async function openForm() {
   const user = renderApp()
-  await user.click(await screen.findByRole('button', { name: 'Seleccionar' }))
+  await user.click(await screen.findByRole('button', { name: 'Select' }))
   return user
 }
 
@@ -63,12 +64,50 @@ describe('Configuración', () => {
     saveExistingConnection(new Date().toISOString())
     renderApp()
 
-    expect(screen.getByText('Cargando configuración…')).toBeInTheDocument()
+    expect(screen.getByText('Loading configuration…')).toBeInTheDocument()
     expect(await screen.findByText('iTop conectado')).toBeInTheDocument()
     expect(screen.getByText('http://10.0.0.5:8000')).toBeInTheDocument()
     expect(screen.getByText('barb-reader')).toBeInTheDocument()
     expect(await screen.findByRole('cell', { name: /prod-api-01/ })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Elige tu CMDB' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Choose your CMDB' })).not.toBeInTheDocument()
+  })
+
+  it('lista iTop como única CMDB disponible y las demás como próximamente', async () => {
+    renderApp()
+
+    expect(await screen.findByRole('heading', { name: 'Configuration' })).toBeInTheDocument()
+    expect(screen.getByText('Connect your CMDB to load the tech stack.')).toBeInTheDocument()
+    expect(screen.getByText('No connection')).toBeInTheDocument()
+    expect(screen.getByText('ServiceNow')).toBeInTheDocument()
+    expect(screen.getByText('Other CMDB')).toBeInTheDocument()
+    expect(screen.getAllByText('Coming soon')).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: 'Select' })).toHaveLength(1)
+  })
+
+  it('muestra la selección de CMDB en español', async () => {
+    localStorage.setItem('language', 'es')
+    await i18n.changeLanguage()
+    renderApp()
+
+    expect(await screen.findByRole('heading', { name: 'Elige tu CMDB' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Conectar CMDB' })).toBeInTheDocument()
+    expect(screen.getByText('Otra CMDB')).toBeInTheDocument()
+    expect(screen.getAllByText('Próximamente')).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Seleccionar' })).toBeInTheDocument()
+  })
+
+  it('volver desde la edición lleva a la lista de CMDB con el formulario vacío', async () => {
+    const user = await renderConnected()
+
+    await user.click(screen.getByRole('button', { name: 'Editar conexión' }))
+    await user.click(screen.getByRole('button', { name: '← Cambiar CMDB' }))
+
+    expect(screen.getByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
+    expect(screen.queryByText('iTop conectado')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Select' }))
+    expect(screen.getByLabelText(URL_LABEL)).toHaveValue('')
+    expect(screen.getByLabelText('Usuario')).toHaveValue('')
   })
 
   it('conecta por primera vez: elige iTop, prueba, conecta y muestra el inventario', async () => {
@@ -126,13 +165,13 @@ describe('Configuración', () => {
     await user.click(screen.getByRole('button', { name: 'Desconectar' }))
     await user.click(screen.getByRole('button', { name: 'Sí, desconectar' }))
 
-    expect(await screen.findByRole('heading', { name: 'Elige tu CMDB' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
     expect(screen.queryByText('iTop conectado')).not.toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
 
     cleanup()
     renderApp()
-    expect(await screen.findByRole('heading', { name: 'Elige tu CMDB' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
   })
 
   it('la prueba con el usuario admin falla con el mensaje del perfil REST', async () => {

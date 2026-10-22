@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../App'
@@ -12,6 +12,11 @@ async function openWithBrowserLanguages(languages: string[]) {
   render(<App />)
 }
 
+// La página repite "Configuración" en su título: las aserciones se limitan a la navegación.
+function nav() {
+  return within(screen.getByRole('navigation'))
+}
+
 afterEach(() => {
   vi.restoreAllMocks()
 })
@@ -20,16 +25,16 @@ describe('Language', () => {
   it('shows English for a non-Spanish browser locale', async () => {
     await openWithBrowserLanguages(['fr-FR'])
 
-    expect(screen.getByText('Configuration')).toBeInTheDocument()
-    expect(screen.getByText('Findings')).toBeInTheDocument()
+    expect(nav().getByText('Configuration')).toBeInTheDocument()
+    expect(nav().getByText('Findings')).toBeInTheDocument()
     expect(document.documentElement.lang).toBe('en')
   })
 
   it.each(['es', 'es-MX', 'es-ES'])('shows Spanish for the %s browser locale', async (locale) => {
     await openWithBrowserLanguages([locale])
 
-    expect(screen.getByText('Configuración')).toBeInTheDocument()
-    expect(screen.getByText('Hallazgos')).toBeInTheDocument()
+    expect(nav().getByText('Configuración')).toBeInTheDocument()
+    expect(nav().getByText('Hallazgos')).toBeInTheDocument()
     expect(document.documentElement.lang).toBe('es')
   })
 
@@ -39,13 +44,13 @@ describe('Language', () => {
 
     await user.click(screen.getByRole('button', { name: 'ES' }))
 
-    expect(screen.getByText('Configuración')).toBeInTheDocument()
+    expect(nav().getByText('Configuración')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'ES' })).toHaveAttribute('aria-pressed', 'true')
     expect(document.documentElement.lang).toBe('es')
 
     await user.click(screen.getByRole('button', { name: 'EN' }))
 
-    expect(screen.getByText('Configuration')).toBeInTheDocument()
+    expect(nav().getByText('Configuration')).toBeInTheDocument()
     expect(document.documentElement.lang).toBe('en')
   })
 
@@ -57,7 +62,7 @@ describe('Language', () => {
     cleanup()
     await openWithBrowserLanguages(['en-US'])
 
-    expect(screen.getByText('Configuración')).toBeInTheDocument()
+    expect(nav().getByText('Configuración')).toBeInTheDocument()
     expect(document.documentElement.lang).toBe('es')
   })
 })

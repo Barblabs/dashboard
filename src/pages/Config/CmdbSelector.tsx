@@ -1,28 +1,19 @@
-import type { CmdbProvider } from '../../api/types'
-import './CmdbSelector.css'
+import { useTranslation } from 'react-i18next'
+import { Badge } from '../../components/ui/Badge'
+import { Button } from '../../components/ui/Button'
 
-const PROVIDERS: CmdbProvider[] = [
-  {
-    id: 'itop',
-    name: 'iTop',
-    description: 'CMDB de código abierto. Se conecta por su API REST con un usuario de solo lectura.',
-    initial: 'I',
-    available: true,
-  },
-  {
-    id: 'servicenow',
-    name: 'ServiceNow',
-    description: 'Integración planeada para una siguiente versión.',
-    initial: 'S',
-    available: false,
-  },
-  {
-    id: 'other',
-    name: 'Otra CMDB',
-    description: 'Conexión por API genérica o archivo de inventario.',
-    initial: 'O',
-    available: false,
-  },
+type ProviderId = 'itop' | 'servicenow' | 'other'
+
+interface Provider {
+  id: ProviderId
+  initial: string
+  available: boolean
+}
+
+const PROVIDERS: Provider[] = [
+  { id: 'itop',       initial: 'I', available: true  },
+  { id: 'servicenow', initial: 'S', available: false },
+  { id: 'other',      initial: 'O', available: false },
 ]
 
 interface Props {
@@ -30,47 +21,53 @@ interface Props {
 }
 
 export function CmdbSelector({ onSelect }: Props) {
+  const { t } = useTranslation()
+
   return (
-    <div className="cmdb-selector">
-      <div className="cmdb-selector__header">
-        <h3 className="cmdb-selector__title">Elige tu CMDB</h3>
-        <p className="cmdb-selector__subtitle">
-          Selecciona de dónde viene tu inventario de activos.
+    <div className="flex min-w-0 flex-1 flex-col gap-4 rounded-xl border border-border-panel bg-white p-6">
+      <div className="flex flex-col gap-0.5">
+        <h3 className="font-title text-[20px] leading-[1.2] text-navy">
+          {t('config.selector.title')}
+        </h3>
+        <p className="font-body text-[14px] leading-[1.4] text-gray">
+          {t('config.selector.subtitle')}
         </p>
       </div>
 
-      <div className="cmdb-selector__list">
-        {PROVIDERS.map((p) =>
-          p.available ? (
-            <div key={p.id} className="cmdb-option cmdb-option--available">
-              <span className="cmdb-option__icon cmdb-option__icon--active">
-                {p.initial}
-              </span>
-              <div className="cmdb-option__text">
-                <span className="cmdb-option__name">{p.name}</span>
-                <span className="cmdb-option__desc">{p.description}</span>
-              </div>
-              <button
-                type="button"
-                className="cmdb-option__btn"
-                onClick={() => onSelect()}
+      <div>
+        {PROVIDERS.map((p) => (
+          <div
+            key={p.id}
+            className={`flex items-center gap-3.5 rounded-[10px] p-4 ${
+              p.available ? 'border-2 border-navy bg-white' : 'border border-border-panel bg-panel'
+            }`}
+          >
+            <span
+              className={`flex size-11 shrink-0 items-center justify-center rounded-lg font-title text-[18px] ${
+                p.available ? 'bg-navy text-cyan' : 'bg-muted-bg text-white'
+              }`}
+            >
+              {p.initial}
+            </span>
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5 leading-[1.4]">
+              <span
+                className={`font-body text-[16px] font-semibold ${p.available ? 'text-navy' : 'text-gray'}`}
               >
-                Seleccionar
-              </button>
-            </div>
-          ) : (
-            <div key={p.id} className="cmdb-option cmdb-option--disabled">
-              <span className="cmdb-option__icon cmdb-option__icon--muted">
-                {p.initial}
+                {t(`config.selector.providers.${p.id}.name`)}
               </span>
-              <div className="cmdb-option__text">
-                <span className="cmdb-option__name">{p.name}</span>
-                <span className="cmdb-option__desc">{p.description}</span>
-              </div>
-              <span className="cmdb-option__soon">Próximamente</span>
+              <span className="font-body text-[14px] text-gray">
+                {t(`config.selector.providers.${p.id}.description`)}
+              </span>
             </div>
-          ),
-        )}
+            {p.available ? (
+              <Button size="lg" className="shrink-0" onClick={onSelect}>
+                {t('config.selector.select')}
+              </Button>
+            ) : (
+              <Badge variant="caps">{t('config.selector.comingSoon')}</Badge>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   )

@@ -71,11 +71,3 @@ export interface CmdbSyncResult {
   reactivated: number
   skipped: number
 }
-
-export interface CmdbProvider {
-  id: string
-  name: string
-  description: string
-  initial: string
-  available: boolean
-}
