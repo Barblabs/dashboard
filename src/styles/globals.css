@@ -1,4 +1,9 @@
-:root {
+@import "tailwindcss";
+
+/* Tokens live in @theme so Tailwind generates utilities (bg-navy, font-title...)
+   while still emitting them as :root variables for the existing component CSS.
+   `static` keeps tokens not yet used anywhere, so plain var() references never break. */
+@theme static {
   /* Brand */
   --color-navy:   #0F385B;
   --color-cyan:   #0DEAE4;
@@ -26,16 +31,11 @@
   --font-mono:  'IBM Plex Mono', monospace;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: var(--font-body);
-  background: var(--color-panel);
-  color: var(--color-navy);
+/* Must stay inside a layer: unlayered rules beat every Tailwind utility. */
+@layer base {
+  body {
+    font-family: var(--font-body);
+    background: var(--color-panel);
+    color: var(--color-navy);
+  }
 }
