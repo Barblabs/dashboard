@@ -27,7 +27,8 @@ export const handlers = [
   /*
    * La prueba falla si el usuario es exactamente "admin": es el superusuario
    * de iTop pero no tiene por defecto el perfil "REST Services User" que el
-   * backend requiere. Cualquier otro usuario tiene éxito.
+   * backend requiere. Cualquier otro usuario tiene éxito. La falla trae el
+   * código propuesto en docs/contrato-cmdb.md junto al mensaje legible.
    */
   http.post(`${API}/cmdb/test`, async ({ request }) => {
     const { user } = (await request.json()) as CmdbCredentials
@@ -35,6 +36,7 @@ export const handlers = [
     if (user === 'admin') {
       return HttpResponse.json({
         ok: false,
+        code: 'missing_rest_profile',
         error:
           "El usuario 'admin' no tiene el perfil 'REST Services User' en iTop. Crea un usuario dedicado con ese perfil.",
       })

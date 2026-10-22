@@ -35,6 +35,42 @@ export const es: Translations = {
         disconnected: 'Sin conexión',
       },
     },
+    form: {
+      title: 'Conectar iTop',
+      back: '← Cambiar CMDB',
+      url: {
+        label: 'Dirección de iTop (IP o URL)',
+        help: 'Incluye el puerto si no es el 80 o el 443.',
+        required: 'La dirección es obligatoria.',
+        scheme: 'Debe comenzar con http:// o https://',
+      },
+      user: {
+        label: 'Usuario',
+        help: 'Usuario con perfil REST Services User y permisos de solo lectura.',
+        required: 'El usuario es obligatorio.',
+      },
+      password: {
+        label: 'Contraseña',
+        help: 'Se envía al backend. No se guarda en el navegador.',
+        required: 'La contraseña es obligatoria.',
+      },
+      actions: {
+        test: 'Probar conexión',
+        testing: 'Probando…',
+        connect: 'Conectar y sincronizar',
+        connecting: 'Conectando…',
+      },
+      result: {
+        success: 'Conexión exitosa. Puedes continuar con la sincronización.',
+        testFailed: 'No se pudo conectar con iTop.',
+        testNetworkError: 'Error de red al probar la conexión.',
+        connectFailed: 'No se pudo guardar la conexión.',
+      },
+      testErrors: {
+        missingRestProfile:
+          "El usuario '{{user}}' no tiene el perfil 'REST Services User' en iTop. Crea un usuario dedicado con ese perfil.",
+      },
+    },
     selector: {
       title: 'Elige tu CMDB',
       subtitle: 'Selecciona de dónde viene tu inventario de activos.',

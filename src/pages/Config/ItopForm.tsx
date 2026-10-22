@@ -1,169 +1,183 @@
-import { useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { ParseKeys } from 'i18next'
+import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
+import { useConnectMutation, useTestConnectionMutation } from '../../api/queries'
+import { ApiError } from '../../api/client'
 import type { CmdbTestResult } from '../../api/types'
-import './ItopForm.css'
+import { Button } from '../../components/ui/Button'
+import { Field } from '../../components/ui/Field'
+import { Input } from '../../components/ui/Input'
+
+// Los mensajes son claves de traducción: el texto se resuelve al pintar, en el idioma activo.
+const credentialsSchema = z.object({
+  url: z
+    .string()
+    .trim()
+    .min(1, 'config.form.url.required')
+    .regex(/^https?:\/\/.+/, 'config.form.url.scheme'),
+  user: z.string().trim().min(1, 'config.form.user.required'),
+  // La contraseña se envía tal cual: los espacios pueden ser parte de ella.
+  password: z.string().refine((value) => value.trim() !== '', 'config.form.password.required'),
+})
+
+type Credentials = z.infer<typeof credentialsSchema>
+
+const TEST_ERROR_KEYS = {
+  missing_rest_profile: 'config.form.testErrors.missingRestProfile',
+} as const
+
+type KnownTestErrorCode = keyof typeof TEST_ERROR_KEYS
+
+function isKnownTestErrorCode(code: string | undefined): code is KnownTestErrorCode {
+  return code !== undefined && Object.prototype.hasOwnProperty.call(TEST_ERROR_KEYS, code)
+}
 
 interface Props {
   initialUrl?: string
   initialUser?: string
-  isTesting: boolean
-  isConnecting: boolean
-  testResult: CmdbTestResult | null
   onBack: () => void
-  onTest: (url: string, user: string, password: string) => void
-  onConnect: (url: string, user: string, password: string) => void
+  onConnected: () => void
 }
 
-function validateUrl(v: string): string {
-  if (!v.trim()) return 'La dirección es obligatoria.'
-  if (!/^https?:\/\/.+/.test(v.trim())) return 'Debe comenzar con http:// o https://'
-  return ''
-}
+const RESULT = 'rounded-md px-4 py-3 font-body text-[14px] leading-[1.4]'
+const RESULT_OK = `${RESULT} border border-nav-active-bg bg-nav-active-bg/6 text-nav-active-bg`
+const RESULT_ERROR = `${RESULT} border border-critical bg-critical/5 text-critical`
 
-function validateUser(v: string): string {
-  if (!v.trim()) return 'El usuario es obligatorio.'
-  return ''
-}
+export function ItopForm({ initialUrl = '', initialUser = '', onBack, onConnected }: Props) {
+  const { t } = useTranslation()
+  const testMutation = useTestConnectionMutation()
+  const connectMutation = useConnectMutation()
 
-export function ItopForm({
-  initialUrl = '',
-  initialUser = '',
-  isTesting,
-  isConnecting,
-  testResult,
-  onBack,
-  onTest,
-  onConnect,
-}: Props) {
-  const [url, setUrl]           = useState(initialUrl)
-  const [user, setUser]         = useState(initialUser)
-  const [password, setPassword] = useState('')
-  const [urlError, setUrlError] = useState('')
-  const [userError, setUserError] = useState('')
+  const {
+    register,
+    handleSubmit,
+    clearErrors,
+    watch,
+    formState: { errors },
+  } = useForm<Credentials>({
+    resolver: zodResolver(credentialsSchema),
+    defaultValues: { url: initialUrl, user: initialUser, password: '' },
+    // Se valida al salir del campo y el error desaparece en cuanto se vuelve a escribir.
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
+  })
 
+  const isTesting = testMutation.isPending
+  const isConnecting = connectMutation.isPending
   const busy = isTesting || isConnecting
+  const actionsDisabled = busy || !watch('password')
 
-  function validate(): boolean {
-    const ue = validateUrl(url)
-    const se = validateUser(user)
-    setUrlError(ue)
-    setUserError(se)
-    return !ue && !se && password.trim() !== ''
+  const handleTest = handleSubmit((credentials) => {
+    connectMutation.reset()
+    testMutation.mutate(credentials)
+  })
+
+  const handleConnect = handleSubmit(async (credentials) => {
+    // mutateAsync y no mutate: al conectar la página puede desmontar el formulario
+    // antes de que corran los callbacks por llamada, y onConnected debe ejecutarse igual.
+    const connected = await connectMutation.mutateAsync(credentials).then(
+      () => true,
+      () => false,
+    )
+    if (connected) onConnected()
+  })
+
+  function errorText(message: string | undefined) {
+    return message && t(message as ParseKeys)
   }
 
-  function handleTest() {
-    if (!validate()) return
-    onTest(url.trim(), user.trim(), password)
+  function testErrorText(error: Error) {
+    return error instanceof ApiError && error.kind === 'network'
+      ? t('config.form.result.testNetworkError')
+      : t('config.form.result.testFailed')
   }
 
-  function handleConnect() {
-    if (!validate()) return
-    onConnect(url.trim(), user.trim(), password)
+  // Un backend sin códigos, o con uno nuevo, sigue mostrando su propio mensaje.
+  function failureText(result: CmdbTestResult, credentials: Credentials) {
+    if (isKnownTestErrorCode(result.code)) {
+      return t(TEST_ERROR_KEYS[result.code], { user: credentials.user })
+    }
+    return result.error ?? t('config.form.result.testFailed')
   }
+
+  const result =
+    connectMutation.isError ? { ok: false, text: t('config.form.result.connectFailed') }
+    : testMutation.isError ? { ok: false, text: testErrorText(testMutation.error) }
+    : testMutation.data?.ok ? { ok: true, text: t('config.form.result.success') }
+    : testMutation.data ? { ok: false, text: failureText(testMutation.data, testMutation.variables) }
+    : null
 
   return (
-    <div className="itop-form">
-      <div className="itop-form__header">
-        <h3 className="itop-form__title">Conectar iTop</h3>
-        <button type="button" className="itop-form__back" onClick={onBack}>
-          ← Cambiar CMDB
+    <div className="flex min-w-0 flex-1 flex-col gap-5 rounded-xl border border-border-panel bg-white p-6">
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="font-title text-[20px] leading-[1.2] text-navy">{t('config.form.title')}</h3>
+        <button
+          type="button"
+          className="cursor-pointer p-0 font-body text-[14px] whitespace-nowrap text-gray underline underline-offset-2 hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+          onClick={onBack}
+        >
+          {t('config.form.back')}
         </button>
       </div>
 
-      <div className="itop-form__fields">
-        {/* URL */}
-        <div className="field">
-          <label className="field__label" htmlFor="itop-url">
-            Dirección de iTop (IP o URL)
-          </label>
-          <input
-            id="itop-url"
+      <div className="flex flex-col gap-4">
+        <Field
+          label={t('config.form.url.label')}
+          help={t('config.form.url.help')}
+          error={errorText(errors.url?.message)}
+        >
+          <Input
             type="url"
-            className={`field__input${urlError ? ' field__input--error' : ''}`}
             placeholder="http://10.0.0.5:8000"
-            value={url}
-            onChange={(e) => { setUrl(e.target.value); setUrlError('') }}
-            onBlur={() => setUrlError(validateUrl(url))}
-            disabled={busy}
             autoComplete="off"
+            disabled={busy}
+            {...register('url', { onChange: () => clearErrors('url') })}
           />
-          {urlError
-            ? <span className="field__error">{urlError}</span>
-            : <span className="field__help">Incluye el puerto si no es el 80 o el 443.</span>
-          }
-        </div>
+        </Field>
 
-        {/* User */}
-        <div className="field">
-          <label className="field__label" htmlFor="itop-user">
-            Usuario
-          </label>
-          <input
-            id="itop-user"
+        <Field
+          label={t('config.form.user.label')}
+          help={t('config.form.user.help')}
+          error={errorText(errors.user?.message)}
+        >
+          <Input
             type="text"
-            className={`field__input${userError ? ' field__input--error' : ''}`}
             placeholder="barb-reader"
-            value={user}
-            onChange={(e) => { setUser(e.target.value); setUserError('') }}
-            onBlur={() => setUserError(validateUser(user))}
-            disabled={busy}
             autoComplete="username"
-          />
-          {userError
-            ? <span className="field__error">{userError}</span>
-            : <span className="field__help">
-                Usuario con perfil REST Services User y permisos de solo lectura.
-              </span>
-          }
-        </div>
-
-        {/* Password */}
-        <div className="field">
-          <label className="field__label" htmlFor="itop-password">
-            Contraseña
-          </label>
-          <input
-            id="itop-password"
-            type="password"
-            className="field__input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             disabled={busy}
-            autoComplete="new-password"
+            {...register('user', { onChange: () => clearErrors('user') })}
           />
-          <span className="field__help">
-            Se envía al backend. No se guarda en el navegador.
-          </span>
-        </div>
+        </Field>
+
+        <Field
+          label={t('config.form.password.label')}
+          help={t('config.form.password.help')}
+          error={errorText(errors.password?.message)}
+        >
+          <Input
+            type="password"
+            autoComplete="new-password"
+            disabled={busy}
+            {...register('password', { onChange: () => clearErrors('password') })}
+          />
+        </Field>
       </div>
 
-      {/* Test result */}
-      {testResult && (
-        <div className={`itop-form__result itop-form__result--${testResult.ok ? 'ok' : 'err'}`}>
-          {testResult.ok
-            ? '✓ Conexión exitosa. Puedes continuar con la sincronización.'
-            : `✗ ${testResult.error ?? 'No se pudo conectar con iTop.'}`
-          }
+      {result && (
+        <div className={result.ok ? RESULT_OK : RESULT_ERROR}>
+          {result.ok ? '✓' : '✗'} {result.text}
         </div>
       )}
 
-      {/* Buttons */}
-      <div className="itop-form__actions">
-        <button
-          type="button"
-          className="btn btn--secondary"
-          onClick={handleTest}
-          disabled={busy || !password}
-        >
-          {isTesting ? 'Probando…' : 'Probar conexión'}
-        </button>
-        <button
-          type="button"
-          className="btn btn--primary"
-          onClick={handleConnect}
-          disabled={busy || !password}
-        >
-          {isConnecting ? 'Conectando…' : 'Conectar y sincronizar'}
-        </button>
+      <div className="flex flex-wrap gap-3">
+        <Button variant="secondary" loading={isTesting} disabled={actionsDisabled} onClick={handleTest}>
+          {isTesting ? t('config.form.actions.testing') : t('config.form.actions.test')}
+        </Button>
+        <Button loading={isConnecting} disabled={actionsDisabled} onClick={handleConnect}>
+          {isConnecting ? t('config.form.actions.connecting') : t('config.form.actions.connect')}
+        </Button>
       </div>
     </div>
   )

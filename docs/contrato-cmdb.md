@@ -60,9 +60,27 @@ Prueba la conexión con las credenciales proporcionadas sin guardar nada.
 ```json
 {
   "ok": false,
+  "code": "missing_rest_profile",
   "error": "El usuario 'barb-reader' no tiene el perfil 'REST Services User'."
 }
 ```
+
+| Campo   | Tipo                 | Descripción                                                        |
+|---------|----------------------|--------------------------------------------------------------------|
+| `ok`    | `boolean`            | `true` si iTop aceptó las credenciales                             |
+| `code`  | `string` (opcional)  | **Propuesta.** Código estable de la falla, para traducirla en el front |
+| `error` | `string` (opcional)  | Mensaje legible de la falla                                        |
+
+> **Propuesta: campo `code`.** El front traduce los códigos que conoce al
+> idioma del usuario y muestra `error` tal cual cuando `code` falta o es
+> desconocido, así que el backend puede adoptarlo sin coordinar el despliegue.
+> Códigos conocidos hoy:
+>
+> | Código                 | Significado                                              |
+> |------------------------|----------------------------------------------------------|
+> | `missing_rest_profile` | El usuario no tiene el perfil `REST Services User` en iTop |
+>
+> Un código nuevo solo necesita su mensaje en `error` hasta que el front lo traduzca.
 
 **Errores HTTP:**
 

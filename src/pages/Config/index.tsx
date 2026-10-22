@@ -1,15 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import {
-  testConnection,
-  connect,
-  disconnect,
-  syncNow,
-} from '../../api/cmdb'
+import { disconnect, syncNow } from '../../api/cmdb'
 import { fetchAssets } from '../../api/assets'
 import { connectionQueryKey, useConnectionQuery } from '../../api/queries'
-import type { Asset, CmdbConnection, CmdbTestResult } from '../../api/types'
+import type { Asset, CmdbConnection } from '../../api/types'
 import { Badge } from '../../components/ui/Badge'
 import { isMockMode } from '../../env'
 import { ConfigStepPanel } from './ConfigStepPanel'
@@ -36,15 +31,12 @@ export function ConfigPage() {
     : connection && !isEditing ? 'connected'
     : setupStep
 
-  /* form state (only lives here while user types; password cleared after connect) */
+  /* valores iniciales del formulario; la contraseña nunca pasa por aquí */
   const [editUrl, setEditUrl]   = useState('')
   const [editUser, setEditUser] = useState('')
 
   /* async operations */
-  const [isTesting, setIsTesting]       = useState(false)
-  const [isConnecting, setIsConnecting] = useState(false)
-  const [isSyncing, setIsSyncing]       = useState(false)
-  const [testResult, setTestResult]     = useState<CmdbTestResult | null>(null)
+  const [isSyncing, setIsSyncing] = useState(false)
 
   /* table */
   const [assets, setAssets]     = useState<Asset[]>([])
@@ -67,42 +59,12 @@ export function ConfigPage() {
   function handleSelectProvider() {
     setEditUrl('')
     setEditUser('')
-    setTestResult(null)
     setSetupStep('form')
-  }
-
-  async function handleTest(url: string, user: string, password: string) {
-    setIsTesting(true)
-    setTestResult(null)
-    try {
-      const result = await testConnection({ url, user, password })
-      setTestResult(result)
-    } catch {
-      setTestResult({ ok: false, error: 'Error de red al probar la conexión.' })
-    } finally {
-      setIsTesting(false)
-    }
-  }
-
-  async function handleConnect(url: string, user: string, password: string) {
-    setIsConnecting(true)
-    try {
-      /* password never leaves component state, never reaches storage */
-      const conn = await connect({ url, user, password })
-      queryClient.setQueryData<CmdbConnection | null>(connectionQueryKey, conn)
-      setIsEditing(false)
-      setTestResult(null)
-    } catch {
-      setTestResult({ ok: false, error: 'No se pudo guardar la conexión.' })
-    } finally {
-      setIsConnecting(false)
-    }
   }
 
   function handleEdit() {
     setEditUrl(connection?.url ?? '')
     setEditUser(connection?.user ?? '')
-    setTestResult(null)
     setIsEditing(true)
     setSetupStep('form')
     setShowConfirm(false)
@@ -175,12 +137,8 @@ export function ConfigPage() {
             <ItopForm
               initialUrl={editUrl}
               initialUser={editUser}
-              isTesting={isTesting}
-              isConnecting={isConnecting}
-              testResult={testResult}
-              onBack={() => { setSetupStep('select'); setTestResult(null) }}
-              onTest={handleTest}
-              onConnect={handleConnect}
+              onBack={() => setSetupStep('select')}
+              onConnected={() => setIsEditing(false)}
             />
           )}
         </div>

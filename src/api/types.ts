@@ -60,6 +60,8 @@ export interface CmdbCredentials {
 
 export interface CmdbTestResult {
   ok: boolean
+  /** Código estable para traducir la falla; puede faltar o ser desconocido para el front. */
+  code?: string
   error?: string
 }
 

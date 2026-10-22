@@ -33,6 +33,42 @@ export const en = {
         disconnected: 'No connection',
       },
     },
+    form: {
+      title: 'Connect iTop',
+      back: '← Change CMDB',
+      url: {
+        label: 'iTop address (IP or URL)',
+        help: 'Include the port if it is not 80 or 443.',
+        required: 'The address is required.',
+        scheme: 'Must start with http:// or https://',
+      },
+      user: {
+        label: 'User',
+        help: 'User with the REST Services User profile and read-only permissions.',
+        required: 'The user is required.',
+      },
+      password: {
+        label: 'Password',
+        help: 'Sent to the backend. Not stored in the browser.',
+        required: 'The password is required.',
+      },
+      actions: {
+        test: 'Test connection',
+        testing: 'Testing…',
+        connect: 'Connect and sync',
+        connecting: 'Connecting…',
+      },
+      result: {
+        success: 'Connection successful. You can continue with the sync.',
+        testFailed: 'Could not connect to iTop.',
+        testNetworkError: 'Network error while testing the connection.',
+        connectFailed: 'Could not save the connection.',
+      },
+      testErrors: {
+        missingRestProfile:
+          "The user '{{user}}' does not have the 'REST Services User' profile in iTop. Create a dedicated user with that profile.",
+      },
+    },
     selector: {
       title: 'Choose your CMDB',
       subtitle: 'Select where your asset inventory comes from.',

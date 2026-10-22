@@ -11,7 +11,7 @@ const API = import.meta.env.VITE_API_URL as string
 
 type User = ReturnType<typeof userEvent.setup>
 
-const URL_LABEL = 'Dirección de iTop (IP o URL)'
+const URL_LABEL = 'iTop address (IP or URL)'
 const CONFIRM_TEXT =
   'Esta acción desconectará el CMDB y eliminará la configuración guardada. ¿Continuar?'
 const VALID_CREDENTIALS = { url: 'http://10.0.0.5:8000', username: 'barb-reader', password: 's3cr3t' }
@@ -37,12 +37,12 @@ async function fillForm(
     await user.type(input, values.url)
   }
   if (values.username !== undefined) {
-    const input = screen.getByLabelText('Usuario')
+    const input = screen.getByLabelText('User')
     await user.clear(input)
     await user.type(input, values.username)
   }
   if (values.password !== undefined) {
-    await user.type(screen.getByLabelText('Contraseña'), values.password)
+    await user.type(screen.getByLabelText('Password'), values.password)
   }
 }
 
@@ -100,28 +100,28 @@ describe('Configuración', () => {
     const user = await renderConnected()
 
     await user.click(screen.getByRole('button', { name: 'Editar conexión' }))
-    await user.click(screen.getByRole('button', { name: '← Cambiar CMDB' }))
+    await user.click(screen.getByRole('button', { name: '← Change CMDB' }))
 
     expect(screen.getByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
     expect(screen.queryByText('iTop conectado')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Select' }))
     expect(screen.getByLabelText(URL_LABEL)).toHaveValue('')
-    expect(screen.getByLabelText('Usuario')).toHaveValue('')
+    expect(screen.getByLabelText('User')).toHaveValue('')
   })
 
   it('conecta por primera vez: elige iTop, prueba, conecta y muestra el inventario', async () => {
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
 
-    await user.click(screen.getByRole('button', { name: 'Probar conexión' }))
-    expect(screen.getByRole('button', { name: 'Probando…' })).toBeDisabled()
+    await user.click(screen.getByRole('button', { name: 'Test connection' }))
+    expect(screen.getByRole('button', { name: 'Testing…' })).toHaveAttribute('aria-disabled', 'true')
     expect(
-      await screen.findByText('✓ Conexión exitosa. Puedes continuar con la sincronización.'),
+      await screen.findByText('✓ Connection successful. You can continue with the sync.'),
     ).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Conectar y sincronizar' }))
-    expect(screen.getByRole('button', { name: 'Conectando…' })).toBeDisabled()
+    await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
+    expect(screen.getByRole('button', { name: 'Connecting…' })).toHaveAttribute('aria-disabled', 'true')
 
     expect(await screen.findByText('iTop conectado')).toBeInTheDocument()
     expect(screen.getByText('http://10.0.0.5:8000')).toBeInTheDocument()
@@ -178,6 +178,47 @@ describe('Configuración', () => {
     const user = await openForm()
     await fillForm(user, { ...VALID_CREDENTIALS, username: 'admin' })
 
+    await user.click(screen.getByRole('button', { name: 'Test connection' }))
+
+    expect(
+      await screen.findByText(
+        "✗ The user 'admin' does not have the 'REST Services User' profile in iTop. Create a dedicated user with that profile.",
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Test connection' })).toBeEnabled()
+  })
+
+  it.each([
+    ['un código desconocido', { code: 'certificate_expired' }],
+    ['ningún código', {}],
+  ])('una prueba fallida con %s muestra el mensaje del backend', async (_, extra) => {
+    server.use(
+      http.post(`${API}/cmdb/test`, () =>
+        HttpResponse.json({ ok: false, error: 'El certificado de iTop expiró.', ...extra }),
+      ),
+    )
+    const user = await openForm()
+    await fillForm(user, VALID_CREDENTIALS)
+
+    await user.click(screen.getByRole('button', { name: 'Test connection' }))
+
+    expect(await screen.findByText('✗ El certificado de iTop expiró.')).toBeInTheDocument()
+  })
+
+  it('muestra el formulario, la validación y el error de perfil REST en español', async () => {
+    localStorage.setItem('language', 'es')
+    await i18n.changeLanguage()
+    const user = renderApp()
+    await user.click(await screen.findByRole('button', { name: 'Seleccionar' }))
+
+    expect(screen.getByRole('heading', { name: 'Conectar iTop' })).toBeInTheDocument()
+    await user.click(screen.getByLabelText('Dirección de iTop (IP o URL)'))
+    await user.tab()
+    expect(screen.getByText('La dirección es obligatoria.')).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText('Dirección de iTop (IP o URL)'), 'http://10.0.0.5:8000')
+    await user.type(screen.getByLabelText('Usuario'), 'admin')
+    await user.type(screen.getByLabelText('Contraseña'), 's3cr3t')
     await user.click(screen.getByRole('button', { name: 'Probar conexión' }))
 
     expect(
@@ -185,38 +226,53 @@ describe('Configuración', () => {
         "✗ El usuario 'admin' no tiene el perfil 'REST Services User' en iTop. Crea un usuario dedicado con ese perfil.",
       ),
     ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Probar conexión' })).toBeEnabled()
+  })
+
+  it('conectar muestra el estado conectado sin volver a pedir la conexión', async () => {
+    let connectionRequests = 0
+    server.use(
+      http.get(`${API}/cmdb/connection`, () => {
+        connectionRequests += 1
+      }),
+    )
+    const user = await openForm()
+    await fillForm(user, VALID_CREDENTIALS)
+
+    await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
+
+    expect(await screen.findByText('iTop conectado')).toBeInTheDocument()
+    expect(connectionRequests).toBe(1)
   })
 
   it('valida los campos en el cliente y limpia los errores al escribir', async () => {
     const user = await openForm()
     const url = screen.getByLabelText(URL_LABEL)
-    const username = screen.getByLabelText('Usuario')
+    const username = screen.getByLabelText('User')
 
-    expect(screen.getByRole('button', { name: 'Probar conexión' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Conectar y sincronizar' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Test connection' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Connect and sync' })).toBeDisabled()
 
     await user.click(url)
     await user.click(username)
     await user.tab()
-    expect(screen.getByText('La dirección es obligatoria.')).toBeInTheDocument()
-    expect(screen.getByText('El usuario es obligatorio.')).toBeInTheDocument()
-    expect(screen.queryByText('Incluye el puerto si no es el 80 o el 443.')).not.toBeInTheDocument()
+    expect(screen.getByText('The address is required.')).toBeInTheDocument()
+    expect(screen.getByText('The user is required.')).toBeInTheDocument()
+    expect(screen.queryByText('Include the port if it is not 80 or 443.')).not.toBeInTheDocument()
 
     await user.type(url, '10.0.0.5')
-    expect(screen.queryByText('La dirección es obligatoria.')).not.toBeInTheDocument()
-    expect(screen.getByText('Incluye el puerto si no es el 80 o el 443.')).toBeInTheDocument()
+    expect(screen.queryByText('The address is required.')).not.toBeInTheDocument()
+    expect(screen.getByText('Include the port if it is not 80 or 443.')).toBeInTheDocument()
 
-    await user.type(screen.getByLabelText('Contraseña'), 's3cr3t')
-    await user.click(screen.getByRole('button', { name: 'Probar conexión' }))
-    expect(screen.getByText('Debe comenzar con http:// o https://')).toBeInTheDocument()
-    expect(screen.getByText('El usuario es obligatorio.')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Probando…' })).not.toBeInTheDocument()
+    await user.type(screen.getByLabelText('Password'), 's3cr3t')
+    await user.click(screen.getByRole('button', { name: 'Test connection' }))
+    expect(screen.getByText('Must start with http:// or https://')).toBeInTheDocument()
+    expect(screen.getByText('The user is required.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Testing…' })).not.toBeInTheDocument()
 
     await user.type(username, 'b')
-    expect(screen.queryByText('El usuario es obligatorio.')).not.toBeInTheDocument()
+    expect(screen.queryByText('The user is required.')).not.toBeInTheDocument()
     expect(
-      screen.getByText('Usuario con perfil REST Services User y permisos de solo lectura.'),
+      screen.getByText('User with the REST Services User profile and read-only permissions.'),
     ).toBeInTheDocument()
   })
 
@@ -226,9 +282,9 @@ describe('Configuración', () => {
     await user.click(screen.getByRole('button', { name: 'Editar conexión' }))
 
     expect(screen.getByLabelText(URL_LABEL)).toHaveValue('http://10.0.0.5:8000')
-    expect(screen.getByLabelText('Usuario')).toHaveValue('barb-reader')
-    expect(screen.getByLabelText('Contraseña')).toHaveValue('')
-    expect(screen.getByRole('button', { name: 'Conectar y sincronizar' })).toBeDisabled()
+    expect(screen.getByLabelText('User')).toHaveValue('barb-reader')
+    expect(screen.getByLabelText('Password')).toHaveValue('')
+    expect(screen.getByRole('button', { name: 'Connect and sync' })).toBeDisabled()
   })
 
   it('muestra un error de red cuando la prueba no llega al backend', async () => {
@@ -236,9 +292,19 @@ describe('Configuración', () => {
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
 
-    await user.click(screen.getByRole('button', { name: 'Probar conexión' }))
+    await user.click(screen.getByRole('button', { name: 'Test connection' }))
 
-    expect(await screen.findByText('✗ Error de red al probar la conexión.')).toBeInTheDocument()
+    expect(await screen.findByText('✗ Network error while testing the connection.')).toBeInTheDocument()
+  })
+
+  it('un error HTTP al probar no se presenta como error de red', async () => {
+    server.use(http.post(`${API}/cmdb/test`, () => new HttpResponse(null, { status: 500 })))
+    const user = await openForm()
+    await fillForm(user, VALID_CREDENTIALS)
+
+    await user.click(screen.getByRole('button', { name: 'Test connection' }))
+
+    expect(await screen.findByText('✗ Could not connect to iTop.')).toBeInTheDocument()
   })
 
   it('muestra un error cuando no se puede guardar la conexión', async () => {
@@ -246,9 +312,9 @@ describe('Configuración', () => {
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
 
-    await user.click(screen.getByRole('button', { name: 'Conectar y sincronizar' }))
+    await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
 
-    expect(await screen.findByText('✗ No se pudo guardar la conexión.')).toBeInTheDocument()
+    expect(await screen.findByText('✗ Could not save the connection.')).toBeInTheDocument()
     expect(screen.queryByText('iTop conectado')).not.toBeInTheDocument()
   })
 
