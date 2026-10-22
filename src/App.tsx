@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Sidebar } from './components/Sidebar'
 import { ConfigPage } from './pages/Config'
+import './i18n'
 import './App.css'
 
 // La importación dinámica bajo DEV deja las devtools fuera del build de producción.
