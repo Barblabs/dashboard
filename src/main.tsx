@@ -4,7 +4,7 @@ import './styles/globals.css'
 import { App } from './App'
 import { isMockMode } from './env'
 
-// La importación dinámica bajo isMockMode deja MSW y los datos de ejemplo fuera del build.
+// The dynamic import behind isMockMode keeps MSW and the sample data out of the build.
 async function startMockWorker() {
   if (!isMockMode) return
   const { worker } = await import('./mocks/browser')
@@ -14,9 +14,9 @@ async function startMockWorker() {
 const root = document.getElementById('root')
 if (!root) throw new Error('No root element found')
 
-// Si el worker falla se renderiza igual: mejor errores de red visibles que una página en blanco.
+// Render even if the worker fails: visible network errors beat a blank page.
 startMockWorker()
-  .catch((error: unknown) => console.error('No se pudo iniciar el mock de MSW', error))
+  .catch((error: unknown) => console.error('Failed to start the MSW mock', error))
   .then(() => {
     createRoot(root).render(
       <StrictMode>

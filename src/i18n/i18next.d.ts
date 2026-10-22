@@ -1,7 +1,7 @@
 import 'i18next'
 import type { Translations } from './locales/en'
 
-// Tipar los recursos hace que una clave inexistente sea error de compilación.
+// Typing the resources turns a missing key into a compile error.
 declare module 'i18next' {
   interface CustomTypeOptions {
     defaultNS: 'translation'

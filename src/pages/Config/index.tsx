@@ -18,7 +18,7 @@ export function ConfigPage() {
   const connectionQuery = useConnectionQuery()
   const connection = connectionQuery.data ?? null
 
-  /* El paso se deriva: solo la elección entre lista y formulario es estado local. */
+  /* The step is derived: only the choice between list and form is local state. */
   const [setupStep, setSetupStep] = useState<SetupStep>('select')
   const [isEditing, setIsEditing] = useState(false)
   const step =
@@ -26,7 +26,7 @@ export function ConfigPage() {
     : connection && !isEditing ? 'connected'
     : setupStep
 
-  /* valores iniciales del formulario; la contraseña nunca pasa por aquí */
+  /* Initial form values; the password never goes through here */
   const [editUrl, setEditUrl]   = useState('')
   const [editUser, setEditUser] = useState('')
 
@@ -45,7 +45,7 @@ export function ConfigPage() {
     setSetupStep('form')
   }
 
-  /* Volver a la lista al conectar: así una desconexión posterior regresa a la selección. */
+  /* Reset to the list on connect, so a later disconnect returns to the selection. */
   function handleConnected() {
     setIsEditing(false)
     setSetupStep('select')
@@ -78,7 +78,7 @@ export function ConfigPage() {
         </p>
       </header>
 
-      {/* ── Estado 1 & 2: dos columnas ── */}
+      {/* ── States 1 & 2: two columns ── */}
       {(step === 'select' || step === 'form') && (
         <div className="flex items-start gap-[22px]">
           <ConfigStepPanel activeStep={stepNumber} connected={false} />
@@ -98,7 +98,7 @@ export function ConfigPage() {
         </div>
       )}
 
-      {/* ── Estado 3: conectado ── */}
+      {/* ── State 3: connected ── */}
       {step === 'connected' && connection && (
         <>
           <ConnectedBar connection={connection} onEdit={handleEdit} />

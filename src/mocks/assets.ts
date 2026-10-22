@@ -5,7 +5,7 @@ export const mockAssetsResponse: AssetsResponse = {
     {
       record_id: 'SRV-001',
       name: 'prod-api-01',
-      description: 'API server principal de producción',
+      description: 'Main production API server',
       kind: 'Server',
       hardware: { vendor: 'Dell', model: 'PowerEdge R640' },
       software: [
@@ -29,7 +29,7 @@ export const mockAssetsResponse: AssetsResponse = {
     {
       record_id: 'VM-002',
       name: 'analytics-worker-03',
-      description: 'Worker de procesamiento de eventos',
+      description: 'Event processing worker',
       kind: 'Virtual Machine',
       hardware: null,
       software: [
@@ -53,7 +53,7 @@ export const mockAssetsResponse: AssetsResponse = {
     {
       record_id: 'SRV-003',
       name: 'crm-db-primary',
-      description: 'Base de datos primaria del CRM',
+      description: 'Primary CRM database',
       kind: 'Server',
       hardware: { vendor: 'HPE', model: 'ProLiant DL380' },
       software: [
@@ -77,7 +77,7 @@ export const mockAssetsResponse: AssetsResponse = {
     {
       record_id: 'ND-004',
       name: 'core-switch-01',
-      description: 'Switch de core del datacenter',
+      description: 'Datacenter core switch',
       kind: 'Network Device',
       hardware: { vendor: 'Cisco', model: 'Catalyst 9500' },
       software: [],
@@ -88,7 +88,7 @@ export const mockAssetsResponse: AssetsResponse = {
     {
       record_id: 'VM-005',
       name: 'erp-app-02',
-      description: 'Nodo de aplicación ERP',
+      description: 'ERP application node',
       kind: 'Virtual Machine',
       hardware: null,
       software: [

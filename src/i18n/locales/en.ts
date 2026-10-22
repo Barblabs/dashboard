@@ -98,8 +98,8 @@ export const en = {
     },
     inventory: {
       title: 'Tech stack',
-      // Translations se deriva de este archivo: aquí deben existir todas las formas
-      // plurales que pida cualquier idioma, como la forma many del español.
+      // Translations is derived from this file: it must contain every plural form any
+      // language needs, such as the Spanish many form.
       count_one: '{{count}} asset · source: iTop',
       count_many: '{{count}} assets · source: iTop',
       count_other: '{{count}} assets · source: iTop',

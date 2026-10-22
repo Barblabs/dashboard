@@ -15,7 +15,7 @@ export function saveConnection(connection: CmdbConnection) {
 }
 
 function notConnected() {
-  return HttpResponse.json({ error: 'No hay fuente CMDB conectada' }, { status: 404 })
+  return HttpResponse.json({ error: 'No CMDB source is connected' }, { status: 404 })
 }
 
 export const handlers = [
@@ -25,10 +25,10 @@ export const handlers = [
   }),
 
   /*
-   * La prueba falla si el usuario es exactamente "admin": es el superusuario
-   * de iTop pero no tiene por defecto el perfil "REST Services User" que el
-   * backend requiere. Cualquier otro usuario tiene éxito. La falla trae el
-   * código propuesto en docs/contrato-cmdb.md junto al mensaje legible.
+   * The test fails when the user is exactly "admin": it is the iTop superuser
+   * but lacks, by default, the "REST Services User" profile the backend
+   * requires. Any other user succeeds. The failure carries the code proposed
+   * in docs/contrato-cmdb.md alongside the human-readable message.
    */
   http.post(`${API}/cmdb/test`, async ({ request }) => {
     const { user } = (await request.json()) as CmdbCredentials
@@ -38,7 +38,7 @@ export const handlers = [
         ok: false,
         code: 'missing_rest_profile',
         error:
-          "El usuario 'admin' no tiene el perfil 'REST Services User' en iTop. Crea un usuario dedicado con ese perfil.",
+          "The user 'admin' does not have the 'REST Services User' profile in iTop. Create a dedicated user with that profile.",
       })
     }
     return HttpResponse.json({ ok: true })

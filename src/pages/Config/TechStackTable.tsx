@@ -77,7 +77,7 @@ function AssetsTable({ assets }: { assets: Asset[] }) {
 export function TechStackTable() {
   const { t } = useTranslation()
   const assetsQuery = useAssetsQuery()
-  // Un inventario que no se pudo leer se muestra vacío, como antes de la migración.
+  // An inventory that could not be read is shown as empty, as before the migration.
   const assets = assetsQuery.data ?? []
 
   return (

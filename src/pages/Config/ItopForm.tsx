@@ -10,7 +10,7 @@ import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
 
-// Los mensajes son claves de traducción: el texto se resuelve al pintar, en el idioma activo.
+// Messages are translation keys: the text is resolved at render time, in the active language.
 const credentialsSchema = z.object({
   url: z
     .string()
@@ -18,7 +18,7 @@ const credentialsSchema = z.object({
     .min(1, 'config.form.url.required')
     .regex(/^https?:\/\/.+/, 'config.form.url.scheme'),
   user: z.string().trim().min(1, 'config.form.user.required'),
-  // La contraseña se envía tal cual: los espacios pueden ser parte de ella.
+  // The password is sent as is: spaces may be part of it.
   password: z.string().refine((value) => value.trim() !== '', 'config.form.password.required'),
 })
 
@@ -59,7 +59,7 @@ export function ItopForm({ initialUrl = '', initialUser = '', onBack, onConnecte
   } = useForm<Credentials>({
     resolver: zodResolver(credentialsSchema),
     defaultValues: { url: initialUrl, user: initialUser, password: '' },
-    // Se valida al salir del campo y el error desaparece en cuanto se vuelve a escribir.
+    // Validate on blur; the error disappears as soon as the user types again.
     mode: 'onBlur',
     reValidateMode: 'onBlur',
   })
@@ -75,8 +75,8 @@ export function ItopForm({ initialUrl = '', initialUser = '', onBack, onConnecte
   })
 
   const handleConnect = handleSubmit(async (credentials) => {
-    // mutateAsync y no mutate: al conectar la página puede desmontar el formulario
-    // antes de que corran los callbacks por llamada, y onConnected debe ejecutarse igual.
+    // mutateAsync rather than mutate: on connect the page may unmount the form before
+    // per-call callbacks run, and onConnected must still fire.
     const connected = await connectMutation.mutateAsync(credentials).then(
       () => true,
       () => false,
@@ -94,7 +94,7 @@ export function ItopForm({ initialUrl = '', initialUser = '', onBack, onConnecte
       : t('config.form.result.testFailed')
   }
 
-  // Un backend sin códigos, o con uno nuevo, sigue mostrando su propio mensaje.
+  // A backend without codes, or with a new one, still shows its own message.
   function failureText(result: CmdbTestResult, credentials: Credentials) {
     if (isKnownTestErrorCode(result.code)) {
       return t(TEST_ERROR_KEYS[result.code], { user: credentials.user })

@@ -10,8 +10,8 @@ interface ApiErrorInit {
 }
 
 /*
- * Toda falla de red sale como ApiError. `kind: 'network'` indica que no hubo
- * respuesta del backend (caído, CORS, sin conexión) y no trae status.
+ * Every request failure surfaces as an ApiError. `kind: 'network'` means the backend
+ * never answered (down, CORS, offline), so there is no status.
  */
 export class ApiError extends Error {
   readonly kind: ApiErrorKind
@@ -32,7 +32,7 @@ interface ErrorBody {
   code?: unknown
 }
 
-// Las cancelaciones y los errores ajenos a axios no son fallas de red: pasan intactos.
+// Cancellations and non-axios errors are not request failures: they pass through untouched.
 function toApiError(error: unknown): unknown {
   if (!axios.isAxiosError(error) || axios.isCancel(error)) return error
   if (!error.response) return new ApiError({ kind: 'network', message: error.message })
@@ -48,8 +48,8 @@ function toApiError(error: unknown): unknown {
 }
 
 /*
- * Adaptador fetch en vez de XHR: es el transporte que ya usaba la app, y el
- * XHR de jsdom aplica CORS a las respuestas de MSW, que no traen esas cabeceras.
+ * Fetch adapter instead of XHR: it is the transport the app already used, and jsdom's
+ * XHR enforces CORS on MSW responses, which lack those headers.
  */
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,

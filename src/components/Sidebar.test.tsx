@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../App'
 import { i18n } from '../i18n'
 
-// Simula abrir la app con otro idioma de navegador: el detector vuelve a correr.
+// Simulates opening the app with a different browser language: the detector runs again.
 async function openWithBrowserLanguages(languages: string[]) {
   vi.spyOn(navigator, 'languages', 'get').mockReturnValue(languages)
   vi.spyOn(navigator, 'language', 'get').mockReturnValue(languages[0])
@@ -12,7 +12,7 @@ async function openWithBrowserLanguages(languages: string[]) {
   render(<App />)
 }
 
-// La página repite "Configuración" en su título: las aserciones se limitan a la navegación.
+// The page repeats "Configuración" in its title: assertions are scoped to the navigation.
 function nav() {
   return within(screen.getByRole('navigation'))
 }

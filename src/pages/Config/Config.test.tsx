@@ -59,8 +59,8 @@ async function openForm() {
   return user
 }
 
-describe('Configuración', () => {
-  it('abre en estado conectado cuando ya existe una conexión', async () => {
+describe('Configuration', () => {
+  it('opens in the connected state when a connection already exists', async () => {
     saveExistingConnection(new Date().toISOString())
     renderApp()
 
@@ -72,7 +72,7 @@ describe('Configuración', () => {
     expect(screen.queryByRole('heading', { name: 'Choose your CMDB' })).not.toBeInTheDocument()
   })
 
-  it('lista iTop como única CMDB disponible y las demás como próximamente', async () => {
+  it('lists iTop as the only available CMDB and the rest as coming soon', async () => {
     renderApp()
 
     expect(await screen.findByRole('heading', { name: 'Configuration' })).toBeInTheDocument()
@@ -84,7 +84,7 @@ describe('Configuración', () => {
     expect(screen.getAllByRole('button', { name: 'Select' })).toHaveLength(1)
   })
 
-  it('muestra la selección de CMDB en español', async () => {
+  it('shows the CMDB selection in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
     renderApp()
@@ -96,7 +96,7 @@ describe('Configuración', () => {
     expect(screen.getByRole('button', { name: 'Seleccionar' })).toBeInTheDocument()
   })
 
-  it('volver desde la edición lleva a la lista de CMDB con el formulario vacío', async () => {
+  it('going back from editing leads to the CMDB list with an empty form', async () => {
     const user = await renderConnected()
 
     await user.click(screen.getByRole('button', { name: 'Edit connection' }))
@@ -110,7 +110,7 @@ describe('Configuración', () => {
     expect(screen.getByLabelText('User')).toHaveValue('')
   })
 
-  it('conecta por primera vez: elige iTop, prueba, conecta y muestra el inventario', async () => {
+  it('connects for the first time: picks iTop, tests, connects and shows the inventory', async () => {
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
 
@@ -133,7 +133,7 @@ describe('Configuración', () => {
     expect(screen.getAllByRole('row')).toHaveLength(6)
   })
 
-  it('la sincronización manual actualiza la hora de la última sincronización', async () => {
+  it('manual sync updates the last sync time', async () => {
     const user = await renderConnected()
     expect(screen.getByText('Last sync: 2 hr. ago')).toBeInTheDocument()
 
@@ -148,7 +148,7 @@ describe('Configuración', () => {
     expect(screen.getByRole('button', { name: 'Sync now' })).toBeEnabled()
   })
 
-  it('sincronizar actualiza la hora sin volver a pedir la conexión', async () => {
+  it('syncing updates the time without refetching the connection', async () => {
     let connectionRequests = 0
     server.use(
       http.get(`${API}/cmdb/connection`, () => {
@@ -163,7 +163,7 @@ describe('Configuración', () => {
     expect(connectionRequests).toBe(1)
   })
 
-  it('muestra la barra de conexión y la hora relativa en español', async () => {
+  it('shows the connection bar and relative time in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
     saveExistingConnection(new Date(Date.now() - 5 * 60 * 1000).toISOString())
@@ -189,7 +189,7 @@ describe('Configuración', () => {
     expect(screen.getByRole('button', { name: 'Cancelar' })).toBeInTheDocument()
   })
 
-  it('cancelar la desconexión conserva la conexión', async () => {
+  it('cancelling the disconnect keeps the connection', async () => {
     const user = await renderConnected()
 
     await user.click(screen.getByRole('button', { name: 'Disconnect' }))
@@ -200,7 +200,7 @@ describe('Configuración', () => {
     expect(screen.getByText('iTop connected')).toBeInTheDocument()
   })
 
-  it('confirmar la desconexión vuelve a la lista de CMDB y no reaparece al recargar', async () => {
+  it('confirming the disconnect returns to the CMDB list and does not come back on reload', async () => {
     const user = await renderConnected()
 
     await user.click(screen.getByRole('button', { name: 'Disconnect' }))
@@ -215,7 +215,7 @@ describe('Configuración', () => {
     expect(await screen.findByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
   })
 
-  it('desconectar después de editar la conexión vuelve a la lista de CMDB', async () => {
+  it('disconnecting after editing the connection returns to the CMDB list', async () => {
     const user = await renderConnected()
 
     await user.click(screen.getByRole('button', { name: 'Edit connection' }))
@@ -227,7 +227,7 @@ describe('Configuración', () => {
     expect(await screen.findByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
   })
 
-  it('la prueba con el usuario admin falla con el mensaje del perfil REST', async () => {
+  it('testing with the admin user fails with the REST profile message', async () => {
     const user = await openForm()
     await fillForm(user, { ...VALID_CREDENTIALS, username: 'admin' })
 
@@ -242,12 +242,12 @@ describe('Configuración', () => {
   })
 
   it.each([
-    ['un código desconocido', { code: 'certificate_expired' }],
-    ['ningún código', {}],
-  ])('una prueba fallida con %s muestra el mensaje del backend', async (_, extra) => {
+    ['an unknown code', { code: 'certificate_expired' }],
+    ['no code', {}],
+  ])('a failed test with %s shows the backend message', async (_, extra) => {
     server.use(
       http.post(`${API}/cmdb/test`, () =>
-        HttpResponse.json({ ok: false, error: 'El certificado de iTop expiró.', ...extra }),
+        HttpResponse.json({ ok: false, error: 'The iTop certificate expired.', ...extra }),
       ),
     )
     const user = await openForm()
@@ -255,10 +255,10 @@ describe('Configuración', () => {
 
     await user.click(screen.getByRole('button', { name: 'Test connection' }))
 
-    expect(await screen.findByText('✗ El certificado de iTop expiró.')).toBeInTheDocument()
+    expect(await screen.findByText('✗ The iTop certificate expired.')).toBeInTheDocument()
   })
 
-  it('muestra el formulario, la validación y el error de perfil REST en español', async () => {
+  it('shows the form, validation and REST profile error in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
     const user = renderApp()
@@ -281,7 +281,7 @@ describe('Configuración', () => {
     ).toBeInTheDocument()
   })
 
-  it('conectar muestra el estado conectado sin volver a pedir la conexión', async () => {
+  it('connecting shows the connected state without refetching the connection', async () => {
     let connectionRequests = 0
     server.use(
       http.get(`${API}/cmdb/connection`, () => {
@@ -297,7 +297,7 @@ describe('Configuración', () => {
     expect(connectionRequests).toBe(1)
   })
 
-  it('valida los campos en el cliente y limpia los errores al escribir', async () => {
+  it('validates fields on the client and clears errors while typing', async () => {
     const user = await openForm()
     const url = screen.getByLabelText(URL_LABEL)
     const username = screen.getByLabelText('User')
@@ -329,7 +329,7 @@ describe('Configuración', () => {
     ).toBeInTheDocument()
   })
 
-  it('editar la conexión precarga la dirección y el usuario, pero no la contraseña', async () => {
+  it('editing the connection prefills the address and user, but not the password', async () => {
     const user = await renderConnected()
 
     await user.click(screen.getByRole('button', { name: 'Edit connection' }))
@@ -340,7 +340,7 @@ describe('Configuración', () => {
     expect(screen.getByRole('button', { name: 'Connect and sync' })).toBeDisabled()
   })
 
-  it('muestra un error de red cuando la prueba no llega al backend', async () => {
+  it('shows a network error when the test does not reach the backend', async () => {
     server.use(http.post(`${API}/cmdb/test`, () => HttpResponse.error()))
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
@@ -350,7 +350,7 @@ describe('Configuración', () => {
     expect(await screen.findByText('✗ Network error while testing the connection.')).toBeInTheDocument()
   })
 
-  it('un error HTTP al probar no se presenta como error de red', async () => {
+  it('an HTTP error while testing is not shown as a network error', async () => {
     server.use(http.post(`${API}/cmdb/test`, () => new HttpResponse(null, { status: 500 })))
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
@@ -360,7 +360,7 @@ describe('Configuración', () => {
     expect(await screen.findByText('✗ Could not connect to iTop.')).toBeInTheDocument()
   })
 
-  it('muestra un error cuando no se puede guardar la conexión', async () => {
+  it('shows an error when the connection cannot be saved', async () => {
     server.use(http.post(`${API}/cmdb/connect`, () => HttpResponse.error()))
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
@@ -371,7 +371,7 @@ describe('Configuración', () => {
     expect(screen.queryByText('iTop connected')).not.toBeInTheDocument()
   })
 
-  it('muestra el inventario con encabezados y etiquetas traducidas', async () => {
+  it('shows the inventory with translated headers and labels', async () => {
     await renderConnected()
 
     expect(screen.getByText('Loading inventory…')).toBeInTheDocument()
@@ -388,7 +388,7 @@ describe('Configuración', () => {
     expect(inactiveRow).toHaveTextContent('Inactive')
   })
 
-  it('muestra el inventario en español', async () => {
+  it('shows the inventory in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
     saveExistingConnection(TWO_HOURS_AGO)
@@ -408,7 +408,7 @@ describe('Configuración', () => {
     expect(inactiveRow).toHaveTextContent('Inactivo')
   })
 
-  it('no pide el inventario mientras no hay conexión', async () => {
+  it('does not fetch the inventory while there is no connection', async () => {
     let assetRequests = 0
     server.use(
       http.get(`${API}/assets`, () => {
@@ -421,7 +421,7 @@ describe('Configuración', () => {
     expect(assetRequests).toBe(0)
   })
 
-  it('muestra el estado vacío de inmediato cuando no se puede leer el inventario', async () => {
+  it('shows the empty state right away when the inventory cannot be read', async () => {
     server.use(http.get(`${API}/assets`, () => new HttpResponse(null, { status: 500 })))
     await renderConnected()
 
@@ -430,7 +430,7 @@ describe('Configuración', () => {
     ).toBeInTheDocument()
   })
 
-  it('muestra el estado vacío cuando el inventario no tiene activos', async () => {
+  it('shows the empty state when the inventory has no assets', async () => {
     server.use(http.get(`${API}/assets`, () => HttpResponse.json({ assets: [] })))
     await renderConnected()
 

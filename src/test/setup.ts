@@ -4,11 +4,11 @@ import { afterAll, afterEach, beforeAll } from 'vitest'
 import { i18n } from '../i18n'
 import { server } from './server'
 
-// Los handlers conservan los retrasos del mock (hasta 2 s en sync).
+// The handlers keep the mock delays (up to 2 s on sync).
 configure({ asyncUtilTimeout: 5000 })
 
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }))
-// Sin elección guardada, el detector vuelve al idioma de jsdom (en-US): la suite corre en inglés.
+// With no saved choice, the detector falls back to jsdom's language (en-US): the suite runs in English.
 afterEach(async () => {
   cleanup()
   server.resetHandlers()

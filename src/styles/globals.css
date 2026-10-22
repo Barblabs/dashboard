@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
-/* Los tokens viven en @theme para que Tailwind genere utilidades (bg-navy, font-title...)
-   y además los emita como variables en :root para la capa base de abajo.
-   `static` conserva los tokens que aún no se usan (colores de severidad), así
-   siempre están disponibles como referencias var(). */
+/* Tokens live in @theme so Tailwind generates utilities (bg-navy, font-title...)
+   and also emits them as :root variables for the base layer below.
+   `static` keeps tokens that are not used yet (severity colors), so they are
+   always available as var() references. */
 @theme static {
   /* Brand */
   --color-navy:   #0F385B;
@@ -17,14 +17,14 @@
   --color-medium:   #F2C94C;
   --color-low:      #637180;
 
-  /* Navigation (extraídos del Figma) */
-  --color-nav-text:       #D6E2EC;   /* texto inactivo en sidebar */
-  --color-nav-text-dim:   #B9CAD8;   /* pie de página sidebar */
-  --color-nav-active-bg:  #0F516E;   /* fondo ítem activo */
+  /* Navigation (taken from Figma) */
+  --color-nav-text:       #D6E2EC;   /* inactive sidebar text */
+  --color-nav-text-dim:   #B9CAD8;   /* sidebar footer */
+  --color-nav-active-bg:  #0F516E;   /* active item background */
 
-  /* Paneles / bordes */
+  /* Panels / borders */
   --color-border-panel:  #D9E1E8;
-  --color-muted-bg:      #C9D3DC;   /* íconos y estados deshabilitados */
+  --color-muted-bg:      #C9D3DC;   /* icons and disabled states */
 
   /* Typography */
   --font-title: 'Archivo Black', sans-serif;

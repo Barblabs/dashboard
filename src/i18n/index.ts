@@ -14,8 +14,8 @@ function toSupportedLanguage(code: string): Language {
   return normalized === 'es' || normalized.startsWith('es-') ? 'es' : 'en'
 }
 
-// Solo se guarda la elección manual: el idioma detectado del navegador no se persiste,
-// así un cambio de idioma del navegador se respeta mientras el usuario no elija uno.
+// Only a manual choice is stored: the detected browser language is not persisted, so a
+// browser language change is respected until the user picks one.
 export function chooseLanguage(language: Language) {
   localStorage.setItem(STORAGE_KEY, language)
   return i18n.changeLanguage(language)

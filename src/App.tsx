@@ -4,7 +4,7 @@ import { Sidebar } from './components/Sidebar'
 import { ConfigPage } from './pages/Config'
 import './i18n'
 
-// La importación dinámica bajo DEV deja las devtools fuera del build de producción.
+// The dynamic import behind DEV keeps the devtools out of the production build.
 const ReactQueryDevtools = import.meta.env.DEV
   ? lazy(() =>
       import('@tanstack/react-query-devtools').then((m) => ({ default: m.ReactQueryDevtools })),
@@ -12,7 +12,7 @@ const ReactQueryDevtools = import.meta.env.DEV
   : null
 
 export function App() {
-  // Un cliente por montaje: cada prueba arranca con la caché vacía.
+  // One client per mount: every test starts with an empty cache.
   const [queryClient] = useState(() => new QueryClient())
 
   return (

@@ -10,15 +10,15 @@ export function useConnectionQuery() {
   return useQuery({
     queryKey: connectionQueryKey,
     queryFn: getConnection,
-    // Sin conexión legible se muestra la lista de CMDB de inmediato, como antes:
-    // reintentar dejaría la página varios segundos en "Cargando".
+    // An unreadable connection shows the CMDB list right away, as before:
+    // retrying would leave the page on "Loading" for several seconds.
     retry: false,
   })
 }
 
 export function useAssetsQuery() {
-  // Solo lee la conexión de la caché: un observador más de useConnectionQuery
-  // la volvería a pedir al montarse.
+  // Only reads the connection from the cache: another useConnectionQuery observer
+  // would refetch it on mount.
   const { data: connection } = useQuery({
     queryKey: connectionQueryKey,
     queryFn: getConnection,
@@ -28,15 +28,15 @@ export function useAssetsQuery() {
     queryKey: assetsQueryKey,
     queryFn: fetchAssets,
     enabled: Boolean(connection),
-    // Igual que antes, un inventario ilegible pasa directo al estado vacío en vez de
-    // quedarse varios segundos en "Cargando" mientras reintenta.
+    // As before, an unreadable inventory goes straight to the empty state instead of
+    // staying on "Loading" for several seconds while it retries.
     retry: false,
     select: (response) => response.assets,
   })
 }
 
-// Las variables de una mutación incluyen la contraseña: gcTime 0 la saca de la caché
-// en cuanto el formulario se desmonta, en vez de conservarla cinco minutos.
+// Mutation variables include the password: gcTime 0 evicts it from the cache as soon
+// as the form unmounts, instead of keeping it for five minutes.
 export function useTestConnectionMutation() {
   return useMutation({ mutationFn: testConnection, gcTime: 0 })
 }

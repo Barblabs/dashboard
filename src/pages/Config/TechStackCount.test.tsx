@@ -7,7 +7,7 @@ import { mockAssetsResponse } from '../../mocks/assets'
 import { saveConnection } from '../../mocks/handlers'
 import { server } from '../../test/server'
 
-// El conteo de activos solo aparece en modo mock.
+// The asset count only appears in mock mode.
 vi.mock('../../env', () => ({ isMockMode: true }))
 
 const API = import.meta.env.VITE_API_URL as string
@@ -30,26 +30,26 @@ function serveOneAsset() {
   )
 }
 
-describe('Conteo del stack tecnológico', () => {
-  it('pluraliza el conteo en inglés', async () => {
+describe('Tech stack count', () => {
+  it('pluralizes the count in English', async () => {
     renderConnected()
     expect(await screen.findByText('5 assets · source: iTop')).toBeInTheDocument()
   })
 
-  it('usa el singular en inglés con un activo', async () => {
+  it('uses the singular in English with one asset', async () => {
     serveOneAsset()
     renderConnected()
     expect(await screen.findByText('1 asset · source: iTop')).toBeInTheDocument()
   })
 
-  it('pluraliza el conteo en español', async () => {
+  it('pluralizes the count in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
     renderConnected()
     expect(await screen.findByText('5 activos · fuente: iTop')).toBeInTheDocument()
   })
 
-  it('usa el singular en español con un activo', async () => {
+  it('uses the singular in Spanish with one asset', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
     serveOneAsset()
