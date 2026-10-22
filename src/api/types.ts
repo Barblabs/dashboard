@@ -52,9 +52,24 @@ export interface CmdbConnection {
   lastSync: string | null
 }
 
+export interface CmdbCredentials {
+  url: string
+  user: string
+  password: string
+}
+
 export interface CmdbTestResult {
   ok: boolean
   error?: string
+}
+
+export interface CmdbSyncResult {
+  lastSync: string
+  created: number
+  updated: number
+  deactivated: number
+  reactivated: number
+  skipped: number
 }
 
 export interface CmdbProvider {

@@ -1,5 +1,5 @@
 import { delay, http, HttpResponse } from 'msw'
-import type { CmdbConnection } from '../api/types'
+import type { CmdbConnection, CmdbCredentials } from '../api/types'
 import { mockAssetsResponse } from './assets'
 
 const API = import.meta.env.VITE_API_URL as string
@@ -18,12 +18,6 @@ function notConnected() {
   return HttpResponse.json({ error: 'No hay fuente CMDB conectada' }, { status: 404 })
 }
 
-interface Credentials {
-  url: string
-  user: string
-  password: string
-}
-
 export const handlers = [
   http.get(`${API}/cmdb/connection`, async () => {
     await delay(300)
@@ -36,7 +30,7 @@ export const handlers = [
    * backend requiere. Cualquier otro usuario tiene éxito.
    */
   http.post(`${API}/cmdb/test`, async ({ request }) => {
-    const { user } = (await request.json()) as Credentials
+    const { user } = (await request.json()) as CmdbCredentials
     await delay(1200)
     if (user === 'admin') {
       return HttpResponse.json({
@@ -49,7 +43,7 @@ export const handlers = [
   }),
 
   http.post(`${API}/cmdb/connect`, async ({ request }) => {
-    const { url, user } = (await request.json()) as Credentials
+    const { url, user } = (await request.json()) as CmdbCredentials
     await delay(1500)
     const connection: CmdbConnection = {
       provider: 'itop',

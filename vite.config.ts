@@ -1,10 +1,27 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite'
+import { rmSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+// public/ se copia tal cual a dist; el worker de MSW solo sirve en desarrollo.
+function excludeMockWorker(): Plugin {
+  let outDir = ''
+  return {
+    name: 'exclude-mock-worker',
+    apply: 'build',
+    configResolved(config) {
+      outDir = resolve(config.root, config.build.outDir)
+    },
+    closeBundle() {
+      rmSync(resolve(outDir, 'mockServiceWorker.js'), { force: true })
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), excludeMockWorker()],
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],

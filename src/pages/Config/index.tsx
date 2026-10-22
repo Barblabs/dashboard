@@ -6,9 +6,9 @@ import {
   disconnect,
   syncNow,
 } from '../../api/cmdb'
-import { fetchAssets } from '../../api/client'
-import { mockAssetsResponse } from '../../mocks/assets'
+import { fetchAssets } from '../../api/assets'
 import type { Asset, CmdbConnection, CmdbTestResult } from '../../api/types'
+import { isMockMode } from '../../env'
 import { ConfigStepPanel } from './ConfigStepPanel'
 import { CmdbSelector } from './CmdbSelector'
 import { ItopForm } from './ItopForm'
@@ -17,7 +17,6 @@ import { TechStackTable } from './TechStackTable'
 import './Config.css'
 
 type Step = 'select' | 'form' | 'connected'
-const useMock = import.meta.env.VITE_USE_MOCK === 'true'
 
 export function ConfigPage() {
   const [step, setStep]                   = useState<Step>('select')
@@ -58,10 +57,7 @@ export function ConfigPage() {
   useEffect(() => {
     if (step !== 'connected') return
     setAssetsLoaded(false)
-    const load = useMock
-      ? Promise.resolve(mockAssetsResponse)
-      : fetchAssets()
-    load
+    fetchAssets()
       .then((data) => { setAssets(data.assets); setAssetsLoaded(true) })
       .catch(() => setAssetsLoaded(true))
   }, [step])
@@ -79,7 +75,7 @@ export function ConfigPage() {
     setIsTesting(true)
     setTestResult(null)
     try {
-      const result = await testConnection(url, user, password)
+      const result = await testConnection({ url, user, password })
       setTestResult(result)
     } catch {
       setTestResult({ ok: false, error: 'Error de red al probar la conexión.' })
@@ -91,7 +87,7 @@ export function ConfigPage() {
   async function handleConnect(url: string, user: string, password: string) {
     setIsConnecting(true)
     try {
-      await connect(url, user, password)
+      await connect({ url, user, password })
       /* password never leaves component state, never reaches storage */
       const conn = await getConnection()
       setConnection(conn)
@@ -154,7 +150,7 @@ export function ConfigPage() {
       <header className="config-page__header">
         <div className="config-page__title-row">
           <h1 className="config-page__title">Configuración</h1>
-          {useMock && (
+          {isMockMode && (
             <span className="config-page__mock-badge">Datos de ejemplo</span>
           )}
         </div>
@@ -204,7 +200,7 @@ export function ConfigPage() {
           <section className="config-page__section">
             <div className="config-page__section-header">
               <h2 className="config-page__section-title">Stack tecnológico</h2>
-              {useMock && assetsLoaded && (
+              {isMockMode && assetsLoaded && (
                 <span className="config-page__section-meta">
                   {assets.length} activos · fuente: iTop
                 </span>
