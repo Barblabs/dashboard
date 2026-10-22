@@ -39,7 +39,6 @@ export const en = {
         connect: 'Connect and sync',
       },
       status: {
-        connected: 'Connected',
         disconnected: 'No connection',
       },
     },

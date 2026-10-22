@@ -1,5 +1,5 @@
 import { delay, http, HttpResponse } from 'msw'
-import type { CmdbConnection, CmdbCredentials } from '../api/types'
+import type { CmdbConnection, CmdbCredentials } from '../api/cmdb'
 import { mockAssetsResponse } from './assets'
 
 const API = import.meta.env.VITE_API_URL

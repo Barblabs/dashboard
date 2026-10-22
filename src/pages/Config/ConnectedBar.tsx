@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
-import { useDisconnectMutation, useSyncMutation } from '../../api/queries'
-import type { CmdbConnection } from '../../api/types'
+import { useDisconnectMutation, useSyncMutation, type CmdbConnection } from '../../api/cmdb'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 

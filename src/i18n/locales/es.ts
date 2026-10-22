@@ -41,7 +41,6 @@ export const es: Translations = {
         connect: 'Conecta y sincroniza',
       },
       status: {
-        connected: 'Conectado',
         disconnected: 'Sin conexión',
       },
     },

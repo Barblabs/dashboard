@@ -1,4 +1,4 @@
-import type { AssetsResponse } from '../api/types'
+import type { AssetsResponse } from '../api/assets'
 
 export const mockAssetsResponse: AssetsResponse = {
   assets: [

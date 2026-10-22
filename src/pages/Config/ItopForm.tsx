@@ -3,12 +3,15 @@ import type { ParseKeys } from 'i18next'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
-import { useConnectMutation, useTestConnectionMutation } from '../../api/queries'
-import { ApiError } from '../../api/client'
-import type { CmdbCredentials, CmdbTestResult } from '../../api/types'
+import {
+  useConnectMutation,
+  useTestConnectionMutation,
+  type CmdbCredentials,
+} from '../../api/cmdb'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
+import { codeKey, requestErrorKey } from '../../i18n/errors'
 
 // Messages are translation keys: the text is resolved at render time, in the active language.
 const credentialsSchema = z.object({
@@ -23,11 +26,6 @@ const credentialsSchema = z.object({
 })
 
 type Credentials = z.infer<typeof credentialsSchema>
-
-// A Map, not an object literal: a backend code like "constructor" must not hit the prototype.
-const TEST_ERROR_KEYS = new Map<string, ParseKeys>([
-  ['missing_rest_profile', 'config.form.testErrors.missingRestProfile'],
-])
 
 interface Props {
   initialValues: Pick<CmdbCredentials, 'url' | 'user'>
@@ -79,25 +77,30 @@ export function ItopForm({ initialValues, onBack, onConnected }: Props) {
     return message && t(message as ParseKeys)
   }
 
-  function testErrorText(error: Error) {
-    return error instanceof ApiError && error.kind === 'network'
-      ? t('config.form.result.testNetworkError')
-      : t('config.form.result.testFailed')
+  function resultOf(): { ok: boolean; text: string } | null {
+    if (connectMutation.isError) {
+      const key = requestErrorKey(connectMutation.error, {
+        fallback: 'config.form.result.connectFailed',
+      })
+      return { ok: false, text: t(key, { user: connectMutation.variables.user }) }
+    }
+    if (testMutation.isError) {
+      const key = requestErrorKey(testMutation.error, {
+        fallback: 'config.form.result.testFailed',
+        network: 'config.form.result.testNetworkError',
+      })
+      return { ok: false, text: t(key, { user: testMutation.variables.user }) }
+    }
+    const test = testMutation.data
+    if (!test) return null
+    if (test.ok) return { ok: true, text: t('config.form.result.success') }
+    // A backend without codes, or with a new one, still shows its own message.
+    const key = codeKey(test.code)
+    if (key) return { ok: false, text: t(key, { user: testMutation.variables.user }) }
+    return { ok: false, text: test.error ?? t('config.form.result.testFailed') }
   }
 
-  // A backend without codes, or with a new one, still shows its own message.
-  function failureText(result: CmdbTestResult, credentials: Credentials) {
-    const key = result.code && TEST_ERROR_KEYS.get(result.code)
-    if (key) return t(key, { user: credentials.user })
-    return result.error ?? t('config.form.result.testFailed')
-  }
-
-  const result =
-    connectMutation.isError ? { ok: false, text: t('config.form.result.connectFailed') }
-    : testMutation.isError ? { ok: false, text: testErrorText(testMutation.error) }
-    : testMutation.data?.ok ? { ok: true, text: t('config.form.result.success') }
-    : testMutation.data ? { ok: false, text: failureText(testMutation.data, testMutation.variables) }
-    : null
+  const result = resultOf()
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-5 rounded-xl border border-border-panel bg-white p-6">

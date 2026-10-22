@@ -1,29 +1,21 @@
 import axios from 'axios'
 
-export type ApiErrorKind = 'http' | 'network'
-
-interface ApiErrorInit {
-  kind: ApiErrorKind
-  message: string
-  status?: number
-  code?: string
-}
-
 /*
- * Every request failure surfaces as an ApiError. `kind: 'network'` means the backend
- * never answered (down, CORS, offline), so there is no status.
+ * `network` means the backend never answered (down, CORS, offline), so there is no
+ * status; an `http` failure always has one, plus the backend's code when it sends one.
  */
-export class ApiError extends Error {
-  readonly kind: ApiErrorKind
-  readonly status: number | null
-  readonly code: string | null
+export type ApiFailure =
+  | { kind: 'http'; status: number; code: string | null }
+  | { kind: 'network' }
 
-  constructor({ kind, message, status, code }: ApiErrorInit) {
+// Every request failure surfaces as an ApiError.
+export class ApiError extends Error {
+  readonly failure: ApiFailure
+
+  constructor(message: string, failure: ApiFailure) {
     super(message)
     this.name = 'ApiError'
-    this.kind = kind
-    this.status = status ?? null
-    this.code = code ?? null
+    this.failure = failure
   }
 }
 
@@ -35,15 +27,14 @@ interface ErrorBody {
 // Cancellations and non-axios errors are not request failures: they pass through untouched.
 function toApiError(error: unknown): unknown {
   if (!axios.isAxiosError(error) || axios.isCancel(error)) return error
-  if (!error.response) return new ApiError({ kind: 'network', message: error.message })
+  if (!error.response) return new ApiError(error.message, { kind: 'network' })
 
   const { status, data } = error.response
   const body = (typeof data === 'object' && data !== null ? data : {}) as ErrorBody
-  return new ApiError({
+  return new ApiError(typeof body.error === 'string' ? body.error : error.message, {
     kind: 'http',
     status,
-    code: typeof body.code === 'string' ? body.code : undefined,
-    message: typeof body.error === 'string' ? body.error : error.message,
+    code: typeof body.code === 'string' ? body.code : null,
   })
 }
 
@@ -51,7 +42,7 @@ function toApiError(error: unknown): unknown {
  * Fetch adapter instead of XHR: it is the transport the app already used, and jsdom's
  * XHR enforces CORS on MSW responses, which lack those headers.
  */
-export const apiClient = axios.create({
+const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   adapter: 'fetch',
 })
@@ -59,3 +50,11 @@ export const apiClient = axios.create({
 apiClient.interceptors.response.use(undefined, (error: unknown) =>
   Promise.reject(toApiError(error)),
 )
+
+// Callers only ever need the response body.
+export const api = {
+  get: <T>(url: string) => apiClient.get<T>(url).then((response) => response.data),
+  post: <T>(url: string, body?: unknown) =>
+    apiClient.post<T>(url, body).then((response) => response.data),
+  delete: (url: string) => apiClient.delete(url).then(() => undefined),
+}

@@ -1,13 +1,12 @@
 import { useTranslation } from 'react-i18next'
 
 interface Props {
-  activeStep: 1 | 2 | 3
-  connected: boolean
+  activeStep: 1 | 2
 }
 
 const STEPS = ['choose', 'credentials', 'connect'] as const
 
-export function ConfigStepPanel({ activeStep, connected }: Props) {
+export function ConfigStepPanel({ activeStep }: Props) {
   const { t } = useTranslation()
 
   return (
@@ -44,7 +43,7 @@ export function ConfigStepPanel({ activeStep, connected }: Props) {
 
       <div className="flex items-center gap-2 rounded-md border border-nav-text px-3 py-2.5 font-body text-[14px] font-semibold text-white">
         <span className="size-2 shrink-0 rounded-full bg-gray" />
-        <span>{t(connected ? 'config.steps.status.connected' : 'config.steps.status.disconnected')}</span>
+        <span>{t('config.steps.status.disconnected')}</span>
       </div>
     </aside>
   )

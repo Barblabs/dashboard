@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useConnectionQuery } from '../../api/queries'
-import type { CmdbConnection, CmdbCredentials } from '../../api/types'
+import { useConnectionQuery, type CmdbConnection, type CmdbCredentials } from '../../api/cmdb'
 import { Badge } from '../../components/ui/Badge'
 import { isMockMode } from '../../env'
 import { ConfigStepPanel } from './ConfigStepPanel'
@@ -10,40 +9,30 @@ import { ItopForm } from './ItopForm'
 import { ConnectedBar } from './ConnectedBar'
 import { TechStackTable } from './TechStackTable'
 
+// The password never goes through here: only the address and user are prefilled.
 type SetupView =
   | { step: 'select' }
   | { step: 'form'; initialValues: Pick<CmdbCredentials, 'url' | 'user'> }
+
+type View = { step: 'loading' } | SetupView | { step: 'connected'; connection: CmdbConnection }
 
 const PAGE = 'flex flex-1 flex-col gap-6 overflow-y-auto px-10 py-8'
 
 export function ConfigPage() {
   const { t } = useTranslation()
   const connectionQuery = useConnectionQuery()
-  const connection = connectionQuery.data ?? null
 
   /* An open setup view wins over the connection, so editing a live connection shows the
      form; with none open the page follows the connection. */
   const [setupView, setSetupView] = useState<SetupView | null>(null)
-  const step =
-    connectionQuery.isPending ? 'loading'
-    : setupView ? setupView.step
-    : connection ? 'connected'
-    : 'select'
+  const connection = connectionQuery.data
+  const view: View =
+    connectionQuery.isPending ? { step: 'loading' }
+    : setupView ? setupView
+    : connection ? { step: 'connected', connection }
+    : { step: 'select' }
 
-  /* ── handlers ── */
-
-  function handleSelectProvider() {
-    setSetupView({ step: 'form', initialValues: { url: '', user: '' } })
-  }
-
-  /* The password never goes through here: only the address and user are prefilled. */
-  function handleEdit(current: CmdbConnection) {
-    setSetupView({ step: 'form', initialValues: { url: current.url, user: current.user } })
-  }
-
-  /* ── render ── */
-
-  if (step === 'loading') {
+  if (view.step === 'loading') {
     return (
       <main className={PAGE}>
         <div className="py-12 text-center text-[14px] text-gray">{t('config.loading')}</div>
@@ -65,30 +54,34 @@ export function ConfigPage() {
         </p>
       </header>
 
-      {/* ── States 1 & 2: two columns ── */}
-      {(step === 'select' || step === 'form') && (
+      {view.step === 'connected' ? (
+        <>
+          <ConnectedBar
+            connection={view.connection}
+            onEdit={() =>
+              setSetupView({
+                step: 'form',
+                initialValues: { url: view.connection.url, user: view.connection.user },
+              })
+            }
+          />
+          <TechStackTable />
+        </>
+      ) : (
         <div className="flex items-start gap-[22px]">
-          <ConfigStepPanel activeStep={step === 'select' ? 1 : 2} connected={false} />
-
-          {setupView?.step === 'form' ? (
+          <ConfigStepPanel activeStep={view.step === 'select' ? 1 : 2} />
+          {view.step === 'form' ? (
             <ItopForm
-              initialValues={setupView.initialValues}
+              initialValues={view.initialValues}
               onBack={() => setSetupView({ step: 'select' })}
               onConnected={() => setSetupView(null)}
             />
           ) : (
-            <CmdbSelector onSelect={handleSelectProvider} />
+            <CmdbSelector
+              onSelect={() => setSetupView({ step: 'form', initialValues: { url: '', user: '' } })}
+            />
           )}
         </div>
-      )}
-
-      {/* ── State 3: connected ── */}
-      {step === 'connected' && connection && (
-        <>
-          <ConnectedBar connection={connection} onEdit={() => handleEdit(connection)} />
-
-          <TechStackTable />
-        </>
       )}
     </main>
   )

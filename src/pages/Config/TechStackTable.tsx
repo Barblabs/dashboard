@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useAssetsQuery } from '../../api/queries'
-import type { Asset } from '../../api/types'
+import { useAssetsQuery, type Asset } from '../../api/assets'
 import { Badge } from '../../components/ui/Badge'
 import { isMockMode } from '../../env'
 
