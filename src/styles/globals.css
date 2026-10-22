@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+/* Tokens live in @theme so Tailwind generates utilities (bg-navy, font-title...)
+   and also emits them as :root variables for the base layer below.
+   `static` keeps tokens that are not used yet (severity colors), so they are
+   always available as var() references. */
+@theme static {
+  /* Brand */
+  --color-navy:   #0F385B;
+  --color-cyan:   #0DEAE4;
+  --color-gray:   #637180;
+  --color-panel:  #F4F7FA;
+
+  /* Severity */
+  --color-critical: #D7263D;
+  --color-high:     #F28C28;
+  --color-medium:   #F2C94C;
+  --color-low:      #637180;
+
+  /* Navigation (taken from Figma) */
+  --color-nav-text:       #D6E2EC;   /* inactive sidebar text */
+  --color-nav-text-dim:   #B9CAD8;   /* sidebar footer */
+  --color-nav-active-bg:  #0F516E;   /* active item background */
+
+  /* Panels / borders */
+  --color-border-panel:  #D9E1E8;
+  --color-muted-bg:      #C9D3DC;   /* icons and disabled states */
+
+  /* Tables */
+  --color-border-row:  #E2E8EF;
+  --color-row-hover:   #EDF1F7;
+
+  /* Typography */
+  --font-title: 'Archivo Black', sans-serif;
+  --font-body:  'Work Sans', sans-serif;
+  --font-mono:  'IBM Plex Mono', monospace;
+}
+
+/* Keyboard focus ring shared by the navy controls (buttons, inputs, links). */
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-navy);
+    outline-offset: 2px;
+  }
+}
+
+/* Must stay inside a layer: unlayered rules beat every Tailwind utility. */
+@layer base {
+  body {
+    font-family: var(--font-body);
+    background: var(--color-panel);
+    color: var(--color-navy);
+  }
+}

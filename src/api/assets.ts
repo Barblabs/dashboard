@@ -1,4 +1,6 @@
-/* ── Asset inventory ───────────────────────────────────── */
+import { queryOptions, useQuery } from '@tanstack/react-query'
+import { api } from './client'
+import { connectionScopeKey } from './cmdb'
 
 export type AssetKind =
   | 'Server'
@@ -43,24 +45,17 @@ export interface AssetsResponse {
   assets: Asset[]
 }
 
-/* ── CMDB connection ───────────────────────────────────── */
+// The inventory comes from the connected CMDB, so it is dropped on disconnect.
+const assetsQuery = queryOptions({
+  queryKey: [...connectionScopeKey, 'assets'],
+  queryFn: () => api.get<AssetsResponse>('/assets'),
+  // As before, an unreadable inventory goes straight to the empty state instead of
+  // staying on "Loading" for several seconds while it retries.
+  retry: false,
+  select: (response) => response.assets,
+})
 
-export interface CmdbConnection {
-  provider: 'itop'
-  url: string
-  user: string
-  lastSync: string | null
-}
-
-export interface CmdbTestResult {
-  ok: boolean
-  error?: string
-}
-
-export interface CmdbProvider {
-  id: string
-  name: string
-  description: string
-  initial: string
-  available: boolean
+// Only mounted under an active connection: the page renders the inventory in the connected state.
+export function useAssetsQuery() {
+  return useQuery(assetsQuery)
 }
