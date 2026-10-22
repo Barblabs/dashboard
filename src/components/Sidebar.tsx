@@ -44,7 +44,7 @@ export function Sidebar() {
       <div className="flex flex-col gap-3">
         <LanguageSwitcher />
         <p className="font-body text-[13px] leading-[1.4] text-nav-text-dim">
-          Reto Lyft · TC3008C<br />
+          {t('sidebar.footer.course')}<br />
           {t('sidebar.footer.stage')}
         </p>
       </div>

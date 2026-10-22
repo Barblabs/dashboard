@@ -8,11 +8,21 @@ export const es: Translations = {
       notifications: 'Notificaciones',
     },
     footer: {
+      course: 'Reto Lyft · TC3008C',
       stage: 'Etapa 3: diseminación y feedback',
     },
     language: {
       label: 'Idioma',
     },
+  },
+  placeholder: {
+    comingSoon: 'Próximamente',
+  },
+  findings: {
+    title: 'Hallazgos',
+  },
+  notifications: {
+    title: 'Notificaciones',
   },
   config: {
     loading: 'Cargando configuración…',

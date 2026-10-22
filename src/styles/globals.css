@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
-/* Tokens live in @theme so Tailwind generates utilities (bg-navy, font-title...)
-   while still emitting them as :root variables for the existing component CSS.
-   `static` keeps tokens not yet used anywhere, so plain var() references never break. */
+/* Los tokens viven en @theme para que Tailwind genere utilidades (bg-navy, font-title...)
+   y además los emita como variables en :root para la capa base de abajo.
+   `static` conserva los tokens que aún no se usan (colores de severidad), así
+   siempre están disponibles como referencias var(). */
 @theme static {
   /* Brand */
   --color-navy:   #0F385B;

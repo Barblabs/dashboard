@@ -1,10 +1,7 @@
-import '../Findings/Findings.css'
+import { useTranslation } from 'react-i18next'
+import { PlaceholderPage } from '../../components/PlaceholderPage'
 
 export function NotificationsPage() {
-  return (
-    <main className="placeholder-page">
-      <h1 className="placeholder-page__title">Notificaciones</h1>
-      <p className="placeholder-page__note">Próximamente</p>
-    </main>
-  )
+  const { t } = useTranslation()
+  return <PlaceholderPage title={t('notifications.title')} />
 }

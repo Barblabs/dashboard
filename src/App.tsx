@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Sidebar } from './components/Sidebar'
 import { ConfigPage } from './pages/Config'
 import './i18n'
-import './App.css'
 
 // La importación dinámica bajo DEV deja las devtools fuera del build de producción.
 const ReactQueryDevtools = import.meta.env.DEV
@@ -18,7 +17,7 @@ export function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="app-layout">
+      <div className="flex min-h-screen">
         <Sidebar />
         <ConfigPage />
       </div>

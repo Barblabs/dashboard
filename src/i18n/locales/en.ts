@@ -6,11 +6,21 @@ export const en = {
       notifications: 'Notifications',
     },
     footer: {
+      course: 'Reto Lyft · TC3008C',
       stage: 'Stage 3: dissemination and feedback',
     },
     language: {
       label: 'Language',
     },
+  },
+  placeholder: {
+    comingSoon: 'Coming soon',
+  },
+  findings: {
+    title: 'Findings',
+  },
+  notifications: {
+    title: 'Notifications',
   },
   config: {
     loading: 'Loading configuration…',
