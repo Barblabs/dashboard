@@ -1,0 +1,41 @@
+:root {
+  /* Brand */
+  --color-navy:   #0F385B;
+  --color-cyan:   #0DEAE4;
+  --color-gray:   #637180;
+  --color-panel:  #F4F7FA;
+
+  /* Severity */
+  --color-critical: #D7263D;
+  --color-high:     #F28C28;
+  --color-medium:   #F2C94C;
+  --color-low:      #637180;
+
+  /* Navigation (extraídos del Figma) */
+  --color-nav-text:       #D6E2EC;   /* texto inactivo en sidebar */
+  --color-nav-text-dim:   #B9CAD8;   /* pie de página sidebar */
+  --color-nav-active-bg:  #0F516E;   /* fondo ítem activo */
+
+  /* Paneles / bordes */
+  --color-border-panel:  #D9E1E8;
+  --color-muted-bg:      #C9D3DC;   /* íconos y estados deshabilitados */
+
+  /* Typography */
+  --font-title: 'Archivo Black', sans-serif;
+  --font-body:  'Work Sans', sans-serif;
+  --font-mono:  'IBM Plex Mono', monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-panel);
+  color: var(--color-navy);
+}

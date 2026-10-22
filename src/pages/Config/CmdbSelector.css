@@ -1,0 +1,132 @@
+.cmdb-selector {
+  flex: 1;
+  min-width: 0;
+  background: #ffffff;
+  border: 1px solid var(--color-border-panel);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cmdb-selector__header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cmdb-selector__title {
+  font-family: var(--font-title);
+  font-size: 20px;
+  color: var(--color-navy);
+  line-height: 1.2;
+}
+
+.cmdb-selector__subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-gray);
+  line-height: 1.4;
+}
+
+/* Option rows */
+.cmdb-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 10px;
+}
+
+.cmdb-option--available {
+  background: #ffffff;
+  border: 2px solid var(--color-navy);
+}
+
+.cmdb-option--disabled {
+  background: var(--color-panel);
+  border: 1px solid var(--color-border-panel);
+}
+
+.cmdb-option__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-title);
+  font-size: 18px;
+}
+
+.cmdb-option__icon--active {
+  background: var(--color-navy);
+  color: var(--color-cyan);
+}
+
+.cmdb-option__icon--muted {
+  background: var(--color-muted-bg);
+  color: #ffffff;
+}
+
+.cmdb-option__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.4;
+}
+
+.cmdb-option__name {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.cmdb-option--disabled .cmdb-option__name {
+  color: var(--color-gray);
+}
+
+.cmdb-option__desc {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-gray);
+}
+
+.cmdb-option__btn {
+  height: 44px;
+  padding: 0 16px;
+  background: var(--color-navy);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.cmdb-option__btn:hover {
+  opacity: 0.88;
+}
+
+.cmdb-option__soon {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--color-muted-bg);
+  border-radius: 4px;
+  padding: 4px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
