@@ -1,16 +1,8 @@
 import { useTranslation } from 'react-i18next'
+import { NavLink } from 'react-router'
 import { chooseLanguage, LANGUAGES } from '../i18n'
 
-type NavItem = {
-  id: 'findings' | 'config' | 'notifications'
-  active: boolean
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { id: 'findings',      active: false },
-  { id: 'config',        active: true  },
-  { id: 'notifications', active: false },
-]
+const NAV_ITEMS = ['findings', 'config', 'notifications'] as const
 
 export function Sidebar() {
   const { t } = useTranslation()
@@ -26,18 +18,25 @@ export function Sidebar() {
           </span>
         </div>
         <nav className="flex flex-col gap-1">
-          {NAV_ITEMS.map((item) => (
-            <div
-              key={item.id}
-              className={`flex h-11 cursor-pointer items-center gap-3 rounded-md px-3 font-body text-[15px] transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white ${
-                item.active ? 'bg-nav-active-bg font-semibold text-white' : 'font-medium text-nav-text'
-              }`}
+          {NAV_ITEMS.map((id) => (
+            <NavLink
+              key={id}
+              to={`/${id}`}
+              className={({ isActive }) =>
+                `flex h-11 items-center gap-3 rounded-md px-3 font-body text-[15px] transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan ${
+                  isActive ? 'bg-nav-active-bg font-semibold text-white' : 'font-medium text-nav-text'
+                }`
+              }
             >
-              <span
-                className={`h-5 w-1 shrink-0 rounded-xs ${item.active ? 'bg-cyan' : 'bg-transparent'}`}
-              />
-              {t(`sidebar.nav.${item.id}`)}
-            </div>
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={`h-5 w-1 shrink-0 rounded-xs ${isActive ? 'bg-cyan' : 'bg-transparent'}`}
+                  />
+                  {t(`sidebar.nav.${id}`)}
+                </>
+              )}
+            </NavLink>
           ))}
         </nav>
       </div>

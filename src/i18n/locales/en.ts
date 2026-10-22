@@ -22,6 +22,17 @@ export const en = {
   notifications: {
     title: 'Notifications',
   },
+  status: {
+    backHome: 'Back to home',
+    notFound: {
+      title: 'Page not found',
+      message: 'The page you are looking for does not exist or was moved.',
+    },
+    forbidden: {
+      title: 'Access denied',
+      message: 'You do not have permission to view this page.',
+    },
+  },
   config: {
     loading: 'Loading configuration…',
     header: {

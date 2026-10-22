@@ -3,7 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { App } from '../App'
 import { mockConnection, saveConnection } from '../mocks/store'
 
-export function renderApp() {
+// jsdom keeps the URL between tests: every render opens the given path explicitly.
+export function renderApp(path = '/') {
+  window.history.replaceState(null, '', path)
   const user = userEvent.setup()
   render(<App />)
   return user
