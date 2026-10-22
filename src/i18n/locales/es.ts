@@ -71,6 +71,23 @@ export const es: Translations = {
           "El usuario '{{user}}' no tiene el perfil 'REST Services User' en iTop. Crea un usuario dedicado con ese perfil.",
       },
     },
+    connected: {
+      badge: 'iTop conectado',
+      lastSync: 'Última sincronización: {{time}}',
+      never: 'nunca',
+      lessThanAMinute: 'hace menos de un minuto',
+      actions: {
+        disconnect: 'Desconectar',
+        edit: 'Editar conexión',
+        sync: 'Sincronizar ahora',
+        syncing: 'Sincronizando…',
+      },
+      confirm: {
+        text: 'Esta acción desconectará el CMDB y eliminará la configuración guardada. ¿Continuar?',
+        confirm: 'Sí, desconectar',
+        cancel: 'Cancelar',
+      },
+    },
     selector: {
       title: 'Elige tu CMDB',
       subtitle: 'Selecciona de dónde viene tu inventario de activos.',

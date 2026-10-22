@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { connect, getConnection, testConnection } from './cmdb'
+import { connect, disconnect, getConnection, syncNow, testConnection } from './cmdb'
 import type { CmdbConnection } from './types'
 
 export const connectionQueryKey = ['cmdb', 'connection'] as const
+export const assetsQueryKey = ['assets'] as const
 
 export function useConnectionQuery() {
   return useQuery({
@@ -27,6 +28,30 @@ export function useConnectMutation() {
     gcTime: 0,
     onSuccess: (connection) => {
       queryClient.setQueryData<CmdbConnection | null>(connectionQueryKey, connection)
+    },
+  })
+}
+
+export function useSyncMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: syncNow,
+    onSuccess: ({ lastSync }) => {
+      queryClient.setQueryData<CmdbConnection | null>(
+        connectionQueryKey,
+        (current) => current && { ...current, lastSync },
+      )
+    },
+  })
+}
+
+export function useDisconnectMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: disconnect,
+    onSuccess: () => {
+      queryClient.setQueryData<CmdbConnection | null>(connectionQueryKey, null)
+      queryClient.removeQueries({ queryKey: assetsQueryKey })
     },
   })
 }

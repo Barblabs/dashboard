@@ -13,7 +13,7 @@ type User = ReturnType<typeof userEvent.setup>
 
 const URL_LABEL = 'iTop address (IP or URL)'
 const CONFIRM_TEXT =
-  'Esta acción desconectará el CMDB y eliminará la configuración guardada. ¿Continuar?'
+  'This will disconnect the CMDB and delete the saved configuration. Continue?'
 const VALID_CREDENTIALS = { url: 'http://10.0.0.5:8000', username: 'barb-reader', password: 's3cr3t' }
 const TWO_HOURS_AGO = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
 
@@ -49,7 +49,7 @@ async function fillForm(
 async function renderConnected() {
   saveExistingConnection(TWO_HOURS_AGO)
   const user = renderApp()
-  await screen.findByText('iTop conectado')
+  await screen.findByText('iTop connected')
   return user
 }
 
@@ -65,7 +65,7 @@ describe('Configuración', () => {
     renderApp()
 
     expect(screen.getByText('Loading configuration…')).toBeInTheDocument()
-    expect(await screen.findByText('iTop conectado')).toBeInTheDocument()
+    expect(await screen.findByText('iTop connected')).toBeInTheDocument()
     expect(screen.getByText('http://10.0.0.5:8000')).toBeInTheDocument()
     expect(screen.getByText('barb-reader')).toBeInTheDocument()
     expect(await screen.findByRole('cell', { name: /prod-api-01/ })).toBeInTheDocument()
@@ -99,11 +99,11 @@ describe('Configuración', () => {
   it('volver desde la edición lleva a la lista de CMDB con el formulario vacío', async () => {
     const user = await renderConnected()
 
-    await user.click(screen.getByRole('button', { name: 'Editar conexión' }))
+    await user.click(screen.getByRole('button', { name: 'Edit connection' }))
     await user.click(screen.getByRole('button', { name: '← Change CMDB' }))
 
     expect(screen.getByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
-    expect(screen.queryByText('iTop conectado')).not.toBeInTheDocument()
+    expect(screen.queryByText('iTop connected')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Select' }))
     expect(screen.getByLabelText(URL_LABEL)).toHaveValue('')
@@ -123,11 +123,11 @@ describe('Configuración', () => {
     await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
     expect(screen.getByRole('button', { name: 'Connecting…' })).toHaveAttribute('aria-disabled', 'true')
 
-    expect(await screen.findByText('iTop conectado')).toBeInTheDocument()
+    expect(await screen.findByText('iTop connected')).toBeInTheDocument()
     expect(screen.getByText('http://10.0.0.5:8000')).toBeInTheDocument()
     expect(screen.getByText('barb-reader')).toBeInTheDocument()
     expect(
-      screen.getByText('Última sincronización: hace menos de un minuto'),
+      screen.getByText('Last sync: less than a minute ago'),
     ).toBeInTheDocument()
     expect(await screen.findByRole('cell', { name: /prod-api-01/ })).toBeInTheDocument()
     expect(screen.getAllByRole('row')).toHaveLength(6)
@@ -135,42 +135,95 @@ describe('Configuración', () => {
 
   it('la sincronización manual actualiza la hora de la última sincronización', async () => {
     const user = await renderConnected()
-    expect(screen.getByText('Última sincronización: hace 2 h')).toBeInTheDocument()
+    expect(screen.getByText('Last sync: 2 hr. ago')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Sync now' }))
+    expect(screen.getByRole('button', { name: 'Syncing…' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Edit connection' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Disconnect' })).toBeDisabled()
+
+    expect(
+      await screen.findByText('Last sync: less than a minute ago'),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sync now' })).toBeEnabled()
+  })
+
+  it('sincronizar actualiza la hora sin volver a pedir la conexión', async () => {
+    let connectionRequests = 0
+    server.use(
+      http.get(`${API}/cmdb/connection`, () => {
+        connectionRequests += 1
+      }),
+    )
+    const user = await renderConnected()
+
+    await user.click(screen.getByRole('button', { name: 'Sync now' }))
+
+    expect(await screen.findByText('Last sync: less than a minute ago')).toBeInTheDocument()
+    expect(connectionRequests).toBe(1)
+  })
+
+  it('muestra la barra de conexión y la hora relativa en español', async () => {
+    localStorage.setItem('language', 'es')
+    await i18n.changeLanguage()
+    saveExistingConnection(new Date(Date.now() - 5 * 60 * 1000).toISOString())
+    const user = renderApp()
+
+    expect(await screen.findByText('iTop conectado')).toBeInTheDocument()
+    expect(screen.getByText('Última sincronización: hace 5 min')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Editar conexión' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Sincronizar ahora' }))
     expect(screen.getByRole('button', { name: 'Sincronizando…' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Editar conexión' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Desconectar' })).toBeDisabled()
-
     expect(
       await screen.findByText('Última sincronización: hace menos de un minuto'),
     ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Sincronizar ahora' })).toBeEnabled()
+
+    await user.click(screen.getByRole('button', { name: 'Desconectar' }))
+    expect(
+      screen.getByText(
+        'Esta acción desconectará el CMDB y eliminará la configuración guardada. ¿Continuar?',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sí, desconectar' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancelar' })).toBeInTheDocument()
   })
 
   it('cancelar la desconexión conserva la conexión', async () => {
     const user = await renderConnected()
 
-    await user.click(screen.getByRole('button', { name: 'Desconectar' }))
+    await user.click(screen.getByRole('button', { name: 'Disconnect' }))
     expect(screen.getByText(CONFIRM_TEXT)).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Cancelar' }))
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
     expect(screen.queryByText(CONFIRM_TEXT)).not.toBeInTheDocument()
-    expect(screen.getByText('iTop conectado')).toBeInTheDocument()
+    expect(screen.getByText('iTop connected')).toBeInTheDocument()
   })
 
   it('confirmar la desconexión vuelve a la lista de CMDB y no reaparece al recargar', async () => {
     const user = await renderConnected()
 
-    await user.click(screen.getByRole('button', { name: 'Desconectar' }))
-    await user.click(screen.getByRole('button', { name: 'Sí, desconectar' }))
+    await user.click(screen.getByRole('button', { name: 'Disconnect' }))
+    await user.click(screen.getByRole('button', { name: 'Yes, disconnect' }))
 
     expect(await screen.findByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
-    expect(screen.queryByText('iTop conectado')).not.toBeInTheDocument()
+    expect(screen.queryByText('iTop connected')).not.toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
 
     cleanup()
     renderApp()
+    expect(await screen.findByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
+  })
+
+  it('desconectar después de editar la conexión vuelve a la lista de CMDB', async () => {
+    const user = await renderConnected()
+
+    await user.click(screen.getByRole('button', { name: 'Edit connection' }))
+    await fillForm(user, { password: 's3cr3t' })
+    await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
+    await user.click(await screen.findByRole('button', { name: 'Disconnect' }))
+    await user.click(screen.getByRole('button', { name: 'Yes, disconnect' }))
+
     expect(await screen.findByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
   })
 
@@ -240,7 +293,7 @@ describe('Configuración', () => {
 
     await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
 
-    expect(await screen.findByText('iTop conectado')).toBeInTheDocument()
+    expect(await screen.findByText('iTop connected')).toBeInTheDocument()
     expect(connectionRequests).toBe(1)
   })
 
@@ -279,7 +332,7 @@ describe('Configuración', () => {
   it('editar la conexión precarga la dirección y el usuario, pero no la contraseña', async () => {
     const user = await renderConnected()
 
-    await user.click(screen.getByRole('button', { name: 'Editar conexión' }))
+    await user.click(screen.getByRole('button', { name: 'Edit connection' }))
 
     expect(screen.getByLabelText(URL_LABEL)).toHaveValue('http://10.0.0.5:8000')
     expect(screen.getByLabelText('User')).toHaveValue('barb-reader')
@@ -315,7 +368,7 @@ describe('Configuración', () => {
     await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
 
     expect(await screen.findByText('✗ Could not save the connection.')).toBeInTheDocument()
-    expect(screen.queryByText('iTop conectado')).not.toBeInTheDocument()
+    expect(screen.queryByText('iTop connected')).not.toBeInTheDocument()
   })
 
   it('muestra el estado vacío cuando el inventario no tiene activos', async () => {

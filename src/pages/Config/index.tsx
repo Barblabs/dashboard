@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { disconnect, syncNow } from '../../api/cmdb'
 import { fetchAssets } from '../../api/assets'
-import { connectionQueryKey, useConnectionQuery } from '../../api/queries'
-import type { Asset, CmdbConnection } from '../../api/types'
+import { useConnectionQuery } from '../../api/queries'
+import type { Asset } from '../../api/types'
 import { Badge } from '../../components/ui/Badge'
 import { isMockMode } from '../../env'
 import { ConfigStepPanel } from './ConfigStepPanel'
@@ -19,7 +17,6 @@ const PAGE = 'flex flex-1 flex-col gap-6 overflow-y-auto px-10 py-8'
 
 export function ConfigPage() {
   const { t } = useTranslation()
-  const queryClient = useQueryClient()
   const connectionQuery = useConnectionQuery()
   const connection = connectionQuery.data ?? null
 
@@ -35,15 +32,9 @@ export function ConfigPage() {
   const [editUrl, setEditUrl]   = useState('')
   const [editUser, setEditUser] = useState('')
 
-  /* async operations */
-  const [isSyncing, setIsSyncing] = useState(false)
-
   /* table */
   const [assets, setAssets]     = useState<Asset[]>([])
   const [assetsLoaded, setAssetsLoaded] = useState(false)
-
-  /* disconnect confirm */
-  const [showConfirm, setShowConfirm] = useState(false)
 
   /* ── load assets when entering connected state ── */
   useEffect(() => {
@@ -67,34 +58,12 @@ export function ConfigPage() {
     setEditUser(connection?.user ?? '')
     setIsEditing(true)
     setSetupStep('form')
-    setShowConfirm(false)
   }
 
-  function handleDisconnectClick() {
-    setShowConfirm(true)
-  }
-
-  async function handleConfirmDisconnect() {
-    await disconnect()
-    queryClient.setQueryData<CmdbConnection | null>(connectionQueryKey, null)
+  /* Volver a la lista al conectar: así una desconexión posterior regresa a la selección. */
+  function handleConnected() {
     setIsEditing(false)
     setSetupStep('select')
-    setShowConfirm(false)
-    setAssets([])
-    setAssetsLoaded(false)
-  }
-
-  async function handleSync() {
-    setIsSyncing(true)
-    try {
-      const { lastSync } = await syncNow()
-      queryClient.setQueryData<CmdbConnection | null>(
-        connectionQueryKey,
-        (current) => current && { ...current, lastSync },
-      )
-    } finally {
-      setIsSyncing(false)
-    }
   }
 
   /* ── render ── */
@@ -138,7 +107,7 @@ export function ConfigPage() {
               initialUrl={editUrl}
               initialUser={editUser}
               onBack={() => setSetupStep('select')}
-              onConnected={() => setIsEditing(false)}
+              onConnected={handleConnected}
             />
           )}
         </div>
@@ -147,16 +116,7 @@ export function ConfigPage() {
       {/* ── Estado 3: conectado ── */}
       {step === 'connected' && connection && (
         <>
-          <ConnectedBar
-            connection={connection}
-            isSyncing={isSyncing}
-            showConfirm={showConfirm}
-            onDisconnect={handleDisconnectClick}
-            onEdit={handleEdit}
-            onSync={handleSync}
-            onConfirmDisconnect={handleConfirmDisconnect}
-            onCancelDisconnect={() => setShowConfirm(false)}
-          />
+          <ConnectedBar connection={connection} onEdit={handleEdit} />
 
           <section className="overflow-hidden rounded-lg border border-border-panel bg-white">
             <div className="flex items-baseline gap-3 border-b border-border-panel px-6 pt-5 pb-4">

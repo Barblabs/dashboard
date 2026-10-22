@@ -69,6 +69,23 @@ export const en = {
           "The user '{{user}}' does not have the 'REST Services User' profile in iTop. Create a dedicated user with that profile.",
       },
     },
+    connected: {
+      badge: 'iTop connected',
+      lastSync: 'Last sync: {{time}}',
+      never: 'never',
+      lessThanAMinute: 'less than a minute ago',
+      actions: {
+        disconnect: 'Disconnect',
+        edit: 'Edit connection',
+        sync: 'Sync now',
+        syncing: 'Syncing…',
+      },
+      confirm: {
+        text: 'This will disconnect the CMDB and delete the saved configuration. Continue?',
+        confirm: 'Yes, disconnect',
+        cancel: 'Cancel',
+      },
+    },
     selector: {
       title: 'Choose your CMDB',
       subtitle: 'Select where your asset inventory comes from.',
