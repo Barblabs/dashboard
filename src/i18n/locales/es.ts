@@ -24,6 +24,17 @@ export const es: Translations = {
   notifications: {
     title: 'Notificaciones',
   },
+  status: {
+    backHome: 'Volver al inicio',
+    notFound: {
+      title: 'Página no encontrada',
+      message: 'La página que buscas no existe o fue movida.',
+    },
+    forbidden: {
+      title: 'Acceso denegado',
+      message: 'No tienes permiso para ver esta página.',
+    },
+  },
   config: {
     loading: 'Cargando configuración…',
     header: {
