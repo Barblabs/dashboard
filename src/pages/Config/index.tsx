@@ -65,7 +65,7 @@ export function ConfigPage() {
               })
             }
           />
-          <TechStackTable />
+          <TechStackTable provider={view.connection.provider} />
         </>
       ) : (
         <div className="flex items-start gap-[22px]">

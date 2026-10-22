@@ -62,9 +62,13 @@ Con `VITE_USE_MOCK=true`, `npm run dev` arranca un service worker de
 responde según el contrato de `docs/`. El código de red es el mismo que en
 producción: no hay ramas `if (useMock)` en `src/api/`.
 
-- Los handlers viven en `src/mocks/handlers.ts` y los datos de ejemplo junto a
-  ellos. Las pruebas usan exactamente los mismos handlers.
-- La conexión CMDB se guarda en `localStorage`, así sobrevive a recargas.
+- Hay un archivo de handlers por dominio en `src/mocks/handlers/` y los datos de
+  ejemplo viven en `src/mocks/`. Las pruebas usan exactamente los mismos
+  handlers; para sobrescribir uno, arma la URL con `apiUrl()` de
+  `src/mocks/url.ts`.
+- La conexión CMDB se guarda en `localStorage` (`src/mocks/store.ts`), así
+  sobrevive a recargas. En las pruebas, `seedConnection()` y `renderApp()` de
+  `src/test/render.tsx` preparan el estado y montan la app.
 - El usuario `admin` hace fallar la prueba de conexión con el código
   `missing_rest_profile`, para probar el mensaje de error traducido.
 - Las respuestas conservan retrasos realistas (hasta 2 s al sincronizar).

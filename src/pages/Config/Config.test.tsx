@@ -1,31 +1,18 @@
-import { cleanup, render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { cleanup, screen } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
-import { App } from '../../App'
 import { i18n } from '../../i18n'
-import { saveConnection } from '../../mocks/handlers'
+import { apiUrl } from '../../mocks/url'
+import { renderApp, seedConnection } from '../../test/render'
 import { server } from '../../test/server'
 
-const API = import.meta.env.VITE_API_URL as string
-
-type User = ReturnType<typeof userEvent.setup>
+type User = ReturnType<typeof renderApp>
 
 const URL_LABEL = 'iTop address (IP or URL)'
 const CONFIRM_TEXT =
   'This will disconnect the CMDB and delete the saved configuration. Continue?'
 const VALID_CREDENTIALS = { url: 'http://10.0.0.5:8000', username: 'barb-reader', password: 's3cr3t' }
 const TWO_HOURS_AGO = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-
-function saveExistingConnection(lastSync: string) {
-  saveConnection({ provider: 'itop', url: 'http://10.0.0.5:8000', user: 'barb-reader', lastSync })
-}
-
-function renderApp() {
-  const user = userEvent.setup()
-  render(<App />)
-  return user
-}
 
 async function fillForm(
   user: User,
@@ -47,7 +34,7 @@ async function fillForm(
 }
 
 async function renderConnected() {
-  saveExistingConnection(TWO_HOURS_AGO)
+  seedConnection(TWO_HOURS_AGO)
   const user = renderApp()
   await screen.findByText('iTop connected')
   return user
@@ -61,7 +48,7 @@ async function openForm() {
 
 describe('Configuration', () => {
   it('opens in the connected state when a connection already exists', async () => {
-    saveExistingConnection(new Date().toISOString())
+    seedConnection()
     renderApp()
 
     expect(screen.getByText('Loading configuration…')).toBeInTheDocument()
@@ -151,7 +138,7 @@ describe('Configuration', () => {
   it('syncing updates the time without refetching the connection', async () => {
     let connectionRequests = 0
     server.use(
-      http.get(`${API}/cmdb/connection`, () => {
+      http.get(apiUrl('/cmdb/connection'), () => {
         connectionRequests += 1
       }),
     )
@@ -166,7 +153,7 @@ describe('Configuration', () => {
   it('shows the connection bar and relative time in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
-    saveExistingConnection(new Date(Date.now() - 5 * 60 * 1000).toISOString())
+    seedConnection(new Date(Date.now() - 5 * 60 * 1000).toISOString())
     const user = renderApp()
 
     expect(await screen.findByText('iTop conectado')).toBeInTheDocument()
@@ -246,7 +233,7 @@ describe('Configuration', () => {
     ['no code', {}],
   ])('a failed test with %s shows the backend message', async (_, extra) => {
     server.use(
-      http.post(`${API}/cmdb/test`, () =>
+      http.post(apiUrl('/cmdb/test'), () =>
         HttpResponse.json({ ok: false, error: 'The iTop certificate expired.', ...extra }),
       ),
     )
@@ -284,7 +271,7 @@ describe('Configuration', () => {
   it('connecting shows the connected state without refetching the connection', async () => {
     let connectionRequests = 0
     server.use(
-      http.get(`${API}/cmdb/connection`, () => {
+      http.get(apiUrl('/cmdb/connection'), () => {
         connectionRequests += 1
       }),
     )
@@ -341,7 +328,7 @@ describe('Configuration', () => {
   })
 
   it('shows a network error when the test does not reach the backend', async () => {
-    server.use(http.post(`${API}/cmdb/test`, () => HttpResponse.error()))
+    server.use(http.post(apiUrl('/cmdb/test'), () => HttpResponse.error()))
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
 
@@ -351,7 +338,7 @@ describe('Configuration', () => {
   })
 
   it('an HTTP error while testing is not shown as a network error', async () => {
-    server.use(http.post(`${API}/cmdb/test`, () => new HttpResponse(null, { status: 500 })))
+    server.use(http.post(apiUrl('/cmdb/test'), () => new HttpResponse(null, { status: 500 })))
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
 
@@ -361,7 +348,7 @@ describe('Configuration', () => {
   })
 
   it('shows an error when the connection cannot be saved', async () => {
-    server.use(http.post(`${API}/cmdb/connect`, () => HttpResponse.error()))
+    server.use(http.post(apiUrl('/cmdb/connect'), () => HttpResponse.error()))
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
 
@@ -391,7 +378,7 @@ describe('Configuration', () => {
   it('shows the inventory in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
-    saveExistingConnection(TWO_HOURS_AGO)
+    seedConnection(TWO_HOURS_AGO)
     renderApp()
 
     expect(await screen.findByText('Cargando inventario…')).toBeInTheDocument()
@@ -411,7 +398,7 @@ describe('Configuration', () => {
   it('does not fetch the inventory while there is no connection', async () => {
     let assetRequests = 0
     server.use(
-      http.get(`${API}/assets`, () => {
+      http.get(apiUrl('/assets'), () => {
         assetRequests += 1
       }),
     )
@@ -422,7 +409,7 @@ describe('Configuration', () => {
   })
 
   it('shows the empty state right away when the inventory cannot be read', async () => {
-    server.use(http.get(`${API}/assets`, () => new HttpResponse(null, { status: 500 })))
+    server.use(http.get(apiUrl('/assets'), () => new HttpResponse(null, { status: 500 })))
     await renderConnected()
 
     expect(
@@ -431,7 +418,7 @@ describe('Configuration', () => {
   })
 
   it('shows the empty state when the inventory has no assets', async () => {
-    server.use(http.get(`${API}/assets`, () => HttpResponse.json({ assets: [] })))
+    server.use(http.get(apiUrl('/assets'), () => HttpResponse.json({ assets: [] })))
     await renderConnected()
 
     expect(

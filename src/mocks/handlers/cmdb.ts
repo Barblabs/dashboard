@@ -1,25 +1,14 @@
 import { delay, http, HttpResponse } from 'msw'
-import type { CmdbConnection, CmdbCredentials } from '../api/cmdb'
-import { mockAssetsResponse } from './assets'
-
-const API = import.meta.env.VITE_API_URL
-const STORAGE_KEY = 'barbattack_cmdb'
-
-function loadConnection(): CmdbConnection | null {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  return raw ? (JSON.parse(raw) as CmdbConnection) : null
-}
-
-export function saveConnection(connection: CmdbConnection) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(connection))
-}
+import type { CmdbConnection, CmdbCredentials } from '../../api/cmdb'
+import { clearConnection, loadConnection, saveConnection } from '../store'
+import { apiUrl } from '../url'
 
 function notConnected() {
   return HttpResponse.json({ error: 'No CMDB source is connected' }, { status: 404 })
 }
 
-export const handlers = [
-  http.get(`${API}/cmdb/connection`, async () => {
+export const cmdbHandlers = [
+  http.get(apiUrl('/cmdb/connection'), async () => {
     await delay(300)
     return HttpResponse.json(loadConnection())
   }),
@@ -30,7 +19,7 @@ export const handlers = [
    * requires. Any other user succeeds. The failure carries the code proposed
    * in docs/contrato-cmdb.md alongside the human-readable message.
    */
-  http.post(`${API}/cmdb/test`, async ({ request }) => {
+  http.post(apiUrl('/cmdb/test'), async ({ request }) => {
     const { user } = (await request.json()) as CmdbCredentials
     await delay(1200)
     if (user === 'admin') {
@@ -44,7 +33,7 @@ export const handlers = [
     return HttpResponse.json({ ok: true })
   }),
 
-  http.post(`${API}/cmdb/connect`, async ({ request }) => {
+  http.post(apiUrl('/cmdb/connect'), async ({ request }) => {
     const { url, user } = (await request.json()) as CmdbCredentials
     await delay(1500)
     const connection: CmdbConnection = {
@@ -57,7 +46,7 @@ export const handlers = [
     return HttpResponse.json(connection)
   }),
 
-  http.post(`${API}/cmdb/sync`, async () => {
+  http.post(apiUrl('/cmdb/sync'), async () => {
     await delay(2000)
     const connection = loadConnection()
     if (!connection) {
@@ -75,14 +64,12 @@ export const handlers = [
     })
   }),
 
-  http.delete(`${API}/cmdb/connection`, async () => {
+  http.delete(apiUrl('/cmdb/connection'), async () => {
     await delay(500)
     if (!loadConnection()) {
       return notConnected()
     }
-    localStorage.removeItem(STORAGE_KEY)
+    clearConnection()
     return new HttpResponse(null, { status: 204 })
   }),
-
-  http.get(`${API}/assets`, () => HttpResponse.json(mockAssetsResponse)),
 ]

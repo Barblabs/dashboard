@@ -26,10 +26,22 @@
   --color-border-panel:  #D9E1E8;
   --color-muted-bg:      #C9D3DC;   /* icons and disabled states */
 
+  /* Tables */
+  --color-border-row:  #E2E8EF;
+  --color-row-hover:   #EDF1F7;
+
   /* Typography */
   --font-title: 'Archivo Black', sans-serif;
   --font-body:  'Work Sans', sans-serif;
   --font-mono:  'IBM Plex Mono', monospace;
+}
+
+/* Keyboard focus ring shared by the navy controls (buttons, inputs, links). */
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-navy);
+    outline-offset: 2px;
+  }
 }
 
 /* Must stay inside a layer: unlayered rules beat every Tailwind utility. */

@@ -11,6 +11,7 @@ import {
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
+import { Panel, PanelTitle } from '../../components/ui/Panel'
 import { codeKey, requestErrorKey } from '../../i18n/errors'
 
 // Messages are translation keys: the text is resolved at render time, in the active language.
@@ -103,12 +104,12 @@ export function ItopForm({ initialValues, onBack, onConnected }: Props) {
   const result = resultOf()
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-5 rounded-xl border border-border-panel bg-white p-6">
+    <Panel className="gap-5">
       <div className="flex items-baseline justify-between gap-3">
-        <h3 className="font-title text-[20px] leading-[1.2] text-navy">{t('config.form.title')}</h3>
+        <PanelTitle>{t('config.form.title')}</PanelTitle>
         <button
           type="button"
-          className="cursor-pointer p-0 font-body text-[14px] whitespace-nowrap text-gray underline underline-offset-2 hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+          className="cursor-pointer p-0 font-body text-[14px] whitespace-nowrap text-gray underline underline-offset-2 hover:text-navy focus-ring"
           onClick={onBack}
         >
           {t('config.form.back')}
@@ -172,6 +173,6 @@ export function ItopForm({ initialValues, onBack, onConnected }: Props) {
           {isConnecting ? t('config.form.actions.connecting') : t('config.form.actions.connect')}
         </Button>
       </div>
-    </div>
+    </Panel>
   )
 }

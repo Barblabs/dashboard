@@ -79,7 +79,7 @@ export const en = {
       },
     },
     connected: {
-      badge: 'iTop connected',
+      badge: '{{provider}} connected',
       lastSync: 'Last sync: {{time}}',
       never: 'never',
       lessThanAMinute: 'less than a minute ago',
@@ -99,9 +99,9 @@ export const en = {
       title: 'Tech stack',
       // Translations is derived from this file: it must contain every plural form any
       // language needs, such as the Spanish many form.
-      count_one: '{{count}} asset · source: iTop',
-      count_many: '{{count}} assets · source: iTop',
-      count_other: '{{count}} assets · source: iTop',
+      count_one: '{{count}} asset · source: {{source}}',
+      count_many: '{{count}} assets · source: {{source}}',
+      count_other: '{{count}} assets · source: {{source}}',
       loading: 'Loading inventory…',
       empty: 'There are no assets in the inventory.',
       columns: {
@@ -134,19 +134,19 @@ export const en = {
       subtitle: 'Select where your asset inventory comes from.',
       select: 'Select',
       comingSoon: 'Coming soon',
-      providers: {
-        itop: {
-          name: 'iTop',
-          description: 'Open source CMDB. Connects through its REST API with a read-only user.',
-        },
-        servicenow: {
-          name: 'ServiceNow',
-          description: 'Integration planned for a future release.',
-        },
-        other: {
-          name: 'Other CMDB',
-          description: 'Connection through a generic API or an inventory file.',
-        },
+    },
+    providers: {
+      itop: {
+        name: 'iTop',
+        description: 'Open source CMDB. Connects through its REST API with a read-only user.',
+      },
+      servicenow: {
+        name: 'ServiceNow',
+        description: 'Integration planned for a future release.',
+      },
+      other: {
+        name: 'Other CMDB',
+        description: 'Connection through a generic API or an inventory file.',
       },
     },
   },

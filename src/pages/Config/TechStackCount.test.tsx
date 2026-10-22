@@ -1,30 +1,23 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it, vi } from 'vitest'
-import { App } from '../../App'
 import { i18n } from '../../i18n'
 import { mockAssetsResponse } from '../../mocks/assets'
-import { saveConnection } from '../../mocks/handlers'
+import { apiUrl } from '../../mocks/url'
+import { renderApp, seedConnection } from '../../test/render'
 import { server } from '../../test/server'
 
 // The asset count only appears in mock mode.
 vi.mock('../../env', () => ({ isMockMode: true }))
 
-const API = import.meta.env.VITE_API_URL as string
-
 function renderConnected() {
-  saveConnection({
-    provider: 'itop',
-    url: 'http://10.0.0.5:8000',
-    user: 'barb-reader',
-    lastSync: new Date().toISOString(),
-  })
-  render(<App />)
+  seedConnection()
+  renderApp()
 }
 
 function serveOneAsset() {
   server.use(
-    http.get(`${API}/assets`, () =>
+    http.get(apiUrl('/assets'), () =>
       HttpResponse.json({ assets: mockAssetsResponse.assets.slice(0, 1) }),
     ),
   )

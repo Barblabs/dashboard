@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useAssetsQuery, type Asset } from '../../api/assets'
+import type { CmdbProvider } from '../../api/cmdb'
 import { Badge } from '../../components/ui/Badge'
 import { isMockMode } from '../../env'
 
@@ -12,7 +13,7 @@ function osLabel(asset: Asset): string {
 const MESSAGE = 'px-6 py-12 text-center text-[14px] text-gray'
 const HEADER_CELL =
   'px-4 py-3 text-left font-body text-[12px] font-semibold tracking-[0.06em] whitespace-nowrap text-gray uppercase'
-const CELL = 'border-b border-[#e2e8ef] px-4 py-3.5 align-middle text-navy'
+const CELL = 'border-b border-border-row px-4 py-3.5 align-middle text-navy'
 const MONO = 'font-mono text-[13px]'
 
 function AssetsTable({ assets }: { assets: Asset[] }) {
@@ -26,7 +27,7 @@ function AssetsTable({ assets }: { assets: Asset[] }) {
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-[14px]">
         <thead>
-          <tr className="border-b-2 border-[#e2e8ef]">
+          <tr className="border-b-2 border-border-row">
             <th className={HEADER_CELL}>{t('config.inventory.columns.component')}</th>
             <th className={HEADER_CELL}>{t('config.inventory.columns.type')}</th>
             <th className={HEADER_CELL}>{t('config.inventory.columns.os')}</th>
@@ -39,7 +40,7 @@ function AssetsTable({ assets }: { assets: Asset[] }) {
           {assets.map((asset) => (
             <tr
               key={asset.record_id}
-              className={`hover:bg-[#edf1f7] ${asset.active ? '' : '*:opacity-50'}`}
+              className={`hover:bg-row-hover ${asset.active ? '' : '*:opacity-50'}`}
             >
               <td className={CELL}>
                 <span className="block font-medium">{asset.name}</span>
@@ -73,7 +74,11 @@ function AssetsTable({ assets }: { assets: Asset[] }) {
   )
 }
 
-export function TechStackTable() {
+interface Props {
+  provider: CmdbProvider
+}
+
+export function TechStackTable({ provider }: Props) {
   const { t } = useTranslation()
   const assetsQuery = useAssetsQuery()
   // An inventory that could not be read is shown as empty, as before the migration.
@@ -85,7 +90,10 @@ export function TechStackTable() {
         <h2 className="font-title text-[16px] text-navy">{t('config.inventory.title')}</h2>
         {isMockMode && !assetsQuery.isPending && (
           <span className="font-body text-[13px] text-gray">
-            {t('config.inventory.count', { count: assets.length })}
+            {t('config.inventory.count', {
+              count: assets.length,
+              source: t(`config.providers.${provider}.name`),
+            })}
           </span>
         )}
       </div>

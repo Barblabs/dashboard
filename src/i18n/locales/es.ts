@@ -81,7 +81,7 @@ export const es: Translations = {
       },
     },
     connected: {
-      badge: 'iTop conectado',
+      badge: '{{provider}} conectado',
       lastSync: 'Última sincronización: {{time}}',
       never: 'nunca',
       lessThanAMinute: 'hace menos de un minuto',
@@ -99,9 +99,9 @@ export const es: Translations = {
     },
     inventory: {
       title: 'Stack tecnológico',
-      count_one: '{{count}} activo · fuente: iTop',
-      count_many: '{{count}} de activos · fuente: iTop',
-      count_other: '{{count}} activos · fuente: iTop',
+      count_one: '{{count}} activo · fuente: {{source}}',
+      count_many: '{{count}} de activos · fuente: {{source}}',
+      count_other: '{{count}} activos · fuente: {{source}}',
       loading: 'Cargando inventario…',
       empty: 'No hay activos registrados en el inventario.',
       columns: {
@@ -134,20 +134,20 @@ export const es: Translations = {
       subtitle: 'Selecciona de dónde viene tu inventario de activos.',
       select: 'Seleccionar',
       comingSoon: 'Próximamente',
-      providers: {
-        itop: {
-          name: 'iTop',
-          description:
-            'CMDB de código abierto. Se conecta por su API REST con un usuario de solo lectura.',
-        },
-        servicenow: {
-          name: 'ServiceNow',
-          description: 'Integración planeada para una siguiente versión.',
-        },
-        other: {
-          name: 'Otra CMDB',
-          description: 'Conexión por API genérica o archivo de inventario.',
-        },
+    },
+    providers: {
+      itop: {
+        name: 'iTop',
+        description:
+          'CMDB de código abierto. Se conecta por su API REST con un usuario de solo lectura.',
+      },
+      servicenow: {
+        name: 'ServiceNow',
+        description: 'Integración planeada para una siguiente versión.',
+      },
+      other: {
+        name: 'Otra CMDB',
+        description: 'Conexión por API genérica o archivo de inventario.',
       },
     },
   },

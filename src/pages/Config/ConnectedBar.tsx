@@ -37,7 +37,9 @@ export function ConnectedBar({ connection, onEdit }: Props) {
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
           <Badge variant="solid">
             <span className="size-[7px] shrink-0 rounded-full bg-cyan" />
-            {t('config.connected.badge')}
+            {t('config.connected.badge', {
+              provider: t(`config.providers.${connection.provider}.name`),
+            })}
           </Badge>
           <span className={`${DETAIL} font-mono text-navy`}>{connection.url}</span>
           <span className={SEPARATOR}>·</span>

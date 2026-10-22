@@ -1,15 +1,14 @@
-import { cleanup, render, screen, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { cleanup, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { App } from '../App'
 import { i18n } from '../i18n'
+import { renderApp } from '../test/render'
 
 // Simulates opening the app with a different browser language: the detector runs again.
 async function openWithBrowserLanguages(languages: string[]) {
   vi.spyOn(navigator, 'languages', 'get').mockReturnValue(languages)
   vi.spyOn(navigator, 'language', 'get').mockReturnValue(languages[0])
   await i18n.changeLanguage()
-  render(<App />)
+  return renderApp()
 }
 
 // The page repeats "Configuración" in its title: assertions are scoped to the navigation.
@@ -39,8 +38,7 @@ describe('Language', () => {
   })
 
   it('switches language immediately from the sidebar', async () => {
-    const user = userEvent.setup()
-    await openWithBrowserLanguages(['en-US'])
+    const user = await openWithBrowserLanguages(['en-US'])
 
     await user.click(screen.getByRole('button', { name: 'ES' }))
 
@@ -55,8 +53,7 @@ describe('Language', () => {
   })
 
   it('keeps the chosen language across reloads, over the browser locale', async () => {
-    const user = userEvent.setup()
-    await openWithBrowserLanguages(['en-US'])
+    const user = await openWithBrowserLanguages(['en-US'])
     await user.click(screen.getByRole('button', { name: 'ES' }))
 
     cleanup()

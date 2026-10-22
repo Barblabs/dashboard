@@ -10,13 +10,14 @@ type ButtonProps = Omit<BaseButton.Props, 'className'> & {
   className?: string
 }
 
+// One transition covers every property a variant changes on hover, at any size.
 const BASE =
-  'cursor-pointer rounded-md font-body font-semibold whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy data-disabled:cursor-not-allowed data-disabled:opacity-45'
+  'focus-ring cursor-pointer rounded-md font-body font-semibold whitespace-nowrap transition-[opacity,background-color,border-color,color] duration-150 ease-[ease] data-disabled:cursor-not-allowed data-disabled:opacity-45'
 
 const SIZES: Record<ButtonSize, string> = {
-  lg: 'h-11 px-4 text-[14px] transition-opacity duration-150 ease-[ease]',
-  md: 'h-[42px] px-5 text-[14px] transition-opacity duration-150 ease-[ease]',
-  sm: 'h-9 px-3.5 text-[13px] transition-[opacity,background-color] duration-150 ease-[ease]',
+  lg: 'h-11 px-4 text-[14px]',
+  md: 'h-[42px] px-5 text-[14px]',
+  sm: 'h-9 px-3.5 text-[13px]',
 }
 
 const VARIANTS: Record<ButtonVariant, string> = {

@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next'
+import type { CmdbProvider } from '../../api/cmdb'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-
-type ProviderId = 'itop' | 'servicenow' | 'other'
+import { Panel, PanelTitle } from '../../components/ui/Panel'
 
 interface Provider {
-  id: ProviderId
+  // "other" is a catalog entry for CMDBs without a dedicated integration, not a provider.
+  id: CmdbProvider | 'other'
   initial: string
   available: boolean
 }
@@ -24,11 +25,9 @@ export function CmdbSelector({ onSelect }: Props) {
   const { t } = useTranslation()
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-4 rounded-xl border border-border-panel bg-white p-6">
+    <Panel className="gap-4">
       <div className="flex flex-col gap-0.5">
-        <h3 className="font-title text-[20px] leading-[1.2] text-navy">
-          {t('config.selector.title')}
-        </h3>
+        <PanelTitle>{t('config.selector.title')}</PanelTitle>
         <p className="font-body text-[14px] leading-[1.4] text-gray">
           {t('config.selector.subtitle')}
         </p>
@@ -53,10 +52,10 @@ export function CmdbSelector({ onSelect }: Props) {
               <span
                 className={`font-body text-[16px] font-semibold ${p.available ? 'text-navy' : 'text-gray'}`}
               >
-                {t(`config.selector.providers.${p.id}.name`)}
+                {t(`config.providers.${p.id}.name`)}
               </span>
               <span className="font-body text-[14px] text-gray">
-                {t(`config.selector.providers.${p.id}.description`)}
+                {t(`config.providers.${p.id}.description`)}
               </span>
             </div>
             {p.available ? (
@@ -69,6 +68,6 @@ export function CmdbSelector({ onSelect }: Props) {
           </div>
         ))}
       </div>
-    </div>
+    </Panel>
   )
 }

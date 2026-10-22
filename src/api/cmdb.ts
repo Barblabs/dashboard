@@ -1,8 +1,11 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 
+// The CMDBs the dashboard knows how to talk to; only iTop has a connection flow today.
+export type CmdbProvider = 'itop' | 'servicenow'
+
 export interface CmdbConnection {
-  provider: 'itop'
+  provider: CmdbProvider
   url: string
   user: string
   lastSync: string | null
