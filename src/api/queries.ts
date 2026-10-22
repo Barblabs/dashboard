@@ -16,18 +16,11 @@ export function useConnectionQuery() {
   })
 }
 
+// Only mounted under an active connection: the page renders the inventory in the connected state.
 export function useAssetsQuery() {
-  // Only reads the connection from the cache: another useConnectionQuery observer
-  // would refetch it on mount.
-  const { data: connection } = useQuery({
-    queryKey: connectionQueryKey,
-    queryFn: getConnection,
-    enabled: false,
-  })
   return useQuery({
     queryKey: assetsQueryKey,
     queryFn: fetchAssets,
-    enabled: Boolean(connection),
     // As before, an unreadable inventory goes straight to the empty state instead of
     // staying on "Loading" for several seconds while it retries.
     retry: false,

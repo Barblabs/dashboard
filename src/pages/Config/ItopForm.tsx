@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { useConnectMutation, useTestConnectionMutation } from '../../api/queries'
 import { ApiError } from '../../api/client'
-import type { CmdbTestResult } from '../../api/types'
+import type { CmdbCredentials, CmdbTestResult } from '../../api/types'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
@@ -24,19 +24,13 @@ const credentialsSchema = z.object({
 
 type Credentials = z.infer<typeof credentialsSchema>
 
-const TEST_ERROR_KEYS = {
-  missing_rest_profile: 'config.form.testErrors.missingRestProfile',
-} as const
-
-type KnownTestErrorCode = keyof typeof TEST_ERROR_KEYS
-
-function isKnownTestErrorCode(code: string | undefined): code is KnownTestErrorCode {
-  return code !== undefined && Object.prototype.hasOwnProperty.call(TEST_ERROR_KEYS, code)
-}
+// A Map, not an object literal: a backend code like "constructor" must not hit the prototype.
+const TEST_ERROR_KEYS = new Map<string, ParseKeys>([
+  ['missing_rest_profile', 'config.form.testErrors.missingRestProfile'],
+])
 
 interface Props {
-  initialUrl?: string
-  initialUser?: string
+  initialValues: Pick<CmdbCredentials, 'url' | 'user'>
   onBack: () => void
   onConnected: () => void
 }
@@ -45,7 +39,7 @@ const RESULT = 'rounded-md px-4 py-3 font-body text-[14px] leading-[1.4]'
 const RESULT_OK = `${RESULT} border border-nav-active-bg bg-nav-active-bg/6 text-nav-active-bg`
 const RESULT_ERROR = `${RESULT} border border-critical bg-critical/5 text-critical`
 
-export function ItopForm({ initialUrl = '', initialUser = '', onBack, onConnected }: Props) {
+export function ItopForm({ initialValues, onBack, onConnected }: Props) {
   const { t } = useTranslation()
   const testMutation = useTestConnectionMutation()
   const connectMutation = useConnectMutation()
@@ -58,7 +52,7 @@ export function ItopForm({ initialUrl = '', initialUser = '', onBack, onConnecte
     formState: { errors },
   } = useForm<Credentials>({
     resolver: zodResolver(credentialsSchema),
-    defaultValues: { url: initialUrl, user: initialUser, password: '' },
+    defaultValues: { ...initialValues, password: '' },
     // Validate on blur; the error disappears as soon as the user types again.
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -74,15 +68,12 @@ export function ItopForm({ initialUrl = '', initialUser = '', onBack, onConnecte
     testMutation.mutate(credentials)
   })
 
-  const handleConnect = handleSubmit(async (credentials) => {
-    // mutateAsync rather than mutate: on connect the page may unmount the form before
-    // per-call callbacks run, and onConnected must still fire.
-    const connected = await connectMutation.mutateAsync(credentials).then(
-      () => true,
-      () => false,
-    )
-    if (connected) onConnected()
-  })
+  // mutateAsync rather than mutate: on connect the page may unmount the form before
+  // per-call callbacks run, and onConnected must still fire. The failure is rendered
+  // from connectMutation.isError, so the rejection needs no handling here.
+  const handleConnect = handleSubmit((credentials) =>
+    connectMutation.mutateAsync(credentials).then(onConnected, () => {}),
+  )
 
   function errorText(message: string | undefined) {
     return message && t(message as ParseKeys)
@@ -96,9 +87,8 @@ export function ItopForm({ initialUrl = '', initialUser = '', onBack, onConnecte
 
   // A backend without codes, or with a new one, still shows its own message.
   function failureText(result: CmdbTestResult, credentials: Credentials) {
-    if (isKnownTestErrorCode(result.code)) {
-      return t(TEST_ERROR_KEYS[result.code], { user: credentials.user })
-    }
+    const key = result.code && TEST_ERROR_KEYS.get(result.code)
+    if (key) return t(key, { user: credentials.user })
     return result.error ?? t('config.form.result.testFailed')
   }
 

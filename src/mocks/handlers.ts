@@ -2,7 +2,7 @@ import { delay, http, HttpResponse } from 'msw'
 import type { CmdbConnection, CmdbCredentials } from '../api/types'
 import { mockAssetsResponse } from './assets'
 
-const API = import.meta.env.VITE_API_URL as string
+const API = import.meta.env.VITE_API_URL
 const STORAGE_KEY = 'barbattack_cmdb'
 
 function loadConnection(): CmdbConnection | null {

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useConnectionQuery } from '../../api/queries'
+import type { CmdbConnection, CmdbCredentials } from '../../api/types'
 import { Badge } from '../../components/ui/Badge'
 import { isMockMode } from '../../env'
 import { ConfigStepPanel } from './ConfigStepPanel'
@@ -9,7 +10,9 @@ import { ItopForm } from './ItopForm'
 import { ConnectedBar } from './ConnectedBar'
 import { TechStackTable } from './TechStackTable'
 
-type SetupStep = 'select' | 'form'
+type SetupView =
+  | { step: 'select' }
+  | { step: 'form'; initialValues: Pick<CmdbCredentials, 'url' | 'user'> }
 
 const PAGE = 'flex flex-1 flex-col gap-6 overflow-y-auto px-10 py-8'
 
@@ -18,37 +21,24 @@ export function ConfigPage() {
   const connectionQuery = useConnectionQuery()
   const connection = connectionQuery.data ?? null
 
-  /* The step is derived: only the choice between list and form is local state. */
-  const [setupStep, setSetupStep] = useState<SetupStep>('select')
-  const [isEditing, setIsEditing] = useState(false)
+  /* An open setup view wins over the connection, so editing a live connection shows the
+     form; with none open the page follows the connection. */
+  const [setupView, setSetupView] = useState<SetupView | null>(null)
   const step =
     connectionQuery.isPending ? 'loading'
-    : connection && !isEditing ? 'connected'
-    : setupStep
-
-  /* Initial form values; the password never goes through here */
-  const [editUrl, setEditUrl]   = useState('')
-  const [editUser, setEditUser] = useState('')
+    : setupView ? setupView.step
+    : connection ? 'connected'
+    : 'select'
 
   /* ── handlers ── */
 
   function handleSelectProvider() {
-    setEditUrl('')
-    setEditUser('')
-    setSetupStep('form')
+    setSetupView({ step: 'form', initialValues: { url: '', user: '' } })
   }
 
-  function handleEdit() {
-    setEditUrl(connection?.url ?? '')
-    setEditUser(connection?.user ?? '')
-    setIsEditing(true)
-    setSetupStep('form')
-  }
-
-  /* Reset to the list on connect, so a later disconnect returns to the selection. */
-  function handleConnected() {
-    setIsEditing(false)
-    setSetupStep('select')
+  /* The password never goes through here: only the address and user are prefilled. */
+  function handleEdit(current: CmdbConnection) {
+    setSetupView({ step: 'form', initialValues: { url: current.url, user: current.user } })
   }
 
   /* ── render ── */
@@ -60,9 +50,6 @@ export function ConfigPage() {
       </main>
     )
   }
-
-  const stepNumber: 1 | 2 | 3 =
-    step === 'select' ? 1 : step === 'form' ? 2 : 3
 
   return (
     <main className={PAGE}>
@@ -81,19 +68,16 @@ export function ConfigPage() {
       {/* ── States 1 & 2: two columns ── */}
       {(step === 'select' || step === 'form') && (
         <div className="flex items-start gap-[22px]">
-          <ConfigStepPanel activeStep={stepNumber} connected={false} />
+          <ConfigStepPanel activeStep={step === 'select' ? 1 : 2} connected={false} />
 
-          {step === 'select' && (
-            <CmdbSelector onSelect={handleSelectProvider} />
-          )}
-
-          {step === 'form' && (
+          {setupView?.step === 'form' ? (
             <ItopForm
-              initialUrl={editUrl}
-              initialUser={editUser}
-              onBack={() => setSetupStep('select')}
-              onConnected={handleConnected}
+              initialValues={setupView.initialValues}
+              onBack={() => setSetupView({ step: 'select' })}
+              onConnected={() => setSetupView(null)}
             />
+          ) : (
+            <CmdbSelector onSelect={handleSelectProvider} />
           )}
         </div>
       )}
@@ -101,7 +85,7 @@ export function ConfigPage() {
       {/* ── State 3: connected ── */}
       {step === 'connected' && connection && (
         <>
-          <ConnectedBar connection={connection} onEdit={handleEdit} />
+          <ConnectedBar connection={connection} onEdit={() => handleEdit(connection)} />
 
           <TechStackTable />
         </>
