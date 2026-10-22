@@ -88,6 +88,38 @@ export const es: Translations = {
         cancel: 'Cancelar',
       },
     },
+    inventory: {
+      title: 'Stack tecnológico',
+      count_one: '{{count}} activo · fuente: iTop',
+      count_many: '{{count}} de activos · fuente: iTop',
+      count_other: '{{count}} activos · fuente: iTop',
+      loading: 'Cargando inventario…',
+      empty: 'No hay activos registrados en el inventario.',
+      columns: {
+        component: 'Componente',
+        type: 'Tipo',
+        os: 'Sistema operativo',
+        criticality: 'Criticidad',
+        owner: 'Dueño',
+        status: 'Estado',
+      },
+      kind: {
+        Server: 'Servidor',
+        'Virtual Machine': 'Máquina virtual',
+        Workstation: 'Estación de trabajo',
+        'Network Device': 'Dispositivo de red',
+      },
+      criticality: {
+        High: 'Alta',
+        Medium: 'Media',
+        Low: 'Baja',
+        Unknown: 'Desconocida',
+      },
+      status: {
+        active: 'Activo',
+        inactive: 'Inactivo',
+      },
+    },
     selector: {
       title: 'Elige tu CMDB',
       subtitle: 'Selecciona de dónde viene tu inventario de activos.',

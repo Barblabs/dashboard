@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { fetchAssets } from '../../api/assets'
 import { useConnectionQuery } from '../../api/queries'
-import type { Asset } from '../../api/types'
 import { Badge } from '../../components/ui/Badge'
 import { isMockMode } from '../../env'
 import { ConfigStepPanel } from './ConfigStepPanel'
@@ -31,19 +29,6 @@ export function ConfigPage() {
   /* valores iniciales del formulario; la contraseña nunca pasa por aquí */
   const [editUrl, setEditUrl]   = useState('')
   const [editUser, setEditUser] = useState('')
-
-  /* table */
-  const [assets, setAssets]     = useState<Asset[]>([])
-  const [assetsLoaded, setAssetsLoaded] = useState(false)
-
-  /* ── load assets when entering connected state ── */
-  useEffect(() => {
-    if (step !== 'connected') return
-    setAssetsLoaded(false)
-    fetchAssets()
-      .then((data) => { setAssets(data.assets); setAssetsLoaded(true) })
-      .catch(() => setAssetsLoaded(true))
-  }, [step])
 
   /* ── handlers ── */
 
@@ -118,21 +103,7 @@ export function ConfigPage() {
         <>
           <ConnectedBar connection={connection} onEdit={handleEdit} />
 
-          <section className="overflow-hidden rounded-lg border border-border-panel bg-white">
-            <div className="flex items-baseline gap-3 border-b border-border-panel px-6 pt-5 pb-4">
-              <h2 className="font-title text-[16px] text-navy">Stack tecnológico</h2>
-              {isMockMode && assetsLoaded && (
-                <span className="font-body text-[13px] text-gray">
-                  {assets.length} activos · fuente: iTop
-                </span>
-              )}
-            </div>
-
-            {!assetsLoaded
-              ? <div className="px-6 py-12 text-center text-[14px] text-gray">Cargando inventario…</div>
-              : <TechStackTable assets={assets} />
-            }
-          </section>
+          <TechStackTable />
         </>
       )}
     </main>

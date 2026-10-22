@@ -86,6 +86,40 @@ export const en = {
         cancel: 'Cancel',
       },
     },
+    inventory: {
+      title: 'Tech stack',
+      // Translations se deriva de este archivo: aquí deben existir todas las formas
+      // plurales que pida cualquier idioma, como la forma many del español.
+      count_one: '{{count}} asset · source: iTop',
+      count_many: '{{count}} assets · source: iTop',
+      count_other: '{{count}} assets · source: iTop',
+      loading: 'Loading inventory…',
+      empty: 'There are no assets in the inventory.',
+      columns: {
+        component: 'Component',
+        type: 'Type',
+        os: 'Operating system',
+        criticality: 'Criticality',
+        owner: 'Owner',
+        status: 'Status',
+      },
+      kind: {
+        Server: 'Server',
+        'Virtual Machine': 'Virtual Machine',
+        Workstation: 'Workstation',
+        'Network Device': 'Network Device',
+      },
+      criticality: {
+        High: 'High',
+        Medium: 'Medium',
+        Low: 'Low',
+        Unknown: 'Unknown',
+      },
+      status: {
+        active: 'Active',
+        inactive: 'Inactive',
+      },
+    },
     selector: {
       title: 'Choose your CMDB',
       subtitle: 'Select where your asset inventory comes from.',

@@ -371,12 +371,71 @@ describe('Configuración', () => {
     expect(screen.queryByText('iTop connected')).not.toBeInTheDocument()
   })
 
+  it('muestra el inventario con encabezados y etiquetas traducidas', async () => {
+    await renderConnected()
+
+    expect(screen.getByText('Loading inventory…')).toBeInTheDocument()
+    const inactiveRow = await screen.findByRole('row', { name: /erp-app-02/ })
+    expect(screen.getByRole('heading', { name: 'Tech stack' })).toBeInTheDocument()
+    expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual([
+      'Component', 'Type', 'Operating system', 'Criticality', 'Owner', 'Status',
+    ])
+    expect(screen.getByRole('row', { name: /prod-api-01/ })).toHaveTextContent(
+      'prod-api-01SRV-001ServerUbuntu 22.04Highdevops@example.comActive',
+    )
+    expect(inactiveRow).toHaveTextContent('Virtual Machine')
+    expect(inactiveRow).toHaveTextContent('Unknown')
+    expect(inactiveRow).toHaveTextContent('Inactive')
+  })
+
+  it('muestra el inventario en español', async () => {
+    localStorage.setItem('language', 'es')
+    await i18n.changeLanguage()
+    saveExistingConnection(TWO_HOURS_AGO)
+    renderApp()
+
+    expect(await screen.findByText('Cargando inventario…')).toBeInTheDocument()
+    const inactiveRow = await screen.findByRole('row', { name: /erp-app-02/ })
+    expect(screen.getByRole('heading', { name: 'Stack tecnológico' })).toBeInTheDocument()
+    expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual([
+      'Componente', 'Tipo', 'Sistema operativo', 'Criticidad', 'Dueño', 'Estado',
+    ])
+    expect(screen.getByRole('row', { name: /prod-api-01/ })).toHaveTextContent(
+      'prod-api-01SRV-001ServidorUbuntu 22.04Altadevops@example.comActivo',
+    )
+    expect(inactiveRow).toHaveTextContent('Máquina virtual')
+    expect(inactiveRow).toHaveTextContent('Desconocida')
+    expect(inactiveRow).toHaveTextContent('Inactivo')
+  })
+
+  it('no pide el inventario mientras no hay conexión', async () => {
+    let assetRequests = 0
+    server.use(
+      http.get(`${API}/assets`, () => {
+        assetRequests += 1
+      }),
+    )
+    renderApp()
+
+    expect(await screen.findByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
+    expect(assetRequests).toBe(0)
+  })
+
+  it('muestra el estado vacío de inmediato cuando no se puede leer el inventario', async () => {
+    server.use(http.get(`${API}/assets`, () => new HttpResponse(null, { status: 500 })))
+    await renderConnected()
+
+    expect(
+      await screen.findByText('There are no assets in the inventory.', {}, { timeout: 1000 }),
+    ).toBeInTheDocument()
+  })
+
   it('muestra el estado vacío cuando el inventario no tiene activos', async () => {
     server.use(http.get(`${API}/assets`, () => HttpResponse.json({ assets: [] })))
     await renderConnected()
 
     expect(
-      await screen.findByText('No hay activos registrados en el inventario.'),
+      await screen.findByText('There are no assets in the inventory.'),
     ).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })

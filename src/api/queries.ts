@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { fetchAssets } from './assets'
 import { connect, disconnect, getConnection, syncNow, testConnection } from './cmdb'
 import type { CmdbConnection } from './types'
 
@@ -12,6 +13,25 @@ export function useConnectionQuery() {
     // Sin conexión legible se muestra la lista de CMDB de inmediato, como antes:
     // reintentar dejaría la página varios segundos en "Cargando".
     retry: false,
+  })
+}
+
+export function useAssetsQuery() {
+  // Solo lee la conexión de la caché: un observador más de useConnectionQuery
+  // la volvería a pedir al montarse.
+  const { data: connection } = useQuery({
+    queryKey: connectionQueryKey,
+    queryFn: getConnection,
+    enabled: false,
+  })
+  return useQuery({
+    queryKey: assetsQueryKey,
+    queryFn: fetchAssets,
+    enabled: Boolean(connection),
+    // Igual que antes, un inventario ilegible pasa directo al estado vacío en vez de
+    // quedarse varios segundos en "Cargando" mientras reintenta.
+    retry: false,
+    select: (response) => response.assets,
   })
 }
 
