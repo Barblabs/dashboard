@@ -1,4 +1,4 @@
-import { cleanup, screen } from '@testing-library/react'
+import { cleanup, screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { i18n } from '../../i18n'
@@ -83,14 +83,16 @@ describe('Configuration', () => {
     expect(screen.getByRole('button', { name: 'Seleccionar' })).toBeInTheDocument()
   })
 
-  it('cancelling an edit returns to the connected source', async () => {
+  it('edits in a dialog over the connected source, and cancelling closes it', async () => {
     const user = await renderConnected()
 
     await user.click(screen.getByRole('button', { name: 'Edit connection' }))
-    expect(screen.getByRole('heading', { name: 'Edit iTop connection' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Edit iTop connection' })).toBeInTheDocument()
+    expect(screen.getByText('iTop connected')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '← Change CMDB' })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(screen.getByText('iTop connected')).toBeInTheDocument()
   })
 

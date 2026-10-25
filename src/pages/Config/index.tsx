@@ -1,52 +1,41 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSourceQuery, type CmdbLogin, type CmdbSource } from '../../api/cmdb'
+import { useSourceQuery, type CmdbSource } from '../../api/cmdb'
 import { ConfigStepPanel } from './ConfigStepPanel'
 import { CmdbSelector } from './CmdbSelector'
-import { ItopForm, type ItopFormMode } from './ItopForm'
+import { ItopForm } from './ItopForm'
 import { ConnectedBar } from './ConnectedBar'
+import { EditConnectionDialog } from './EditConnectionDialog'
 import { TechStackTable } from './TechStackTable'
 
-type SelectView = { step: 'select' }
-
-interface FormView {
-  step: 'form'
-  mode: ItopFormMode
-  initialValues: Pick<CmdbLogin, 'url' | 'user'>
-  back: SelectView | null
-}
-
-type SetupView = SelectView | FormView
-
-type View = { step: 'loading' } | SetupView | { step: 'connected'; source: CmdbSource }
+type View =
+  | { step: 'loading' }
+  | { step: 'select' }
+  | { step: 'form' }
+  | { step: 'connected'; source: CmdbSource }
 
 function deriveView(
   isPending: boolean,
-  setupView: SetupView | null,
+  connecting: boolean,
   source: CmdbSource | null | undefined,
 ): View {
   if (isPending) return { step: 'loading' }
-  if (setupView) return setupView
+  if (connecting) return { step: 'form' }
   if (source) return { step: 'connected', source }
   return { step: 'select' }
 }
 
 const PAGE = 'flex flex-1 flex-col gap-6 overflow-y-auto px-10 py-8'
 
+const NEW_CONNECTION = { url: '', user: '' }
+
 export function ConfigPage() {
   const { t } = useTranslation()
   const sourceQuery = useSourceQuery()
 
-  const [setupView, setSetupView] = useState<SetupView | null>(null)
-  const view = deriveView(sourceQuery.isPending, setupView, sourceQuery.data)
-
-  const editLogin = (source: CmdbSource) =>
-    setSetupView({
-      step: 'form',
-      mode: 'update',
-      initialValues: { url: source.url, user: source.user ?? '' },
-      back: null,
-    })
+  const [connecting, setConnecting] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const view = deriveView(sourceQuery.isPending, connecting, sourceQuery.data)
 
   return (
     <main className={PAGE}>
@@ -63,18 +52,12 @@ export function ConfigPage() {
         <div className="py-12 text-center text-[0.875rem] text-gray">{t('config.loading')}</div>
       ) : view.step === 'connected' ? (
         <div className="flex animate-fade-in flex-col gap-6">
-          <ConnectedBar source={view.source} onEdit={() => editLogin(view.source)} />
+          <ConnectedBar source={view.source} onEdit={() => setEditing(true)} />
           <TechStackTable />
-        </div>
-      ) : view.step === 'form' && view.mode === 'update' ? (
-        // Editing a live connection is not onboarding: no setup steps, no "disconnected" status.
-        <div className="flex max-w-2xl">
-          <ItopForm
-            className="animate-fade-in"
-            mode={view.mode}
-            initialValues={view.initialValues}
-            onBack={() => setSetupView(view.back)}
-            onSaved={() => setSetupView(null)}
+          <EditConnectionDialog
+            source={view.source}
+            open={editing}
+            onClose={() => setEditing(false)}
           />
         </div>
       ) : (
@@ -83,23 +66,13 @@ export function ConfigPage() {
           {view.step === 'form' ? (
             <ItopForm
               className="animate-fade-in"
-              mode={view.mode}
-              initialValues={view.initialValues}
-              onBack={() => setSetupView(view.back)}
-              onSaved={() => setSetupView(null)}
+              mode="connect"
+              initialValues={NEW_CONNECTION}
+              onBack={() => setConnecting(false)}
+              onSaved={() => setConnecting(false)}
             />
           ) : (
-            <CmdbSelector
-              className="animate-fade-in"
-              onSelect={() =>
-                setSetupView({
-                  step: 'form',
-                  mode: 'connect',
-                  initialValues: { url: '', user: '' },
-                  back: { step: 'select' },
-                })
-              }
-            />
+            <CmdbSelector className="animate-fade-in" onSelect={() => setConnecting(true)} />
           )}
         </div>
       )}

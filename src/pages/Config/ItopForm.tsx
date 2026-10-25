@@ -37,6 +37,8 @@ interface Props {
   onBack: () => void
   onSaved: () => void
   className?: string
+  /** Lets a surrounding dialog name itself after the form title. */
+  titleId?: string
 }
 
 const PROVIDER = 'itop'
@@ -60,7 +62,14 @@ const RESULT = 'animate-fade-in rounded-md px-4 py-3 font-body text-[0.875rem] l
 const RESULT_OK = `${RESULT} border border-nav-active-bg bg-nav-active-bg/6 text-nav-active-bg`
 const RESULT_ERROR = `${RESULT} border border-critical bg-critical/5 text-critical`
 
-export function ItopForm({ mode, initialValues, onBack, onSaved, className = '' }: Props) {
+export function ItopForm({
+  mode,
+  initialValues,
+  onBack,
+  onSaved,
+  className = '',
+  titleId,
+}: Props) {
   const { t } = useTranslation()
   const testMutation = useTestLoginMutation(PROVIDER)
   const connectMutation = useConnectMutation(PROVIDER)
@@ -132,7 +141,7 @@ export function ItopForm({ mode, initialValues, onBack, onSaved, className = '' 
   return (
     <Panel className={`gap-5 ${className}`}>
       <div className="flex items-baseline justify-between gap-3">
-        <PanelTitle>{t(copy.title)}</PanelTitle>
+        <PanelTitle id={titleId}>{t(copy.title)}</PanelTitle>
         <button
           type="button"
           className="cursor-pointer p-0 font-body text-[0.875rem] whitespace-nowrap text-gray underline underline-offset-2 hover:text-navy focus-ring"
