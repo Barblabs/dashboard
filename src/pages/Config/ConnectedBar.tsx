@@ -37,22 +37,17 @@ export function ConnectedBar({ source, onEdit }: Props) {
     ? formatRelative(source.lastSync, t, language)
     : t('config.connected.never')
 
-  /* The failed request carries a translatable code; the recorded failure only has the
-     backend's message, so the request's text wins while it is on screen. */
-  function syncFailureText(): string | null {
-    if (isSyncing) return null
-    if (syncMutation.isError) {
-      return requestErrorText(syncMutation.error, t, { fallback: 'config.errors.syncFailed' })
-    }
-    const failure = source.lastSyncFailure
-    if (!failure) return null
-    return t('config.connected.lastSyncFailed', {
-      time: formatRelative(failure.at, t, language),
-      error: failure.error,
+  const requestFailureText = syncMutation.isError
+    ? requestErrorText(syncMutation.error, t, { fallback: 'config.errors.syncFailed' })
+    : null
+  const recordedFailure = source.lastSyncFailure
+  const recordedFailureText =
+    recordedFailure &&
+    t('config.connected.lastSyncFailed', {
+      time: formatRelative(recordedFailure.at, t, language),
+      error: recordedFailure.error,
     })
-  }
-
-  const syncFailure = syncFailureText()
+  const syncFailure = isSyncing ? null : (requestFailureText ?? recordedFailureText)
 
   return (
     <div className="flex flex-col overflow-hidden rounded-lg border border-border-panel">

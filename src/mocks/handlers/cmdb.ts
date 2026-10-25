@@ -11,12 +11,7 @@ function notConnected() {
   return failure(404, 'not_connected', 'no CMDB source is connected')
 }
 
-/*
- * The login fails when the user is exactly "admin": it is the iTop superuser
- * but lacks, by default, the "REST Services User" profile the backend requires.
- * Any other user succeeds.
- */
-function checkLogin({ user }: CmdbLogin) {
+function rejectAdminWithoutRestProfile({ user }: CmdbLogin) {
   if (user !== 'admin') return null
   return {
     code: 'missing_rest_profile',
@@ -34,7 +29,7 @@ export const cmdbHandlers = [
   http.post(apiUrl('/cmdb/source/test'), async ({ request }) => {
     const login = (await request.json()) as CmdbSourceRequest
     await delay(1200)
-    const rejected = checkLogin(login)
+    const rejected = rejectAdminWithoutRestProfile(login)
     return HttpResponse.json(rejected ? { ok: false, ...rejected } : { ok: true })
   }),
 
@@ -44,7 +39,7 @@ export const cmdbHandlers = [
     if (loadSource()) {
       return failure(409, 'already_connected', 'a CMDB source is already connected')
     }
-    const rejected = checkLogin({ url, user, password })
+    const rejected = rejectAdminWithoutRestProfile({ url, user, password })
     if (rejected) return failure(422, rejected.code, rejected.error)
     const source: CmdbSource = {
       provider,
@@ -62,7 +57,7 @@ export const cmdbHandlers = [
     await delay(800)
     const current = loadSource()
     if (!current) return notConnected()
-    const rejected = checkLogin(login)
+    const rejected = rejectAdminWithoutRestProfile(login)
     if (rejected) return failure(422, rejected.code, rejected.error)
     const source: CmdbSource = { ...current, url: login.url, user: login.user }
     saveSource(source)

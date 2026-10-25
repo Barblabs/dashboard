@@ -29,11 +29,7 @@ interface RequestErrorKeys {
 // A type alias, not an interface: i18next options need its implicit index signature.
 type MessageValues = { user?: string }
 
-/*
- * A known code is translated; an unknown one shows the backend's own message, since
- * codes can ship before the frontend knows them.
- */
-export function failureText(
+export function translatedOrBackendMessage(
   { code, error }: BackendFailure,
   t: TFunction<'translation'>,
   fallback: ParseKeys,
@@ -44,7 +40,6 @@ export function failureText(
   return error || t(fallback)
 }
 
-// Without a backend code there is only the network message, if the caller has one, or the fallback.
 export function requestErrorText(
   error: Error,
   t: TFunction<'translation'>,
@@ -56,5 +51,5 @@ export function requestErrorText(
   }
   const code = errorCode(error)
   if (!code) return t(keys.fallback)
-  return failureText({ code, error: error.message }, t, keys.fallback, values)
+  return translatedOrBackendMessage({ code, error: error.message }, t, keys.fallback, values)
 }

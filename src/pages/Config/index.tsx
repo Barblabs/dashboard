@@ -9,12 +9,29 @@ import { ItopForm, type ItopFormMode } from './ItopForm'
 import { ConnectedBar } from './ConnectedBar'
 import { TechStackTable } from './TechStackTable'
 
-// The password never goes through here: only the address and user are prefilled.
-type SetupView =
-  | { step: 'select' }
-  | { step: 'form'; mode: ItopFormMode; initialValues: Pick<CmdbLogin, 'url' | 'user'> }
+type SelectView = { step: 'select' }
+
+interface FormView {
+  step: 'form'
+  mode: ItopFormMode
+  initialValues: Pick<CmdbLogin, 'url' | 'user'>
+  back: SelectView | null
+}
+
+type SetupView = SelectView | FormView
 
 type View = { step: 'loading' } | SetupView | { step: 'connected'; source: CmdbSource }
+
+function deriveView(
+  isPending: boolean,
+  setupView: SetupView | null,
+  source: CmdbSource | null | undefined,
+): View {
+  if (isPending) return { step: 'loading' }
+  if (setupView) return setupView
+  if (source) return { step: 'connected', source }
+  return { step: 'select' }
+}
 
 const PAGE = 'flex flex-1 flex-col gap-6 overflow-y-auto px-10 py-8'
 
@@ -22,21 +39,15 @@ export function ConfigPage() {
   const { t } = useTranslation()
   const sourceQuery = useSourceQuery()
 
-  /* An open setup view wins over the source, so editing a live source shows the
-     form; with none open the page follows the source. */
   const [setupView, setSetupView] = useState<SetupView | null>(null)
-  const source = sourceQuery.data
-  const view: View =
-    sourceQuery.isPending ? { step: 'loading' }
-    : setupView ? setupView
-    : source ? { step: 'connected', source }
-    : { step: 'select' }
+  const view = deriveView(sourceQuery.isPending, setupView, sourceQuery.data)
 
   const editLogin = (source: CmdbSource) =>
     setSetupView({
       step: 'form',
       mode: 'update',
       initialValues: { url: source.url, user: source.user ?? '' },
+      back: null,
     })
 
   if (view.step === 'loading') {
@@ -73,14 +84,18 @@ export function ConfigPage() {
             <ItopForm
               mode={view.mode}
               initialValues={view.initialValues}
-              // Changing CMDB needs a disconnect first, so editing goes back to the source.
-              onBack={() => setSetupView(view.mode === 'update' ? null : { step: 'select' })}
+              onBack={() => setSetupView(view.back)}
               onSaved={() => setSetupView(null)}
             />
           ) : (
             <CmdbSelector
               onSelect={() =>
-                setSetupView({ step: 'form', mode: 'connect', initialValues: { url: '', user: '' } })
+                setSetupView({
+                  step: 'form',
+                  mode: 'connect',
+                  initialValues: { url: '', user: '' },
+                  back: { step: 'select' },
+                })
               }
             />
           )}

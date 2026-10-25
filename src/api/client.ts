@@ -8,7 +8,6 @@ export type ApiFailure =
   | { kind: 'http'; status: number; code: string | null }
   | { kind: 'network' }
 
-// What the backend sends for a failure, in an error body or a result body alike.
 export interface BackendFailure {
   code: string
   error: string
@@ -25,7 +24,6 @@ export class ApiError extends Error {
   }
 }
 
-// The backend's failure code, if the error is a request failure that carries one.
 export function errorCode(error: Error | null): string | null {
   return error instanceof ApiError && error.failure.kind === 'http' ? error.failure.code : null
 }

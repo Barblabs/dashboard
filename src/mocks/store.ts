@@ -1,6 +1,5 @@
 import type { CmdbSource } from '../api/cmdb'
 
-// The fake backend persists the source in localStorage so it survives reloads.
 const STORAGE_KEY = 'barbattack_cmdb_source'
 
 export const mockSource: Omit<CmdbSource, 'lastSync'> = {

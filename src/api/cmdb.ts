@@ -1,4 +1,10 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from '@tanstack/react-query'
 import { api, type BackendFailure } from './client'
 
 // The CMDBs the dashboard knows how to talk to; only iTop has a connection flow today.
@@ -53,8 +59,6 @@ export const connectionScopeKey = ['source'] as const
 const sourceQuery = queryOptions({
   queryKey: ['cmdb', 'source'],
   queryFn: () => api.get<CmdbSource | null>('/cmdb/source'),
-  // An unreadable source shows the CMDB list right away, as before:
-  // retrying would leave the page on "Loading" for several seconds.
   retry: false,
 })
 
@@ -62,12 +66,16 @@ export function useSourceQuery() {
   return useQuery(sourceQuery)
 }
 
-/*
- * Mutation variables include the password: gcTime 0 evicts it from the cache as soon
- * as the form unmounts, instead of keeping it for five minutes. The provider is bound
- * per hook, so every login mutation takes the same variables: a form can swap the
- * save mutation without reshaping what it sends.
- */
+function refetchSource(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: sourceQuery.queryKey })
+}
+
+function refreshInventory(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({ queryKey: connectionScopeKey })
+}
+
+// Mutation variables include the password: gcTime 0 evicts it from the cache as soon
+// as the form unmounts, instead of keeping it for five minutes.
 export function useTestLoginMutation(provider: CmdbProvider) {
   return useMutation({
     mutationFn: (login: CmdbLogin) =>
@@ -87,14 +95,12 @@ function useSaveSourceMutation(save: (login: CmdbLogin) => Promise<CmdbSource>) 
   })
 }
 
-// The backend runs the first Sync inside this request, so it can take minutes.
 export function useConnectMutation(provider: CmdbProvider) {
   return useSaveSourceMutation((login) =>
     api.post<CmdbSource>('/cmdb/source', { provider, ...login } satisfies CmdbSourceRequest),
   )
 }
 
-// Replaces the login of the connected source (e.g. a rotated password); runs no Sync.
 export function useUpdateLoginMutation() {
   return useSaveSourceMutation((login) => api.put<CmdbSource>('/cmdb/source', login))
 }
@@ -108,11 +114,9 @@ export function useSyncMutation() {
         sourceQuery.queryKey,
         (current) => current && { ...current, lastSync, lastSyncFailure: null },
       )
-      // The Sync changed the inventory; the button need not wait for the refetch.
-      void queryClient.invalidateQueries({ queryKey: connectionScopeKey })
+      refreshInventory(queryClient)
     },
-    // The backend records a failed Sync on the source, or the source may be gone.
-    onError: () => queryClient.invalidateQueries({ queryKey: sourceQuery.queryKey }),
+    onError: () => refetchSource(queryClient),
   })
 }
 
@@ -124,7 +128,6 @@ export function useDisconnectMutation() {
       queryClient.setQueryData(sourceQuery.queryKey, null)
       queryClient.removeQueries({ queryKey: connectionScopeKey })
     },
-    // A source that is already gone answers not_connected: the refetch shows that.
-    onError: () => queryClient.invalidateQueries({ queryKey: sourceQuery.queryKey }),
+    onError: () => refetchSource(queryClient),
   })
 }

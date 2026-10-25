@@ -13,7 +13,7 @@ import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
 import { Panel, PanelTitle } from '../../components/ui/Panel'
-import { failureText, requestErrorText } from '../../i18n/errors'
+import { translatedOrBackendMessage, requestErrorText } from '../../i18n/errors'
 
 // Messages are translation keys: the text is resolved at render time, in the active language.
 const credentialsSchema = z.object({
@@ -29,7 +29,6 @@ const credentialsSchema = z.object({
 
 type Credentials = z.infer<typeof credentialsSchema>
 
-// "update" replaces the login of the connected source; "connect" creates the source.
 export type ItopFormMode = 'connect' | 'update'
 
 interface Props {
@@ -92,10 +91,7 @@ export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
     testMutation.mutate(login)
   })
 
-  // mutateAsync rather than mutate: on save the page may unmount the form before
-  // per-call callbacks run, and onSaved must still fire. The failure is rendered
-  // from the mutation's error, so the rejection needs no handling here.
-  const handleSave = handleSubmit((login) => saveMutation.mutateAsync(login).then(onSaved, () => {}))
+  const handleSave = handleSubmit((login) => saveMutation.mutate(login, { onSuccess: onSaved }))
 
   function errorText(message: string | undefined) {
     return message && t(message as ParseKeys)
@@ -126,7 +122,7 @@ export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
     const test = testMutation.data
     if (!test) return null
     if (test.ok) return { ok: true, text: t('config.form.result.success') }
-    const text = failureText(test, t, 'config.form.result.testFailed', {
+    const text = translatedOrBackendMessage(test, t, 'config.form.result.testFailed', {
       user: testMutation.variables.user,
     })
     return { ok: false, text }

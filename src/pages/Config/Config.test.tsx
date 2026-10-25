@@ -446,6 +446,15 @@ describe('Configuration', () => {
     expect(assetRequests).toBe(0)
   })
 
+  it('shows the CMDB list right away when the source cannot be read', async () => {
+    server.use(http.get(apiUrl('/cmdb/source'), () => new HttpResponse(null, { status: 500 })))
+    renderApp()
+
+    expect(
+      await screen.findByRole('heading', { name: 'Choose your CMDB' }, { timeout: 1000 }),
+    ).toBeInTheDocument()
+  })
+
   it('shows the empty state right away when the inventory cannot be read', async () => {
     server.use(http.get(apiUrl('/assets'), () => new HttpResponse(null, { status: 500 })))
     await renderConnected()
