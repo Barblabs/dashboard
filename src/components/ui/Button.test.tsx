@@ -5,7 +5,7 @@ import { Button } from './Button'
 
 describe('Button', () => {
   it('runs its action when enabled', async () => {
-    const onClick = vi.fn()
+    const onClick = vi.fn<() => void>()
     render(<Button onClick={onClick}>Sync now</Button>)
 
     await userEvent.click(screen.getByRole('button', { name: 'Sync now' }))
@@ -14,7 +14,7 @@ describe('Button', () => {
   })
 
   it('ignores clicks when disabled', async () => {
-    const onClick = vi.fn()
+    const onClick = vi.fn<() => void>()
     render(<Button disabled onClick={onClick}>Sync now</Button>)
 
     const button = screen.getByRole('button', { name: 'Sync now' })
@@ -25,7 +25,7 @@ describe('Button', () => {
   })
 
   it('announces loading, ignores clicks and keeps focus while loading', async () => {
-    const onClick = vi.fn()
+    const onClick = vi.fn<() => void>()
     const { rerender } = render(<Button onClick={onClick}>Sync now</Button>)
     const button = screen.getByRole('button', { name: 'Sync now' })
     button.focus()
