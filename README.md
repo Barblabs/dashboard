@@ -103,8 +103,11 @@ npm run preview  # sirve dist/ localmente para verificar
 ## Linter
 
 ```bash
-npm run lint
+npm run lint   # oxlint
 ```
+
+Un hook de pre-commit (husky, instalado con `npm install`) corre `npm run lint`
+y `npm test`; si alguno falla, el commit no se crea.
 
 ## Estructura de carpetas
 
