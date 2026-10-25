@@ -14,7 +14,7 @@ de activos del CMDB y los hallazgos de vulnerabilidades priorizados.
 | `@tanstack/react-query-devtools` | Inspeccionar la caché | Solo en desarrollo; se carga sola en `App.tsx` y no entra al build. |
 | `react-hook-form` + `zod` + `@hookform/resolvers` | Formularios | Todo formulario: el esquema zod declara las reglas una vez y `zodResolver` las conecta. Los mensajes de error del esquema son claves de traducción, no texto. |
 | `i18next`, `react-i18next`, `i18next-browser-languagedetector` | Traducciones | Todo texto visible, con `useTranslation()` y `t('clave')`. Ver [Idiomas](#idiomas-i18n). |
-| `msw` | Mock del backend | Handlers en `src/mocks/` compartidos por el modo mock del navegador y las pruebas. Un endpoint nuevo del contrato se agrega ahí. Ver [Modo mock](#modo-mock). |
+| `msw` | Backend falso de las pruebas | Solo en pruebas: handlers en `src/test/mocks/`. Un endpoint nuevo del contrato se agrega ahí. Ver [Pruebas](#pruebas). |
 | `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom` | Pruebas | Ver [Pruebas](#pruebas). Interactuar con `user-event`, buscar por rol, label o texto, nunca por clases o estado interno. |
 | `react-router`, `zustand` | Ruteo y estado global de cliente | Instaladas pero todavía sin usar. `react-router` cuando la navegación entre Hallazgos, Configuración y Notificaciones sea real. `zustand` solo para estado de UI compartido entre ramas lejanas del árbol; el estado del servidor va en react-query y el estado local en `useState`. |
 
@@ -42,7 +42,6 @@ Variables disponibles:
 | Variable        | Descripción                                                        | Ejemplo                 |
 |-----------------|--------------------------------------------------------------------|-------------------------|
 | `VITE_API_URL`  | URL base del backend (sin barra al final)                          | `http://localhost:8080` |
-| `VITE_USE_MOCK` | `true` para servir el backend con MSW en desarrollo (modo mock)    | `true`                  |
 
 ## Levantar en local
 
@@ -52,31 +51,7 @@ npm run dev
 
 Abre [http://localhost:5173](http://localhost:5173).
 
-Para apuntar al backend real, establece `VITE_USE_MOCK=false` y asegúrate
-de que el backend esté corriendo con `./barbackend serve`.
-
-## Modo mock
-
-Con `VITE_USE_MOCK=true`, `npm run dev` arranca un service worker de
-[MSW](https://mswjs.io) que intercepta las peticiones a `VITE_API_URL` y
-responde según el contrato de `docs/`. El código de red es el mismo que en
-producción: no hay ramas `if (useMock)` en `src/api/`.
-
-- Hay un archivo de handlers por dominio en `src/mocks/handlers/` y los datos de
-  ejemplo viven en `src/mocks/`. Las pruebas usan exactamente los mismos
-  handlers; para sobrescribir uno, arma la URL con `apiUrl()` de
-  `src/mocks/url.ts`.
-- La conexión CMDB se guarda en `localStorage` (`src/mocks/store.ts`), así
-  sobrevive a recargas. En las pruebas, `seedConnection()` y `renderApp()` de
-  `src/test/render.tsx` preparan el estado y montan la app.
-- El usuario `admin` hace fallar la prueba de conexión con el código
-  `missing_rest_profile`, para probar el mensaje de error traducido.
-- Las respuestas conservan retrasos realistas (hasta 2 s al sincronizar).
-- El modo mock solo existe en desarrollo: el build de producción no incluye
-  MSW, los datos de ejemplo ni `mockServiceWorker.js`.
-
-`public/mockServiceWorker.js` es generado por MSW y está en el repo. Si
-actualizas `msw`, regenéralo con `npx msw init public`.
+Requiere el backend corriendo con `./barbackend serve`.
 
 ## Idiomas (i18n)
 
@@ -103,11 +78,20 @@ npm run test:watch   # modo watch
 
 Vitest con jsdom y Testing Library. Las pruebas renderizan la app completa con
 sus providers reales y la usan como un usuario (roles, labels, texto
-visible), contra un servidor MSW de Node con los mismos handlers del modo
-mock. Cada archivo de prueba está junto a lo que ejercita: los flujos en
+visible), contra un servidor MSW de Node. Cada archivo de prueba está junto a lo que ejercita: los flujos en
 `src/pages/Config/`, el selector de idioma en `src/components/` y las
 primitivas con comportamiento propio en `src/components/ui/`. La suite corre
 en inglés, salvo las pruebas de cambio de idioma.
+
+- Hay un archivo de handlers por dominio en `src/test/mocks/handlers/`,
+  siguiendo la API de barbackend, y los datos de ejemplo viven en
+  `src/test/mocks/`. Para sobrescribir un handler en una prueba, arma la URL
+  con `apiUrl()` de `src/test/mocks/url.ts`.
+- La conexión CMDB se guarda en `localStorage` (`src/test/mocks/store.ts`).
+  `seedSource()` y `renderApp()` de `src/test/render.tsx` preparan el estado y
+  montan la app.
+- El usuario `admin` hace fallar la prueba de conexión con el código
+  `missing_rest_profile`, para probar el mensaje de error traducido.
 
 ## Build de producción
 
@@ -119,8 +103,11 @@ npm run preview  # sirve dist/ localmente para verificar
 ## Linter
 
 ```bash
-npm run lint
+npm run lint   # oxlint
 ```
+
+Un hook de pre-commit (husky, instalado con `npm install`) corre `npm run lint`
+y `npm test`; si alguno falla, el commit no se crea.
 
 ## Estructura de carpetas
 
@@ -130,13 +117,11 @@ src/
   components/     # componentes compartidos (Sidebar, PlaceholderPage)
     ui/           # primitivas sobre Base UI y Tailwind (Button, Field, Input, Badge)
   i18n/           # configuración de i18next y recursos en/es
-  mocks/          # handlers MSW, worker del navegador y datos de ejemplo
   pages/          # páginas: Config, Findings, Notifications
   styles/         # globals.css: Tailwind y tokens del tema (colores, tipografía)
-  test/           # setup de Vitest y servidor MSW de Node
+  test/           # setup de Vitest, servidor MSW de Node, handlers y datos de ejemplo
 docs/
   contrato-assets.md   # contrato propuesto del endpoint GET /assets
-  contrato-cmdb.md     # contrato propuesto de los endpoints /cmdb
 ```
 
 ## Notas de desarrollo

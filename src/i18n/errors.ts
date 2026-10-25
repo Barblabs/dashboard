@@ -2,7 +2,7 @@ import type { ParseKeys, TFunction } from 'i18next'
 import { ApiError, errorCode, type BackendFailure } from '../api/client'
 
 /*
- * Stable failure codes from the backend (docs/contrato-cmdb.md), whether they arrive in
+ * Stable failure codes from barbackend's /cmdb API, whether they arrive in
  * a result body or an HTTP error. A Map, not an object literal: a code like
  * "constructor" must not hit the prototype.
  */

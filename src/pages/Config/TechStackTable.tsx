@@ -1,8 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useAssetsQuery, type Asset } from '../../api/assets'
-import type { CmdbProvider } from '../../api/cmdb'
 import { Badge } from '../../components/ui/Badge'
-import { isMockMode } from '../../env'
 
 function osLabel(asset: Asset): string {
   const os = asset.software.find((s) => s.role === 'Operating System')
@@ -74,11 +72,7 @@ function AssetsTable({ assets }: { assets: Asset[] }) {
   )
 }
 
-interface Props {
-  provider: CmdbProvider
-}
-
-export function TechStackTable({ provider }: Props) {
+export function TechStackTable() {
   const { t } = useTranslation()
   const assetsQuery = useAssetsQuery()
   // An inventory that could not be read is shown as empty, as before the migration.
@@ -88,14 +82,6 @@ export function TechStackTable({ provider }: Props) {
     <section className="overflow-hidden rounded-lg border border-border-panel bg-white">
       <div className="flex items-baseline gap-3 border-b border-border-panel px-6 pt-5 pb-4">
         <h2 className="font-title text-[16px] text-navy">{t('config.inventory.title')}</h2>
-        {isMockMode && !assetsQuery.isPending && (
-          <span className="font-body text-[13px] text-gray">
-            {t('config.inventory.count', {
-              count: assets.length,
-              source: t(`config.providers.${provider}.name`),
-            })}
-          </span>
-        )}
       </div>
 
       {assetsQuery.isPending

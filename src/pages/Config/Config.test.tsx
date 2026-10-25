@@ -2,9 +2,9 @@ import { cleanup, screen } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { i18n } from '../../i18n'
-import { apiUrl } from '../../mocks/url'
+import { apiUrl } from '../../test/mocks/url'
 import { renderApp, seedSource } from '../../test/render'
-import { server } from '../../test/server'
+import { holdRequests, server } from '../../test/server'
 
 type User = ReturnType<typeof renderApp>
 
@@ -139,14 +139,18 @@ describe('Configuration', () => {
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
 
+    const releaseTest = holdRequests('post', '/cmdb/source/test')
     await user.click(screen.getByRole('button', { name: 'Test connection' }))
     expect(screen.getByRole('button', { name: 'Testing…' })).toHaveAttribute('aria-disabled', 'true')
+    releaseTest()
     expect(
       await screen.findByText('✓ Connection successful. You can continue with the sync.'),
     ).toBeInTheDocument()
 
+    const releaseConnect = holdRequests('post', '/cmdb/source')
     await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
     expect(screen.getByRole('button', { name: 'Connecting…' })).toHaveAttribute('aria-disabled', 'true')
+    releaseConnect()
 
     expect(await screen.findByText('iTop connected')).toBeInTheDocument()
     expect(screen.getByText('http://10.0.0.5:8000')).toBeInTheDocument()
@@ -162,10 +166,12 @@ describe('Configuration', () => {
     const user = await renderConnected()
     expect(screen.getByText('Last sync: 2 hr. ago')).toBeInTheDocument()
 
+    const releaseSync = holdRequests('post', '/cmdb/source/sync')
     await user.click(screen.getByRole('button', { name: 'Sync now' }))
     expect(screen.getByRole('button', { name: 'Syncing…' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Edit connection' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Disconnect' })).toBeDisabled()
+    releaseSync()
 
     expect(
       await screen.findByText('Last sync: less than a minute ago'),
@@ -198,8 +204,10 @@ describe('Configuration', () => {
     expect(screen.getByText('Última sincronización: hace 5 min')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Editar conexión' })).toBeInTheDocument()
 
+    const releaseSync = holdRequests('post', '/cmdb/source/sync')
     await user.click(screen.getByRole('button', { name: 'Sincronizar ahora' }))
     expect(screen.getByRole('button', { name: 'Sincronizando…' })).toBeDisabled()
+    releaseSync()
     expect(
       await screen.findByText('Última sincronización: hace menos de un minuto'),
     ).toBeInTheDocument()

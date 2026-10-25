@@ -40,7 +40,6 @@ export const es: Translations = {
     header: {
       title: 'Configuración',
       subtitle: 'Conecta tu CMDB para cargar el stack tecnológico.',
-      mockBadge: 'Datos de ejemplo',
     },
     steps: {
       title: 'Conectar CMDB',
@@ -129,9 +128,6 @@ export const es: Translations = {
     },
     inventory: {
       title: 'Stack tecnológico',
-      count_one: '{{count}} activo · fuente: {{source}}',
-      count_many: '{{count}} de activos · fuente: {{source}}',
-      count_other: '{{count}} activos · fuente: {{source}}',
       loading: 'Cargando inventario…',
       empty: 'No hay activos registrados en el inventario.',
       columns: {
