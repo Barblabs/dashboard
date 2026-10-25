@@ -1,23 +1,23 @@
-import type { CmdbConnection } from '../api/cmdb'
+import type { CmdbSource } from '../api/cmdb'
 
-// The fake backend persists the connection in localStorage so it survives reloads.
-const STORAGE_KEY = 'barbattack_cmdb'
+const STORAGE_KEY = 'barbattack_cmdb_source'
 
-export const mockConnection: Omit<CmdbConnection, 'lastSync'> = {
+export const mockSource: Omit<CmdbSource, 'lastSync'> = {
   provider: 'itop',
   url: 'http://10.0.0.5:8000',
   user: 'barb-reader',
+  lastSyncFailure: null,
 }
 
-export function loadConnection(): CmdbConnection | null {
+export function loadSource(): CmdbSource | null {
   const raw = localStorage.getItem(STORAGE_KEY)
-  return raw ? (JSON.parse(raw) as CmdbConnection) : null
+  return raw ? (JSON.parse(raw) as CmdbSource) : null
 }
 
-export function saveConnection(connection: CmdbConnection) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(connection))
+export function saveSource(source: CmdbSource) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(source))
 }
 
-export function clearConnection() {
+export function clearSource() {
   localStorage.removeItem(STORAGE_KEY)
 }

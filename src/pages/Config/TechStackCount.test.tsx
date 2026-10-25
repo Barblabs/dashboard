@@ -4,14 +4,14 @@ import { describe, expect, it, vi } from 'vitest'
 import { i18n } from '../../i18n'
 import { mockAssetsResponse } from '../../mocks/assets'
 import { apiUrl } from '../../mocks/url'
-import { renderApp, seedConnection } from '../../test/render'
+import { renderApp, seedSource } from '../../test/render'
 import { server } from '../../test/server'
 
 // The asset count only appears in mock mode.
 vi.mock('../../env', () => ({ isMockMode: true }))
 
 function renderConnected() {
-  seedConnection()
+  seedSource()
   renderApp()
 }
 

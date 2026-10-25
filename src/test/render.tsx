@@ -1,7 +1,8 @@
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App } from '../App'
-import { mockConnection, saveConnection } from '../mocks/store'
+import type { CmdbSource } from '../api/cmdb'
+import { mockSource, saveSource } from '../mocks/store'
 
 // jsdom keeps the URL between tests: every render opens the given path explicitly.
 export function renderApp(path = '/') {
@@ -11,6 +12,6 @@ export function renderApp(path = '/') {
   return user
 }
 
-export function seedConnection(lastSync = new Date().toISOString()) {
-  saveConnection({ ...mockConnection, lastSync })
+export function seedSource(overrides: Partial<CmdbSource> = {}) {
+  saveSource({ ...mockSource, lastSync: new Date().toISOString(), ...overrides })
 }

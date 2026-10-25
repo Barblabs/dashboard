@@ -1,36 +1,54 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useConnectionQuery, type CmdbConnection, type CmdbCredentials } from '../../api/cmdb'
+import { useSourceQuery, type CmdbLogin, type CmdbSource } from '../../api/cmdb'
 import { Badge } from '../../components/ui/Badge'
 import { isMockMode } from '../../env'
 import { ConfigStepPanel } from './ConfigStepPanel'
 import { CmdbSelector } from './CmdbSelector'
-import { ItopForm } from './ItopForm'
+import { ItopForm, type ItopFormMode } from './ItopForm'
 import { ConnectedBar } from './ConnectedBar'
 import { TechStackTable } from './TechStackTable'
 
-// The password never goes through here: only the address and user are prefilled.
-type SetupView =
-  | { step: 'select' }
-  | { step: 'form'; initialValues: Pick<CmdbCredentials, 'url' | 'user'> }
+type SelectView = { step: 'select' }
 
-type View = { step: 'loading' } | SetupView | { step: 'connected'; connection: CmdbConnection }
+interface FormView {
+  step: 'form'
+  mode: ItopFormMode
+  initialValues: Pick<CmdbLogin, 'url' | 'user'>
+  back: SelectView | null
+}
+
+type SetupView = SelectView | FormView
+
+type View = { step: 'loading' } | SetupView | { step: 'connected'; source: CmdbSource }
+
+function deriveView(
+  isPending: boolean,
+  setupView: SetupView | null,
+  source: CmdbSource | null | undefined,
+): View {
+  if (isPending) return { step: 'loading' }
+  if (setupView) return setupView
+  if (source) return { step: 'connected', source }
+  return { step: 'select' }
+}
 
 const PAGE = 'flex flex-1 flex-col gap-6 overflow-y-auto px-10 py-8'
 
 export function ConfigPage() {
   const { t } = useTranslation()
-  const connectionQuery = useConnectionQuery()
+  const sourceQuery = useSourceQuery()
 
-  /* An open setup view wins over the connection, so editing a live connection shows the
-     form; with none open the page follows the connection. */
   const [setupView, setSetupView] = useState<SetupView | null>(null)
-  const connection = connectionQuery.data
-  const view: View =
-    connectionQuery.isPending ? { step: 'loading' }
-    : setupView ? setupView
-    : connection ? { step: 'connected', connection }
-    : { step: 'select' }
+  const view = deriveView(sourceQuery.isPending, setupView, sourceQuery.data)
+
+  const editLogin = (source: CmdbSource) =>
+    setSetupView({
+      step: 'form',
+      mode: 'update',
+      initialValues: { url: source.url, user: source.user ?? '' },
+      back: null,
+    })
 
   if (view.step === 'loading') {
     return (
@@ -56,29 +74,29 @@ export function ConfigPage() {
 
       {view.step === 'connected' ? (
         <>
-          <ConnectedBar
-            connection={view.connection}
-            onEdit={() =>
-              setSetupView({
-                step: 'form',
-                initialValues: { url: view.connection.url, user: view.connection.user },
-              })
-            }
-          />
-          <TechStackTable provider={view.connection.provider} />
+          <ConnectedBar source={view.source} onEdit={() => editLogin(view.source)} />
+          <TechStackTable provider={view.source.provider} />
         </>
       ) : (
         <div className="flex items-start gap-[22px]">
           <ConfigStepPanel activeStep={view.step === 'select' ? 1 : 2} />
           {view.step === 'form' ? (
             <ItopForm
+              mode={view.mode}
               initialValues={view.initialValues}
-              onBack={() => setSetupView({ step: 'select' })}
-              onConnected={() => setSetupView(null)}
+              onBack={() => setSetupView(view.back)}
+              onSaved={() => setSetupView(null)}
             />
           ) : (
             <CmdbSelector
-              onSelect={() => setSetupView({ step: 'form', initialValues: { url: '', user: '' } })}
+              onSelect={() =>
+                setSetupView({
+                  step: 'form',
+                  mode: 'connect',
+                  initialValues: { url: '', user: '' },
+                  back: { step: 'select' },
+                })
+              }
             />
           )}
         </div>

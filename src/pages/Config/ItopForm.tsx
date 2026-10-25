@@ -5,14 +5,15 @@ import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import {
   useConnectMutation,
-  useTestConnectionMutation,
-  type CmdbCredentials,
+  useTestLoginMutation,
+  useUpdateLoginMutation,
+  type CmdbLogin,
 } from '../../api/cmdb'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
 import { Panel, PanelTitle } from '../../components/ui/Panel'
-import { codeKey, requestErrorKey } from '../../i18n/errors'
+import { translatedOrBackendMessage, requestErrorText } from '../../i18n/errors'
 
 // Messages are translation keys: the text is resolved at render time, in the active language.
 const credentialsSchema = z.object({
@@ -28,20 +29,43 @@ const credentialsSchema = z.object({
 
 type Credentials = z.infer<typeof credentialsSchema>
 
+export type ItopFormMode = 'connect' | 'update'
+
 interface Props {
-  initialValues: Pick<CmdbCredentials, 'url' | 'user'>
+  mode: ItopFormMode
+  initialValues: Pick<CmdbLogin, 'url' | 'user'>
   onBack: () => void
-  onConnected: () => void
+  onSaved: () => void
 }
+
+const PROVIDER = 'itop'
+
+const COPY = {
+  connect: {
+    title: 'config.form.title',
+    back: 'config.form.back',
+    save: 'config.form.actions.connect',
+    saving: 'config.form.actions.connecting',
+  },
+  update: {
+    title: 'config.form.editTitle',
+    back: 'config.form.cancel',
+    save: 'config.form.actions.save',
+    saving: 'config.form.actions.saving',
+  },
+} as const satisfies Record<ItopFormMode, Record<string, ParseKeys>>
 
 const RESULT = 'rounded-md px-4 py-3 font-body text-[14px] leading-[1.4]'
 const RESULT_OK = `${RESULT} border border-nav-active-bg bg-nav-active-bg/6 text-nav-active-bg`
 const RESULT_ERROR = `${RESULT} border border-critical bg-critical/5 text-critical`
 
-export function ItopForm({ initialValues, onBack, onConnected }: Props) {
+export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
   const { t } = useTranslation()
-  const testMutation = useTestConnectionMutation()
-  const connectMutation = useConnectMutation()
+  const testMutation = useTestLoginMutation(PROVIDER)
+  const connectMutation = useConnectMutation(PROVIDER)
+  const updateMutation = useUpdateLoginMutation()
+  const saveMutation = mode === 'update' ? updateMutation : connectMutation
+  const copy = COPY[mode]
 
   const {
     register,
@@ -58,47 +82,50 @@ export function ItopForm({ initialValues, onBack, onConnected }: Props) {
   })
 
   const isTesting = testMutation.isPending
-  const isConnecting = connectMutation.isPending
-  const busy = isTesting || isConnecting
+  const isSaving = saveMutation.isPending
+  const busy = isTesting || isSaving
   const actionsDisabled = busy || !watch('password')
 
-  const handleTest = handleSubmit((credentials) => {
-    connectMutation.reset()
-    testMutation.mutate(credentials)
+  const handleTest = handleSubmit((login) => {
+    saveMutation.reset()
+    testMutation.mutate(login)
   })
 
-  // mutateAsync rather than mutate: on connect the page may unmount the form before
-  // per-call callbacks run, and onConnected must still fire. The failure is rendered
-  // from connectMutation.isError, so the rejection needs no handling here.
-  const handleConnect = handleSubmit((credentials) =>
-    connectMutation.mutateAsync(credentials).then(onConnected, () => {}),
-  )
+  const handleSave = handleSubmit((login) => saveMutation.mutate(login, { onSuccess: onSaved }))
 
   function errorText(message: string | undefined) {
     return message && t(message as ParseKeys)
   }
 
   function resultOf(): { ok: boolean; text: string } | null {
-    if (connectMutation.isError) {
-      const key = requestErrorKey(connectMutation.error, {
-        fallback: 'config.form.result.connectFailed',
-      })
-      return { ok: false, text: t(key, { user: connectMutation.variables.user }) }
+    if (saveMutation.isError) {
+      const text = requestErrorText(
+        saveMutation.error,
+        t,
+        { fallback: 'config.form.result.connectFailed' },
+        { user: saveMutation.variables.user },
+      )
+      return { ok: false, text }
     }
     if (testMutation.isError) {
-      const key = requestErrorKey(testMutation.error, {
-        fallback: 'config.form.result.testFailed',
-        network: 'config.form.result.testNetworkError',
-      })
-      return { ok: false, text: t(key, { user: testMutation.variables.user }) }
+      const text = requestErrorText(
+        testMutation.error,
+        t,
+        {
+          fallback: 'config.form.result.testFailed',
+          network: 'config.form.result.testNetworkError',
+        },
+        { user: testMutation.variables.user },
+      )
+      return { ok: false, text }
     }
     const test = testMutation.data
     if (!test) return null
     if (test.ok) return { ok: true, text: t('config.form.result.success') }
-    // A backend without codes, or with a new one, still shows its own message.
-    const key = codeKey(test.code)
-    if (key) return { ok: false, text: t(key, { user: testMutation.variables.user }) }
-    return { ok: false, text: test.error ?? t('config.form.result.testFailed') }
+    const text = translatedOrBackendMessage(test, t, 'config.form.result.testFailed', {
+      user: testMutation.variables.user,
+    })
+    return { ok: false, text }
   }
 
   const result = resultOf()
@@ -106,13 +133,13 @@ export function ItopForm({ initialValues, onBack, onConnected }: Props) {
   return (
     <Panel className="gap-5">
       <div className="flex items-baseline justify-between gap-3">
-        <PanelTitle>{t('config.form.title')}</PanelTitle>
+        <PanelTitle>{t(copy.title)}</PanelTitle>
         <button
           type="button"
           className="cursor-pointer p-0 font-body text-[14px] whitespace-nowrap text-gray underline underline-offset-2 hover:text-navy focus-ring"
           onClick={onBack}
         >
-          {t('config.form.back')}
+          {t(copy.back)}
         </button>
       </div>
 
@@ -169,8 +196,8 @@ export function ItopForm({ initialValues, onBack, onConnected }: Props) {
         <Button variant="secondary" loading={isTesting} disabled={actionsDisabled} onClick={handleTest}>
           {isTesting ? t('config.form.actions.testing') : t('config.form.actions.test')}
         </Button>
-        <Button loading={isConnecting} disabled={actionsDisabled} onClick={handleConnect}>
-          {isConnecting ? t('config.form.actions.connecting') : t('config.form.actions.connect')}
+        <Button loading={isSaving} disabled={actionsDisabled} onClick={handleSave}>
+          {isSaving ? t(copy.saving) : t(copy.save)}
         </Button>
       </div>
     </Panel>

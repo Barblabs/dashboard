@@ -1,59 +1,75 @@
 import { delay, http, HttpResponse } from 'msw'
-import type { CmdbConnection, CmdbCredentials } from '../../api/cmdb'
-import { clearConnection, loadConnection, saveConnection } from '../store'
+import type { CmdbLogin, CmdbSource, CmdbSourceRequest } from '../../api/cmdb'
+import { clearSource, loadSource, saveSource } from '../store'
 import { apiUrl } from '../url'
 
+function failure(status: number, code: string, error: string) {
+  return HttpResponse.json({ code, error }, { status })
+}
+
 function notConnected() {
-  return HttpResponse.json({ error: 'No CMDB source is connected' }, { status: 404 })
+  return failure(404, 'not_connected', 'no CMDB source is connected')
+}
+
+function rejectAdminWithoutRestProfile({ user }: CmdbLogin) {
+  if (user !== 'admin') return null
+  return {
+    code: 'missing_rest_profile',
+    error:
+      "The user 'admin' does not have the 'REST Services User' profile in iTop. Create a dedicated user with that profile.",
+  }
 }
 
 export const cmdbHandlers = [
-  http.get(apiUrl('/cmdb/connection'), async () => {
+  http.get(apiUrl('/cmdb/source'), async () => {
     await delay(300)
-    return HttpResponse.json(loadConnection())
+    return HttpResponse.json(loadSource())
   }),
 
-  /*
-   * The test fails when the user is exactly "admin": it is the iTop superuser
-   * but lacks, by default, the "REST Services User" profile the backend
-   * requires. Any other user succeeds. The failure carries the code proposed
-   * in docs/contrato-cmdb.md alongside the human-readable message.
-   */
-  http.post(apiUrl('/cmdb/test'), async ({ request }) => {
-    const { user } = (await request.json()) as CmdbCredentials
+  http.post(apiUrl('/cmdb/source/test'), async ({ request }) => {
+    const login = (await request.json()) as CmdbSourceRequest
     await delay(1200)
-    if (user === 'admin') {
-      return HttpResponse.json({
-        ok: false,
-        code: 'missing_rest_profile',
-        error:
-          "The user 'admin' does not have the 'REST Services User' profile in iTop. Create a dedicated user with that profile.",
-      })
-    }
-    return HttpResponse.json({ ok: true })
+    const rejected = rejectAdminWithoutRestProfile(login)
+    return HttpResponse.json(rejected ? { ok: false, ...rejected } : { ok: true })
   }),
 
-  http.post(apiUrl('/cmdb/connect'), async ({ request }) => {
-    const { url, user } = (await request.json()) as CmdbCredentials
+  http.post(apiUrl('/cmdb/source'), async ({ request }) => {
+    const { provider, url, user, password } = (await request.json()) as CmdbSourceRequest
     await delay(1500)
-    const connection: CmdbConnection = {
-      provider: 'itop',
+    if (loadSource()) {
+      return failure(409, 'already_connected', 'a CMDB source is already connected')
+    }
+    const rejected = rejectAdminWithoutRestProfile({ url, user, password })
+    if (rejected) return failure(422, rejected.code, rejected.error)
+    const source: CmdbSource = {
+      provider,
       url,
       user,
       lastSync: new Date().toISOString(),
+      lastSyncFailure: null,
     }
-    saveConnection(connection)
-    return HttpResponse.json(connection)
+    saveSource(source)
+    return HttpResponse.json(source)
   }),
 
-  http.post(apiUrl('/cmdb/sync'), async () => {
+  http.put(apiUrl('/cmdb/source'), async ({ request }) => {
+    const login = (await request.json()) as CmdbLogin
+    await delay(800)
+    const current = loadSource()
+    if (!current) return notConnected()
+    const rejected = rejectAdminWithoutRestProfile(login)
+    if (rejected) return failure(422, rejected.code, rejected.error)
+    const source: CmdbSource = { ...current, url: login.url, user: login.user }
+    saveSource(source)
+    return HttpResponse.json(source)
+  }),
+
+  http.post(apiUrl('/cmdb/source/sync'), async () => {
     await delay(2000)
-    const connection = loadConnection()
-    if (!connection) {
-      return notConnected()
-    }
+    const source = loadSource()
+    if (!source) return notConnected()
     const lastSync = new Date().toISOString()
-    saveConnection({ ...connection, lastSync })
+    saveSource({ ...source, lastSync, lastSyncFailure: null })
     return HttpResponse.json({
       lastSync,
       created: 0,
@@ -64,12 +80,10 @@ export const cmdbHandlers = [
     })
   }),
 
-  http.delete(apiUrl('/cmdb/connection'), async () => {
+  http.delete(apiUrl('/cmdb/source'), async () => {
     await delay(500)
-    if (!loadConnection()) {
-      return notConnected()
-    }
-    clearConnection()
+    if (!loadSource()) return notConnected()
+    clearSource()
     return new HttpResponse(null, { status: 204 })
   }),
 ]

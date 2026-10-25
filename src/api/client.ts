@@ -8,6 +8,11 @@ export type ApiFailure =
   | { kind: 'http'; status: number; code: string | null }
   | { kind: 'network' }
 
+export interface BackendFailure {
+  code: string
+  error: string
+}
+
 // Every request failure surfaces as an ApiError.
 export class ApiError extends Error {
   readonly failure: ApiFailure
@@ -17,6 +22,10 @@ export class ApiError extends Error {
     this.name = 'ApiError'
     this.failure = failure
   }
+}
+
+export function errorCode(error: Error | null): string | null {
+  return error instanceof ApiError && error.failure.kind === 'http' ? error.failure.code : null
 }
 
 interface ErrorBody {
@@ -56,5 +65,7 @@ export const api = {
   get: <T>(url: string) => apiClient.get<T>(url).then((response) => response.data),
   post: <T>(url: string, body?: unknown) =>
     apiClient.post<T>(url, body).then((response) => response.data),
+  put: <T>(url: string, body?: unknown) =>
+    apiClient.put<T>(url, body).then((response) => response.data),
   delete: (url: string) => apiClient.delete(url).then(() => undefined),
 }

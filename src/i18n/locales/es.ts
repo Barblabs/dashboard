@@ -57,7 +57,9 @@ export const es: Translations = {
     },
     form: {
       title: 'Conectar iTop',
+      editTitle: 'Editar conexión de iTop',
       back: '← Cambiar CMDB',
+      cancel: 'Cancelar',
       url: {
         label: 'Dirección de iTop (IP o URL)',
         help: 'Incluye el puerto si no es el 80 o el 443.',
@@ -79,6 +81,8 @@ export const es: Translations = {
         testing: 'Probando…',
         connect: 'Conectar y sincronizar',
         connecting: 'Conectando…',
+        save: 'Guardar cambios',
+        saving: 'Guardando…',
       },
       result: {
         success: 'Conexión exitosa. Puedes continuar con la sincronización.',
@@ -86,24 +90,39 @@ export const es: Translations = {
         testNetworkError: 'Error de red al probar la conexión.',
         connectFailed: 'No se pudo guardar la conexión.',
       },
-      testErrors: {
-        missingRestProfile:
-          "El usuario '{{user}}' no tiene el perfil 'REST Services User' en iTop. Crea un usuario dedicado con ese perfil.",
-      },
+    },
+    errors: {
+      unreachable: 'No se pudo llegar a iTop. Revisa la dirección, el puerto y la red.',
+      tlsError: 'Falló la conexión segura con iTop. Revisa su certificado TLS.',
+      invalidCredentials: 'iTop rechazó el usuario o la contraseña.',
+      unexpectedResponse:
+        'La dirección respondió, pero no como iTop. Revisa que apunte a la URL base de iTop.',
+      missingRestProfile:
+        "El usuario '{{user}}' no tiene el perfil 'REST Services User' en iTop. Crea un usuario dedicado con ese perfil.",
+      invalidRequest: 'La solicitud está incompleta. Revisa los campos.',
+      invalidLogin: 'El backend rechazó el inicio de sesión. Revisa la dirección.',
+      notConnected: 'No hay ningún CMDB conectado.',
+      alreadyConnected: 'Ya hay un CMDB conectado. Desconéctalo primero.',
+      syncInProgress: 'Ya hay una sincronización en curso. Inténtalo de nuevo en un momento.',
+      syncFailed: 'La sincronización falló.',
+      internalError: 'El servidor tuvo un error interno. Inténtalo de nuevo.',
     },
     connected: {
       badge: '{{provider}} conectado',
       lastSync: 'Última sincronización: {{time}}',
       never: 'nunca',
       lessThanAMinute: 'hace menos de un minuto',
+      lastSyncFailed: 'La última sincronización falló {{time}}: {{error}}',
+      disconnectFailed: 'No se pudo desconectar el CMDB.',
       actions: {
         disconnect: 'Desconectar',
         edit: 'Editar conexión',
         sync: 'Sincronizar ahora',
         syncing: 'Sincronizando…',
+        updateLogin: 'Actualizar credenciales',
       },
       confirm: {
-        text: 'Esta acción desconectará el CMDB y eliminará la configuración guardada. ¿Continuar?',
+        text: 'Esta acción desconectará el CMDB. Los activos sincronizados se conservan, marcados como inactivos. ¿Continuar?',
         confirm: 'Sí, desconectar',
         cancel: 'Cancelar',
       },
