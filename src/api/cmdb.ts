@@ -4,23 +4,36 @@ import { api } from './client'
 // The CMDBs the dashboard knows how to talk to; only iTop has a connection flow today.
 export type CmdbProvider = 'itop' | 'servicenow'
 
-export interface CmdbConnection {
-  provider: CmdbProvider
-  url: string
-  user: string
-  lastSync: string | null
+export interface CmdbSyncFailure {
+  at: string
+  error: string
 }
 
-export interface CmdbCredentials {
+export interface CmdbSource {
+  provider: CmdbProvider
+  url: string
+  /** `null` for token-auth sources, which only the backend CLI can create. */
+  user: string | null
+  /** When the latest successful Sync finished. */
+  lastSync: string | null
+  /** Set only while the latest Sync failed; it carries no code, only the message. */
+  lastSyncFailure: CmdbSyncFailure | null
+}
+
+export interface CmdbLogin {
   url: string
   user: string
   password: string
 }
 
+export interface CmdbSourceRequest extends CmdbLogin {
+  provider: CmdbProvider
+}
+
 export type CmdbTestResult =
   | { ok: true }
-  /** `code` is a stable id used to translate the failure; it may be missing or unknown to the frontend. */
-  | { ok: false; code?: string; error?: string }
+  /** `code` is a stable id used to translate the failure; it may be unknown to the frontend. */
+  | { ok: false; code: string; error: string }
 
 export interface CmdbSyncResult {
   lastSync: string
@@ -37,36 +50,48 @@ export interface CmdbSyncResult {
  */
 export const connectionScopeKey = ['source'] as const
 
-const connectionQuery = queryOptions({
-  queryKey: ['cmdb', 'connection'],
-  queryFn: () => api.get<CmdbConnection | null>('/cmdb/connection'),
-  // An unreadable connection shows the CMDB list right away, as before:
+const sourceQuery = queryOptions({
+  queryKey: ['cmdb', 'source'],
+  queryFn: () => api.get<CmdbSource | null>('/cmdb/source'),
+  // An unreadable source shows the CMDB list right away, as before:
   // retrying would leave the page on "Loading" for several seconds.
   retry: false,
 })
 
-export function useConnectionQuery() {
-  return useQuery(connectionQuery)
+export function useSourceQuery() {
+  return useQuery(sourceQuery)
 }
 
 // Mutation variables include the password: gcTime 0 evicts it from the cache as soon
 // as the form unmounts, instead of keeping it for five minutes.
-export function useTestConnectionMutation() {
+export function useTestLoginMutation() {
   return useMutation({
-    mutationFn: (credentials: CmdbCredentials) =>
-      api.post<CmdbTestResult>('/cmdb/test', credentials),
+    mutationFn: (request: CmdbSourceRequest) =>
+      api.post<CmdbTestResult>('/cmdb/source/test', request),
     gcTime: 0,
   })
 }
 
+// The backend runs the first Sync inside this request, so it can take minutes.
 export function useConnectMutation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (credentials: CmdbCredentials) =>
-      api.post<CmdbConnection>('/cmdb/connect', credentials),
+    mutationFn: (request: CmdbSourceRequest) => api.post<CmdbSource>('/cmdb/source', request),
     gcTime: 0,
-    onSuccess: (connection) => {
-      queryClient.setQueryData(connectionQuery.queryKey, connection)
+    onSuccess: (source) => {
+      queryClient.setQueryData(sourceQuery.queryKey, source)
+    },
+  })
+}
+
+// Replaces the login of the connected source (e.g. a rotated password); runs no Sync.
+export function useUpdateLoginMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (login: CmdbLogin) => api.put<CmdbSource>('/cmdb/source', login),
+    gcTime: 0,
+    onSuccess: (source) => {
+      queryClient.setQueryData(sourceQuery.queryKey, source)
     },
   })
 }
@@ -74,23 +99,29 @@ export function useConnectMutation() {
 export function useSyncMutation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () => api.post<CmdbSyncResult>('/cmdb/sync', {}),
+    mutationFn: () => api.post<CmdbSyncResult>('/cmdb/source/sync'),
     onSuccess: ({ lastSync }) => {
       queryClient.setQueryData(
-        connectionQuery.queryKey,
-        (current) => current && { ...current, lastSync },
+        sourceQuery.queryKey,
+        (current) => current && { ...current, lastSync, lastSyncFailure: null },
       )
+      // The Sync changed the inventory; the button need not wait for the refetch.
+      void queryClient.invalidateQueries({ queryKey: connectionScopeKey })
     },
+    // The backend records a failed Sync on the source, or the source may be gone.
+    onError: () => queryClient.invalidateQueries({ queryKey: sourceQuery.queryKey }),
   })
 }
 
 export function useDisconnectMutation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () => api.delete('/cmdb/connection'),
+    mutationFn: () => api.delete('/cmdb/source'),
     onSuccess: () => {
-      queryClient.setQueryData(connectionQuery.queryKey, null)
+      queryClient.setQueryData(sourceQuery.queryKey, null)
       queryClient.removeQueries({ queryKey: connectionScopeKey })
     },
+    // A source that is already gone answers not_connected: the refetch shows that.
+    onError: () => queryClient.invalidateQueries({ queryKey: sourceQuery.queryKey }),
   })
 }

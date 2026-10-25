@@ -55,7 +55,9 @@ export const en = {
     },
     form: {
       title: 'Connect iTop',
+      editTitle: 'Edit iTop connection',
       back: '← Change CMDB',
+      cancel: 'Cancel',
       url: {
         label: 'iTop address (IP or URL)',
         help: 'Include the port if it is not 80 or 443.',
@@ -77,6 +79,8 @@ export const en = {
         testing: 'Testing…',
         connect: 'Connect and sync',
         connecting: 'Connecting…',
+        save: 'Save changes',
+        saving: 'Saving…',
       },
       result: {
         success: 'Connection successful. You can continue with the sync.',
@@ -84,24 +88,39 @@ export const en = {
         testNetworkError: 'Network error while testing the connection.',
         connectFailed: 'Could not save the connection.',
       },
-      testErrors: {
-        missingRestProfile:
-          "The user '{{user}}' does not have the 'REST Services User' profile in iTop. Create a dedicated user with that profile.",
-      },
+    },
+    errors: {
+      unreachable: 'Could not reach iTop. Check the address, the port and the network.',
+      tlsError: 'The secure connection to iTop failed. Check its TLS certificate.',
+      invalidCredentials: 'iTop rejected the user or the password.',
+      unexpectedResponse:
+        'The address answered, but not as iTop. Check that it points to the iTop base URL.',
+      missingRestProfile:
+        "The user '{{user}}' does not have the 'REST Services User' profile in iTop. Create a dedicated user with that profile.",
+      invalidRequest: 'The request is incomplete. Check the fields.',
+      invalidLogin: 'The backend rejected the login. Check the address.',
+      notConnected: 'There is no CMDB connected.',
+      alreadyConnected: 'A CMDB is already connected. Disconnect it first.',
+      syncInProgress: 'A sync is already running. Try again in a moment.',
+      syncFailed: 'The sync failed.',
+      internalError: 'The server had an internal error. Try again.',
     },
     connected: {
       badge: '{{provider}} connected',
       lastSync: 'Last sync: {{time}}',
       never: 'never',
       lessThanAMinute: 'less than a minute ago',
+      lastSyncFailed: 'Last sync failed {{time}}: {{error}}',
+      disconnectFailed: 'Could not disconnect the CMDB.',
       actions: {
         disconnect: 'Disconnect',
         edit: 'Edit connection',
         sync: 'Sync now',
         syncing: 'Syncing…',
+        updateLogin: 'Update credentials',
       },
       confirm: {
-        text: 'This will disconnect the CMDB and delete the saved configuration. Continue?',
+        text: 'This will disconnect the CMDB. Synced assets are kept, marked as inactive. Continue?',
         confirm: 'Yes, disconnect',
         cancel: 'Cancel',
       },

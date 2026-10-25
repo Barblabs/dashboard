@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useConnectionQuery, type CmdbConnection, type CmdbCredentials } from '../../api/cmdb'
+import { useSourceQuery, type CmdbLogin, type CmdbSource } from '../../api/cmdb'
 import { Badge } from '../../components/ui/Badge'
 import { isMockMode } from '../../env'
 import { ConfigStepPanel } from './ConfigStepPanel'
@@ -9,28 +9,36 @@ import { ItopForm } from './ItopForm'
 import { ConnectedBar } from './ConnectedBar'
 import { TechStackTable } from './TechStackTable'
 
-// The password never goes through here: only the address and user are prefilled.
+/* The password never goes through here: only the address and user are prefilled.
+   "update" edits the login of the connected source; "connect" creates a new one. */
 type SetupView =
   | { step: 'select' }
-  | { step: 'form'; initialValues: Pick<CmdbCredentials, 'url' | 'user'> }
+  | { step: 'form'; mode: 'connect' | 'update'; initialValues: Pick<CmdbLogin, 'url' | 'user'> }
 
-type View = { step: 'loading' } | SetupView | { step: 'connected'; connection: CmdbConnection }
+type View = { step: 'loading' } | SetupView | { step: 'connected'; source: CmdbSource }
 
 const PAGE = 'flex flex-1 flex-col gap-6 overflow-y-auto px-10 py-8'
 
 export function ConfigPage() {
   const { t } = useTranslation()
-  const connectionQuery = useConnectionQuery()
+  const sourceQuery = useSourceQuery()
 
-  /* An open setup view wins over the connection, so editing a live connection shows the
-     form; with none open the page follows the connection. */
+  /* An open setup view wins over the source, so editing a live source shows the
+     form; with none open the page follows the source. */
   const [setupView, setSetupView] = useState<SetupView | null>(null)
-  const connection = connectionQuery.data
+  const source = sourceQuery.data
   const view: View =
-    connectionQuery.isPending ? { step: 'loading' }
+    sourceQuery.isPending ? { step: 'loading' }
     : setupView ? setupView
-    : connection ? { step: 'connected', connection }
+    : source ? { step: 'connected', source }
     : { step: 'select' }
+
+  const editLogin = (source: CmdbSource) =>
+    setSetupView({
+      step: 'form',
+      mode: 'update',
+      initialValues: { url: source.url, user: source.user ?? '' },
+    })
 
   if (view.step === 'loading') {
     return (
@@ -56,29 +64,25 @@ export function ConfigPage() {
 
       {view.step === 'connected' ? (
         <>
-          <ConnectedBar
-            connection={view.connection}
-            onEdit={() =>
-              setSetupView({
-                step: 'form',
-                initialValues: { url: view.connection.url, user: view.connection.user },
-              })
-            }
-          />
-          <TechStackTable provider={view.connection.provider} />
+          <ConnectedBar source={view.source} onEdit={() => editLogin(view.source)} />
+          <TechStackTable provider={view.source.provider} />
         </>
       ) : (
         <div className="flex items-start gap-[22px]">
           <ConfigStepPanel activeStep={view.step === 'select' ? 1 : 2} />
           {view.step === 'form' ? (
             <ItopForm
+              mode={view.mode}
               initialValues={view.initialValues}
-              onBack={() => setSetupView({ step: 'select' })}
-              onConnected={() => setSetupView(null)}
+              // Changing CMDB needs a disconnect first, so editing goes back to the source.
+              onBack={() => setSetupView(view.mode === 'update' ? null : { step: 'select' })}
+              onSaved={() => setSetupView(null)}
             />
           ) : (
             <CmdbSelector
-              onSelect={() => setSetupView({ step: 'form', initialValues: { url: '', user: '' } })}
+              onSelect={() =>
+                setSetupView({ step: 'form', mode: 'connect', initialValues: { url: '', user: '' } })
+              }
             />
           )}
         </div>

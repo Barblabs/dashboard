@@ -56,5 +56,7 @@ export const api = {
   get: <T>(url: string) => apiClient.get<T>(url).then((response) => response.data),
   post: <T>(url: string, body?: unknown) =>
     apiClient.post<T>(url, body).then((response) => response.data),
+  put: <T>(url: string, body?: unknown) =>
+    apiClient.put<T>(url, body).then((response) => response.data),
   delete: (url: string) => apiClient.delete(url).then(() => undefined),
 }

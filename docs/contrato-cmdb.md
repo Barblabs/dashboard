@@ -1,195 +1,193 @@
-# Contrato propuesto: endpoints CMDB
+# Contrato: endpoints CMDB
 
-> Propuesta del equipo de frontend. El dashboard necesita estos cinco endpoints
-> para el flujo de conexión al CMDB. El backend actual gestiona las fuentes
-> desde el CLI (`source add` / `sync`); estos endpoints expondrían las mismas
-> operaciones vía HTTP.
+> Contrato que barbackend sirve hoy (PR Barblabs/barbackend#66, issue #24).
+> Reemplaza la propuesta anterior del frontend (`/cmdb/connection`, `/cmdb/test`,
+> `/cmdb/connect`, `/cmdb/sync`). Las fuentes de verdad son, en barbackend,
+> `README.md` (sección "HTTP API"), `internal/httpapi/httpapi.go`,
+> `internal/httpapi/cmdb_source.go` e `internal/cmdb/provider.go`. Si algo de
+> aquí difiere de esos archivos, mandan los archivos.
 
 ---
 
-## GET /cmdb/connection
+## Reglas comunes
 
-Devuelve la conexión CMDB activa del cliente autenticado, o `null` si no hay ninguna.
+**Errores.** Todo error responde:
 
-**Respuesta 200 — con conexión:**
+```json
+{ "code": "not_connected", "error": "mensaje legible" }
+```
+
+El front traduce los códigos que conoce y muestra `error` tal cual cuando el
+código es desconocido: el backend puede agregar códigos sin coordinar el
+despliegue. Excepción: una ruta inexistente devuelve el 404 en texto plano de gin.
+
+| Código              | Significado                                                        |
+|---------------------|--------------------------------------------------------------------|
+| `invalid_request`   | Cuerpo malformado o campo faltante                                 |
+| `invalid_login`     | Proveedor desconocido o login rechazado antes de contactar el CMDB (p. ej. URL malformada) |
+| `not_connected`     | No hay CMDB Source conectada                                       |
+| `already_connected` | Ya hay una CMDB Source conectada                                   |
+| `sync_in_progress`  | Hay una Sync de la fuente en curso o confirmándose                 |
+| `sync_failed`       | La Sync falló por una razón que el proveedor no clasificó          |
+| `internal_error`    | Error del servidor; `error` siempre es `"internal server error"`   |
+
+**Códigos de falla del CMDB** (en el resultado de `/test`, como 422 al conectar o
+actualizar, como 502 al sincronizar):
+
+| Código                 | Significado                                                 |
+|------------------------|-------------------------------------------------------------|
+| `unreachable`          | Falla de DNS, conexión rechazada o timeout                  |
+| `tls_error`            | Falló el handshake TLS                                      |
+| `invalid_credentials`  | iTop rechazó el usuario o la contraseña                     |
+| `unexpected_response`  | No es iTop, respuesta malformada, o error de iTop ajeno al login |
+| `missing_rest_profile` | El usuario no tiene el perfil `REST Services User` (solo iTop) |
+
+**Timestamps:** RFC 3339, pueden traer fracciones de segundo y un offset distinto
+de `Z`. Se parsean, no se comparan como texto.
+
+**Proveedor:** hoy solo existe `"itop"`.
+
+---
+
+## GET /cmdb/source
+
+La CMDB Source conectada, o `null`.
+
 ```json
 {
   "provider": "itop",
   "url": "http://10.0.0.5:8000",
   "user": "barb-reader",
-  "lastSync": "2026-10-20T18:35:00Z"
+  "lastSync": "2026-10-20T18:35:00.123456Z",
+  "lastSyncFailure": null
 }
 ```
 
-**Respuesta 200 — sin conexión:**
-```json
-null
-```
+| Campo             | Tipo                                   | Notas                                                   |
+|-------------------|----------------------------------------|---------------------------------------------------------|
+| `provider`        | `string`                               | `"itop"`                                                |
+| `url`             | `string`                               | URL base de iTop                                        |
+| `user`            | `string \| null`                       | `null` en fuentes con token (solo se crean por CLI)     |
+| `lastSync`        | `string \| null`                       | Fin de la última Sync **exitosa**                       |
+| `lastSyncFailure` | `{ at: string, error: string } \| null` | Solo mientras la **última** Sync falló. Sin `code`.     |
 
-| Campo      | Tipo               | Descripción                                          |
-|------------|--------------------|------------------------------------------------------|
-| `provider` | `"itop"`           | Identificador del proveedor CMDB                     |
-| `url`      | `string`           | URL base del iTop                                    |
-| `user`     | `string`           | Usuario de solo lectura                              |
-| `lastSync` | `string ISO` / `null` | Timestamp de la última sincronización exitosa   |
-
-> **Nota:** La contraseña nunca se devuelve. El backend la almacena como
-> referencia a una variable de entorno (ver pregunta abierta).
+Las credenciales nunca se devuelven. Errores: `500 internal_error`. No hay
+historial de Syncs: se consulta este endpoint para ver el último resultado.
 
 ---
 
-## POST /cmdb/test
+## POST /cmdb/source/test
 
-Prueba la conexión con las credenciales proporcionadas sin guardar nada.
+Prueba un login contra el CMDB; no guarda nada.
 
-**Cuerpo:**
+**Cuerpo** (todos obligatorios):
 ```json
-{
-  "url": "http://10.0.0.5:8000",
-  "user": "barb-reader",
-  "password": "s3cr3t"
-}
+{ "provider": "itop", "url": "http://10.0.0.5:8000", "user": "barb-reader", "password": "<contraseña>" }
 ```
 
-**Respuesta 200 — éxito:**
-```json
-{ "ok": true }
-```
-
-**Respuesta 200 — fallo de conexión** (no es un error HTTP, es un resultado):
-```json
-{
-  "ok": false,
-  "code": "missing_rest_profile",
-  "error": "El usuario 'barb-reader' no tiene el perfil 'REST Services User'."
-}
-```
-
-| Campo   | Tipo                 | Descripción                                                        |
-|---------|----------------------|--------------------------------------------------------------------|
-| `ok`    | `boolean`            | `true` si iTop aceptó las credenciales                             |
-| `code`  | `string` (opcional)  | **Propuesta.** Código estable de la falla, para traducirla en el front |
-| `error` | `string` (opcional)  | Mensaje legible de la falla                                        |
-
-> **Propuesta: campo `code`.** El front traduce los códigos que conoce al
-> idioma del usuario y muestra `error` tal cual cuando `code` falta o es
-> desconocido, así que el backend puede adoptarlo sin coordinar el despliegue.
-> Códigos conocidos hoy:
->
-> | Código                 | Significado                                              |
-> |------------------------|----------------------------------------------------------|
-> | `missing_rest_profile` | El usuario no tiene el perfil `REST Services User` en iTop |
->
-> Un código nuevo solo necesita su mensaje en `error` hasta que el front lo traduzca.
-
-**Errores HTTP:**
-
-| Status | Descripción                              |
-|--------|------------------------------------------|
-| `400`  | Cuerpo inválido (campo faltante, URL malformada) |
-| `500`  | Error interno del servidor               |
+- `200` éxito: `{ "ok": true }`
+- `200` falla (es un resultado, no un error HTTP):
+  `{ "ok": false, "code": "missing_rest_profile", "error": "..." }`. En una falla
+  `code` siempre está y es un código de falla del CMDB.
+- `400` `invalid_request` / `invalid_login`; `500` `internal_error`.
 
 ---
 
-## POST /cmdb/connect
+## POST /cmdb/source
 
-Registra la fuente CMDB y ejecuta la primera sincronización.
+Conecta: prueba el login, guarda la fuente con las credenciales cifradas y
+ejecuta la primera Sync. Puede tardar hasta 5 minutos.
 
-Internamente equivale a `./barbackend source add --provider itop …` seguido
-de `./barbackend sync --source <id>`.
+**Cuerpo:** igual que `/test`. **200:** misma forma que `GET /cmdb/source`.
 
-**Cuerpo:** igual que `/cmdb/test`.
+Si la primera Sync falla, **igual responde 200**, con `lastSync: null` y
+`lastSyncFailure`; la fuente queda conectada y se puede volver a sincronizar.
 
-**Respuesta 200:**
+| Status | Código                             | Cuándo                                |
+|--------|------------------------------------|---------------------------------------|
+| `400`  | `invalid_request`, `invalid_login` |                                       |
+| `409`  | `already_connected`                | Hay que desconectar primero           |
+| `422`  | código de falla del CMDB           | El CMDB rechazó el login; nada se guarda |
+| `500`  | `internal_error`                   |                                       |
+
+---
+
+## PUT /cmdb/source
+
+Reemplaza el login de la fuente conectada (p. ej. rotación de contraseña).
+Conserva el proveedor, los activos y las declaraciones. **No** ejecuta Sync.
+
+**Cuerpo:** `{ "url": "...", "user": "...", "password": "..." }` (sin `provider`).
+**200:** misma forma que `GET /cmdb/source`.
+
+| Status | Código                             | Cuándo                   |
+|--------|------------------------------------|--------------------------|
+| `400`  | `invalid_request`, `invalid_login` |                          |
+| `404`  | `not_connected`                    |                          |
+| `422`  | código de falla del CMDB           | Rechazado; nada cambia   |
+| `500`  | `internal_error`                   |                          |
+
+Cuando una Sync falla con `invalid_credentials`, el dashboard ofrece este formulario.
+
+---
+
+## POST /cmdb/source/sync
+
+Ejecuta una Sync de la fuente conectada. Sin cuerpo.
+
 ```json
-{
-  "provider": "itop",
-  "url": "http://10.0.0.5:8000",
-  "user": "barb-reader",
-  "lastSync": "2026-10-20T18:35:00Z"
-}
+{ "lastSync": "2026-10-20T19:10:00Z", "created": 3, "updated": 12, "deactivated": 1, "reactivated": 0, "skipped": 0 }
 ```
 
-**Errores HTTP:**
+`skipped` es solo un conteo. La Sync sobrevive a la request (cerrar la pestaña no
+la cancela); solo la cortan el límite de 5 minutos o el apagado del servidor.
 
-| Status | Descripción                                         |
-|--------|-----------------------------------------------------|
-| `400`  | Cuerpo inválido                                     |
-| `409`  | Ya existe una conexión activa (desconectar primero) |
-| `422`  | Credenciales rechazadas por iTop                    |
-| `500`  | Error interno                                       |
-
----
-
-## POST /cmdb/sync
-
-Ejecuta una sincronización manual de la fuente CMDB activa.
-
-Internamente equivale a `./barbackend sync --source <id>`.
-
-**Cuerpo:** vacío `{}`.
-
-**Respuesta 200:**
-```json
-{
-  "lastSync": "2026-10-20T19:10:00Z",
-  "created": 3,
-  "updated": 12,
-  "deactivated": 1,
-  "reactivated": 0,
-  "skipped": 0
-}
-```
-
-**Errores HTTP:**
-
-| Status | Descripción                          |
-|--------|--------------------------------------|
-| `404`  | No hay fuente CMDB conectada         |
-| `500`  | Error de red o error interno         |
+| Status | Código                                     | Cuándo                                         |
+|--------|--------------------------------------------|------------------------------------------------|
+| `404`  | `not_connected`                            |                                                |
+| `409`  | `sync_in_progress`                         | Hay otra Sync en curso                         |
+| `502`  | código de falla del CMDB o `sync_failed`   | La Sync falló; queda como `lastSyncFailure`    |
+| `500`  | `internal_error`                           |                                                |
 
 ---
 
-## DELETE /cmdb/connection
+## DELETE /cmdb/source
 
-Elimina la fuente CMDB activa. No elimina los activos ya sincronizados
-(decisión pendiente — ver preguntas abiertas).
+Desconecta. **No borra nada:** la fuente y los activos quedan guardados, los
+activos pasan a inactivos y no se aceptan más Syncs de esa fuente. Conectar de
+nuevo crea una CMDB Source nueva.
 
-**Respuesta 204:** sin cuerpo.
-
-**Errores HTTP:**
-
-| Status | Descripción                          |
-|--------|--------------------------------------|
-| `404`  | No hay fuente CMDB conectada         |
-| `500`  | Error interno                        |
+`204` sin cuerpo. `404` `not_connected`; `409` `sync_in_progress` (mientras una
+Sync se confirma); `500` `internal_error`.
 
 ---
 
-## CORS
+## CORS y servidor
 
-El backend necesitará habilitar CORS para el origen del front en local
-(`http://localhost:5173`). Ver también `docs/contrato-assets.md`.
+- Orígenes permitidos en `CORS_ALLOWED_ORIGINS` del backend (separados por coma;
+  en local, `http://localhost:5173`).
+- El preflight permite `GET, PUT, DELETE` y el header `Content-Type`; se cachea
+  10 minutos. Un origen no permitido recibe 403 en el preflight.
+- El servidor escucha en `:8080` salvo que se defina `PORT`. `GET /ping` es el
+  chequeo de vida.
 
 ---
 
-## Preguntas abiertas
+## Decisiones (antes preguntas abiertas)
 
-1. **Almacenamiento de la contraseña:** hoy el backend guarda el *nombre*
-   de una variable de entorno, no la contraseña. Si el usuario la escribe
-   en el dashboard, ¿dónde se guarda y cómo se cifra? Opciones: a) el
-   backend la cifra y almacena en Postgres, b) se pide al ops que la
-   exporte como variable de entorno y el front solo envía el nombre de la
-   variable, c) se usa un gestor de secretos externo.
+1. **Contraseña:** el backend cifra las credenciales y las guarda en Postgres. El
+   front envía la contraseña real.
+2. **Al desconectar:** no se borra nada; los activos pasan a inactivos; sin
+   período de gracia; reconectar crea una fuente nueva.
+3. **Multi-fuente:** una CMDB Source conectada por cliente. La API no tiene IDs:
+   todo actúa sobre "la" fuente conectada.
+4. **Autenticación:** no implementada. Cada request actúa por un cliente fijo en la
+   configuración del servidor, así que estos endpoints (incluido `/test`, que
+   puede llegar a cualquier URL) son solo para desarrollo local hasta que exista
+   autenticación. Ningún issue del backend la sigue todavía.
 
-2. **Datos al desconectar:** ¿`DELETE /cmdb/connection` borra también los
-   activos sincronizados en Postgres, o solo la fuente? Si los borra,
-   ¿hay un período de gracia?
+## Lo que no existe
 
-3. **Multi-fuente:** el modelo de `CMDBSource` admite múltiples fuentes por
-   cliente. El flujo actual del front asume una sola. ¿Lo ampliamos?
-
-4. **Autenticación y autorización:** el backend no tiene autenticación. Estos
-   endpoints cambian la conexión al CMDB y deben quedar restringidos al rol
-   de administrador. ¿Cuándo y cómo agregamos la autenticación (Cognito u
-   otro)?
+Historial de Syncs, registros omitidos individuales, `code` en
+`lastSyncFailure` y headers de autenticación. Si la UI los necesita, se abre un
+issue en `Barblabs/barbackend`.

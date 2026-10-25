@@ -3,14 +3,14 @@ import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { i18n } from '../../i18n'
 import { apiUrl } from '../../mocks/url'
-import { renderApp, seedConnection } from '../../test/render'
+import { renderApp, seedSource } from '../../test/render'
 import { server } from '../../test/server'
 
 type User = ReturnType<typeof renderApp>
 
 const URL_LABEL = 'iTop address (IP or URL)'
 const CONFIRM_TEXT =
-  'This will disconnect the CMDB and delete the saved configuration. Continue?'
+  'This will disconnect the CMDB. Synced assets are kept, marked as inactive. Continue?'
 const VALID_CREDENTIALS = { url: 'http://10.0.0.5:8000', username: 'barb-reader', password: 's3cr3t' }
 const TWO_HOURS_AGO = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
 
@@ -34,7 +34,7 @@ async function fillForm(
 }
 
 async function renderConnected() {
-  seedConnection(TWO_HOURS_AGO)
+  seedSource(TWO_HOURS_AGO)
   const user = renderApp()
   await screen.findByText('iTop connected')
   return user
@@ -48,7 +48,7 @@ async function openForm() {
 
 describe('Configuration', () => {
   it('opens in the connected state when a connection already exists', async () => {
-    seedConnection()
+    seedSource()
     renderApp()
 
     expect(screen.getByText('Loading configuration…')).toBeInTheDocument()
@@ -83,18 +83,56 @@ describe('Configuration', () => {
     expect(screen.getByRole('button', { name: 'Seleccionar' })).toBeInTheDocument()
   })
 
-  it('going back from editing leads to the CMDB list with an empty form', async () => {
+  it('cancelling an edit returns to the connected source', async () => {
     const user = await renderConnected()
 
     await user.click(screen.getByRole('button', { name: 'Edit connection' }))
-    await user.click(screen.getByRole('button', { name: '← Change CMDB' }))
+    expect(screen.getByRole('heading', { name: 'Edit iTop connection' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '← Change CMDB' })).not.toBeInTheDocument()
 
-    expect(screen.getByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
-    expect(screen.queryByText('iTop connected')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(screen.getByText('iTop connected')).toBeInTheDocument()
+  })
 
-    await user.click(screen.getByRole('button', { name: 'Select' }))
-    expect(screen.getByLabelText(URL_LABEL)).toHaveValue('')
-    expect(screen.getByLabelText('User')).toHaveValue('')
+  it('editing replaces the login without connecting or syncing again', async () => {
+    const requests: string[] = []
+    server.use(
+      http.put(apiUrl('/cmdb/source'), () => {
+        requests.push('update')
+      }),
+      http.post(apiUrl('/cmdb/source'), () => {
+        requests.push('connect')
+      }),
+      http.post(apiUrl('/cmdb/source/sync'), () => {
+        requests.push('sync')
+      }),
+    )
+    const user = await renderConnected()
+
+    await user.click(screen.getByRole('button', { name: 'Edit connection' }))
+    await fillForm(user, { username: 'barb-rotated', password: 'n3w' })
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+    expect(await screen.findByText('iTop connected')).toBeInTheDocument()
+    expect(screen.getByText('barb-rotated')).toBeInTheDocument()
+    expect(screen.getByText('Last sync: 2 hr. ago')).toBeInTheDocument()
+    expect(requests).toEqual(['update'])
+  })
+
+  it('a rejected edit shows the translated failure and keeps the form open', async () => {
+    server.use(
+      http.put(apiUrl('/cmdb/source'), () =>
+        HttpResponse.json({ code: 'invalid_credentials', error: 'login rejected' }, { status: 422 }),
+      ),
+    )
+    const user = await renderConnected()
+
+    await user.click(screen.getByRole('button', { name: 'Edit connection' }))
+    await fillForm(user, { password: 'wrong' })
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+    expect(await screen.findByText('✗ iTop rejected the user or the password.')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Edit iTop connection' })).toBeInTheDocument()
   })
 
   it('connects for the first time: picks iTop, tests, connects and shows the inventory', async () => {
@@ -138,7 +176,7 @@ describe('Configuration', () => {
   it('syncing updates the time without refetching the connection', async () => {
     let connectionRequests = 0
     server.use(
-      http.get(apiUrl('/cmdb/connection'), () => {
+      http.get(apiUrl('/cmdb/source'), () => {
         connectionRequests += 1
       }),
     )
@@ -153,7 +191,7 @@ describe('Configuration', () => {
   it('shows the connection bar and relative time in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
-    seedConnection(new Date(Date.now() - 5 * 60 * 1000).toISOString())
+    seedSource(new Date(Date.now() - 5 * 60 * 1000).toISOString())
     const user = renderApp()
 
     expect(await screen.findByText('iTop conectado')).toBeInTheDocument()
@@ -169,7 +207,7 @@ describe('Configuration', () => {
     await user.click(screen.getByRole('button', { name: 'Desconectar' }))
     expect(
       screen.getByText(
-        'Esta acción desconectará el CMDB y eliminará la configuración guardada. ¿Continuar?',
+        'Esta acción desconectará el CMDB. Los activos sincronizados se conservan, marcados como inactivos. ¿Continuar?',
       ),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sí, desconectar' })).toBeInTheDocument()
@@ -207,7 +245,7 @@ describe('Configuration', () => {
 
     await user.click(screen.getByRole('button', { name: 'Edit connection' }))
     await fillForm(user, { password: 's3cr3t' })
-    await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
     await user.click(await screen.findByRole('button', { name: 'Disconnect' }))
     await user.click(screen.getByRole('button', { name: 'Yes, disconnect' }))
 
@@ -233,7 +271,7 @@ describe('Configuration', () => {
     ['no code', {}],
   ])('a failed test with %s shows the backend message', async (_, extra) => {
     server.use(
-      http.post(apiUrl('/cmdb/test'), () =>
+      http.post(apiUrl('/cmdb/source/test'), () =>
         HttpResponse.json({ ok: false, error: 'The iTop certificate expired.', ...extra }),
       ),
     )
@@ -271,7 +309,7 @@ describe('Configuration', () => {
   it('connecting shows the connected state without refetching the connection', async () => {
     let connectionRequests = 0
     server.use(
-      http.get(apiUrl('/cmdb/connection'), () => {
+      http.get(apiUrl('/cmdb/source'), () => {
         connectionRequests += 1
       }),
     )
@@ -324,11 +362,11 @@ describe('Configuration', () => {
     expect(screen.getByLabelText(URL_LABEL)).toHaveValue('http://10.0.0.5:8000')
     expect(screen.getByLabelText('User')).toHaveValue('barb-reader')
     expect(screen.getByLabelText('Password')).toHaveValue('')
-    expect(screen.getByRole('button', { name: 'Connect and sync' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled()
   })
 
   it('shows a network error when the test does not reach the backend', async () => {
-    server.use(http.post(apiUrl('/cmdb/test'), () => HttpResponse.error()))
+    server.use(http.post(apiUrl('/cmdb/source/test'), () => HttpResponse.error()))
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
 
@@ -338,7 +376,7 @@ describe('Configuration', () => {
   })
 
   it('an HTTP error while testing is not shown as a network error', async () => {
-    server.use(http.post(apiUrl('/cmdb/test'), () => new HttpResponse(null, { status: 500 })))
+    server.use(http.post(apiUrl('/cmdb/source/test'), () => new HttpResponse(null, { status: 500 })))
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
 
@@ -348,7 +386,7 @@ describe('Configuration', () => {
   })
 
   it('shows an error when the connection cannot be saved', async () => {
-    server.use(http.post(apiUrl('/cmdb/connect'), () => HttpResponse.error()))
+    server.use(http.post(apiUrl('/cmdb/source'), () => HttpResponse.error()))
     const user = await openForm()
     await fillForm(user, VALID_CREDENTIALS)
 
@@ -378,7 +416,7 @@ describe('Configuration', () => {
   it('shows the inventory in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
-    seedConnection(TWO_HOURS_AGO)
+    seedSource(TWO_HOURS_AGO)
     renderApp()
 
     expect(await screen.findByText('Cargando inventario…')).toBeInTheDocument()
@@ -425,5 +463,140 @@ describe('Configuration', () => {
       await screen.findByText('There are no assets in the inventory.'),
     ).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
+  })
+
+  it('sends the provider with the login when testing and connecting', async () => {
+    const bodies: unknown[] = []
+    server.use(
+      http.post(apiUrl('/cmdb/source/test'), async ({ request }) => {
+        bodies.push(await request.clone().json())
+      }),
+      http.post(apiUrl('/cmdb/source'), async ({ request }) => {
+        bodies.push(await request.clone().json())
+      }),
+    )
+    const user = await openForm()
+    await fillForm(user, VALID_CREDENTIALS)
+
+    await user.click(screen.getByRole('button', { name: 'Test connection' }))
+    await screen.findByText(/Connection successful/)
+    await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
+    await screen.findByText('iTop connected')
+
+    const login = { provider: 'itop', url: 'http://10.0.0.5:8000', user: 'barb-reader', password: 's3cr3t' }
+    expect(bodies).toEqual([login, login])
+  })
+
+  it('a failed first sync still connects and shows the failure', async () => {
+    server.use(
+      http.post(apiUrl('/cmdb/source'), () =>
+        HttpResponse.json({
+          provider: 'itop',
+          url: 'http://10.0.0.5:8000',
+          user: 'barb-reader',
+          lastSync: null,
+          lastSyncFailure: { at: new Date().toISOString(), error: 'iTop timed out' },
+        }),
+      ),
+    )
+    const user = await openForm()
+    await fillForm(user, VALID_CREDENTIALS)
+
+    await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
+
+    expect(await screen.findByText('iTop connected')).toBeInTheDocument()
+    expect(screen.getByText('Last sync: never')).toBeInTheDocument()
+    expect(
+      screen.getByText('Last sync failed less than a minute ago: iTop timed out'),
+    ).toBeInTheDocument()
+  })
+
+  it.each([
+    ['a known code is translated', 'unreachable', 'Could not reach iTop. Check the address, the port and the network.'],
+    ['an unknown code shows the backend message', 'certificate_expired', 'The iTop certificate expired.'],
+  ])('a rejected connect: %s', async (_, code, text) => {
+    server.use(
+      http.post(apiUrl('/cmdb/source'), () =>
+        HttpResponse.json({ code, error: 'The iTop certificate expired.' }, { status: 422 }),
+      ),
+    )
+    const user = await openForm()
+    await fillForm(user, VALID_CREDENTIALS)
+
+    await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
+
+    expect(await screen.findByText(`✗ ${text}`)).toBeInTheDocument()
+    expect(screen.queryByText('iTop connected')).not.toBeInTheDocument()
+  })
+
+  it('a sync rejected for its credentials offers to update them', async () => {
+    server.use(
+      http.post(apiUrl('/cmdb/source/sync'), () =>
+        HttpResponse.json({ code: 'invalid_credentials', error: 'login rejected' }, { status: 502 }),
+      ),
+    )
+    const user = await renderConnected()
+
+    await user.click(screen.getByRole('button', { name: 'Sync now' }))
+
+    expect(await screen.findByText('iTop rejected the user or the password.')).toBeInTheDocument()
+    expect(screen.getByText('Last sync: 2 hr. ago')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Update credentials' }))
+    expect(screen.getByRole('heading', { name: 'Edit iTop connection' })).toBeInTheDocument()
+  })
+
+  it('a sync that fails for another reason does not offer to update the credentials', async () => {
+    server.use(
+      http.post(apiUrl('/cmdb/source/sync'), () =>
+        HttpResponse.json({ code: 'sync_in_progress', error: 'sync running' }, { status: 409 }),
+      ),
+    )
+    const user = await renderConnected()
+
+    await user.click(screen.getByRole('button', { name: 'Sync now' }))
+
+    expect(
+      await screen.findByText('A sync is already running. Try again in a moment.'),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Update credentials' })).not.toBeInTheDocument()
+  })
+
+  it('shows the failure recorded on the latest sync', async () => {
+    seedSource(TWO_HOURS_AGO, {
+      lastSyncFailure: { at: new Date(Date.now() - 5 * 60 * 1000).toISOString(), error: 'iTop timed out' },
+    })
+    renderApp()
+
+    expect(
+      await screen.findByText('Last sync failed 5 min. ago: iTop timed out'),
+    ).toBeInTheDocument()
+  })
+
+  it('a disconnect refused while a sync commits shows why and keeps the source', async () => {
+    server.use(
+      http.delete(apiUrl('/cmdb/source'), () =>
+        HttpResponse.json({ code: 'sync_in_progress', error: 'sync running' }, { status: 409 }),
+      ),
+    )
+    const user = await renderConnected()
+
+    await user.click(screen.getByRole('button', { name: 'Disconnect' }))
+    await user.click(screen.getByRole('button', { name: 'Yes, disconnect' }))
+
+    expect(
+      await screen.findByText('A sync is already running. Try again in a moment.'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('iTop connected')).toBeInTheDocument()
+  })
+
+  it('a token-auth source shows no user and edits with an empty one', async () => {
+    seedSource(TWO_HOURS_AGO, { user: null })
+    const user = renderApp()
+
+    expect(await screen.findByText('iTop connected')).toBeInTheDocument()
+    expect(screen.queryByText('barb-reader')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Edit connection' }))
+    expect(screen.getByLabelText('User')).toHaveValue('')
   })
 })
