@@ -15,17 +15,17 @@ export function Field({ label, help, error, className = '', children, ...props }
 
   return (
     <BaseField.Root invalid={invalid} className={`flex flex-col gap-1 ${className}`} {...props}>
-      <BaseField.Label className="font-body text-[14px] font-semibold text-navy">
+      <BaseField.Label className="font-body text-[0.875rem] font-semibold text-navy">
         {label}
       </BaseField.Label>
       {children}
       {invalid ? (
-        <BaseField.Error match className="font-body text-[12px] leading-[1.4] text-critical">
+        <BaseField.Error match className="font-body text-[0.75rem] leading-[1.4] text-critical">
           {error}
         </BaseField.Error>
       ) : (
         help && (
-          <BaseField.Description className="font-body text-[12px] leading-[1.4] text-gray">
+          <BaseField.Description className="font-body text-[0.75rem] leading-[1.4] text-gray">
             {help}
           </BaseField.Description>
         )

@@ -34,6 +34,13 @@
   --font-title: 'Archivo Black', sans-serif;
   --font-body:  'Work Sans', sans-serif;
   --font-mono:  'IBM Plex Mono', monospace;
+
+  /* Motion. Opacity-only, so it stays on under prefers-reduced-motion. */
+  --animate-fade-in: fade-in 200ms ease-out;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+  }
 }
 
 /* Keyboard focus ring shared by the navy controls (buttons, inputs, links). */

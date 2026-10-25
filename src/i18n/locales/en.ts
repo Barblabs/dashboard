@@ -110,6 +110,7 @@ export const en = {
       never: 'never',
       lessThanAMinute: 'less than a minute ago',
       lastSyncFailed: 'Last sync failed {{time}}: {{error}}',
+      syncSucceeded: 'Sync complete.',
       disconnectFailed: 'Could not disconnect the CMDB.',
       actions: {
         disconnect: 'Disconnect',

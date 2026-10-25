@@ -12,6 +12,6 @@ export function Panel({ className = '', ...props }: ComponentProps<'div'>) {
 
 export function PanelTitle({ className = '', ...props }: ComponentProps<'h3'>) {
   return (
-    <h3 className={`font-title text-[20px] leading-[1.2] text-navy ${className}`} {...props} />
+    <h3 className={`font-title text-[1.25rem] leading-[1.2] text-navy ${className}`} {...props} />
   )
 }

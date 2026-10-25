@@ -8,7 +8,7 @@ import {
 } from '../../api/assets'
 
 const SELECT =
-  'focus-ring cursor-pointer rounded-md border border-border-panel bg-white px-3 py-2 font-body text-[14px] text-navy outline-none focus:border-navy'
+  'focus-ring cursor-pointer rounded-md border border-border-panel bg-white px-3 py-2 font-body text-[0.875rem] text-navy outline-none focus:border-navy'
 
 function FilterSelect({
   label,
@@ -22,7 +22,7 @@ function FilterSelect({
   children: ReactNode
 }) {
   return (
-    <label className="flex flex-col gap-1 font-body text-[12px] font-semibold tracking-[0.06em] text-gray uppercase">
+    <label className="flex flex-col gap-1 font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase">
       {label}
       <select className={SELECT} value={value} onChange={(event) => onChange(event.target.value)}>
         {children}

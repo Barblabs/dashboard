@@ -6,10 +6,10 @@ import { Badge } from '../../components/ui/Badge'
 const NONE = '-'
 
 const HEADER_CELL =
-  'px-4 py-3 text-left font-body text-[12px] font-semibold tracking-[0.06em] whitespace-nowrap text-gray uppercase'
+  'px-4 py-3 text-left font-body text-[0.75rem] font-semibold tracking-[0.06em] whitespace-nowrap text-gray uppercase'
 const CELL = 'border-b border-border-row px-4 py-3.5 align-middle text-navy'
-const MONO = 'font-mono text-[13px]'
-const DETAIL_LABEL = 'font-body text-[12px] font-semibold tracking-[0.06em] text-gray uppercase'
+const MONO = 'font-mono text-[0.8125rem]'
+const DETAIL_LABEL = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase'
 const COLUMN_COUNT = 7
 
 function versioned(name: string, version: string) {
@@ -35,7 +35,7 @@ function AssetStatus({ asset }: { asset: Asset }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 text-[13px] font-medium ${asset.active ? 'text-navy' : 'text-gray'}`}
+      className={`inline-flex items-center gap-1.5 text-[0.8125rem] font-medium ${asset.active ? 'text-navy' : 'text-gray'}`}
     >
       <span className="size-1.5 shrink-0 rounded-full bg-current" />
       {asset.active
@@ -51,7 +51,7 @@ function AssetDetails({ asset }: { asset: Asset }) {
   const { t } = useTranslation()
 
   return (
-    <div className="flex flex-col gap-4 bg-panel px-6 py-4">
+    <div className="flex animate-fade-in flex-col gap-4 bg-panel px-6 py-4">
       <dl className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
         <div className="flex flex-col gap-1">
           <dt className={DETAIL_LABEL}>{t('config.inventory.details.description')}</dt>
@@ -87,11 +87,11 @@ function AssetDetails({ asset }: { asset: Asset }) {
               // Components have no identity of their own; the list order is the backend's.
               <li key={index} className="flex flex-wrap items-center gap-2">
                 <span className={MONO}>{versioned(component.name, component.version)}</span>
-                <span className="text-[12px] text-gray">
+                <span className="text-[0.75rem] text-gray">
                   {t(`config.inventory.role.${component.role}`)}
                 </span>
                 {component.product ? (
-                  <span className="text-[12px] text-gray">
+                  <span className="text-[0.75rem] text-gray">
                     {component.product.vendor} {component.product.name}
                   </span>
                 ) : (
@@ -120,10 +120,10 @@ export function AssetsTable({ assets, busy }: { assets: Asset[]; busy: boolean }
     })
 
   return (
-    <div className="overflow-x-auto">
+    <div className="animate-fade-in overflow-x-auto">
       <table
         aria-busy={busy || undefined}
-        className={`w-full border-collapse text-[14px] transition-opacity duration-150 ${busy ? 'opacity-60' : ''}`}
+        className={`w-full border-collapse text-[0.875rem] transition-opacity duration-150 ${busy ? 'opacity-60' : ''}`}
       >
         <thead>
           <tr className="border-b-2 border-border-row">
@@ -145,10 +145,18 @@ export function AssetsTable({ assets, busy }: { assets: Asset[]; busy: boolean }
             const detailsId = `asset-details-${key}`
             return (
               <Fragment key={key}>
-                <tr className={`hover:bg-row-hover ${asset.active ? '' : '*:opacity-50'}`}>
+                <tr
+                  // The whole row is the mouse target; the button stays the keyboard and screen reader path.
+                  onClick={() => {
+                    // Selecting text to copy it (a record id, an email) is not a request to expand.
+                    if (window.getSelection()?.isCollapsed === false) return
+                    toggle(key)
+                  }}
+                  className={`cursor-pointer hover:bg-row-hover ${asset.active ? '' : '*:opacity-50'}`}
+                >
                   <td className={CELL}>
                     <span className="block font-medium">{asset.name}</span>
-                    <span className="mt-0.5 block font-mono text-[11px] text-gray">
+                    <span className="mt-0.5 block font-mono text-[0.6875rem] text-gray">
                       {asset.record_id}
                     </span>
                   </td>
@@ -183,7 +191,10 @@ export function AssetsTable({ assets, busy }: { assets: Asset[]; busy: boolean }
                         isExpanded ? 'config.inventory.details.hide' : 'config.inventory.details.show',
                         { name: asset.name },
                       )}
-                      onClick={() => toggle(key)}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        toggle(key)
+                      }}
                       className="focus-ring cursor-pointer rounded-md px-2 py-1 text-gray transition-[color] duration-150 ease-[ease] hover:text-navy"
                     >
                       <span

@@ -62,9 +62,9 @@ describe('Configuration', () => {
   it('lists iTop as the only available CMDB and the rest as coming soon', async () => {
     renderApp()
 
-    expect(await screen.findByRole('heading', { name: 'Configuration' })).toBeInTheDocument()
+    expect(await screen.findByText('No connection')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Configuration' })).toBeInTheDocument()
     expect(screen.getByText('Connect your CMDB to load the tech stack.')).toBeInTheDocument()
-    expect(screen.getByText('No connection')).toBeInTheDocument()
     expect(screen.getByText('ServiceNow')).toBeInTheDocument()
     expect(screen.getByText('Other CMDB')).toBeInTheDocument()
     expect(screen.getAllByText('Coming soon')).toHaveLength(2)
@@ -131,7 +131,9 @@ describe('Configuration', () => {
     await fillForm(user, { password: 'wrong' })
     await user.click(screen.getByRole('button', { name: 'Save changes' }))
 
-    expect(await screen.findByText('✗ iTop rejected the user or the password.')).toBeInTheDocument()
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'iTop rejected the user or the password.',
+    )
     expect(screen.getByRole('heading', { name: 'Edit iTop connection' })).toBeInTheDocument()
   })
 
@@ -143,9 +145,9 @@ describe('Configuration', () => {
     await user.click(screen.getByRole('button', { name: 'Test connection' }))
     expect(screen.getByRole('button', { name: 'Testing…' })).toHaveAttribute('aria-disabled', 'true')
     releaseTest()
-    expect(
-      await screen.findByText('✓ Connection successful. You can continue with the sync.'),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Connection successful. You can continue with the sync.',
+    )
 
     const releaseConnect = holdRequests('post', '/cmdb/source')
     await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
@@ -168,7 +170,7 @@ describe('Configuration', () => {
 
     const releaseSync = holdRequests('post', '/cmdb/source/sync')
     await user.click(screen.getByRole('button', { name: 'Sync now' }))
-    expect(screen.getByRole('button', { name: 'Syncing…' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Syncing…' })).toHaveAttribute('aria-disabled', 'true')
     expect(screen.getByRole('button', { name: 'Edit connection' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Disconnect' })).toBeDisabled()
     releaseSync()
@@ -177,6 +179,7 @@ describe('Configuration', () => {
       await screen.findByText('Last sync: less than a minute ago'),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sync now' })).toBeEnabled()
+    expect(screen.getByRole('status')).toHaveTextContent('Sync complete.')
   })
 
   it('syncing updates the time without refetching the connection', async () => {
@@ -206,7 +209,7 @@ describe('Configuration', () => {
 
     const releaseSync = holdRequests('post', '/cmdb/source/sync')
     await user.click(screen.getByRole('button', { name: 'Sincronizar ahora' }))
-    expect(screen.getByRole('button', { name: 'Sincronizando…' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Sincronizando…' })).toHaveAttribute('aria-disabled', 'true')
     releaseSync()
     expect(
       await screen.findByText('Última sincronización: hace menos de un minuto'),
@@ -266,11 +269,9 @@ describe('Configuration', () => {
 
     await user.click(screen.getByRole('button', { name: 'Test connection' }))
 
-    expect(
-      await screen.findByText(
-        "✗ The user 'admin' does not have the 'REST Services User' profile in iTop. Create a dedicated user with that profile.",
-      ),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "The user 'admin' does not have the 'REST Services User' profile in iTop. Create a dedicated user with that profile.",
+    )
     expect(screen.getByRole('button', { name: 'Test connection' })).toBeEnabled()
   })
 
@@ -288,7 +289,9 @@ describe('Configuration', () => {
 
     await user.click(screen.getByRole('button', { name: 'Test connection' }))
 
-    expect(await screen.findByText('✗ The iTop certificate expired.')).toBeInTheDocument()
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The iTop certificate expired.',
+    )
   })
 
   it('shows the form, validation and REST profile error in Spanish', async () => {
@@ -307,11 +310,9 @@ describe('Configuration', () => {
     await user.type(screen.getByLabelText('Contraseña'), 's3cr3t')
     await user.click(screen.getByRole('button', { name: 'Probar conexión' }))
 
-    expect(
-      await screen.findByText(
-        "✗ El usuario 'admin' no tiene el perfil 'REST Services User' en iTop. Crea un usuario dedicado con ese perfil.",
-      ),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "El usuario 'admin' no tiene el perfil 'REST Services User' en iTop. Crea un usuario dedicado con ese perfil.",
+    )
   })
 
   it('connecting shows the connected state without refetching the connection', async () => {
@@ -334,9 +335,6 @@ describe('Configuration', () => {
     const user = await openForm()
     const url = screen.getByLabelText(URL_LABEL)
     const username = screen.getByLabelText('User')
-
-    expect(screen.getByRole('button', { name: 'Test connection' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Connect and sync' })).toBeDisabled()
 
     await user.click(url)
     await user.click(username)
@@ -370,7 +368,11 @@ describe('Configuration', () => {
     expect(screen.getByLabelText(URL_LABEL)).toHaveValue('http://10.0.0.5:8000')
     expect(screen.getByLabelText('User')).toHaveValue('barb-reader')
     expect(screen.getByLabelText('Password')).toHaveValue('')
-    expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled()
+    // Editing a live connection is not the setup wizard.
+    expect(screen.queryByText('No connection')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+    expect(screen.getByText('The password is required.')).toBeInTheDocument()
   })
 
   it('shows a network error when the test does not reach the backend', async () => {
@@ -380,7 +382,9 @@ describe('Configuration', () => {
 
     await user.click(screen.getByRole('button', { name: 'Test connection' }))
 
-    expect(await screen.findByText('✗ Network error while testing the connection.')).toBeInTheDocument()
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Network error while testing the connection.',
+    )
   })
 
   it('an HTTP error while testing is not shown as a network error', async () => {
@@ -390,7 +394,9 @@ describe('Configuration', () => {
 
     await user.click(screen.getByRole('button', { name: 'Test connection' }))
 
-    expect(await screen.findByText('✗ Could not connect to iTop.')).toBeInTheDocument()
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Could not connect to iTop.',
+    )
   })
 
   it('shows an error when the connection cannot be saved', async () => {
@@ -400,7 +406,9 @@ describe('Configuration', () => {
 
     await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
 
-    expect(await screen.findByText('✗ Could not save the connection.')).toBeInTheDocument()
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Could not save the connection.',
+    )
     expect(screen.queryByText('iTop connected')).not.toBeInTheDocument()
   })
 
@@ -486,7 +494,9 @@ describe('Configuration', () => {
 
     await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
 
-    expect(await screen.findByText(`✗ ${text}`)).toBeInTheDocument()
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      `${text}`,
+    )
     expect(screen.queryByText('iTop connected')).not.toBeInTheDocument()
   })
 
