@@ -1,4 +1,4 @@
-import type { CmdbSource } from '../api/cmdb'
+import type { CmdbSource } from '../../api/cmdb'
 
 const STORAGE_KEY = 'barbattack_cmdb_source'
 

@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSourceQuery, type CmdbLogin, type CmdbSource } from '../../api/cmdb'
-import { Badge } from '../../components/ui/Badge'
-import { isMockMode } from '../../env'
 import { ConfigStepPanel } from './ConfigStepPanel'
 import { CmdbSelector } from './CmdbSelector'
 import { ItopForm, type ItopFormMode } from './ItopForm'
@@ -61,12 +59,9 @@ export function ConfigPage() {
   return (
     <main className={PAGE}>
       <header className="flex flex-col gap-1.5">
-        <div className="flex items-center gap-3">
-          <h1 className="font-title text-[30px] leading-[1.15] text-navy">
-            {t('config.header.title')}
-          </h1>
-          {isMockMode && <Badge variant="dashed">{t('config.header.mockBadge')}</Badge>}
-        </div>
+        <h1 className="font-title text-[30px] leading-[1.15] text-navy">
+          {t('config.header.title')}
+        </h1>
         <p className="font-body text-[15px] leading-[1.4] text-gray">
           {t('config.header.subtitle')}
         </p>
@@ -75,7 +70,7 @@ export function ConfigPage() {
       {view.step === 'connected' ? (
         <>
           <ConnectedBar source={view.source} onEdit={() => editLogin(view.source)} />
-          <TechStackTable provider={view.source.provider} />
+          <TechStackTable />
         </>
       ) : (
         <div className="flex items-start gap-[22px]">

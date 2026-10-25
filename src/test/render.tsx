@@ -2,7 +2,7 @@ import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App } from '../App'
 import type { CmdbSource } from '../api/cmdb'
-import { mockSource, saveSource } from '../mocks/store'
+import { mockSource, saveSource } from './mocks/store'
 
 // jsdom keeps the URL between tests: every render opens the given path explicitly.
 export function renderApp(path = '/') {

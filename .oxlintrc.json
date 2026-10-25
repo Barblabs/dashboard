@@ -9,7 +9,7 @@
     "browser": true,
     "es2022": true
   },
-  "ignorePatterns": ["dist", "public/mockServiceWorker.js"],
+  "ignorePatterns": ["dist"],
   "rules": {
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",

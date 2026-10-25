@@ -38,7 +38,6 @@ export const en = {
     header: {
       title: 'Configuration',
       subtitle: 'Connect your CMDB to load the tech stack.',
-      mockBadge: 'Sample data',
     },
     steps: {
       title: 'Connect CMDB',
@@ -127,11 +126,6 @@ export const en = {
     },
     inventory: {
       title: 'Tech stack',
-      // Translations is derived from this file: it must contain every plural form any
-      // language needs, such as the Spanish many form.
-      count_one: '{{count}} asset · source: {{source}}',
-      count_many: '{{count}} assets · source: {{source}}',
-      count_other: '{{count}} assets · source: {{source}}',
       loading: 'Loading inventory…',
       empty: 'There are no assets in the inventory.',
       columns: {
