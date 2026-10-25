@@ -1,171 +1,79 @@
-# Contrato propuesto: GET /assets
+# Contrato: GET /assets
 
-> Propuesta del equipo de frontend para que el backend implemente este endpoint.
-> Basada en el modelo de dominio real de `internal/inventory/`.
+Contrato implementado por el backend. Consumido por `src/api/assets.ts`.
 
-## Ruta
+## Petición
 
 ```
-GET /assets
+GET /assets?limit=&cursor=&active=&kind=&criticality=
 ```
 
-## Descripción
+Ruta sin versión. El Customer lo resuelve el servidor: no se envía su id.
 
-Devuelve todos los activos del inventario (activos e inactivos) para todas
-las fuentes CMDB registradas. Los activos provienen de la tabla `assets` junto
-con sus `software_components` y `asset_owners`.
+| Parámetro     | Comportamiento                                                                    |
+|---------------|-----------------------------------------------------------------------------------|
+| `limit`       | Por defecto 50, máximo 200. Fuera de rango o no numérico devuelve 400 (no recorta). |
+| `cursor`      | String opaco tomado de un `next_cursor` anterior. Nunca se interpreta ni se construye. |
+| `active`      | `true` (por defecto), `false` o `all`.                                            |
+| `kind`        | `server`, `virtual_machine`, `workstation`, `network_device`.                     |
+| `criticality` | `high`, `medium`, `low`. (`unknown` no es un filtro válido.)                      |
 
-## Autenticación
+- El orden es fijo (name, source_id, record_id). No hay orden en el cliente.
+- **Los filtros se repiten en cada página.** Un cursor enviado con filtros distintos a los
+  de la petición que lo produjo devuelve 400. Cambiar un filtro descarta el cursor y vuelve
+  a la primera página.
+- Aún no existen la búsqueda por nombre (`q`) ni el filtro por dueño (`owner`).
 
-Por definir. El frontend asumirá que el backend agrega autenticación cuando
-la implemente. Por ahora el endpoint puede ser abierto en local.
-
-## Respuesta exitosa
-
-**Status:** `200 OK`  
-**Content-Type:** `application/json`
+## Respuesta (200)
 
 ```json
 {
   "assets": [
     {
+      "source_id": "uuid",
       "record_id": "SRV-001",
       "name": "prod-api-01",
       "description": "API server principal de producción",
-      "kind": "Server",
-      "hardware": {
-        "vendor": "Dell",
-        "model": "PowerEdge R640"
-      },
+      "kind": "server",
+      "hardware": { "vendor": "Dell", "model": "PowerEdge R640" },
       "software": [
-        {
-          "role": "Operating System",
-          "name": "Ubuntu",
-          "version": "22.04",
-          "product": {
-            "vendor": "Canonical",
-            "name": "Ubuntu"
-          }
-        },
-        {
-          "role": "Application",
-          "name": "nginx",
-          "version": "1.24.0",
-          "product": {
-            "vendor": "F5",
-            "name": "nginx"
-          }
-        }
+        { "role": "operating_system", "name": "Ubuntu", "version": "22.04",
+          "product": { "vendor": "Canonical", "name": "Ubuntu" } }
       ],
-      "criticality": "High",
-      "owner": "devops@example.com",
-      "active": true
+      "criticality": "high",
+      "exposure": null,
+      "owner": { "email": "devops@example.com", "source": "imported" },
+      "retired": false,
+      "active": true,
+      "inactive_since": null
     }
-  ]
+  ],
+  "next_cursor": "opaco-o-null",
+  "total": 312
 }
 ```
 
-## Campos
-
-### Objeto raíz
-
-| Campo    | Tipo           | Descripción                  |
-|----------|----------------|------------------------------|
-| `assets` | `Asset[]`      | Lista de activos del CMDB    |
-
-### Asset
-
-| Campo         | Tipo                   | Nullable | Descripción                                                       |
-|---------------|------------------------|----------|-------------------------------------------------------------------|
-| `record_id`   | `string`               | No       | ID del registro en el CMDB fuente                                 |
-| `name`        | `string`               | No       | Nombre del activo                                                 |
-| `description` | `string`               | No       | Descripción. Puede ser string vacío                               |
-| `kind`        | `string` (enum)        | No       | Tipo de activo (ver abajo)                                        |
-| `hardware`    | `Hardware \| null`     | Sí       | Solo presente en activos físicos                                  |
-| `software`    | `SoftwareComponent[]`  | No       | Puede ser array vacío                                             |
-| `criticality` | `string` (enum)        | No       | Criticidad del activo (ver abajo)                                 |
-| `owner`       | `string \| null`       | Sí       | Email del dueño (declarado si existe, si no importado del CMDB)   |
-| `active`      | `boolean`              | No       | `false` si `inactive_since` está presente en la BD                |
-
-### Hardware
-
-| Campo    | Tipo     | Descripción   |
-|----------|----------|---------------|
-| `vendor` | `string` | Fabricante    |
-| `model`  | `string` | Modelo        |
-
-### SoftwareComponent
-
-| Campo     | Tipo               | Nullable | Descripción                     |
-|-----------|--------------------|----------|---------------------------------|
-| `role`    | `string` (enum)    | No       | `"Operating System"` o `"Application"` |
-| `name`    | `string`           | No       | Nombre del componente           |
-| `version` | `string`           | No       | Versión. Puede ser string vacío |
-| `product` | `Product \| null`  | Sí       | Identificación del producto     |
-
-### Product
-
-| Campo    | Tipo     | Descripción      |
-|----------|----------|------------------|
-| `vendor` | `string` | Fabricante       |
-| `name`   | `string` | Nombre del producto |
-
-## Enumeraciones
-
-### kind
-
-Mapeo desde `inventory.AssetKind`:
-
-| Valor             | Constante Go        |
-|-------------------|---------------------|
-| `"Server"`        | `Server = 1`        |
-| `"Virtual Machine"` | `VirtualMachine = 2` |
-| `"Workstation"`   | `Workstation = 3`   |
-| `"Network Device"` | `NetworkDevice = 4` |
-
-### criticality
-
-Mapeo desde `inventory.Criticality`:
-
-| Valor       | Constante Go              |
-|-------------|---------------------------|
-| `"Unknown"` | `CriticalityUnknown = 0`  |
-| `"High"`    | `CriticalityHigh = 1`     |
-| `"Medium"`  | `CriticalityMedium = 2`   |
-| `"Low"`     | `CriticalityLow = 3`      |
+- **Identidad**: el par `source_id` + `record_id`; no hay un id único.
+- **Enumeraciones**: códigos snake_case en minúsculas; las etiquetas y su traducción son
+  del frontend. `role`: `operating_system`, `application`. `exposure`: `internet_facing`,
+  `internal`.
+- **`null` explícito** (la clave siempre está): `hardware` (las máquinas virtuales no
+  tienen), `software[].product` (Unidentified Component), `owner`, `criticality`,
+  `exposure`. `software` siempre es un array, quizá vacío, ya en orden de presentación.
+- `owner.source` es `declared` o `imported`; el valor declarado ya gana.
+- `retired` (lo que dice la CMDB), `active` e `inactive_since` son tres hechos distintos.
+- `total` cuenta los Assets que cumplen los filtros, sin paginar. `next_cursor` es `null`
+  en la última página.
+- Sin Assets o sin coincidencias: `{"assets": [], "next_cursor": null, "total": 0}`.
 
 ## Errores
 
-| Status | Descripción                                          |
-|--------|------------------------------------------------------|
-| `500`  | Error interno; body: `{"error": "mensaje"}`          |
+Cuerpo `{"code": "...", "error": "..."}`.
 
-## CORS
+| Status | `code`             | Causa                                                                 |
+|--------|--------------------|-----------------------------------------------------------------------|
+| `400`  | `invalid_request`  | `limit`, `kind`, `criticality` o `active` inválidos; cursor malformado o con otros filtros |
+| `500`  | `internal_error`   | Error interno                                                         |
 
-El backend necesitará habilitar CORS para el origen del frontend en local
-(`http://localhost:5173` por defecto con Vite). En producción se configurará
-el origen real del dashboard.
-
-Cabeceras mínimas requeridas:
-
-```
-Access-Control-Allow-Origin: http://localhost:5173
-Access-Control-Allow-Methods: GET, OPTIONS
-Access-Control-Allow-Headers: Content-Type
-```
-
----
-
-## Preguntas abiertas
-
-1. **Arquitecturas (App, Analítica, CRM, ERP):** El CMDB no tiene un campo
-   de arquitectura. Los activos solo tienen `kind` (Server, VM, etc.) y
-   `software`. ¿Cómo asignamos cada activo a una arquitectura de referencia?
-   Opciones posibles: a) campo manual en el CMDB, b) etiqueta en `description`,
-   c) tabla de mapeo en el backend, d) declaración en el dashboard.
-
-2. **Paginación:** ¿El endpoint debe paginar cuando el inventario crece?
-   ¿Tamaño de página sugerido?
-
-3. **Filtrado por fuente CMDB:** ¿El front necesita ver activos por
-   `cmdb_source_id`, o siempre todos juntos?
+Con listas de opciones fijas, el frontend solo puede provocar un 400 con un cursor viejo o
+alterado; en ese caso vuelve a la primera página.

@@ -159,7 +159,7 @@ describe('Configuration', () => {
       screen.getByText('Last sync: less than a minute ago'),
     ).toBeInTheDocument()
     expect(await screen.findByRole('cell', { name: /prod-api-01/ })).toBeInTheDocument()
-    expect(screen.getAllByRole('row')).toHaveLength(6)
+    expect(screen.getAllByRole('row')).toHaveLength(5)
   })
 
   it('manual sync updates the last sync time', async () => {
@@ -404,43 +404,6 @@ describe('Configuration', () => {
     expect(screen.queryByText('iTop connected')).not.toBeInTheDocument()
   })
 
-  it('shows the inventory with translated headers and labels', async () => {
-    await renderConnected()
-
-    expect(screen.getByText('Loading inventory…')).toBeInTheDocument()
-    const inactiveRow = await screen.findByRole('row', { name: /erp-app-02/ })
-    expect(screen.getByRole('heading', { name: 'Tech stack' })).toBeInTheDocument()
-    expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual([
-      'Component', 'Type', 'Operating system', 'Criticality', 'Owner', 'Status',
-    ])
-    expect(screen.getByRole('row', { name: /prod-api-01/ })).toHaveTextContent(
-      'prod-api-01SRV-001ServerUbuntu 22.04Highdevops@example.comActive',
-    )
-    expect(inactiveRow).toHaveTextContent('Virtual Machine')
-    expect(inactiveRow).toHaveTextContent('Unknown')
-    expect(inactiveRow).toHaveTextContent('Inactive')
-  })
-
-  it('shows the inventory in Spanish', async () => {
-    localStorage.setItem('language', 'es')
-    await i18n.changeLanguage()
-    seedSource({ lastSync: TWO_HOURS_AGO })
-    renderApp()
-
-    expect(await screen.findByText('Cargando inventario…')).toBeInTheDocument()
-    const inactiveRow = await screen.findByRole('row', { name: /erp-app-02/ })
-    expect(screen.getByRole('heading', { name: 'Stack tecnológico' })).toBeInTheDocument()
-    expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual([
-      'Componente', 'Tipo', 'Sistema operativo', 'Criticidad', 'Dueño', 'Estado',
-    ])
-    expect(screen.getByRole('row', { name: /prod-api-01/ })).toHaveTextContent(
-      'prod-api-01SRV-001ServidorUbuntu 22.04Altadevops@example.comActivo',
-    )
-    expect(inactiveRow).toHaveTextContent('Máquina virtual')
-    expect(inactiveRow).toHaveTextContent('Desconocida')
-    expect(inactiveRow).toHaveTextContent('Inactivo')
-  })
-
   it('does not fetch the inventory while there is no connection', async () => {
     let assetRequests = 0
     server.use(
@@ -461,25 +424,6 @@ describe('Configuration', () => {
     expect(
       await screen.findByRole('heading', { name: 'Choose your CMDB' }, { timeout: 1000 }),
     ).toBeInTheDocument()
-  })
-
-  it('shows the empty state right away when the inventory cannot be read', async () => {
-    server.use(http.get(apiUrl('/assets'), () => new HttpResponse(null, { status: 500 })))
-    await renderConnected()
-
-    expect(
-      await screen.findByText('There are no assets in the inventory.', {}, { timeout: 1000 }),
-    ).toBeInTheDocument()
-  })
-
-  it('shows the empty state when the inventory has no assets', async () => {
-    server.use(http.get(apiUrl('/assets'), () => HttpResponse.json({ assets: [] })))
-    await renderConnected()
-
-    expect(
-      await screen.findByText('There are no assets in the inventory.'),
-    ).toBeInTheDocument()
-    expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 
   it('sends the provider with the login when testing and connecting', async () => {

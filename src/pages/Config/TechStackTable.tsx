@@ -1,93 +1,114 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAssetsQuery, type Asset } from '../../api/assets'
-import { Badge } from '../../components/ui/Badge'
-
-function osLabel(asset: Asset): string {
-  const os = asset.software.find((s) => s.role === 'Operating System')
-  if (!os) return '—'
-  return os.version ? `${os.name} ${os.version}` : os.name
-}
+import { DEFAULT_ASSET_FILTERS, useAssetsQuery, type AssetFilters } from '../../api/assets'
+import { errorCode } from '../../api/client'
+import { Button } from '../../components/ui/Button'
+import { requestErrorText } from '../../i18n/errors'
+import { AssetFilterBar } from './AssetFilterBar'
+import { AssetsTable } from './AssetsTable'
 
 const MESSAGE = 'px-6 py-12 text-center text-[14px] text-gray'
-const HEADER_CELL =
-  'px-4 py-3 text-left font-body text-[12px] font-semibold tracking-[0.06em] whitespace-nowrap text-gray uppercase'
-const CELL = 'border-b border-border-row px-4 py-3.5 align-middle text-navy'
-const MONO = 'font-mono text-[13px]'
 
-function AssetsTable({ assets }: { assets: Asset[] }) {
-  const { t } = useTranslation()
+interface Listing {
+  filters: AssetFilters
+  /** Cursors are forward-only: the stack of visited pages is what makes "Previous" possible. */
+  cursors: (string | null)[]
+}
 
-  if (assets.length === 0) {
-    return <div className={MESSAGE}>{t('config.inventory.empty')}</div>
-  }
+const FIRST_PAGE: Listing['cursors'] = [null]
 
+function hasFilters({ active, kind, criticality }: AssetFilters) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-[14px]">
-        <thead>
-          <tr className="border-b-2 border-border-row">
-            <th className={HEADER_CELL}>{t('config.inventory.columns.component')}</th>
-            <th className={HEADER_CELL}>{t('config.inventory.columns.type')}</th>
-            <th className={HEADER_CELL}>{t('config.inventory.columns.os')}</th>
-            <th className={HEADER_CELL}>{t('config.inventory.columns.criticality')}</th>
-            <th className={HEADER_CELL}>{t('config.inventory.columns.owner')}</th>
-            <th className={HEADER_CELL}>{t('config.inventory.columns.status')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {assets.map((asset) => (
-            <tr
-              key={asset.record_id}
-              className={`hover:bg-row-hover ${asset.active ? '' : '*:opacity-50'}`}
-            >
-              <td className={CELL}>
-                <span className="block font-medium">{asset.name}</span>
-                <span className="mt-0.5 block font-mono text-[11px] text-gray">
-                  {asset.record_id}
-                </span>
-              </td>
-              <td className={CELL}>{t(`config.inventory.kind.${asset.kind}`)}</td>
-              <td className={`${CELL} ${MONO}`}>{osLabel(asset)}</td>
-              <td className={CELL}>
-                <Badge variant={asset.criticality === 'Unknown' ? 'muted' : 'outline'}>
-                  {t(`config.inventory.criticality.${asset.criticality}`)}
-                </Badge>
-              </td>
-              <td className={`${CELL} ${MONO}`}>{asset.owner ?? '—'}</td>
-              <td className={CELL}>
-                <span
-                  className={`inline-flex items-center gap-1.5 text-[13px] font-medium ${asset.active ? 'text-navy' : 'text-gray'}`}
-                >
-                  <span className="size-1.5 shrink-0 rounded-full bg-current" />
-                  {asset.active
-                    ? t('config.inventory.status.active')
-                    : t('config.inventory.status.inactive')}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    active !== DEFAULT_ASSET_FILTERS.active ||
+    kind !== DEFAULT_ASSET_FILTERS.kind ||
+    criticality !== DEFAULT_ASSET_FILTERS.criticality
   )
 }
 
 export function TechStackTable() {
   const { t } = useTranslation()
-  const assetsQuery = useAssetsQuery()
-  // An inventory that could not be read is shown as empty, as before the migration.
-  const assets = assetsQuery.data ?? []
+  const [listing, setListing] = useState<Listing>({
+    filters: DEFAULT_ASSET_FILTERS,
+    cursors: FIRST_PAGE,
+  })
+  const cursor = listing.cursors[listing.cursors.length - 1] ?? null
+  const assetsQuery = useAssetsQuery(listing.filters, cursor)
+
+  // A cursor the backend no longer accepts (stale or tampered) restarts the listing.
+  // Reset while rendering: it clears the cursor, so it cannot repeat.
+  if (cursor !== null && errorCode(assetsQuery.error) === 'invalid_request') {
+    setListing({ ...listing, cursors: FIRST_PAGE })
+  }
+
+  // A cursor is only valid with the filters that produced it, so new filters start at page one.
+  const changeFilters = (filters: AssetFilters) => setListing({ filters, cursors: FIRST_PAGE })
+  const nextCursor = assetsQuery.data?.next_cursor ?? null
+  const goNext = () => {
+    if (nextCursor) setListing((current) => ({ ...current, cursors: [...current.cursors, nextCursor] }))
+  }
+  const goPrevious = () =>
+    setListing((current) => ({ ...current, cursors: current.cursors.slice(0, -1) }))
+
+  const page = assetsQuery.data ?? { assets: [], next_cursor: null, total: 0 }
+  const pageNumber = listing.cursors.length
+  // While the placeholder page shows, its next_cursor belongs to the previous request.
+  const navigating = assetsQuery.isPlaceholderData
 
   return (
     <section className="overflow-hidden rounded-lg border border-border-panel bg-white">
-      <div className="flex items-baseline gap-3 border-b border-border-panel px-6 pt-5 pb-4">
-        <h2 className="font-title text-[16px] text-navy">{t('config.inventory.title')}</h2>
+      <div className="flex flex-col gap-4 border-b border-border-panel px-6 pt-5 pb-4">
+        <div className="flex items-baseline gap-3">
+          <h2 className="font-title text-[16px] text-navy">{t('config.inventory.title')}</h2>
+          {assetsQuery.isSuccess && (
+            <span className="font-body text-[13px] text-gray">
+              {t('config.inventory.total', { count: page.total })}
+            </span>
+          )}
+        </div>
+        <AssetFilterBar filters={listing.filters} onChange={changeFilters} />
       </div>
 
-      {assetsQuery.isPending
-        ? <div className={MESSAGE}>{t('config.inventory.loading')}</div>
-        : <AssetsTable assets={assets} />
-      }
+      {assetsQuery.isPending ? (
+        <div className={MESSAGE}>{t('config.inventory.loading')}</div>
+      ) : assetsQuery.isError ? (
+        <div role="alert" className={`${MESSAGE} flex flex-col items-center gap-3`}>
+          {requestErrorText(assetsQuery.error, t, {
+            fallback: 'config.inventory.loadFailed',
+            network: 'config.inventory.networkError',
+          })}
+          <Button variant="secondary" size="sm" onClick={() => void assetsQuery.refetch()}>
+            {t('config.inventory.retry')}
+          </Button>
+        </div>
+      ) : page.assets.length === 0 ? (
+        <div className={MESSAGE}>
+          {hasFilters(listing.filters) ? t('config.inventory.noMatches') : t('config.inventory.empty')}
+        </div>
+      ) : (
+        <AssetsTable assets={page.assets} busy={navigating} />
+      )}
+
+      {(pageNumber > 1 || nextCursor) && (
+        <nav
+          aria-label={t('config.inventory.pagination.label')}
+          className="flex items-center justify-end gap-3 px-6 py-4"
+        >
+          <span className="font-body text-[13px] text-gray">
+            {t('config.inventory.pagination.page', { page: pageNumber })}
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={pageNumber === 1 || navigating}
+            onClick={goPrevious}
+          >
+            {t('config.inventory.pagination.previous')}
+          </Button>
+          <Button variant="secondary" size="sm" disabled={!nextCursor || navigating} onClick={goNext}>
+            {t('config.inventory.pagination.next')}
+          </Button>
+        </nav>
+      )}
     </section>
   )
 }
