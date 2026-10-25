@@ -84,7 +84,7 @@ primitivas con comportamiento propio en `src/components/ui/`. La suite corre
 en inglés, salvo las pruebas de cambio de idioma.
 
 - Hay un archivo de handlers por dominio en `src/test/mocks/handlers/`,
-  siguiendo el contrato de `docs/`, y los datos de ejemplo viven en
+  siguiendo la API de barbackend, y los datos de ejemplo viven en
   `src/test/mocks/`. Para sobrescribir un handler en una prueba, arma la URL
   con `apiUrl()` de `src/test/mocks/url.ts`.
 - La conexión CMDB se guarda en `localStorage` (`src/test/mocks/store.ts`).
@@ -119,7 +119,6 @@ src/
   test/           # setup de Vitest, servidor MSW de Node, handlers y datos de ejemplo
 docs/
   contrato-assets.md   # contrato propuesto del endpoint GET /assets
-  contrato-cmdb.md     # contrato propuesto de los endpoints /cmdb
 ```
 
 ## Notas de desarrollo
