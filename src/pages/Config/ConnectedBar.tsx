@@ -20,10 +20,14 @@ function formatRelative(iso: string, t: TFunction, language: string): string {
   return format.format(-Math.floor(minutes / 60), 'hour')
 }
 
-const DETAIL = 'overflow-hidden text-[13px] text-ellipsis whitespace-nowrap'
-const SEPARATOR = 'text-[14px] text-border-panel'
-const ALERT = 'flex flex-wrap items-center gap-4 border-t border-critical/15 bg-critical/4 px-6 py-3.5'
-const ALERT_TEXT = 'flex-1 font-body text-[14px] leading-[1.4] text-critical'
+const DETAIL = 'overflow-hidden text-[0.8125rem] text-ellipsis whitespace-nowrap'
+const SEPARATOR = 'text-[0.875rem] text-border-panel'
+const STRIP = 'flex animate-fade-in flex-wrap items-center gap-4 border-t px-6 py-3.5'
+const STRIP_TEXT = 'flex-1 font-body text-[0.875rem] leading-[1.4]'
+const ERROR_STRIP = `${STRIP} border-critical/15 bg-critical/4`
+const SUCCESS_STRIP = `${STRIP} border-nav-active-bg/15 bg-nav-active-bg/6`
+// A question, not a failure: only the danger button carries the critical color.
+const CONFIRM_STRIP = `${STRIP} border-border-panel bg-panel`
 
 export function ConnectedBar({ source, onEdit }: Props) {
   const { t, i18n } = useTranslation()
@@ -79,15 +83,23 @@ export function ConnectedBar({ source, onEdit }: Props) {
           <Button variant="secondary" size="sm" disabled={isSyncing} onClick={onEdit}>
             {t('config.connected.actions.edit')}
           </Button>
-          <Button size="sm" disabled={isSyncing} onClick={() => syncMutation.mutate()}>
+          <Button size="sm" loading={isSyncing} onClick={() => syncMutation.mutate()}>
             {isSyncing ? t('config.connected.actions.syncing') : t('config.connected.actions.sync')}
           </Button>
         </div>
       </div>
 
+      {syncMutation.isSuccess && (
+        <div role="status" className={SUCCESS_STRIP}>
+          <p className={`${STRIP_TEXT} text-nav-active-bg`}>
+            <span aria-hidden="true">✓</span> {t('config.connected.syncSucceeded')}
+          </p>
+        </div>
+      )}
+
       {syncFailure && (
-        <div className={ALERT}>
-          <p className={ALERT_TEXT}>{syncFailure}</p>
+        <div role="alert" className={ERROR_STRIP}>
+          <p className={`${STRIP_TEXT} text-critical`}>{syncFailure}</p>
           {errorCode(syncMutation.error) === 'invalid_credentials' && (
             <Button variant="secondary" size="sm" className="shrink-0" onClick={onEdit}>
               {t('config.connected.actions.updateLogin')}
@@ -97,14 +109,16 @@ export function ConnectedBar({ source, onEdit }: Props) {
       )}
 
       {showConfirm && (
-        <div className={ALERT}>
-          <p className={ALERT_TEXT}>
-            {disconnectMutation.isError
-              ? requestErrorText(disconnectMutation.error, t, {
-                  fallback: 'config.connected.disconnectFailed',
-                })
-              : t('config.connected.confirm.text')}
-          </p>
+        <div className={CONFIRM_STRIP}>
+          {disconnectMutation.isError ? (
+            <p role="alert" className={`${STRIP_TEXT} text-critical`}>
+              {requestErrorText(disconnectMutation.error, t, {
+                fallback: 'config.connected.disconnectFailed',
+              })}
+            </p>
+          ) : (
+            <p className={`${STRIP_TEXT} text-navy`}>{t('config.connected.confirm.text')}</p>
+          )}
           <div className="flex shrink-0 gap-2">
             <Button
               variant="danger"

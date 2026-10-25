@@ -19,16 +19,17 @@ const PROVIDERS: Provider[] = [
 
 interface Props {
   onSelect: () => void
+  className?: string
 }
 
-export function CmdbSelector({ onSelect }: Props) {
+export function CmdbSelector({ onSelect, className = '' }: Props) {
   const { t } = useTranslation()
 
   return (
-    <Panel className="gap-4">
+    <Panel className={`gap-4 ${className}`}>
       <div className="flex flex-col gap-0.5">
         <PanelTitle>{t('config.selector.title')}</PanelTitle>
-        <p className="font-body text-[14px] leading-[1.4] text-gray">
+        <p className="font-body text-[0.875rem] leading-[1.4] text-gray">
           {t('config.selector.subtitle')}
         </p>
       </div>
@@ -42,7 +43,7 @@ export function CmdbSelector({ onSelect }: Props) {
             }`}
           >
             <span
-              className={`flex size-11 shrink-0 items-center justify-center rounded-lg font-title text-[18px] ${
+              className={`flex size-11 shrink-0 items-center justify-center rounded-lg font-title text-[1.125rem] ${
                 p.available ? 'bg-navy text-cyan' : 'bg-muted-bg text-white'
               }`}
             >
@@ -50,11 +51,11 @@ export function CmdbSelector({ onSelect }: Props) {
             </span>
             <div className="flex min-w-0 flex-1 flex-col gap-0.5 leading-[1.4]">
               <span
-                className={`font-body text-[16px] font-semibold ${p.available ? 'text-navy' : 'text-gray'}`}
+                className={`font-body text-[1rem] font-semibold ${p.available ? 'text-navy' : 'text-gray'}`}
               >
                 {t(`config.providers.${p.id}.name`)}
               </span>
-              <span className="font-body text-[14px] text-gray">
+              <span className="font-body text-[0.875rem] text-gray">
                 {t(`config.providers.${p.id}.description`)}
               </span>
             </div>

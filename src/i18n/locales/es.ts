@@ -112,6 +112,7 @@ export const es: Translations = {
       never: 'nunca',
       lessThanAMinute: 'hace menos de un minuto',
       lastSyncFailed: 'La última sincronización falló {{time}}: {{error}}',
+      syncSucceeded: 'Sincronización completa.',
       disconnectFailed: 'No se pudo desconectar el CMDB.',
       actions: {
         disconnect: 'Desconectar',

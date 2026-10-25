@@ -36,6 +36,9 @@ interface Props {
   initialValues: Pick<CmdbLogin, 'url' | 'user'>
   onBack: () => void
   onSaved: () => void
+  className?: string
+  /** Lets a surrounding dialog name itself after the form title. */
+  titleId?: string
 }
 
 const PROVIDER = 'itop'
@@ -55,11 +58,18 @@ const COPY = {
   },
 } as const satisfies Record<ItopFormMode, Record<string, ParseKeys>>
 
-const RESULT = 'rounded-md px-4 py-3 font-body text-[14px] leading-[1.4]'
+const RESULT = 'animate-fade-in rounded-md px-4 py-3 font-body text-[0.875rem] leading-[1.4]'
 const RESULT_OK = `${RESULT} border border-nav-active-bg bg-nav-active-bg/6 text-nav-active-bg`
 const RESULT_ERROR = `${RESULT} border border-critical bg-critical/5 text-critical`
 
-export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
+export function ItopForm({
+  mode,
+  initialValues,
+  onBack,
+  onSaved,
+  className = '',
+  titleId,
+}: Props) {
   const { t } = useTranslation()
   const testMutation = useTestLoginMutation(PROVIDER)
   const connectMutation = useConnectMutation(PROVIDER)
@@ -71,7 +81,6 @@ export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
     register,
     handleSubmit,
     clearErrors,
-    watch,
     formState: { errors },
   } = useForm<Credentials>({
     resolver: zodResolver(credentialsSchema),
@@ -84,7 +93,6 @@ export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
   const isTesting = testMutation.isPending
   const isSaving = saveMutation.isPending
   const busy = isTesting || isSaving
-  const actionsDisabled = busy || !watch('password')
 
   const handleTest = handleSubmit((login) => {
     saveMutation.reset()
@@ -131,12 +139,12 @@ export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
   const result = resultOf()
 
   return (
-    <Panel className="gap-5">
+    <Panel className={`gap-5 ${className}`}>
       <div className="flex items-baseline justify-between gap-3">
-        <PanelTitle>{t(copy.title)}</PanelTitle>
+        <PanelTitle id={titleId}>{t(copy.title)}</PanelTitle>
         <button
           type="button"
-          className="cursor-pointer p-0 font-body text-[14px] whitespace-nowrap text-gray underline underline-offset-2 hover:text-navy focus-ring"
+          className="cursor-pointer p-0 font-body text-[0.875rem] whitespace-nowrap text-gray underline underline-offset-2 hover:text-navy focus-ring"
           onClick={onBack}
         >
           {t(copy.back)}
@@ -187,16 +195,19 @@ export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
       </div>
 
       {result && (
-        <div className={result.ok ? RESULT_OK : RESULT_ERROR}>
-          {result.ok ? '✓' : '✗'} {result.text}
+        <div
+          role={result.ok ? 'status' : 'alert'}
+          className={result.ok ? RESULT_OK : RESULT_ERROR}
+        >
+          <span aria-hidden="true">{result.ok ? '✓' : '✗'}</span> {result.text}
         </div>
       )}
 
       <div className="flex flex-wrap gap-3">
-        <Button variant="secondary" loading={isTesting} disabled={actionsDisabled} onClick={handleTest}>
+        <Button variant="secondary" loading={isTesting} disabled={busy} onClick={handleTest}>
           {isTesting ? t('config.form.actions.testing') : t('config.form.actions.test')}
         </Button>
-        <Button loading={isSaving} disabled={actionsDisabled} onClick={handleSave}>
+        <Button loading={isSaving} disabled={busy} onClick={handleSave}>
           {isSaving ? t(copy.saving) : t(copy.save)}
         </Button>
       </div>

@@ -7,7 +7,7 @@ import { requestErrorText } from '../../i18n/errors'
 import { AssetFilterBar } from './AssetFilterBar'
 import { AssetsTable } from './AssetsTable'
 
-const MESSAGE = 'px-6 py-12 text-center text-[14px] text-gray'
+const MESSAGE = 'px-6 py-12 text-center text-[0.875rem] text-gray'
 
 interface Listing {
   filters: AssetFilters
@@ -58,9 +58,9 @@ export function TechStackTable() {
     <section className="overflow-hidden rounded-lg border border-border-panel bg-white">
       <div className="flex flex-col gap-4 border-b border-border-panel px-6 pt-5 pb-4">
         <div className="flex items-baseline gap-3">
-          <h2 className="font-title text-[16px] text-navy">{t('config.inventory.title')}</h2>
+          <h2 className="font-title text-[1rem] text-navy">{t('config.inventory.title')}</h2>
           {assetsQuery.isSuccess && (
-            <span className="font-body text-[13px] text-gray">
+            <span className="font-body text-[0.8125rem] text-gray">
               {t('config.inventory.total', { count: page.total })}
             </span>
           )}
@@ -93,7 +93,7 @@ export function TechStackTable() {
           aria-label={t('config.inventory.pagination.label')}
           className="flex items-center justify-end gap-3 px-6 py-4"
         >
-          <span className="font-body text-[13px] text-gray">
+          <span className="font-body text-[0.8125rem] text-gray">
             {t('config.inventory.pagination.page', { page: pageNumber })}
           </span>
           <Button

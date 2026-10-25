@@ -10,14 +10,15 @@ type ButtonProps = Omit<BaseButton.Props, 'className'> & {
   className?: string
 }
 
-// One transition covers every property a variant changes on hover, at any size.
+// One transition covers every property a variant changes on hover or press, at any size.
+// The press scale is feedback on pointer-down, before the click resolves.
 const BASE =
-  'focus-ring cursor-pointer rounded-md font-body font-semibold whitespace-nowrap transition-[opacity,background-color,border-color,color] duration-150 ease-[ease] data-disabled:cursor-not-allowed data-disabled:opacity-45'
+  'focus-ring cursor-pointer rounded-md font-body font-semibold whitespace-nowrap transition-[opacity,background-color,border-color,color,scale] duration-150 ease-[ease] data-disabled:cursor-not-allowed data-disabled:opacity-45 motion-safe:not-data-disabled:active:scale-[0.97]'
 
 const SIZES: Record<ButtonSize, string> = {
-  lg: 'h-11 px-4 text-[14px]',
-  md: 'h-[42px] px-5 text-[14px]',
-  sm: 'h-9 px-3.5 text-[13px]',
+  lg: 'h-11 px-4 text-[0.875rem]',
+  md: 'h-[42px] px-5 text-[0.875rem]',
+  sm: 'h-9 px-3.5 text-[0.8125rem]',
 }
 
 const VARIANTS: Record<ButtonVariant, string> = {

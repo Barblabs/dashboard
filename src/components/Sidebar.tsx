@@ -12,7 +12,7 @@ export function Sidebar() {
       <div className="flex flex-col gap-8">
         <div className="flex items-center gap-3">
           <img src="/castle-logo.svg" alt="" className="size-10 shrink-0" aria-hidden="true" />
-          <span className="font-title text-[19px] leading-[1.2] whitespace-nowrap">
+          <span className="font-title text-[1.1875rem] leading-[1.2] whitespace-nowrap">
             <span className="text-white">BARB</span>
             <span className="text-cyan">ATTACK</span>
           </span>
@@ -23,7 +23,7 @@ export function Sidebar() {
               key={id}
               to={`/${id}`}
               className={({ isActive }) =>
-                `flex h-11 items-center gap-3 rounded-md px-3 font-body text-[15px] transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan ${
+                `flex h-11 items-center gap-3 rounded-md px-3 font-body text-[0.9375rem] transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan ${
                   isActive ? 'bg-nav-active-bg font-semibold text-white' : 'font-medium text-nav-text'
                 }`
               }
@@ -42,7 +42,7 @@ export function Sidebar() {
       </div>
       <div className="flex flex-col gap-3">
         <LanguageSwitcher />
-        <p className="font-body text-[13px] leading-[1.4] text-nav-text-dim">
+        <p className="font-body text-[0.8125rem] leading-[1.4] text-nav-text-dim">
           {t('sidebar.footer.course')}<br />
           {t('sidebar.footer.stage')}
         </p>
@@ -64,7 +64,7 @@ function LanguageSwitcher() {
             type="button"
             aria-pressed={active}
             onClick={() => chooseLanguage(language)}
-            className={`cursor-pointer rounded-md px-2 py-1 font-body text-[13px] font-semibold transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan ${
+            className={`cursor-pointer rounded-md px-2 py-1 font-body text-[0.8125rem] font-semibold transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan ${
               active ? 'bg-nav-active-bg text-white' : 'text-nav-text-dim'
             }`}
           >
