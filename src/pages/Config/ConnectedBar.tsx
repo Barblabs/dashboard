@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { useDisconnectMutation, useSyncMutation, type CmdbSource } from '../../api/cmdb'
-import { ApiError } from '../../api/client'
+import { errorCode } from '../../api/client'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { requestErrorText } from '../../i18n/errors'
@@ -18,14 +18,6 @@ function formatRelative(iso: string, t: TFunction, language: string): string {
   const format = new Intl.RelativeTimeFormat(language, { style: 'short' })
   if (minutes < 60) return format.format(-minutes, 'minute')
   return format.format(-Math.floor(minutes / 60), 'hour')
-}
-
-function isInvalidCredentials(error: Error | null): boolean {
-  return (
-    error instanceof ApiError &&
-    error.failure.kind === 'http' &&
-    error.failure.code === 'invalid_credentials'
-  )
 }
 
 const DETAIL = 'overflow-hidden text-[13px] text-ellipsis whitespace-nowrap'
@@ -101,7 +93,7 @@ export function ConnectedBar({ source, onEdit }: Props) {
       {syncFailure && (
         <div className={ALERT}>
           <p className={ALERT_TEXT}>{syncFailure}</p>
-          {isInvalidCredentials(syncMutation.error) && (
+          {errorCode(syncMutation.error) === 'invalid_credentials' && (
             <Button variant="secondary" size="sm" className="shrink-0" onClick={onEdit}>
               {t('config.connected.actions.updateLogin')}
             </Button>

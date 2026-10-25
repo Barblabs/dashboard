@@ -13,7 +13,7 @@ import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
 import { Panel, PanelTitle } from '../../components/ui/Panel'
-import { codeKey, requestErrorText } from '../../i18n/errors'
+import { failureText, requestErrorText } from '../../i18n/errors'
 
 // Messages are translation keys: the text is resolved at render time, in the active language.
 const credentialsSchema = z.object({
@@ -29,9 +29,11 @@ const credentialsSchema = z.object({
 
 type Credentials = z.infer<typeof credentialsSchema>
 
+// "update" replaces the login of the connected source; "connect" creates the source.
+export type ItopFormMode = 'connect' | 'update'
+
 interface Props {
-  // "update" replaces the login of the connected source; "connect" creates the source.
-  mode: 'connect' | 'update'
+  mode: ItopFormMode
   initialValues: Pick<CmdbLogin, 'url' | 'user'>
   onBack: () => void
   onSaved: () => void
@@ -39,16 +41,32 @@ interface Props {
 
 const PROVIDER = 'itop'
 
+const COPY = {
+  connect: {
+    title: 'config.form.title',
+    back: 'config.form.back',
+    save: 'config.form.actions.connect',
+    saving: 'config.form.actions.connecting',
+  },
+  update: {
+    title: 'config.form.editTitle',
+    back: 'config.form.cancel',
+    save: 'config.form.actions.save',
+    saving: 'config.form.actions.saving',
+  },
+} as const satisfies Record<ItopFormMode, Record<string, ParseKeys>>
+
 const RESULT = 'rounded-md px-4 py-3 font-body text-[14px] leading-[1.4]'
 const RESULT_OK = `${RESULT} border border-nav-active-bg bg-nav-active-bg/6 text-nav-active-bg`
 const RESULT_ERROR = `${RESULT} border border-critical bg-critical/5 text-critical`
 
 export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
   const { t } = useTranslation()
-  const testMutation = useTestLoginMutation()
-  const connectMutation = useConnectMutation()
+  const testMutation = useTestLoginMutation(PROVIDER)
+  const connectMutation = useConnectMutation(PROVIDER)
   const updateMutation = useUpdateLoginMutation()
-  const isUpdate = mode === 'update'
+  const saveMutation = mode === 'update' ? updateMutation : connectMutation
+  const copy = COPY[mode]
 
   const {
     register,
@@ -65,32 +83,25 @@ export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
   })
 
   const isTesting = testMutation.isPending
-  const isSaving = connectMutation.isPending || updateMutation.isPending
+  const isSaving = saveMutation.isPending
   const busy = isTesting || isSaving
   const actionsDisabled = busy || !watch('password')
 
   const handleTest = handleSubmit((login) => {
-    connectMutation.reset()
-    updateMutation.reset()
-    testMutation.mutate({ provider: PROVIDER, ...login })
+    saveMutation.reset()
+    testMutation.mutate(login)
   })
 
   // mutateAsync rather than mutate: on save the page may unmount the form before
   // per-call callbacks run, and onSaved must still fire. The failure is rendered
   // from the mutation's error, so the rejection needs no handling here.
-  const handleSave = handleSubmit((login) => {
-    const saved = isUpdate
-      ? updateMutation.mutateAsync(login)
-      : connectMutation.mutateAsync({ provider: PROVIDER, ...login })
-    return saved.then(onSaved, () => {})
-  })
+  const handleSave = handleSubmit((login) => saveMutation.mutateAsync(login).then(onSaved, () => {}))
 
   function errorText(message: string | undefined) {
     return message && t(message as ParseKeys)
   }
 
   function resultOf(): { ok: boolean; text: string } | null {
-    const saveMutation = isUpdate ? updateMutation : connectMutation
     if (saveMutation.isError) {
       const text = requestErrorText(
         saveMutation.error,
@@ -115,17 +126,10 @@ export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
     const test = testMutation.data
     if (!test) return null
     if (test.ok) return { ok: true, text: t('config.form.result.success') }
-    // A code this build does not know yet still shows the backend's own message.
-    const key = codeKey(test.code)
-    if (key) return { ok: false, text: t(key, { user: testMutation.variables.user }) }
-    return { ok: false, text: test.error || t('config.form.result.testFailed') }
-  }
-
-  function saveLabel() {
-    if (isUpdate) {
-      return isSaving ? t('config.form.actions.saving') : t('config.form.actions.save')
-    }
-    return isSaving ? t('config.form.actions.connecting') : t('config.form.actions.connect')
+    const text = failureText(test, t, 'config.form.result.testFailed', {
+      user: testMutation.variables.user,
+    })
+    return { ok: false, text }
   }
 
   const result = resultOf()
@@ -133,13 +137,13 @@ export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
   return (
     <Panel className="gap-5">
       <div className="flex items-baseline justify-between gap-3">
-        <PanelTitle>{isUpdate ? t('config.form.editTitle') : t('config.form.title')}</PanelTitle>
+        <PanelTitle>{t(copy.title)}</PanelTitle>
         <button
           type="button"
           className="cursor-pointer p-0 font-body text-[14px] whitespace-nowrap text-gray underline underline-offset-2 hover:text-navy focus-ring"
           onClick={onBack}
         >
-          {isUpdate ? t('config.form.cancel') : t('config.form.back')}
+          {t(copy.back)}
         </button>
       </div>
 
@@ -197,7 +201,7 @@ export function ItopForm({ mode, initialValues, onBack, onSaved }: Props) {
           {isTesting ? t('config.form.actions.testing') : t('config.form.actions.test')}
         </Button>
         <Button loading={isSaving} disabled={actionsDisabled} onClick={handleSave}>
-          {saveLabel()}
+          {isSaving ? t(copy.saving) : t(copy.save)}
         </Button>
       </div>
     </Panel>

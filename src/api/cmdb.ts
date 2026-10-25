@@ -1,5 +1,5 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from './client'
+import { api, type BackendFailure } from './client'
 
 // The CMDBs the dashboard knows how to talk to; only iTop has a connection flow today.
 export type CmdbProvider = 'itop' | 'servicenow'
@@ -33,7 +33,7 @@ export interface CmdbSourceRequest extends CmdbLogin {
 export type CmdbTestResult =
   | { ok: true }
   /** `code` is a stable id used to translate the failure; it may be unknown to the frontend. */
-  | { ok: false; code: string; error: string }
+  | ({ ok: false } & BackendFailure)
 
 export interface CmdbSyncResult {
   lastSync: string
@@ -62,38 +62,41 @@ export function useSourceQuery() {
   return useQuery(sourceQuery)
 }
 
-// Mutation variables include the password: gcTime 0 evicts it from the cache as soon
-// as the form unmounts, instead of keeping it for five minutes.
-export function useTestLoginMutation() {
+/*
+ * Mutation variables include the password: gcTime 0 evicts it from the cache as soon
+ * as the form unmounts, instead of keeping it for five minutes. The provider is bound
+ * per hook, so every login mutation takes the same variables: a form can swap the
+ * save mutation without reshaping what it sends.
+ */
+export function useTestLoginMutation(provider: CmdbProvider) {
   return useMutation({
-    mutationFn: (request: CmdbSourceRequest) =>
-      api.post<CmdbTestResult>('/cmdb/source/test', request),
+    mutationFn: (login: CmdbLogin) =>
+      api.post<CmdbTestResult>('/cmdb/source/test', { provider, ...login } satisfies CmdbSourceRequest),
     gcTime: 0,
+  })
+}
+
+function useSaveSourceMutation(save: (login: CmdbLogin) => Promise<CmdbSource>) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: save,
+    gcTime: 0,
+    onSuccess: (source) => {
+      queryClient.setQueryData(sourceQuery.queryKey, source)
+    },
   })
 }
 
 // The backend runs the first Sync inside this request, so it can take minutes.
-export function useConnectMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (request: CmdbSourceRequest) => api.post<CmdbSource>('/cmdb/source', request),
-    gcTime: 0,
-    onSuccess: (source) => {
-      queryClient.setQueryData(sourceQuery.queryKey, source)
-    },
-  })
+export function useConnectMutation(provider: CmdbProvider) {
+  return useSaveSourceMutation((login) =>
+    api.post<CmdbSource>('/cmdb/source', { provider, ...login } satisfies CmdbSourceRequest),
+  )
 }
 
 // Replaces the login of the connected source (e.g. a rotated password); runs no Sync.
 export function useUpdateLoginMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (login: CmdbLogin) => api.put<CmdbSource>('/cmdb/source', login),
-    gcTime: 0,
-    onSuccess: (source) => {
-      queryClient.setQueryData(sourceQuery.queryKey, source)
-    },
-  })
+  return useSaveSourceMutation((login) => api.put<CmdbSource>('/cmdb/source', login))
 }
 
 export function useSyncMutation() {

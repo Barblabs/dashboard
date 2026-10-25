@@ -12,6 +12,6 @@ export function renderApp(path = '/') {
   return user
 }
 
-export function seedSource(lastSync = new Date().toISOString(), overrides: Partial<CmdbSource> = {}) {
-  saveSource({ ...mockSource, lastSync, ...overrides })
+export function seedSource(overrides: Partial<CmdbSource> = {}) {
+  saveSource({ ...mockSource, lastSync: new Date().toISOString(), ...overrides })
 }

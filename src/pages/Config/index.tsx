@@ -5,15 +5,14 @@ import { Badge } from '../../components/ui/Badge'
 import { isMockMode } from '../../env'
 import { ConfigStepPanel } from './ConfigStepPanel'
 import { CmdbSelector } from './CmdbSelector'
-import { ItopForm } from './ItopForm'
+import { ItopForm, type ItopFormMode } from './ItopForm'
 import { ConnectedBar } from './ConnectedBar'
 import { TechStackTable } from './TechStackTable'
 
-/* The password never goes through here: only the address and user are prefilled.
-   "update" edits the login of the connected source; "connect" creates a new one. */
+// The password never goes through here: only the address and user are prefilled.
 type SetupView =
   | { step: 'select' }
-  | { step: 'form'; mode: 'connect' | 'update'; initialValues: Pick<CmdbLogin, 'url' | 'user'> }
+  | { step: 'form'; mode: ItopFormMode; initialValues: Pick<CmdbLogin, 'url' | 'user'> }
 
 type View = { step: 'loading' } | SetupView | { step: 'connected'; source: CmdbSource }
 

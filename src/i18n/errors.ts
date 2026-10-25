@@ -1,5 +1,5 @@
 import type { ParseKeys, TFunction } from 'i18next'
-import { ApiError } from '../api/client'
+import { ApiError, errorCode, type BackendFailure } from '../api/client'
 
 /*
  * Stable failure codes from the backend (docs/contrato-cmdb.md), whether they arrive in
@@ -21,10 +21,6 @@ const CODE_KEYS = new Map<string, ParseKeys>([
   ['internal_error', 'config.errors.internalError'],
 ])
 
-export function codeKey(code: string | null | undefined): ParseKeys | undefined {
-  return code ? CODE_KEYS.get(code) : undefined
-}
-
 interface RequestErrorKeys {
   fallback: ParseKeys
   network?: ParseKeys
@@ -34,20 +30,31 @@ interface RequestErrorKeys {
 type MessageValues = { user?: string }
 
 /*
- * A known backend code is translated; an unknown one shows the backend's own message,
- * since codes can ship before the frontend knows them. Without a code there is only
- * the network message, if the caller has one, or the fallback.
+ * A known code is translated; an unknown one shows the backend's own message, since
+ * codes can ship before the frontend knows them.
  */
+export function failureText(
+  { code, error }: BackendFailure,
+  t: TFunction<'translation'>,
+  fallback: ParseKeys,
+  values: MessageValues = {},
+): string {
+  const key = CODE_KEYS.get(code)
+  if (key) return t(key, values)
+  return error || t(fallback)
+}
+
+// Without a backend code there is only the network message, if the caller has one, or the fallback.
 export function requestErrorText(
   error: Error,
   t: TFunction<'translation'>,
   keys: RequestErrorKeys,
   values: MessageValues = {},
 ): string {
-  if (!(error instanceof ApiError)) return t(keys.fallback)
-  if (error.failure.kind === 'network') return t(keys.network ?? keys.fallback)
-  const { code } = error.failure
-  const key = codeKey(code)
-  if (key) return t(key, values)
-  return code ? error.message : t(keys.fallback)
+  if (error instanceof ApiError && error.failure.kind === 'network') {
+    return t(keys.network ?? keys.fallback)
+  }
+  const code = errorCode(error)
+  if (!code) return t(keys.fallback)
+  return failureText({ code, error: error.message }, t, keys.fallback, values)
 }
