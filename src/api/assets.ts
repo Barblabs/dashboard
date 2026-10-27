@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
-import { api } from './client'
+import { api, errorCode } from './client'
 import { connectionScopeKey } from './cmdb'
 
 export const ASSET_KINDS = ['server', 'virtual_machine', 'workstation', 'network_device'] as const
@@ -69,7 +70,7 @@ export interface AssetFilters {
   criticality: Criticality | null
 }
 
-export const DEFAULT_ASSET_FILTERS: AssetFilters = { active: 'true', kind: null, criticality: null }
+const DEFAULT_ASSET_FILTERS: AssetFilters = { active: 'true', kind: null, criticality: null }
 
 export const ASSETS_PAGE_SIZE = 50
 
@@ -99,7 +100,98 @@ function assetsQuery(filters: AssetFilters, cursor: string | null) {
   })
 }
 
+interface Listing {
+  filters: AssetFilters
+  /** Cursors are forward-only: the stack of visited pages is what makes "Previous" possible. */
+  cursors: (string | null)[]
+}
+
+const FIRST_PAGE: Listing['cursors'] = [null]
+
+function isFiltered({ active, kind, criticality }: AssetFilters) {
+  return (
+    active !== DEFAULT_ASSET_FILTERS.active ||
+    kind !== DEFAULT_ASSET_FILTERS.kind ||
+    criticality !== DEFAULT_ASSET_FILTERS.criticality
+  )
+}
+
+export type InventoryStatus =
+  | { state: 'loading' }
+  | { state: 'failed'; error: Error; retry: () => void }
+  | {
+      state: 'ready'
+      assets: Asset[]
+      total: number
+      /** Tells "nothing matches the filters" apart from an empty inventory. */
+      filtered: boolean
+      /** The assets shown belong to the previous page while the requested one loads. */
+      navigating: boolean
+    }
+
+export interface Inventory {
+  status: InventoryStatus
+  filters: AssetFilters
+  pageNumber: number
+  /** The inventory spans more than one page, so there is something to navigate. */
+  paged: boolean
+  canGoBack: boolean
+  canGoForward: boolean
+  filterBy: (filters: AssetFilters) => void
+  next: () => void
+  previous: () => void
+}
+
 // Only mounted under an active connection: the page renders the inventory in the connected state.
-export function useAssetsQuery(filters: AssetFilters, cursor: string | null) {
-  return useQuery(assetsQuery(filters, cursor))
+export function useInventory(): Inventory {
+  const [listing, setListing] = useState<Listing>({
+    filters: DEFAULT_ASSET_FILTERS,
+    cursors: FIRST_PAGE,
+  })
+  const cursor = listing.cursors[listing.cursors.length - 1] ?? null
+  const query = useQuery(assetsQuery(listing.filters, cursor))
+
+  // A cursor the backend no longer accepts (stale or tampered) restarts the listing.
+  // Reset while rendering: it clears the cursor, so it cannot repeat.
+  if (cursor !== null && errorCode(query.error) === 'invalid_request') {
+    setListing({ ...listing, cursors: FIRST_PAGE })
+  }
+
+  const pageNumber = listing.cursors.length
+  const navigating = query.isPlaceholderData
+  const nextCursor = query.data?.next_cursor ?? null
+  // While the placeholder page shows, its next_cursor belongs to the previous request.
+  const forwardCursor = navigating ? null : nextCursor
+  const canGoBack = pageNumber > 1 && !navigating
+
+  const status: InventoryStatus = query.isPending
+    ? { state: 'loading' }
+    : query.isError
+      ? { state: 'failed', error: query.error, retry: () => void query.refetch() }
+      : {
+          state: 'ready',
+          assets: query.data.assets,
+          total: query.data.total,
+          filtered: isFiltered(listing.filters),
+          navigating,
+        }
+
+  return {
+    status,
+    filters: listing.filters,
+    pageNumber,
+    paged: pageNumber > 1 || nextCursor !== null,
+    canGoBack,
+    canGoForward: forwardCursor !== null,
+    // A cursor is only valid with the filters that produced it, so new filters start at page one.
+    filterBy: (filters) => setListing({ filters, cursors: FIRST_PAGE }),
+    next: () => {
+      if (forwardCursor !== null) {
+        setListing((current) => ({ ...current, cursors: [...current.cursors, forwardCursor] }))
+      }
+    },
+    previous: () => {
+      if (canGoBack) setListing((current) => ({ ...current, cursors: current.cursors.slice(0, -1) }))
+    },
+  }
 }
