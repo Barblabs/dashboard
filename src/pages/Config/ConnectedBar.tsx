@@ -37,14 +37,14 @@ export function ConnectedBar({ source, onEdit }: Props) {
 
   const language = i18n.resolvedLanguage ?? i18n.language
   const isSyncing = syncMutation.isPending
-  const lastSync = source.lastSync
-    ? formatRelative(source.lastSync, t, language)
+  const lastSync = source.last_sync
+    ? formatRelative(source.last_sync, t, language)
     : t('config.connected.never')
 
   const requestFailureText = syncMutation.isError
     ? requestErrorText(syncMutation.error, t, { fallback: 'config.errors.syncFailed' })
     : null
-  const recordedFailure = source.lastSyncFailure
+  const recordedFailure = source.last_sync_failure
   const recordedFailureText =
     recordedFailure &&
     t('config.connected.lastSyncFailed', {
