@@ -21,9 +21,9 @@ export interface CmdbSource {
   /** `null` for token-auth sources, which only the backend CLI can create. */
   user: string | null
   /** When the latest successful Sync finished. */
-  lastSync: string | null
+  last_sync: string | null
   /** Set only while the latest Sync failed; it carries no code, only the message. */
-  lastSyncFailure: CmdbSyncFailure | null
+  last_sync_failure: CmdbSyncFailure | null
 }
 
 export interface CmdbLogin {
@@ -42,7 +42,7 @@ export type CmdbTestResult =
   | ({ ok: false } & BackendFailure)
 
 export interface CmdbSyncResult {
-  lastSync: string
+  last_sync: string
   created: number
   updated: number
   deactivated: number
@@ -109,10 +109,10 @@ export function useSyncMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: () => api.post<CmdbSyncResult>('/cmdb/source/sync'),
-    onSuccess: ({ lastSync }) => {
+    onSuccess: ({ last_sync }) => {
       queryClient.setQueryData(
         sourceQuery.queryKey,
-        (current) => current && { ...current, lastSync, lastSyncFailure: null },
+        (current) => current && { ...current, last_sync, last_sync_failure: null },
       )
       refreshInventory(queryClient)
     },

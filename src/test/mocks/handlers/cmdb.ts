@@ -42,8 +42,8 @@ export const cmdbHandlers = [
       provider,
       url,
       user,
-      lastSync: new Date().toISOString(),
-      lastSyncFailure: null,
+      last_sync: new Date().toISOString(),
+      last_sync_failure: null,
     }
     saveSource(source)
     return HttpResponse.json(source)
@@ -63,10 +63,10 @@ export const cmdbHandlers = [
   http.post(apiUrl('/cmdb/source/sync'), async () => {
     const source = loadSource()
     if (!source) return notConnected()
-    const lastSync = new Date().toISOString()
-    saveSource({ ...source, lastSync, lastSyncFailure: null })
+    const last_sync = new Date().toISOString()
+    saveSource({ ...source, last_sync, last_sync_failure: null })
     return HttpResponse.json({
-      lastSync,
+      last_sync,
       created: 0,
       updated: 0,
       deactivated: 0,

@@ -2,11 +2,11 @@ import type { CmdbSource } from '../../api/cmdb'
 
 const STORAGE_KEY = 'barbattack_cmdb_source'
 
-export const mockSource: Omit<CmdbSource, 'lastSync'> = {
+export const mockSource: Omit<CmdbSource, 'last_sync'> = {
   provider: 'itop',
   url: 'http://10.0.0.5:8000',
   user: 'barb-reader',
-  lastSyncFailure: null,
+  last_sync_failure: null,
 }
 
 export function loadSource(): CmdbSource | null {

@@ -34,7 +34,7 @@ async function fillForm(
 }
 
 async function renderConnected() {
-  seedSource({ lastSync: TWO_HOURS_AGO })
+  seedSource({ last_sync: TWO_HOURS_AGO })
   const user = renderApp()
   await screen.findByText('iTop connected')
   return user
@@ -202,7 +202,7 @@ describe('Configuration', () => {
   it('shows the connection bar and relative time in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
-    seedSource({ lastSync: new Date(Date.now() - 5 * 60 * 1000).toISOString() })
+    seedSource({ last_sync: new Date(Date.now() - 5 * 60 * 1000).toISOString() })
     const user = renderApp()
 
     expect(await screen.findByText('iTop conectado')).toBeInTheDocument()
@@ -465,8 +465,8 @@ describe('Configuration', () => {
           provider: 'itop',
           url: 'http://10.0.0.5:8000',
           user: 'barb-reader',
-          lastSync: null,
-          lastSyncFailure: { at: new Date().toISOString(), error: 'iTop timed out' },
+          last_sync: null,
+          last_sync_failure: { at: new Date().toISOString(), error: 'iTop timed out' },
         }),
       ),
     )
@@ -536,8 +536,8 @@ describe('Configuration', () => {
 
   it('shows the failure recorded on the latest sync', async () => {
     seedSource({
-      lastSync: TWO_HOURS_AGO,
-      lastSyncFailure: { at: new Date(Date.now() - 5 * 60 * 1000).toISOString(), error: 'iTop timed out' },
+      last_sync: TWO_HOURS_AGO,
+      last_sync_failure: { at: new Date(Date.now() - 5 * 60 * 1000).toISOString(), error: 'iTop timed out' },
     })
     renderApp()
 
@@ -564,7 +564,7 @@ describe('Configuration', () => {
   })
 
   it('a token-auth source shows no user and edits with an empty one', async () => {
-    seedSource({ lastSync: TWO_HOURS_AGO, user: null })
+    seedSource({ last_sync: TWO_HOURS_AGO, user: null })
     const user = renderApp()
 
     expect(await screen.findByText('iTop connected')).toBeInTheDocument()
