@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSourceQuery, type CmdbSource } from '../../api/cmdb'
+import { useAuthStore } from '../../auth/store'
 import { ConfigStepPanel } from './ConfigStepPanel'
 import { CmdbSelector } from './CmdbSelector'
 import { ItopForm } from './ItopForm'
@@ -32,6 +33,8 @@ const NEW_CONNECTION = { url: '', user: '' }
 export function ConfigPage() {
   const { t } = useTranslation()
   const sourceQuery = useSourceQuery()
+  const role = useAuthStore((s) => s.user?.role)
+  const readOnly = role === 'viewer'
 
   const [connecting, setConnecting] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -52,14 +55,20 @@ export function ConfigPage() {
         <div className="py-12 text-center text-[0.875rem] text-gray">{t('config.loading')}</div>
       ) : view.step === 'connected' ? (
         <div className="flex animate-fade-in flex-col gap-6">
-          <ConnectedBar source={view.source} onEdit={() => setEditing(true)} />
+          <ConnectedBar source={view.source} onEdit={() => setEditing(true)} readOnly={readOnly} />
           <TechStackTable />
-          <EditConnectionDialog
-            source={view.source}
-            open={editing}
-            onClose={() => setEditing(false)}
-          />
+          {!readOnly && (
+            <EditConnectionDialog
+              source={view.source}
+              open={editing}
+              onClose={() => setEditing(false)}
+            />
+          )}
         </div>
+      ) : readOnly ? (
+        <p className="animate-fade-in py-12 text-center font-body text-[0.9375rem] text-gray">
+          {t('config.viewer.notConnected')}
+        </p>
       ) : (
         <div className="flex items-start gap-[22px]">
           <ConfigStepPanel activeStep={view.step === 'select' ? 1 : 2} />

@@ -53,6 +53,15 @@ export const es: Translations = {
   notifications: {
     title: 'Notificaciones',
   },
+  users: {
+    title: 'Usuarios',
+  },
+  tenants: {
+    title: 'Tenants',
+  },
+  adminDashboard: {
+    title: 'Dashboard',
+  },
   status: {
     backHome: 'Volver al inicio',
     notFound: {
@@ -244,6 +253,9 @@ export const es: Translations = {
       subtitle: 'Selecciona de dónde viene tu inventario de activos.',
       select: 'Seleccionar',
       comingSoon: 'Próximamente',
+    },
+    viewer: {
+      notConnected: 'Tu organización no tiene ningún CMDB configurado.',
     },
     providers: {
       itop: {

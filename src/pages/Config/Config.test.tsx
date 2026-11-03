@@ -2,9 +2,17 @@ import { cleanup, screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { i18n } from '../../i18n'
+import type { AuthUser } from '../../auth/store'
 import { apiUrl } from '../../test/mocks/url'
 import { renderApp, seedSource } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
+
+const VIEWER: AuthUser = {
+  id: 'viewer-id',
+  email: 'viewer@test.example',
+  role: 'viewer',
+  customer: { id: 'test-customer-id', name: 'Test Org' },
+}
 
 type User = ReturnType<typeof renderApp>
 
@@ -544,6 +552,29 @@ describe('Configuration', () => {
     expect(
       await screen.findByText('Last sync failed 5 min. ago: iTop timed out'),
     ).toBeInTheDocument()
+  })
+
+  describe('viewer (read-only)', () => {
+    it('sees the connected CMDB info and the inventory but no action buttons', async () => {
+      seedSource({ last_sync: TWO_HOURS_AGO })
+      renderApp('/config', VIEWER)
+
+      expect(await screen.findByText('iTop connected')).toBeInTheDocument()
+      expect(screen.getByText('http://10.0.0.5:8000')).toBeInTheDocument()
+      expect(await screen.findByRole('cell', { name: /prod-api-01/ })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Disconnect' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Edit connection' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Sync now' })).not.toBeInTheDocument()
+    })
+
+    it('sees a not-connected message and no connect button when there is no CMDB', async () => {
+      renderApp('/config', VIEWER)
+
+      expect(
+        await screen.findByText('No CMDB is configured for your organization.'),
+      ).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Select' })).not.toBeInTheDocument()
+    })
   })
 
   it('a disconnect refused while a sync commits shows why and keeps the source', async () => {

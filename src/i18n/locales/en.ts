@@ -51,6 +51,15 @@ export const en = {
   notifications: {
     title: 'Notifications',
   },
+  users: {
+    title: 'Users',
+  },
+  tenants: {
+    title: 'Tenants',
+  },
+  adminDashboard: {
+    title: 'Dashboard',
+  },
   status: {
     backHome: 'Back to home',
     notFound: {
@@ -242,6 +251,9 @@ export const en = {
       subtitle: 'Select where your asset inventory comes from.',
       select: 'Select',
       comingSoon: 'Coming soon',
+    },
+    viewer: {
+      notConnected: 'No CMDB is configured for your organization.',
     },
     providers: {
       itop: {

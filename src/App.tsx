@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/reac
 import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router'
 import { useAuthStore, type Role } from './auth/store'
 import { Sidebar } from './components/Sidebar'
+import { AdminDashboardPage } from './pages/AdminDashboard'
 import { ConfigPage } from './pages/Config'
 import { DeactivatedPage } from './pages/Deactivated'
 import { FindingsPage } from './pages/Findings'
@@ -10,6 +11,8 @@ import { ForbiddenPage } from './pages/Forbidden'
 import { LoginPage } from './pages/Login'
 import { NotFoundPage } from './pages/NotFound'
 import { NotificationsPage } from './pages/Notifications'
+import { TenantsPage } from './pages/Tenants'
+import { UsersPage } from './pages/Users'
 import './i18n'
 
 const ReactQueryDevtools = import.meta.env.DEV
@@ -80,15 +83,15 @@ function createAppRouter() {
             },
             {
               path: 'users',
-              element: <RoleGuard roles={['customer_admin']}><ForbiddenPage /></RoleGuard>,
+              element: <RoleGuard roles={['customer_admin']}><UsersPage /></RoleGuard>,
             },
             {
               path: 'tenants',
-              element: <RoleGuard roles={['platform_admin']}><ForbiddenPage /></RoleGuard>,
+              element: <RoleGuard roles={['platform_admin']}><TenantsPage /></RoleGuard>,
             },
             {
               path: 'admin-dashboard',
-              element: <RoleGuard roles={['platform_admin']}><ForbiddenPage /></RoleGuard>,
+              element: <RoleGuard roles={['platform_admin']}><AdminDashboardPage /></RoleGuard>,
             },
             { path: 'forbidden', element: <ForbiddenPage /> },
             { path: '*', element: <NotFoundPage /> },

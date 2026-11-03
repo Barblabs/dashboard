@@ -10,6 +10,7 @@ import { requestErrorText } from '../../i18n/errors'
 interface Props {
   source: CmdbSource
   onEdit: () => void
+  readOnly?: boolean
 }
 
 function formatRelative(iso: string, t: TFunction, language: string): string {
@@ -29,7 +30,7 @@ const SUCCESS_STRIP = `${STRIP} border-nav-active-bg/15 bg-nav-active-bg/6`
 // A question, not a failure: only the danger button carries the critical color.
 const CONFIRM_STRIP = `${STRIP} border-border-panel bg-panel`
 
-export function ConnectedBar({ source, onEdit }: Props) {
+export function ConnectedBar({ source, onEdit, readOnly = false }: Props) {
   const { t, i18n } = useTranslation()
   const syncMutation = useSyncMutation()
   const disconnectMutation = useDisconnectMutation()
@@ -76,17 +77,19 @@ export function ConnectedBar({ source, onEdit }: Props) {
           </span>
         </div>
 
-        <div className="flex shrink-0 gap-2">
-          <Button variant="ghost" size="sm" disabled={isSyncing} onClick={() => setShowConfirm(true)}>
-            {t('config.connected.actions.disconnect')}
-          </Button>
-          <Button variant="secondary" size="sm" disabled={isSyncing} onClick={onEdit}>
-            {t('config.connected.actions.edit')}
-          </Button>
-          <Button size="sm" loading={isSyncing} onClick={() => syncMutation.mutate()}>
-            {isSyncing ? t('config.connected.actions.syncing') : t('config.connected.actions.sync')}
-          </Button>
-        </div>
+        {!readOnly && (
+          <div className="flex shrink-0 gap-2">
+            <Button variant="ghost" size="sm" disabled={isSyncing} onClick={() => setShowConfirm(true)}>
+              {t('config.connected.actions.disconnect')}
+            </Button>
+            <Button variant="secondary" size="sm" disabled={isSyncing} onClick={onEdit}>
+              {t('config.connected.actions.edit')}
+            </Button>
+            <Button size="sm" loading={isSyncing} onClick={() => syncMutation.mutate()}>
+              {isSyncing ? t('config.connected.actions.syncing') : t('config.connected.actions.sync')}
+            </Button>
+          </div>
+        )}
       </div>
 
       {syncMutation.isSuccess && (
@@ -108,7 +111,7 @@ export function ConnectedBar({ source, onEdit }: Props) {
         </div>
       )}
 
-      {showConfirm && (
+      {!readOnly && showConfirm && (
         <div className={CONFIRM_STRIP}>
           {disconnectMutation.isError ? (
             <p role="alert" className={`${STRIP_TEXT} text-critical`}>
