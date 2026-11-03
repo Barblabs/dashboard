@@ -2,10 +2,21 @@ import type { Translations } from './en'
 
 export const es: Translations = {
   sidebar: {
+    superAdmin: 'Super Admin',
     nav: {
       findings: 'Hallazgos',
       config: 'Configuración',
       notifications: 'Notificaciones',
+      users: 'Usuarios',
+      tenants: 'Tenants',
+      'admin-dashboard': 'Dashboard',
+    },
+    user: {
+      role: {
+        platform_admin: 'Super Admin',
+        customer_admin: 'Administrador',
+        viewer: 'Lector',
+      },
     },
     footer: {
       course: 'Reto Lyft · TC3008C',
@@ -14,6 +25,24 @@ export const es: Translations = {
     language: {
       label: 'Idioma',
     },
+  },
+  login: {
+    mock: {
+      title: 'Modo de prueba',
+      subtitle: 'Elige un rol para entrar sin Cognito.',
+      platformAdmin: 'Super Admin (platform_admin)',
+      customerAdmin: 'Administrador (customer_admin)',
+      viewer: 'Lector (viewer)',
+    },
+    real: {
+      comingSoon: 'Inicio de sesión con Cognito próximamente. Usa VITE_USE_MOCK=true para desarrollo.',
+    },
+  },
+  deactivated: {
+    title: 'Organización desactivada',
+    message:
+      'El acceso de tu organización ha sido desactivado. Contacta a tu administrador de BARBATTACK para más información.',
+    signOut: 'Cerrar sesión',
   },
   placeholder: {
     comingSoon: 'Próximamente',

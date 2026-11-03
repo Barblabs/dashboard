@@ -1,9 +1,20 @@
 export const en = {
   sidebar: {
+    superAdmin: 'Super Admin',
     nav: {
       findings: 'Findings',
       config: 'Configuration',
       notifications: 'Notifications',
+      users: 'Users',
+      tenants: 'Tenants',
+      'admin-dashboard': 'Dashboard',
+    },
+    user: {
+      role: {
+        platform_admin: 'Super Admin',
+        customer_admin: 'Admin',
+        viewer: 'Viewer',
+      },
     },
     footer: {
       course: 'Reto Lyft · TC3008C',
@@ -12,6 +23,24 @@ export const en = {
     language: {
       label: 'Language',
     },
+  },
+  login: {
+    mock: {
+      title: 'Test mode',
+      subtitle: 'Choose a role to sign in without Cognito.',
+      platformAdmin: 'Super Admin (platform_admin)',
+      customerAdmin: 'Admin (customer_admin)',
+      viewer: 'Viewer (viewer)',
+    },
+    real: {
+      comingSoon: 'Cognito sign-in coming soon. Use VITE_USE_MOCK=true for development.',
+    },
+  },
+  deactivated: {
+    title: 'Organization deactivated',
+    message:
+      "Your organization's access has been deactivated. Contact your BARBATTACK administrator for more information.",
+    signOut: 'Sign out',
   },
   placeholder: {
     comingSoon: 'Coming soon',

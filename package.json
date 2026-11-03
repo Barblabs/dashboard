@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "gen:types": "openapi-typescript http://localhost:8080/openapi.json -o src/api/generated.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query-devtools": "^5.104.5",
+    "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.8",
@@ -39,10 +41,16 @@
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "msw": "^3.0.3",
+    "openapi-typescript": "^7.13.0",
     "oxlint": "^1.89.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3",
     "vite": "^6.3.5",
     "vitest": "^5.0.5"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

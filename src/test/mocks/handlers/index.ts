@@ -1,4 +1,5 @@
 import { assetsHandlers } from './assets'
+import { authHandlers } from './auth'
 import { cmdbHandlers } from './cmdb'
 
-export const handlers = [...cmdbHandlers, ...assetsHandlers]
+export const handlers = [...authHandlers, ...cmdbHandlers, ...assetsHandlers]
