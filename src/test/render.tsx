@@ -4,8 +4,10 @@ import { App } from '../App'
 import type { AuthUser } from '../auth/store'
 import { useAuthStore } from '../auth/store'
 import type { CmdbSource } from '../api/cmdb'
+import type { CustomerResponse } from '../api/customers'
 import type { UserResponse } from '../api/users'
 import { mockSource, saveSource } from './mocks/store'
+import { saveCustomers } from './mocks/customers-store'
 import { saveUsers } from './mocks/users-store'
 
 const DEFAULT_TEST_USER: AuthUser = {
@@ -31,4 +33,8 @@ export function seedSource(overrides: Partial<CmdbSource> = {}) {
 
 export function seedUsers(users: UserResponse[]) {
   saveUsers(users)
+}
+
+export function seedCustomers(customers: CustomerResponse[]) {
+  saveCustomers(customers)
 }

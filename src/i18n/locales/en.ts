@@ -110,10 +110,89 @@ export const en = {
     },
   },
   tenants: {
-    title: 'Tenants',
+    title: 'Organizations',
+    loading: 'Loading organizations…',
+    loadFailed: 'Could not load organizations.',
+    empty: 'No organizations yet.',
+    retry: 'Retry',
+    search: { placeholder: 'Search by name…' },
+    counter: {
+      organizations: 'organizations',
+      deactivated: 'deactivated',
+    },
+    status: {
+      active: 'Active',
+      deactivated: 'Deactivated · their users cannot sign in',
+    },
+    created: 'Created {{date}}',
+    actions: {
+      rename: 'Rename',
+      deactivate: 'Deactivate',
+      reactivate: 'Reactivate',
+    },
+    rename: {
+      title: 'Rename organization',
+      label: 'Name',
+      save: 'Save',
+      cancel: 'Cancel',
+      failed: 'Could not rename the organization.',
+    },
+    deactivate: {
+      title: 'Deactivate organization',
+      body: 'Users of this organization will no longer be able to sign in.',
+      confirm: 'Yes, deactivate',
+      cancel: 'Cancel',
+      failed: 'Could not deactivate the organization.',
+    },
+    reactivate: {
+      failed: 'Could not reactivate the organization.',
+    },
+    create: {
+      button: 'New organization',
+      step: 'Step {{current}} of {{total}}',
+      step1: {
+        title: 'New organization',
+        label: 'Organization name',
+        placeholder: 'Company name',
+        next: 'Next',
+        required: 'The name is required.',
+      },
+      step2: {
+        title: 'Admin email',
+        label: 'Admin email',
+        notice: 'The admin will receive an email with a temporary password.',
+        back: 'Back',
+        submit: 'Create and send invitation',
+        submitting: 'Creating…',
+        required: 'The email is required.',
+        invalid: 'Enter a valid email.',
+      },
+      failed: 'Could not create the organization.',
+    },
+    errors: {
+      nameTaken: 'An organization with this name already exists.',
+    },
   },
   adminDashboard: {
     title: 'Dashboard',
+    loading: 'Loading…',
+    loadFailed: 'Could not load dashboard data.',
+    retry: 'Retry',
+    stats: {
+      total: 'Organizations',
+      active: 'Active',
+      deactivated: 'Deactivated',
+      newThisMonth: 'New this month',
+    },
+    chart: {
+      title: 'New organizations per month',
+    },
+    recent: {
+      title: 'Recent organizations',
+      empty: 'No organizations yet.',
+    },
+    notice:
+      'As Platform Admin you can see names, creation dates and status only. Access to users, CMDB and assets belongs to each organization.',
   },
   status: {
     backHome: 'Back to home',

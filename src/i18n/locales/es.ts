@@ -112,10 +112,89 @@ export const es: Translations = {
     },
   },
   tenants: {
-    title: 'Tenants',
+    title: 'Organizaciones',
+    loading: 'Cargando organizaciones…',
+    loadFailed: 'No se pudo cargar la lista de organizaciones.',
+    empty: 'Aún no hay organizaciones.',
+    retry: 'Reintentar',
+    search: { placeholder: 'Buscar por nombre…' },
+    counter: {
+      organizations: 'organizaciones',
+      deactivated: 'desactivadas',
+    },
+    status: {
+      active: 'Activa',
+      deactivated: 'Desactivada · sus usuarios no pueden entrar',
+    },
+    created: 'Creada el {{date}}',
+    actions: {
+      rename: 'Renombrar',
+      deactivate: 'Desactivar',
+      reactivate: 'Reactivar',
+    },
+    rename: {
+      title: 'Renombrar organización',
+      label: 'Nombre',
+      save: 'Guardar',
+      cancel: 'Cancelar',
+      failed: 'No se pudo renombrar la organización.',
+    },
+    deactivate: {
+      title: 'Desactivar organización',
+      body: 'Los usuarios de esta organización ya no podrán iniciar sesión.',
+      confirm: 'Sí, desactivar',
+      cancel: 'Cancelar',
+      failed: 'No se pudo desactivar la organización.',
+    },
+    reactivate: {
+      failed: 'No se pudo reactivar la organización.',
+    },
+    create: {
+      button: 'Nueva organización',
+      step: 'Paso {{current}} de {{total}}',
+      step1: {
+        title: 'Nueva organización',
+        label: 'Nombre de la organización',
+        placeholder: 'Nombre de la empresa',
+        next: 'Siguiente',
+        required: 'El nombre es obligatorio.',
+      },
+      step2: {
+        title: 'Correo del administrador',
+        label: 'Correo del administrador',
+        notice: 'El administrador recibirá un correo con una contraseña temporal.',
+        back: 'Atrás',
+        submit: 'Crear y enviar invitación',
+        submitting: 'Creando…',
+        required: 'El correo es obligatorio.',
+        invalid: 'Ingresa un correo válido.',
+      },
+      failed: 'No se pudo crear la organización.',
+    },
+    errors: {
+      nameTaken: 'Ya existe una organización con este nombre.',
+    },
   },
   adminDashboard: {
     title: 'Dashboard',
+    loading: 'Cargando…',
+    loadFailed: 'No se pudo cargar el dashboard.',
+    retry: 'Reintentar',
+    stats: {
+      total: 'Organizaciones',
+      active: 'Activas',
+      deactivated: 'Desactivadas',
+      newThisMonth: 'Nuevas este mes',
+    },
+    chart: {
+      title: 'Altas por mes',
+    },
+    recent: {
+      title: 'Organizaciones recientes',
+      empty: 'Aún no hay organizaciones.',
+    },
+    notice:
+      'Como Platform Admin solo tienes visibilidad del nombre, fecha de alta y estado. El acceso a usuarios, CMDB y activos pertenece a cada organización.',
   },
   status: {
     backHome: 'Volver al inicio',

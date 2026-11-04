@@ -22,6 +22,7 @@ const CODE_KEYS = new Map<string, ParseKeys>([
   ['email_taken', 'users.invite.emailTaken'],
   ['user_not_found', 'users.errors.userNotFound'],
   ['last_customer_admin', 'users.errors.lastCustomerAdmin'],
+  ['customer_name_taken', 'tenants.errors.nameTaken'],
 ])
 
 interface RequestErrorKeys {
