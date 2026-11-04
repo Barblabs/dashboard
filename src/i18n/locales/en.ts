@@ -53,6 +53,61 @@ export const en = {
   },
   users: {
     title: 'Users',
+    loading: 'Loading users…',
+    loadFailed: 'Could not load users.',
+    empty: 'No users yet.',
+    retry: 'Retry',
+    you: 'You',
+    search: { placeholder: 'Search by email…' },
+    invite: {
+      button: 'Invite user',
+      title: 'Invite user',
+      cancel: 'Cancel',
+      email: {
+        label: 'Email',
+        required: 'Email is required.',
+        invalid: 'Enter a valid email.',
+      },
+      role: { label: 'Role' },
+      submit: 'Send invitation',
+      submitting: 'Sending…',
+      failed: 'Could not send the invitation.',
+      emailTaken: 'A user with this email already exists.',
+      tempPasswordNotice: 'The user will receive an email with a temporary password.',
+    },
+    columns: {
+      email: 'Email',
+      role: 'Role',
+    },
+    role: {
+      customer_admin: 'Admin',
+      viewer: 'Viewer',
+    },
+    status: {
+      disabled: 'Disabled',
+    },
+    actions: {
+      editRole: 'Edit role',
+      disable: 'Disable',
+      disableFailed: 'Could not disable this user.',
+      roleChangeFailed: 'Could not change the role.',
+    },
+    changeRole: {
+      title: 'Change role',
+      save: 'Save',
+    },
+    disable: {
+      title: 'Disable user',
+    },
+    errors: {
+      userNotFound: 'User not found.',
+      lastCustomerAdmin: 'Cannot remove the last admin of your organization.',
+    },
+    confirm: {
+      text: 'This user will no longer be able to sign in. Continue?',
+      confirm: 'Yes, disable',
+      cancel: 'Cancel',
+    },
   },
   tenants: {
     title: 'Tenants',

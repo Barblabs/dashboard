@@ -55,6 +55,61 @@ export const es: Translations = {
   },
   users: {
     title: 'Usuarios',
+    loading: 'Cargando usuarios…',
+    loadFailed: 'No se pudo cargar la lista de usuarios.',
+    empty: 'Aún no hay usuarios.',
+    retry: 'Reintentar',
+    you: 'Tú',
+    search: { placeholder: 'Buscar por correo…' },
+    invite: {
+      button: 'Invitar usuario',
+      title: 'Invitar usuario',
+      cancel: 'Cancelar',
+      email: {
+        label: 'Correo electrónico',
+        required: 'El correo es obligatorio.',
+        invalid: 'Ingresa un correo válido.',
+      },
+      role: { label: 'Rol' },
+      submit: 'Enviar invitación',
+      submitting: 'Enviando…',
+      failed: 'No se pudo enviar la invitación.',
+      emailTaken: 'Ya existe un usuario con este correo.',
+      tempPasswordNotice: 'El usuario recibirá un correo con una contraseña temporal.',
+    },
+    columns: {
+      email: 'Correo',
+      role: 'Rol',
+    },
+    role: {
+      customer_admin: 'Administrador',
+      viewer: 'Lector',
+    },
+    status: {
+      disabled: 'Deshabilitado',
+    },
+    actions: {
+      editRole: 'Editar rol',
+      disable: 'Deshabilitar',
+      disableFailed: 'No se pudo deshabilitar al usuario.',
+      roleChangeFailed: 'No se pudo cambiar el rol.',
+    },
+    changeRole: {
+      title: 'Cambiar rol',
+      save: 'Guardar',
+    },
+    disable: {
+      title: 'Deshabilitar usuario',
+    },
+    errors: {
+      userNotFound: 'Usuario no encontrado.',
+      lastCustomerAdmin: 'No se puede eliminar al último administrador de la organización.',
+    },
+    confirm: {
+      text: 'Este usuario ya no podrá iniciar sesión. ¿Continuar?',
+      confirm: 'Sí, deshabilitar',
+      cancel: 'Cancelar',
+    },
   },
   tenants: {
     title: 'Tenants',
