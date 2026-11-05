@@ -1,5 +1,7 @@
 import { http, HttpResponse } from 'msw'
-import type { MeResponse } from '../../../api/generated'
+import type { components } from '../../../api/generated'
+
+type MeResponse = components['schemas']['MeResponse']
 import { apiUrl } from '../url'
 
 type MockRole = 'platform_admin' | 'customer_admin' | 'viewer'

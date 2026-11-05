@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import type { CustomerResponse } from './generated'
+import type { components } from './generated'
 
-export type { CustomerResponse }
+export type CustomerResponse = components['schemas']['CustomerResponse']
 
 interface CustomerListResponse {
   customers: CustomerResponse[]
