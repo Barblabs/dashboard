@@ -26,6 +26,9 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     env: {
       VITE_API_URL: 'http://localhost:8080',
+      VITE_COGNITO_REGION: 'us-east-1',
+      VITE_COGNITO_USER_POOL_ID: 'us-east-1_testpool',
+      VITE_COGNITO_CLIENT_ID: 'test-client-id',
     },
   },
 })
