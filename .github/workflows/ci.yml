@@ -56,3 +56,67 @@ jobs:
     steps:
       - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
         run: exit 1
+
+  # Outside the `ci` gate on purpose: a failed deploy must not block merging.
+  # Depending on `ci` in the same run ships exactly the commit that push CI
+  # tested, since the rulesets do not require PR branches to be up to date.
+  deploy:
+    needs: [ci]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    # Queue instead of cancel: killing a deploy mid-upload leaves the bucket half-written.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+      VITE_API_URL: ${{ vars.VITE_API_URL }}
+      VITE_COGNITO_REGION: ${{ vars.VITE_COGNITO_REGION }}
+      VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
+      VITE_COGNITO_CLIENT_ID: ${{ vars.VITE_COGNITO_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Unset variables resolve to empty strings and Vite still builds, shipping
+      # an app that only breaks at login. Fail here with the full list instead.
+      - name: Check production environment variables
+        run: |
+          missing=()
+          for name in AWS_REGION AWS_ROLE_ARN S3_BUCKET CLOUDFRONT_DISTRIBUTION_ID \
+                      VITE_API_URL VITE_COGNITO_REGION VITE_COGNITO_USER_POOL_ID VITE_COGNITO_CLIENT_ID; do
+            [ -n "${!name}" ] || missing+=("$name")
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing variables on the 'production' environment: ${missing[*]}"
+            exit 1
+          fi
+      - run: npm run build
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      # Hashed assets first and index.html last, so the live index.html never
+      # references a bundle that is not uploaded yet.
+      - name: Upload hashed assets
+        run: aws s3 sync dist/assets "s3://$S3_BUCKET/assets" --cache-control "public,max-age=31536000,immutable"
+      - name: Upload unhashed files
+        run: aws s3 sync dist "s3://$S3_BUCKET" --exclude "assets/*" --exclude index.html --cache-control "no-cache"
+      - name: Upload index.html
+        run: aws s3 cp dist/index.html "s3://$S3_BUCKET/index.html" --cache-control "no-cache"
+      # --size-only keeps this pass from re-uploading files (which would drop the
+      # cache headers set above); it only deletes keys no longer in dist/.
+      - name: Prune old files
+        run: aws s3 sync dist "s3://$S3_BUCKET" --delete --size-only
+      - name: Invalidate index.html
+        run: aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths /index.html
