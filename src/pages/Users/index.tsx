@@ -319,10 +319,19 @@ export function UsersPage() {
   const TH =
     'px-4 py-3 font-body text-[0.75rem] font-semibold uppercase tracking-wider text-gray text-left'
 
-  const filtered =
-    usersQuery.data?.users.filter((u) =>
-      u.email.toLowerCase().includes(search.toLowerCase()),
-    ) ?? []
+  const users = usersQuery.data?.users ?? []
+  const disabledCount = users.filter((u) => u.disabled_at !== null).length
+  const counter =
+    users.length > 0
+      ? `${users.length} ${users.length === 1 ? t('users.counter.user') : t('users.counter.users')}` +
+        (disabledCount > 0
+          ? ` · ${disabledCount} ${disabledCount === 1 ? t('users.counter.disabled') : t('users.counter.disabledMany')}`
+          : '')
+      : ''
+
+  const filtered = users.filter((u) =>
+    u.email.toLowerCase().includes(search.toLowerCase()),
+  )
 
   return (
     <main className="flex flex-1 flex-col gap-6 overflow-y-auto px-10 py-8">
@@ -343,28 +352,33 @@ export function UsersPage() {
         </div>
       ) : (
         <>
-          <div className="relative">
-            <span
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray"
-              aria-hidden="true"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="6.5" cy="6.5" r="4.25" stroke="currentColor" strokeWidth="1.4" />
-                <path
-                  d="m11 11 2.5 2.5"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </span>
-            <input
-              type="search"
-              placeholder={t('users.search.placeholder')}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-md border border-border-panel bg-white py-2.5 pl-9 pr-3 font-body text-[0.9375rem] text-navy outline-none transition-[border-color] duration-150 ease-[ease] focus:border-navy focus-ring"
-            />
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <span
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray"
+                aria-hidden="true"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="6.5" cy="6.5" r="4.25" stroke="currentColor" strokeWidth="1.4" />
+                  <path
+                    d="m11 11 2.5 2.5"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>
+              <input
+                type="search"
+                placeholder={t('users.search.placeholder')}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-md border border-border-panel bg-white py-2.5 pl-9 pr-3 font-body text-[0.9375rem] text-navy outline-none transition-[border-color] duration-150 ease-[ease] focus:border-navy focus-ring"
+              />
+            </div>
+            {counter && (
+              <p className="shrink-0 font-body text-[0.875rem] text-gray">{counter}</p>
+            )}
           </div>
 
           {filtered.length === 0 ? (

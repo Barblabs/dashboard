@@ -59,6 +59,12 @@ export const en = {
     retry: 'Retry',
     you: 'You',
     search: { placeholder: 'Search by email…' },
+    counter: {
+      user: 'user',
+      users: 'users',
+      disabled: 'disabled',
+      disabledMany: 'disabled',
+    },
     invite: {
       button: 'Invite user',
       title: 'Invite user',

@@ -25,6 +25,20 @@ describe('Users', () => {
     const viewerRow = screen.getByText(VIEWER.email).closest('tr')!
     expect(within(adminRow).getByText('Admin')).toBeInTheDocument()
     expect(within(viewerRow).getByText('Viewer')).toBeInTheDocument()
+    expect(screen.getByText(/2 users/)).toBeInTheDocument()
+  })
+
+  it('shows the counter with disabled count when applicable', async () => {
+    const disabled = {
+      ...VIEWER,
+      id: 'user-disabled',
+      email: 'old@acme.example',
+      disabled_at: '2026-06-01T00:00:00Z',
+    }
+    seedUsers([ADMIN, VIEWER, disabled])
+    await renderUsers()
+
+    expect(screen.getByText(/3 users · 1 disabled/)).toBeInTheDocument()
   })
 
   it('shows a disabled user with no action buttons', async () => {

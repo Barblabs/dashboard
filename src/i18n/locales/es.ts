@@ -61,6 +61,12 @@ export const es: Translations = {
     retry: 'Reintentar',
     you: 'Tú',
     search: { placeholder: 'Buscar por correo…' },
+    counter: {
+      user: 'usuario',
+      users: 'usuarios',
+      disabled: 'deshabilitado',
+      disabledMany: 'deshabilitados',
+    },
     invite: {
       button: 'Invitar usuario',
       title: 'Invitar usuario',
