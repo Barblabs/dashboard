@@ -317,7 +317,7 @@ export function LoginPage() {
     return <Navigate to={destForRole(user.role)} replace />
   }
 
-  if (import.meta.env.VITE_USE_MOCK === 'true') {
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCK === 'true') {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-panel px-8">
         <div className="flex flex-col items-center gap-2">

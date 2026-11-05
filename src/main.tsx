@@ -4,7 +4,7 @@ import './styles/globals.css'
 import { App } from './App'
 
 async function main() {
-  if (import.meta.env.VITE_USE_MOCK === 'true') {
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCK === 'true') {
     const { worker } = await import('./mocks/browser')
     await worker.start({ onUnhandledFrame: 'bypass' })
   }
