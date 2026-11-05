@@ -3,6 +3,7 @@ import type { Translations } from './en'
 export const es: Translations = {
   sidebar: {
     superAdmin: 'Super Admin',
+    signOut: 'Cerrar sesión',
     nav: {
       findings: 'Hallazgos',
       config: 'Configuración',
@@ -36,6 +37,32 @@ export const es: Translations = {
     },
     real: {
       comingSoon: 'Inicio de sesión con Cognito próximamente. Usa VITE_USE_MOCK=true para desarrollo.',
+    },
+    form: {
+      tagline: 'Las vulnerabilidades que sí afectan a tu stack, priorizadas.',
+      subtitle: 'Business-Aware Risk-Based Analysis of Threats, Tailored Alerts & Countermeasure Knowledge.',
+      title: 'Iniciar sesión',
+      access: 'Acceso restringido al equipo de seguridad y a los dueños de activo.',
+      email: 'Correo',
+      emailPlaceholder: 'nombre@empresa.com',
+      password: 'Contraseña',
+      submit: 'Entrar',
+      submitting: 'Entrando…',
+      notice: 'No hay registro público. Las cuentas y los roles los asigna un administrador.',
+    },
+    newPassword: {
+      title: 'Crear contraseña',
+      subtitle: 'Es tu primer acceso. Elige una contraseña nueva.',
+      label: 'Nueva contraseña',
+      policy: 'Mínimo 12 caracteres, con mayúsculas, minúsculas, números y símbolos.',
+      submit: 'Guardar',
+      submitting: 'Guardando…',
+    },
+    errors: {
+      badCredentials: 'Correo o contraseña incorrectos.',
+      userDisabled: 'Tu cuenta está deshabilitada. Contacta a tu administrador.',
+      network: 'No se pudo conectar con el servidor.',
+      passwordPolicy: 'La contraseña no cumple los requisitos de seguridad.',
     },
   },
   deactivated: {

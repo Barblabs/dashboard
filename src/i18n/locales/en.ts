@@ -1,6 +1,7 @@
 export const en = {
   sidebar: {
     superAdmin: 'Super Admin',
+    signOut: 'Sign out',
     nav: {
       findings: 'Findings',
       config: 'Configuration',
@@ -34,6 +35,32 @@ export const en = {
     },
     real: {
       comingSoon: 'Cognito sign-in coming soon. Use VITE_USE_MOCK=true for development.',
+    },
+    form: {
+      tagline: 'The vulnerabilities that actually affect your stack, prioritized.',
+      subtitle: 'Business-Aware Risk-Based Analysis of Threats, Tailored Alerts & Countermeasure Knowledge.',
+      title: 'Sign in',
+      access: 'Access restricted to the security team and asset owners.',
+      email: 'Email',
+      emailPlaceholder: 'name@company.com',
+      password: 'Password',
+      submit: 'Sign in',
+      submitting: 'Signing in…',
+      notice: 'No public registration. Accounts and roles are assigned by an administrator.',
+    },
+    newPassword: {
+      title: 'Create password',
+      subtitle: 'This is your first sign-in. Choose a new password.',
+      label: 'New password',
+      policy: 'At least 12 characters, with uppercase, lowercase, numbers and symbols.',
+      submit: 'Save',
+      submitting: 'Saving…',
+    },
+    errors: {
+      badCredentials: 'Incorrect email or password.',
+      userDisabled: 'Your account is disabled. Contact your administrator.',
+      network: 'Could not connect to the server.',
+      passwordPolicy: 'The password does not meet security requirements.',
     },
   },
   deactivated: {

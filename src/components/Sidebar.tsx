@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { NavLink } from 'react-router'
+import { NavLink, useNavigate } from 'react-router'
+import { signOut } from '../auth/cognito'
 import { useAuthStore, type Role } from '../auth/store'
 import { chooseLanguage, LANGUAGES } from '../i18n'
 
@@ -29,7 +30,15 @@ const ROLE_KEY: Record<Role, 'sidebar.user.role.platform_admin' | 'sidebar.user.
 export function Sidebar() {
   const { t } = useTranslation()
   const user = useAuthStore((s) => s.user)
+  const clearSession = useAuthStore((s) => s.clearSession)
+  const navigate = useNavigate()
   const navItems = user ? NAV_BY_ROLE[user.role] : []
+
+  function handleSignOut() {
+    if (import.meta.env.VITE_USE_MOCK !== 'true' && user) signOut(user.email)
+    clearSession()
+    void navigate('/', { replace: true })
+  }
 
   return (
     <aside className="flex min-h-screen w-[232px] shrink-0 flex-col justify-between bg-navy px-5 py-7">
@@ -76,13 +85,22 @@ export function Sidebar() {
       <div className="flex flex-col gap-3">
         <LanguageSwitcher />
         {user && (
-          <div className="flex flex-col gap-0.5">
-            <p className="truncate font-body text-[0.8125rem] leading-[1.4] text-nav-text">
-              {user.email}
-            </p>
-            <p className="font-body text-[0.8125rem] leading-[1.4] text-nav-text-dim">
-              {t(ROLE_KEY[user.role])}
-            </p>
+          <div className="flex flex-col gap-2 border-t border-white/10 pt-3">
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <p className="truncate font-body text-[0.8125rem] leading-[1.4] text-nav-text">
+                {user.email}
+              </p>
+              <p className="font-body text-[0.8125rem] leading-[1.4] text-nav-text-dim">
+                {t(ROLE_KEY[user.role])}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="cursor-pointer rounded-md bg-critical px-3 py-1.5 font-body text-[0.8125rem] font-semibold text-white transition-opacity duration-150 ease-[ease] hover:opacity-88 focus-visible:outline-2 focus-visible:outline-cyan"
+            >
+              {t('sidebar.signOut')}
+            </button>
           </div>
         )}
         <p className="font-body text-[0.8125rem] leading-[1.4] text-nav-text-dim">

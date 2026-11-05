@@ -1,8 +1,19 @@
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { CognitoUser } from 'amazon-cognito-identity-js'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useNavigate } from 'react-router'
+import { z } from 'zod'
+import { completeNewPassword, signIn, signOut } from '../../auth/cognito'
 import { useAuthStore, type AuthUser, type Role } from '../../auth/store'
 import { Button } from '../../components/ui/Button'
+import { Input } from '../../components/ui/Input'
+import { fetchMe } from '../../api/me'
+import { ApiError } from '../../api/client'
 import { setMockRole } from '../../test/mocks/handlers/auth'
+
+// ── Mock login (VITE_USE_MOCK=true) ─────────────────────────────────────────
 
 interface MockRoleOption {
   role: Role
@@ -25,14 +36,285 @@ function mockUser(role: Role, email: string): AuthUser {
   }
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+type LoginErrorKey =
+  | 'login.errors.badCredentials'
+  | 'login.errors.userDisabled'
+  | 'login.errors.network'
+  | 'login.errors.passwordPolicy'
+
+function cognitoErrorKey(err: unknown): LoginErrorKey {
+  if (err instanceof Error) {
+    if (err.name === 'NotAuthorizedException' || err.name === 'UserNotFoundException') {
+      return 'login.errors.badCredentials'
+    }
+    if (err.name === 'InvalidPasswordException' || err.name === 'InvalidParameterException') {
+      return 'login.errors.passwordPolicy'
+    }
+  }
+  return 'login.errors.network'
+}
+
+function destForRole(role: Role): string {
+  return role === 'platform_admin' ? '/tenants' : '/config'
+}
+
+// ── Shared layout wrapper ────────────────────────────────────────────────────
+
+function LoginLayout({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation()
+  return (
+    <div className="flex min-h-screen">
+      {/* Left brand panel */}
+      <div className="flex w-[560px] shrink-0 flex-col justify-between bg-navy px-14 pb-12 pt-14">
+        <div className="flex flex-col gap-7">
+          <div className="flex items-center gap-4">
+            <img src="/castle-logo.svg" alt="" className="size-16 shrink-0" aria-hidden="true" />
+            <span className="font-title text-[2rem] leading-[1.2] whitespace-nowrap">
+              <span className="text-white">BARB</span>
+              <span className="text-cyan">ATTACK</span>
+            </span>
+          </div>
+          <p className="font-title text-[2.125rem] leading-[1.2] text-white">
+            {t('login.form.tagline')}
+          </p>
+          <p className="font-body text-[1rem] leading-[1.4] text-nav-text">
+            {t('login.form.subtitle')}
+          </p>
+        </div>
+        <p className="font-body text-[0.8125rem] leading-[1.4] text-nav-text-dim">
+          {t('sidebar.footer.course')}
+        </p>
+      </div>
+
+      {/* Right access panel */}
+      <div className="flex flex-1 items-center justify-center bg-panel p-10">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+// ── Step 1: credentials ──────────────────────────────────────────────────────
+
+const credSchema = z.object({
+  email: z.string().min(1),
+  password: z.string().min(1),
+})
+type CredFields = z.infer<typeof credSchema>
+
+interface CredFormProps {
+  onNewPasswordRequired: (cognitoUser: CognitoUser, email: string) => void
+}
+
+function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
+  const { t } = useTranslation()
+  const setSession = useAuthStore((s) => s.setSession)
+  const clearSession = useAuthStore((s) => s.clearSession)
+  const navigate = useNavigate()
+  const [serverError, setServerError] = useState<string | null>(null)
+
+  const { register, handleSubmit, formState: { isSubmitting } } = useForm<CredFields>({
+    resolver: zodResolver(credSchema),
+  })
+
+  async function onSubmit({ email, password }: CredFields) {
+    setServerError(null)
+    try {
+      const result = await signIn(email, password)
+
+      if (result.kind === 'newPasswordRequired') {
+        onNewPasswordRequired(result.cognitoUser, email)
+        return
+      }
+
+      // Temporarily expose the token so fetchMe can use the axios interceptor.
+      useAuthStore.setState({ accessToken: result.accessToken })
+      try {
+        const me = await fetchMe()
+        setSession(
+          { id: me.id, email: me.email, role: me.role, customer: me.customer },
+          result.accessToken,
+        )
+        void navigate(destForRole(me.role), { replace: true })
+      } catch (meErr) {
+        clearSession()
+        signOut(email)
+        if (meErr instanceof ApiError && meErr.failure.kind === 'http' && meErr.failure.status === 401) {
+          setServerError(t('login.errors.userDisabled'))
+        } else {
+          setServerError(t('login.errors.network'))
+        }
+      }
+    } catch (err) {
+      setServerError(t(cognitoErrorKey(err)))
+    }
+  }
+
+  return (
+    <form
+      onSubmit={(e) => { void handleSubmit(onSubmit)(e) }}
+      className="flex w-[420px] flex-col gap-[18px] rounded-xl border border-border-panel bg-white px-8 pb-7 pt-8"
+    >
+      <div className="flex flex-col gap-1.5">
+        <h1 className="font-title text-[1.625rem] leading-[1.15] text-navy">
+          {t('login.form.title')}
+        </h1>
+        <p className="font-body text-[0.9375rem] leading-[1.4] text-gray">
+          {t('login.form.access')}
+        </p>
+      </div>
+
+      {serverError && (
+        <p role="alert" className="rounded-md bg-critical/10 px-3.5 py-2.5 font-body text-[0.875rem] text-critical">
+          {serverError}
+        </p>
+      )}
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="email" className="font-body text-[0.875rem] font-semibold text-navy">
+          {t('login.form.email')}
+        </label>
+        <Input
+          id="email"
+          type="email"
+          autoComplete="email"
+          placeholder={t('login.form.emailPlaceholder')}
+          {...register('email')}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="password" className="font-body text-[0.875rem] font-semibold text-navy">
+          {t('login.form.password')}
+        </label>
+        <Input
+          id="password"
+          type="password"
+          autoComplete="current-password"
+          placeholder="••••••••••••"
+          {...register('password')}
+        />
+      </div>
+
+      <Button type="submit" variant="secondary" size="lg" loading={isSubmitting} className="w-full justify-center">
+        {isSubmitting ? t('login.form.submitting') : t('login.form.submit')}
+      </Button>
+
+      <p className="rounded-md bg-panel px-3.5 py-3 font-body text-[0.8125rem] leading-[1.4] text-navy">
+        {t('login.form.notice')}
+      </p>
+    </form>
+  )
+}
+
+// ── Step 2: new password ─────────────────────────────────────────────────────
+
+const newPwSchema = z.object({
+  newPassword: z.string().min(1),
+})
+type NewPwFields = z.infer<typeof newPwSchema>
+
+interface NewPasswordFormProps {
+  cognitoUser: CognitoUser
+  email: string
+}
+
+function NewPasswordForm({ cognitoUser, email }: NewPasswordFormProps) {
+  const { t } = useTranslation()
+  const setSession = useAuthStore((s) => s.setSession)
+  const clearSession = useAuthStore((s) => s.clearSession)
+  const navigate = useNavigate()
+  const [serverError, setServerError] = useState<string | null>(null)
+
+  const { register, handleSubmit, formState: { isSubmitting } } = useForm<NewPwFields>({
+    resolver: zodResolver(newPwSchema),
+  })
+
+  async function onSubmit({ newPassword }: NewPwFields) {
+    setServerError(null)
+    try {
+      const accessToken = await completeNewPassword(cognitoUser, newPassword)
+      useAuthStore.setState({ accessToken })
+      try {
+        const me = await fetchMe()
+        setSession(
+          { id: me.id, email: me.email, role: me.role, customer: me.customer },
+          accessToken,
+        )
+        void navigate(destForRole(me.role), { replace: true })
+      } catch (meErr) {
+        clearSession()
+        signOut(email)
+        if (meErr instanceof ApiError && meErr.failure.kind === 'http' && meErr.failure.status === 401) {
+          setServerError(t('login.errors.userDisabled'))
+        } else {
+          setServerError(t('login.errors.network'))
+        }
+      }
+    } catch (err) {
+      setServerError(t(cognitoErrorKey(err)))
+    }
+  }
+
+  return (
+    <form
+      onSubmit={(e) => { void handleSubmit(onSubmit)(e) }}
+      className="flex w-[420px] flex-col gap-[18px] rounded-xl border border-border-panel bg-white px-8 pb-7 pt-8"
+    >
+      <div className="flex flex-col gap-1.5">
+        <h1 className="font-title text-[1.625rem] leading-[1.15] text-navy">
+          {t('login.newPassword.title')}
+        </h1>
+        <p className="font-body text-[0.9375rem] leading-[1.4] text-gray">
+          {t('login.newPassword.subtitle')}
+        </p>
+      </div>
+
+      {serverError && (
+        <p role="alert" className="rounded-md bg-critical/10 px-3.5 py-2.5 font-body text-[0.875rem] text-critical">
+          {serverError}
+        </p>
+      )}
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="newPassword" className="font-body text-[0.875rem] font-semibold text-navy">
+          {t('login.newPassword.label')}
+        </label>
+        <Input
+          id="newPassword"
+          type="password"
+          autoComplete="new-password"
+          {...register('newPassword')}
+        />
+        <p className="font-body text-[0.8125rem] leading-[1.4] text-gray">
+          {t('login.newPassword.policy')}
+        </p>
+      </div>
+
+      <Button type="submit" variant="secondary" size="lg" loading={isSubmitting} className="w-full justify-center">
+        {isSubmitting ? t('login.newPassword.submitting') : t('login.newPassword.submit')}
+      </Button>
+    </form>
+  )
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+type Step =
+  | { kind: 'credentials' }
+  | { kind: 'newPassword'; cognitoUser: CognitoUser; email: string }
+
 export function LoginPage() {
   const { t } = useTranslation()
   const user = useAuthStore((s) => s.user)
   const setSession = useAuthStore((s) => s.setSession)
   const navigate = useNavigate()
+  const [step, setStep] = useState<Step>({ kind: 'credentials' })
 
   if (user) {
-    return <Navigate to={user.role === 'platform_admin' ? '/tenants' : '/config'} replace />
+    return <Navigate to={destForRole(user.role)} replace />
   }
 
   if (import.meta.env.VITE_USE_MOCK === 'true') {
@@ -57,7 +339,7 @@ export function LoginPage() {
               onClick={() => {
                 setMockRole(role)
                 setSession(mockUser(role, email), 'mock-access-token')
-                void navigate(role === 'platform_admin' ? '/tenants' : '/config', { replace: true })
+                void navigate(destForRole(role), { replace: true })
               }}
             >
               {t(labelKey)}
@@ -69,12 +351,16 @@ export function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-panel px-8">
-      <span className="font-title text-[2rem] leading-none">
-        <span className="text-navy">BARB</span>
-        <span className="text-cyan">ATTACK</span>
-      </span>
-      <p className="font-body text-[0.9375rem] text-gray">{t('login.real.comingSoon')}</p>
-    </main>
+    <LoginLayout>
+      {step.kind === 'credentials' ? (
+        <CredentialsForm
+          onNewPasswordRequired={(cognitoUser, email) =>
+            setStep({ kind: 'newPassword', cognitoUser, email })
+          }
+        />
+      ) : (
+        <NewPasswordForm cognitoUser={step.cognitoUser} email={step.email} />
+      )}
+    </LoginLayout>
   )
 }
