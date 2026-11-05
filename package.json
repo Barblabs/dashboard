@@ -10,12 +10,14 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "gen:types": "openapi-typescript http://localhost:8080/openapi.json -o src/api/generated.ts",
     "prepare": "husky"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@hookform/resolvers": "^5.9.2",
     "@tanstack/react-query": "^5.104.5",
+    "amazon-cognito-identity-js": "^6.3.22",
     "axios": "^1.20.0",
     "i18next": "^26.5.5",
     "i18next-browser-languagedetector": "^8.2.1",
@@ -24,12 +26,14 @@
     "react-hook-form": "^7.90.0",
     "react-i18next": "^17.1.2",
     "react-router": "^8.5.0",
+    "recharts": "^3.10.1",
     "zod": "^4.6.7",
     "zustand": "^5.0.16"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query-devtools": "^5.104.5",
+    "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.8",
@@ -39,10 +43,16 @@
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "msw": "^3.0.3",
+    "openapi-typescript": "^7.13.0",
     "oxlint": "^1.89.0",
     "tailwindcss": "^4.3.3",
-    "typescript": "~6.0.3",
+    "typescript": "~5.9.3",
     "vite": "^6.3.5",
     "vitest": "^5.0.5"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

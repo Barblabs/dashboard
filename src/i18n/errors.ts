@@ -19,6 +19,10 @@ const CODE_KEYS = new Map<string, ParseKeys>([
   ['sync_in_progress', 'config.errors.syncInProgress'],
   ['sync_failed', 'config.errors.syncFailed'],
   ['internal_error', 'config.errors.internalError'],
+  ['email_taken', 'users.invite.emailTaken'],
+  ['user_not_found', 'users.errors.userNotFound'],
+  ['last_customer_admin', 'users.errors.lastCustomerAdmin'],
+  ['customer_name_taken', 'tenants.errors.nameTaken'],
 ])
 
 interface RequestErrorKeys {

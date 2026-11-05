@@ -2,10 +2,22 @@ import type { Translations } from './en'
 
 export const es: Translations = {
   sidebar: {
+    superAdmin: 'Super Admin',
+    signOut: 'Cerrar sesión',
     nav: {
       findings: 'Hallazgos',
       config: 'Configuración',
       notifications: 'Notificaciones',
+      users: 'Usuarios',
+      tenants: 'Tenants',
+      'admin-dashboard': 'Dashboard',
+    },
+    user: {
+      role: {
+        platform_admin: 'Super Admin',
+        customer_admin: 'Administrador',
+        viewer: 'Lector',
+      },
     },
     footer: {
       course: 'Reto Lyft · TC3008C',
@@ -15,6 +27,50 @@ export const es: Translations = {
       label: 'Idioma',
     },
   },
+  login: {
+    mock: {
+      title: 'Modo de prueba',
+      subtitle: 'Elige un rol para entrar sin Cognito.',
+      platformAdmin: 'Super Admin (platform_admin)',
+      customerAdmin: 'Administrador (customer_admin)',
+      viewer: 'Lector (viewer)',
+    },
+    real: {
+      comingSoon: 'Inicio de sesión con Cognito próximamente. Usa VITE_USE_MOCK=true para desarrollo.',
+    },
+    form: {
+      tagline: 'Las vulnerabilidades que sí afectan a tu stack, priorizadas.',
+      subtitle: 'Business-Aware Risk-Based Analysis of Threats, Tailored Alerts & Countermeasure Knowledge.',
+      title: 'Iniciar sesión',
+      access: 'Acceso restringido al equipo de seguridad y a los dueños de activo.',
+      email: 'Correo',
+      emailPlaceholder: 'nombre@empresa.com',
+      password: 'Contraseña',
+      submit: 'Entrar',
+      submitting: 'Entrando…',
+      notice: 'No hay registro público. Las cuentas y los roles los asigna un administrador.',
+    },
+    newPassword: {
+      title: 'Crear contraseña',
+      subtitle: 'Es tu primer acceso. Elige una contraseña nueva.',
+      label: 'Nueva contraseña',
+      policy: 'Mínimo 12 caracteres, con mayúsculas, minúsculas, números y símbolos.',
+      submit: 'Guardar',
+      submitting: 'Guardando…',
+    },
+    errors: {
+      badCredentials: 'Correo o contraseña incorrectos.',
+      userDisabled: 'Tu cuenta está deshabilitada. Contacta a tu administrador.',
+      network: 'No se pudo conectar con el servidor.',
+      passwordPolicy: 'La contraseña no cumple los requisitos de seguridad.',
+    },
+  },
+  deactivated: {
+    title: 'Organización desactivada',
+    message:
+      'El acceso de tu organización ha sido desactivado. Contacta a tu administrador de BARBATTACK para más información.',
+    signOut: 'Cerrar sesión',
+  },
   placeholder: {
     comingSoon: 'Próximamente',
   },
@@ -23,6 +79,155 @@ export const es: Translations = {
   },
   notifications: {
     title: 'Notificaciones',
+  },
+  users: {
+    title: 'Usuarios',
+    loading: 'Cargando usuarios…',
+    loadFailed: 'No se pudo cargar la lista de usuarios.',
+    empty: 'Aún no hay usuarios.',
+    retry: 'Reintentar',
+    you: 'Tú',
+    search: { placeholder: 'Buscar por correo…' },
+    counter: {
+      user: 'usuario',
+      users: 'usuarios',
+      disabled: 'deshabilitado',
+      disabledMany: 'deshabilitados',
+    },
+    invite: {
+      button: 'Invitar usuario',
+      title: 'Invitar usuario',
+      cancel: 'Cancelar',
+      email: {
+        label: 'Correo electrónico',
+        required: 'El correo es obligatorio.',
+        invalid: 'Ingresa un correo válido.',
+      },
+      role: { label: 'Rol' },
+      submit: 'Enviar invitación',
+      submitting: 'Enviando…',
+      failed: 'No se pudo enviar la invitación.',
+      emailTaken: 'Ya existe un usuario con este correo.',
+      tempPasswordNotice: 'El usuario recibirá un correo con una contraseña temporal.',
+    },
+    columns: {
+      email: 'Correo',
+      role: 'Rol',
+    },
+    role: {
+      customer_admin: 'Administrador',
+      viewer: 'Lector',
+    },
+    status: {
+      disabled: 'Deshabilitado',
+    },
+    actions: {
+      editRole: 'Editar rol',
+      disable: 'Deshabilitar',
+      disableFailed: 'No se pudo deshabilitar al usuario.',
+      roleChangeFailed: 'No se pudo cambiar el rol.',
+    },
+    changeRole: {
+      title: 'Cambiar rol',
+      save: 'Guardar',
+    },
+    disable: {
+      title: 'Deshabilitar usuario',
+    },
+    errors: {
+      userNotFound: 'Usuario no encontrado.',
+      lastCustomerAdmin: 'No se puede eliminar al último administrador de la organización.',
+    },
+    confirm: {
+      text: 'Este usuario ya no podrá iniciar sesión. ¿Continuar?',
+      confirm: 'Sí, deshabilitar',
+      cancel: 'Cancelar',
+    },
+  },
+  tenants: {
+    title: 'Organizaciones',
+    loading: 'Cargando organizaciones…',
+    loadFailed: 'No se pudo cargar la lista de organizaciones.',
+    empty: 'Aún no hay organizaciones.',
+    retry: 'Reintentar',
+    search: { placeholder: 'Buscar por nombre…' },
+    counter: {
+      organizations: 'organizaciones',
+      deactivated: 'desactivadas',
+    },
+    status: {
+      active: 'Activa',
+      deactivated: 'Desactivada · sus usuarios no pueden entrar',
+    },
+    created: 'Creada el {{date}}',
+    actions: {
+      rename: 'Renombrar',
+      deactivate: 'Desactivar',
+      reactivate: 'Reactivar',
+    },
+    rename: {
+      title: 'Renombrar organización',
+      label: 'Nombre',
+      save: 'Guardar',
+      cancel: 'Cancelar',
+      failed: 'No se pudo renombrar la organización.',
+    },
+    deactivate: {
+      title: 'Desactivar organización',
+      body: 'Los usuarios de esta organización ya no podrán iniciar sesión.',
+      confirm: 'Sí, desactivar',
+      cancel: 'Cancelar',
+      failed: 'No se pudo desactivar la organización.',
+    },
+    reactivate: {
+      failed: 'No se pudo reactivar la organización.',
+    },
+    create: {
+      button: 'Nueva organización',
+      step: 'Paso {{current}} de {{total}}',
+      step1: {
+        title: 'Nueva organización',
+        label: 'Nombre de la organización',
+        placeholder: 'Nombre de la empresa',
+        next: 'Siguiente',
+        required: 'El nombre es obligatorio.',
+      },
+      step2: {
+        title: 'Correo del administrador',
+        label: 'Correo del administrador',
+        notice: 'El administrador recibirá un correo con una contraseña temporal.',
+        back: 'Atrás',
+        submit: 'Crear y enviar invitación',
+        submitting: 'Creando…',
+        required: 'El correo es obligatorio.',
+        invalid: 'Ingresa un correo válido.',
+      },
+      failed: 'No se pudo crear la organización.',
+    },
+    errors: {
+      nameTaken: 'Ya existe una organización con este nombre.',
+    },
+  },
+  adminDashboard: {
+    title: 'Dashboard',
+    loading: 'Cargando…',
+    loadFailed: 'No se pudo cargar el dashboard.',
+    retry: 'Reintentar',
+    stats: {
+      total: 'Organizaciones',
+      active: 'Activas',
+      deactivated: 'Desactivadas',
+      newThisMonth: 'Nuevas este mes',
+    },
+    chart: {
+      title: 'Altas por mes',
+    },
+    recent: {
+      title: 'Organizaciones recientes',
+      empty: 'Aún no hay organizaciones.',
+    },
+    notice:
+      'Como Platform Admin solo tienes visibilidad del nombre, fecha de alta y estado. El acceso a usuarios, CMDB y activos pertenece a cada organización.',
   },
   status: {
     backHome: 'Volver al inicio',
@@ -215,6 +420,9 @@ export const es: Translations = {
       subtitle: 'Selecciona de dónde viene tu inventario de activos.',
       select: 'Seleccionar',
       comingSoon: 'Próximamente',
+    },
+    viewer: {
+      notConnected: 'Tu organización no tiene ningún CMDB configurado.',
     },
     providers: {
       itop: {

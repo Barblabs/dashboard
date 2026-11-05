@@ -39,11 +39,17 @@ cp .env.example .env
 
 Variables disponibles:
 
-| Variable        | Descripción                                                        | Ejemplo                 |
-|-----------------|--------------------------------------------------------------------|-------------------------|
-| `VITE_API_URL`  | URL base del backend (sin barra al final)                          | `http://localhost:8080` |
+| Variable                    | Descripción                                                                          | Ejemplo                    |
+|-----------------------------|--------------------------------------------------------------------------------------|----------------------------|
+| `VITE_API_URL`              | URL base del backend (sin barra al final)                                            | `http://localhost:8080`    |
+| `VITE_USE_MOCK`             | `true` activa el modo mock **solo en desarrollo** (`npm run dev`): MSW intercepta todas las peticiones, sin backend ni Cognito. En el build de producción esta variable se ignora aunque esté en `true`. | `true`                  |
+| `VITE_COGNITO_REGION`       | Región de AWS del User Pool (requerida cuando `VITE_USE_MOCK` no es `true`)          | `us-east-1`                |
+| `VITE_COGNITO_USER_POOL_ID` | ID del User Pool de Cognito                                                          | `us-east-1_XXXXXXXXX`     |
+| `VITE_COGNITO_CLIENT_ID`    | ID del cliente de Cognito (App Client)                                               | `XXXXXXXXXXXXXXXXXXXXXXXXXX` |
 
 ## Levantar en local
+
+### Con backend real
 
 ```bash
 npm run dev
@@ -52,6 +58,30 @@ npm run dev
 Abre [http://localhost:5173](http://localhost:5173).
 
 Requiere el backend corriendo con `./barbackend serve`.
+
+### Modo mock (sin backend ni Cognito)
+
+Solo funciona con `npm run dev`. **El build de producción ignora `VITE_USE_MOCK` aunque esté en `true`**: el selector de roles y MSW no se incluyen en el bundle.
+
+```bash
+# En .env o .env.local:
+VITE_USE_MOCK=true
+
+npm run dev
+```
+
+La pantalla de login muestra tres botones para elegir rol (`platform_admin`, `customer_admin`, `viewer`) sin necesidad de credenciales de Cognito ni backend corriendo.
+
+## Tipos del contrato (openapi-typescript)
+
+El archivo `src/api/generated.ts` contiene los tipos TypeScript generados desde el OpenAPI del backend. Está commiteado en el repo para que el build no dependa de que el backend esté corriendo.
+
+Cuando el backend cambie su spec, regenera los tipos con:
+
+```bash
+# Requiere el backend corriendo en VITE_API_URL (por defecto http://localhost:8080)
+npm run gen:types
+```
 
 ## Idiomas (i18n)
 

@@ -1,9 +1,21 @@
 export const en = {
   sidebar: {
+    superAdmin: 'Super Admin',
+    signOut: 'Sign out',
     nav: {
       findings: 'Findings',
       config: 'Configuration',
       notifications: 'Notifications',
+      users: 'Users',
+      tenants: 'Tenants',
+      'admin-dashboard': 'Dashboard',
+    },
+    user: {
+      role: {
+        platform_admin: 'Super Admin',
+        customer_admin: 'Admin',
+        viewer: 'Viewer',
+      },
     },
     footer: {
       course: 'Reto Lyft · TC3008C',
@@ -13,6 +25,50 @@ export const en = {
       label: 'Language',
     },
   },
+  login: {
+    mock: {
+      title: 'Test mode',
+      subtitle: 'Choose a role to sign in without Cognito.',
+      platformAdmin: 'Super Admin (platform_admin)',
+      customerAdmin: 'Admin (customer_admin)',
+      viewer: 'Viewer (viewer)',
+    },
+    real: {
+      comingSoon: 'Cognito sign-in coming soon. Use VITE_USE_MOCK=true for development.',
+    },
+    form: {
+      tagline: 'The vulnerabilities that actually affect your stack, prioritized.',
+      subtitle: 'Business-Aware Risk-Based Analysis of Threats, Tailored Alerts & Countermeasure Knowledge.',
+      title: 'Sign in',
+      access: 'Access restricted to the security team and asset owners.',
+      email: 'Email',
+      emailPlaceholder: 'name@company.com',
+      password: 'Password',
+      submit: 'Sign in',
+      submitting: 'Signing in…',
+      notice: 'No public registration. Accounts and roles are assigned by an administrator.',
+    },
+    newPassword: {
+      title: 'Create password',
+      subtitle: 'This is your first sign-in. Choose a new password.',
+      label: 'New password',
+      policy: 'At least 12 characters, with uppercase, lowercase, numbers and symbols.',
+      submit: 'Save',
+      submitting: 'Saving…',
+    },
+    errors: {
+      badCredentials: 'Incorrect email or password.',
+      userDisabled: 'Your account is disabled. Contact your administrator.',
+      network: 'Could not connect to the server.',
+      passwordPolicy: 'The password does not meet security requirements.',
+    },
+  },
+  deactivated: {
+    title: 'Organization deactivated',
+    message:
+      "Your organization's access has been deactivated. Contact your BARBATTACK administrator for more information.",
+    signOut: 'Sign out',
+  },
   placeholder: {
     comingSoon: 'Coming soon',
   },
@@ -21,6 +77,155 @@ export const en = {
   },
   notifications: {
     title: 'Notifications',
+  },
+  users: {
+    title: 'Users',
+    loading: 'Loading users…',
+    loadFailed: 'Could not load users.',
+    empty: 'No users yet.',
+    retry: 'Retry',
+    you: 'You',
+    search: { placeholder: 'Search by email…' },
+    counter: {
+      user: 'user',
+      users: 'users',
+      disabled: 'disabled',
+      disabledMany: 'disabled',
+    },
+    invite: {
+      button: 'Invite user',
+      title: 'Invite user',
+      cancel: 'Cancel',
+      email: {
+        label: 'Email',
+        required: 'Email is required.',
+        invalid: 'Enter a valid email.',
+      },
+      role: { label: 'Role' },
+      submit: 'Send invitation',
+      submitting: 'Sending…',
+      failed: 'Could not send the invitation.',
+      emailTaken: 'A user with this email already exists.',
+      tempPasswordNotice: 'The user will receive an email with a temporary password.',
+    },
+    columns: {
+      email: 'Email',
+      role: 'Role',
+    },
+    role: {
+      customer_admin: 'Admin',
+      viewer: 'Viewer',
+    },
+    status: {
+      disabled: 'Disabled',
+    },
+    actions: {
+      editRole: 'Edit role',
+      disable: 'Disable',
+      disableFailed: 'Could not disable this user.',
+      roleChangeFailed: 'Could not change the role.',
+    },
+    changeRole: {
+      title: 'Change role',
+      save: 'Save',
+    },
+    disable: {
+      title: 'Disable user',
+    },
+    errors: {
+      userNotFound: 'User not found.',
+      lastCustomerAdmin: 'Cannot remove the last admin of your organization.',
+    },
+    confirm: {
+      text: 'This user will no longer be able to sign in. Continue?',
+      confirm: 'Yes, disable',
+      cancel: 'Cancel',
+    },
+  },
+  tenants: {
+    title: 'Organizations',
+    loading: 'Loading organizations…',
+    loadFailed: 'Could not load organizations.',
+    empty: 'No organizations yet.',
+    retry: 'Retry',
+    search: { placeholder: 'Search by name…' },
+    counter: {
+      organizations: 'organizations',
+      deactivated: 'deactivated',
+    },
+    status: {
+      active: 'Active',
+      deactivated: 'Deactivated · their users cannot sign in',
+    },
+    created: 'Created {{date}}',
+    actions: {
+      rename: 'Rename',
+      deactivate: 'Deactivate',
+      reactivate: 'Reactivate',
+    },
+    rename: {
+      title: 'Rename organization',
+      label: 'Name',
+      save: 'Save',
+      cancel: 'Cancel',
+      failed: 'Could not rename the organization.',
+    },
+    deactivate: {
+      title: 'Deactivate organization',
+      body: 'Users of this organization will no longer be able to sign in.',
+      confirm: 'Yes, deactivate',
+      cancel: 'Cancel',
+      failed: 'Could not deactivate the organization.',
+    },
+    reactivate: {
+      failed: 'Could not reactivate the organization.',
+    },
+    create: {
+      button: 'New organization',
+      step: 'Step {{current}} of {{total}}',
+      step1: {
+        title: 'New organization',
+        label: 'Organization name',
+        placeholder: 'Company name',
+        next: 'Next',
+        required: 'The name is required.',
+      },
+      step2: {
+        title: 'Admin email',
+        label: 'Admin email',
+        notice: 'The admin will receive an email with a temporary password.',
+        back: 'Back',
+        submit: 'Create and send invitation',
+        submitting: 'Creating…',
+        required: 'The email is required.',
+        invalid: 'Enter a valid email.',
+      },
+      failed: 'Could not create the organization.',
+    },
+    errors: {
+      nameTaken: 'An organization with this name already exists.',
+    },
+  },
+  adminDashboard: {
+    title: 'Dashboard',
+    loading: 'Loading…',
+    loadFailed: 'Could not load dashboard data.',
+    retry: 'Retry',
+    stats: {
+      total: 'Organizations',
+      active: 'Active',
+      deactivated: 'Deactivated',
+      newThisMonth: 'New this month',
+    },
+    chart: {
+      title: 'New organizations per month',
+    },
+    recent: {
+      title: 'Recent organizations',
+      empty: 'No organizations yet.',
+    },
+    notice:
+      'As Platform Admin you can see names, creation dates and status only. Access to users, CMDB and assets belongs to each organization.',
   },
   status: {
     backHome: 'Back to home',
@@ -213,6 +418,9 @@ export const en = {
       subtitle: 'Select where your asset inventory comes from.',
       select: 'Select',
       comingSoon: 'Coming soon',
+    },
+    viewer: {
+      notConnected: 'No CMDB is configured for your organization.',
     },
     providers: {
       itop: {

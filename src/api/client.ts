@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { useAuthStore } from '../auth/store'
 
 /*
  * `network` means the backend never answered (down, CORS, offline), so there is no
@@ -56,16 +57,28 @@ const apiClient = axios.create({
   adapter: 'fetch',
 })
 
-apiClient.interceptors.response.use(undefined, (error: unknown) =>
-  Promise.reject(toApiError(error)),
-)
+apiClient.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().accessToken
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+apiClient.interceptors.response.use(undefined, (error: unknown) => {
+  if (axios.isAxiosError(error) && !axios.isCancel(error) && error.response) {
+    const { status, data } = error.response
+    const body = (typeof data === 'object' && data !== null ? data : {}) as ErrorBody
+    const code = typeof body.code === 'string' ? body.code : null
+    if (status === 401) useAuthStore.getState().clearSession()
+    else if (status === 403 && code === 'customer_deactivated') useAuthStore.getState().setDeactivated()
+  }
+  return Promise.reject(toApiError(error))
+})
 
 // Callers only ever need the response body.
 export const api = {
-  get: <T>(url: string) => apiClient.get<T>(url).then((response) => response.data),
-  post: <T>(url: string, body?: unknown) =>
-    apiClient.post<T>(url, body).then((response) => response.data),
-  put: <T>(url: string, body?: unknown) =>
-    apiClient.put<T>(url, body).then((response) => response.data),
+  get: <T>(url: string) => apiClient.get<T>(url).then((r) => r.data),
+  post: <T>(url: string, body?: unknown) => apiClient.post<T>(url, body).then((r) => r.data),
+  put: <T>(url: string, body?: unknown) => apiClient.put<T>(url, body).then((r) => r.data),
+  patch: <T>(url: string, body?: unknown) => apiClient.patch<T>(url, body).then((r) => r.data),
   delete: (url: string) => apiClient.delete(url).then(() => undefined),
 }
