@@ -4,6 +4,7 @@ import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-rou
 import { useAuthStore, type Role } from './auth/store'
 import { Sidebar } from './components/Sidebar'
 import { AdminDashboardPage } from './pages/AdminDashboard'
+import { BusinessContextPage } from './pages/BusinessContext'
 import { ConfigPage } from './pages/Config'
 import { DeactivatedPage } from './pages/Deactivated'
 import { FindingsPage } from './pages/Findings'
@@ -77,6 +78,10 @@ function createAppRouter() {
             {
               path: 'config',
               element: <RoleGuard roles={CUSTOMER_ROLES}><ConfigPage /></RoleGuard>,
+            },
+            {
+              path: 'business-context',
+              element: <RoleGuard roles={CUSTOMER_ROLES}><BusinessContextPage /></RoleGuard>,
             },
             {
               path: 'notifications',
