@@ -4,6 +4,7 @@ import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-rou
 import { useAuthStore, type Role } from './auth/store'
 import { Sidebar } from './components/Sidebar'
 import { AdminDashboardPage } from './pages/AdminDashboard'
+import { BusinessContextPage } from './pages/BusinessContext'
 import { ConfigPage } from './pages/Config'
 import { DeactivatedPage } from './pages/Deactivated'
 import { FindingsPage } from './pages/Findings'
@@ -49,9 +50,10 @@ function DefaultRedirect() {
   return <Navigate to={user.role === 'platform_admin' ? '/tenants' : '/config'} replace />
 }
 
+// The page scrolls inside its main, so the sidebar and anything sticky in a page stay in view.
 function AppLayout() {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen">
       <Sidebar />
       <Outlet />
     </div>
@@ -76,6 +78,10 @@ function createAppRouter() {
             {
               path: 'config',
               element: <RoleGuard roles={CUSTOMER_ROLES}><ConfigPage /></RoleGuard>,
+            },
+            {
+              path: 'business-context',
+              element: <RoleGuard roles={CUSTOMER_ROLES}><BusinessContextPage /></RoleGuard>,
             },
             {
               path: 'notifications',

@@ -4,6 +4,40 @@
  */
 
 export interface paths {
+    "/analista/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start a conversation with the Analista */
+        post: operations["start-analista-conversation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analista/conversations/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a message in one of the User's conversations with the Analista */
+        post: operations["continue-analista-conversation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assets": {
         parameters: {
             query?: never;
@@ -18,6 +52,70 @@ export interface paths {
         get: operations["list-assets"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/business-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the newest version of the Customer's Business Context
+         * @description Version 0, with nothing stated, until a Customer Admin saves one. Every User of the Customer reads it.
+         */
+        get: operations["get-business-context"];
+        /**
+         * Save the Customer's Business Context as its next version
+         * @description Only a Customer Admin saves. version is the one read: a save on any other is refused with business_context_stale, so a concurrent save is never overwritten.
+         */
+        put: operations["save-business-context"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/business-context/brief": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read the Customer's Business Context as Markdown, for a model's prompt or a person
+         * @description Every field has a line, and one not stated says so. The ETag is the version.
+         */
+        get: operations["get-business-context-brief"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/business-context/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask the Drafter for a Business Context read from documents, without saving it
+         * @description Only a Customer Admin asks. Give pasted text, files or both: text, Markdown, CSV, JSON, PDFs or Word documents (.docx), up to 10 of them, 10 MB each and 20 MB together. The Drafter reads them together, which can take a minute. The draft is for a Customer Admin to review and save.
+         */
+        post: operations["draft-business-context"];
         delete?: never;
         options?: never;
         head?: never;
@@ -182,6 +280,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/prioritizations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the Prioritizations of the Customer's open Findings, newest first
+         * @description The Findings pipeline creates them; the newest is the order to follow.
+         */
+        get: operations["list-prioritizations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/prioritizations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read a Prioritization: its Priority Groups in the order to attend them, its Findings, their Action Plans and Feedback */
+        get: operations["get-prioritization"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/prioritizations/{id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record what a User says about a Finding of a Prioritization
+         * @description It changes no Score and no order.
+         */
+        post: operations["record-prioritization-feedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/prioritizations/{id}/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask Luna for the Action Plan of one Finding of a Prioritization
+         * @description Runs Luna, which can take a minute. A Finding asked again gets a newer plan.
+         */
+        post: operations["create-action-plan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users": {
         parameters: {
             query?: never;
@@ -247,6 +422,21 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ActionPlanResponse: {
+            fixed_version: string | null;
+            mitigation: string | null;
+            sources: string[];
+            steps: string[];
+            summary: string;
+            verification: string;
+        };
+        AnalistaAnswer: {
+            conversation_id: string;
+            reply: string;
+        };
+        AnalistaMessage: {
+            message: string;
+        };
         AssetListResponse: {
             assets: components["schemas"]["AssetResponse"][];
             next_cursor: string | null;
@@ -268,6 +458,31 @@ export interface components {
             retired: boolean;
             software: components["schemas"]["SoftwareResponse"][];
             source_id: string;
+        };
+        BusinessContextFields: {
+            footprint: components["schemas"]["FootprintFields"];
+            geography: components["schemas"]["GeographyFields"];
+            operations: components["schemas"]["OperationsFields"];
+            profile: components["schemas"]["ProfileFields"];
+            risk: components["schemas"]["RiskFields"];
+        } & {
+            [key: string]: unknown;
+        };
+        BusinessContextResponse: {
+            context: components["schemas"]["BusinessContextFields"];
+            /** @description The key fields not stated */
+            gaps: string[];
+            /** @description The paths of what the Agents need most, such as profile.sectors */
+            key_fields: string[];
+            /** Format: date-time */
+            saved_at: string | null;
+            /** @description The email of the User who saved it */
+            saved_by: string | null;
+            /**
+             * Format: int64
+             * @description 0 until the Customer saves one; a save sends back the version it read
+             */
+            version: number;
         };
         ChangeRoleRequest: {
             /** @enum {string} */
@@ -308,6 +523,26 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        CriticalServiceField: {
+            /** @description Names of the Assets that run it, as the CMDB Source writes them */
+            assets: string[];
+            /** @description Up to 1000 characters */
+            description: string;
+            /**
+             * @description How badly losing it hurts the Customer
+             * @enum {string}
+             */
+            impact: "" | "critical" | "high" | "medium" | "low";
+            /**
+             * @description How long it can be down before the harm is unacceptable
+             * @enum {string}
+             */
+            max_downtime: "" | "under_1h" | "1h_4h" | "4h_24h" | "1d_3d" | "3d_7d" | "over_7d";
+            /** @description Up to 200 characters, unique regardless of case */
+            name: string;
+        } & {
+            [key: string]: unknown;
+        };
         CustomerListResponse: {
             customers: components["schemas"]["CustomerResponse"][];
         };
@@ -318,6 +553,89 @@ export interface components {
             deactivated_at: string | null;
             id: string;
             name: string;
+        };
+        DraftBusinessContextRequest: {
+            files?: components["schemas"]["DraftFile"][];
+            /** @description Pasted text, read as one more document */
+            text?: string;
+        } & {
+            [key: string]: unknown;
+        };
+        DraftFile: {
+            /** @description The file's bytes */
+            data: string;
+            /** @description Such as text/plain, application/pdf or application/vnd.openxmlformats-officedocument.wordprocessingml.document */
+            media_type: string;
+            name: string;
+        } & {
+            [key: string]: unknown;
+        };
+        DraftResponse: {
+            context: components["schemas"]["BusinessContextFields"];
+            /** @description The key fields the document did not state */
+            gaps: string[];
+        };
+        EvidenceResponse: {
+            finding_id: string;
+            /** @description RFC 6901 pointer into what the Prioritizer read of the Finding */
+            path: string;
+            value: string;
+        };
+        FeedbackRequestBody: {
+            finding_id: string;
+            note?: string;
+            /** @enum {string} */
+            verdict: "applies" | "does_not_apply" | "remediated" | "should_be_earlier" | "should_be_later";
+        };
+        FeedbackResponse: {
+            author_id: string;
+            /** Format: date-time */
+            created_at: string;
+            finding_id: string;
+            id: string;
+            note: string;
+            verdict: string;
+            via_analista: boolean;
+        };
+        FindingResponse: {
+            asset_name: string;
+            component: string;
+            cve_id: string;
+            /** @description What the Agents read, to show as evidence. Its shape is not a contract. */
+            dossier: unknown;
+            finding_id: string;
+            /**
+             * Format: int64
+             * @description Position of its Priority Group
+             */
+            group: number;
+            /** Format: double */
+            score: number;
+            /**
+             * Format: int64
+             * @description Where the Score alone would put it, 1 the highest
+             */
+            score_rank: number;
+            version: string;
+        };
+        FootprintFields: {
+            brands: string[];
+            /** @description Domain names, such as example.com; a URL keeps only its host */
+            domains: string[];
+            /** @description Platforms, SaaS and products it depends on that are not Assets */
+            technologies: string[];
+            /** @description Suppliers and partners with access to its systems or data */
+            third_parties: string[];
+        } & {
+            [key: string]: unknown;
+        };
+        GeographyFields: {
+            /** @description ISO 3166-1 alpha-2 codes of where it operates, its headquarters among them */
+            countries: string[];
+            /** @description ISO 3166-1 alpha-2 code, such as MX */
+            headquarters: string;
+        } & {
+            [key: string]: unknown;
         };
         HardwareResponse: {
             model: string;
@@ -352,16 +670,126 @@ export interface components {
             /** @enum {string} */
             role: "platform_admin" | "customer_admin" | "viewer";
         };
+        OperationsFields: {
+            /** @description Up to 25 */
+            critical_services: components["schemas"]["CriticalServiceField"][];
+            data_categories: ("personal_data" | "sensitive_personal_data" | "government_ids" | "payment_cards" | "financial_data" | "tax_data" | "health_data" | "biometric_data" | "children_data" | "employee_data" | "location_data" | "communications" | "credentials" | "intellectual_property" | "source_code" | "research_data" | "legal_data" | "operational_data" | "classified_information")[];
+            environments: ("on_premises" | "private_cloud" | "public_cloud" | "saas" | "email_collaboration" | "erp" | "containers" | "mainframe" | "legacy_systems" | "operational_technology" | "iot" | "public_web_apps" | "public_apis" | "mobile_apps" | "point_of_sale" | "atms" | "branch_offices" | "remote_work" | "byod")[];
+            regulations: ("gdpr" | "uk_gdpr" | "lfpdppp" | "lgpdppso" | "lgpd" | "habeas_data_co" | "ley_21719_cl" | "ley_25326_ar" | "ccpa" | "pipeda" | "pci_dss" | "sox" | "glba" | "cnbv" | "banxico" | "ley_fintech" | "cnsf" | "lfpiorpi" | "dora" | "nydfs_500" | "swift_csp" | "sec_cyber" | "hipaa" | "hitrust" | "nom_024_ssa3" | "nom_151" | "nis2" | "nerc_cip" | "iec_62443" | "tisax" | "cmmc" | "fedramp" | "fisma" | "ferpa" | "coppa" | "iso_27001" | "iso_27701" | "iso_22301" | "soc_2" | "nist_csf" | "nist_800_53" | "cis_controls" | "cobit")[];
+        } & {
+            [key: string]: unknown;
+        };
         OwnerResponse: {
             email: string;
             source: string;
+        };
+        PlanRequestBody: {
+            finding_id: string;
+        };
+        PlanResponse: {
+            /** Format: date-time */
+            created_at: string;
+            finding_id: string;
+            model: string;
+            output: components["schemas"]["ActionPlanResponse"];
+            prompt_id: string;
+        };
+        PrioritizationListResponse: {
+            prioritizations: components["schemas"]["PrioritizationSummaryResponse"][];
+        };
+        PrioritizationResponse: {
+            /** Format: date-time */
+            created_at: string;
+            feedback: components["schemas"]["FeedbackResponse"][];
+            findings: components["schemas"]["FindingResponse"][];
+            /** @description In the order to attend them */
+            groups: components["schemas"]["PriorityGroupResponse"][];
+            id: string;
+            model: string;
+            /** @description The newest Action Plan of each Finding that has one */
+            plans: components["schemas"]["PlanResponse"][];
+            prompt_id: string;
+        };
+        PrioritizationSummaryResponse: {
+            /** Format: date-time */
+            created_at: string;
+            /**
+             * Format: int64
+             * @description How many Findings it orders
+             */
+            findings: number;
+            /**
+             * Format: int64
+             * @description How many Priority Groups it has
+             */
+            groups: number;
+            id: string;
+        };
+        PriorityGroupResponse: {
+            evidence: components["schemas"]["EvidenceResponse"][];
+            /** @description Findings attended at the same time */
+            finding_ids: string[];
+            /**
+             * Format: int64
+             * @description 1 is attended first
+             */
+            position: number;
+            reason: string;
+            title: string;
         };
         ProductResponse: {
             name: string;
             vendor: string;
         };
+        ProfileFields: {
+            /**
+             * @description In US dollars per year
+             * @enum {string}
+             */
+            annual_revenue: "" | "under_1m" | "1m_5m" | "5m_10m" | "10m_50m" | "50m_100m" | "100m_250m" | "250m_1b" | "1b_10b" | "over_10b";
+            /** @enum {string} */
+            employees: "" | "1_9" | "10_49" | "50_249" | "250_999" | "1000_4999" | "5000_9999" | "10000_plus";
+            /** @description Up to 1000 characters */
+            mission: string;
+            /** @enum {string} */
+            organization_type: "" | "private_company" | "public_company" | "subsidiary" | "state_owned" | "government" | "non_profit" | "academic" | "cooperative" | "international_organization";
+            /** @description STIX 2.1 industry-sector-ov codes */
+            sectors: ("agriculture" | "aerospace" | "automotive" | "chemical" | "commercial" | "communications" | "construction" | "defense" | "education" | "energy" | "entertainment" | "financial-services" | "government" | "government-emergency-services" | "government-local" | "government-national" | "government-public-services" | "government-regional" | "healthcare" | "hospitality-leisure" | "infrastructure" | "infrastructure-dams" | "infrastructure-nuclear" | "infrastructure-water" | "insurance" | "manufacturing" | "mining" | "non-profit" | "pharmaceuticals" | "retail" | "technology" | "telecommunications" | "transportation" | "utilities" | "biotechnology" | "cryptocurrency" | "e-commerce" | "food-beverage" | "gaming" | "legal" | "logistics" | "maritime" | "media" | "oil-gas" | "professional-services" | "real-estate" | "research" | "semiconductors")[];
+            /** @description What the Customer does, for whom and how, up to 2000 characters */
+            summary: string;
+            /** @description Up to 1000 characters */
+            vision: string;
+        } & {
+            [key: string]: unknown;
+        };
         RenameCustomerRequest: {
             name: string;
+        } & {
+            [key: string]: unknown;
+        };
+        RiskFields: {
+            /**
+             * @description How much risk the Customer as a whole takes, as its leadership sets it
+             * @enum {string}
+             */
+            appetite: "" | "averse" | "minimal" | "cautious" | "open" | "eager";
+            concerns: ("ransomware" | "data_theft" | "accidental_exposure" | "fraud" | "business_email_compromise" | "phishing" | "social_engineering" | "account_takeover" | "malware" | "vulnerability_exploitation" | "web_attacks" | "espionage" | "sabotage" | "ddos" | "insider" | "supply_chain" | "third_party_breach" | "hacktivism" | "cryptojacking")[];
+            /** @description What limits remediation, such as maintenance windows; up to 4000 characters */
+            constraints: string;
+            /** @description Up to 4000 characters */
+            notes: string;
+            /** @description Up to 4000 characters */
+            past_incidents: string;
+        } & {
+            [key: string]: unknown;
+        };
+        SaveBusinessContextRequest: {
+            context: components["schemas"]["BusinessContextFields"];
+            /**
+             * Format: int64
+             * @description The version read, which this save follows
+             */
+            version: number;
         } & {
             [key: string]: unknown;
         };
@@ -417,6 +845,164 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    "start-analista-conversation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalistaMessage"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalistaAnswer"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "continue-analista-conversation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalistaMessage"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalistaAnswer"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
     "list-assets": {
         parameters: {
             query?: {
@@ -474,6 +1060,240 @@ export interface operations {
             };
             /** @description Internal Server Error */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-business-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessContextResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "save-business-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveBusinessContextRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessContextResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-business-context-brief": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "Content-Type"?: string;
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/markdown": string;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "draft-business-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftBusinessContextRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1224,6 +2044,274 @@ export interface operations {
             };
             /** @description Internal Server Error */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "list-prioritizations": {
+        parameters: {
+            query?: {
+                /** @description Page size */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrioritizationListResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-prioritization": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrioritizationResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "record-prioritization-feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedbackRequestBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "create-action-plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanRequestBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };

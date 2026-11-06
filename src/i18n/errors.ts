@@ -23,6 +23,11 @@ const CODE_KEYS = new Map<string, ParseKeys>([
   ['user_not_found', 'users.errors.userNotFound'],
   ['last_customer_admin', 'users.errors.lastCustomerAdmin'],
   ['customer_name_taken', 'tenants.errors.nameTaken'],
+  ['business_context_stale', 'businessContext.save.stale'],
+  ['invalid_document', 'businessContext.import.invalidDocument'],
+  ['agent_refused', 'businessContext.import.refused'],
+  ['agent_rejected', 'businessContext.import.rejected'],
+  ['agent_unavailable', 'businessContext.import.unavailable'],
 ])
 
 interface RequestErrorKeys {

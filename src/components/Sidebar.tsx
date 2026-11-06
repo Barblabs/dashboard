@@ -4,17 +4,25 @@ import { signOut } from '../auth/cognito'
 import { useAuthStore, type Role } from '../auth/store'
 import { chooseLanguage, LANGUAGES } from '../i18n'
 
-type NavId = 'findings' | 'config' | 'notifications' | 'users' | 'tenants' | 'admin-dashboard'
+type NavId =
+  | 'findings'
+  | 'config'
+  | 'business-context'
+  | 'notifications'
+  | 'users'
+  | 'tenants'
+  | 'admin-dashboard'
 
 const NAV_BY_ROLE: Record<Role, readonly NavId[]> = {
   platform_admin: ['tenants', 'admin-dashboard'],
-  customer_admin: ['findings', 'config', 'notifications', 'users'],
-  viewer: ['findings', 'config', 'notifications'],
+  customer_admin: ['findings', 'config', 'business-context', 'notifications', 'users'],
+  viewer: ['findings', 'config', 'business-context', 'notifications'],
 }
 
-const NAV_KEY: Record<NavId, 'sidebar.nav.findings' | 'sidebar.nav.config' | 'sidebar.nav.notifications' | 'sidebar.nav.users' | 'sidebar.nav.tenants' | 'sidebar.nav.admin-dashboard'> = {
+const NAV_KEY: Record<NavId, `sidebar.nav.${NavId}`> = {
   findings: 'sidebar.nav.findings',
   config: 'sidebar.nav.config',
+  'business-context': 'sidebar.nav.business-context',
   notifications: 'sidebar.nav.notifications',
   users: 'sidebar.nav.users',
   tenants: 'sidebar.nav.tenants',
