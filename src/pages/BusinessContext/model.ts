@@ -121,7 +121,7 @@ export function canonicalDomain(entry: string): string | null {
   const host = entry
     .trim()
     .toLowerCase()
-    .replace(/^https?:\/\//, '')
+    .replace(/^[a-z][a-z0-9+.-]*:\/\//, '')
     .split('/')[0]!
     .replace(/\.$/, '')
     .replace(/^www\./, '')

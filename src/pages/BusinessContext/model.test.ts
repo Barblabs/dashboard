@@ -84,6 +84,7 @@ describe('canonicalDomain', () => {
     ['https://www.Acme.example/contacto', 'acme.example'],
     ['pagos.acme.example.', 'pagos.acme.example'],
     ['xn--caf-dma.mx', 'xn--caf-dma.mx'],
+    ['ftp://files.acme.example', 'files.acme.example'],
   ])('keeps the host of %s', (entry, want) => {
     expect(canonicalDomain(entry)).toBe(want)
   })
