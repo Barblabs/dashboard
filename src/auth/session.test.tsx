@@ -1,11 +1,11 @@
 import { act, screen } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
-import { forgetMockRole, hasMockRole, MOCK_ROLE_KEY, setMockRole } from '../test/mocks/handlers/auth'
 import { failure } from '../test/mocks/handlers/responses'
 import { apiUrl } from '../test/mocks/url'
 import { renderApp, seedSource } from '../test/render'
 import { holdRequests, server } from '../test/server'
+import { MOCK_ROLE_KEY, mockTokens, setMockRole } from './mockTokens'
 import { useAuthStore, type AuthUser } from './store'
 
 const NEXT_USER: AuthUser = {
@@ -55,7 +55,7 @@ describe('Restoring the session on startup', () => {
     reopen('/config')
 
     expect(await findSignInPage()).toBeInTheDocument()
-    expect(hasMockRole()).toBe(false)
+    expect(mockTokens.hasStored()).toBe(false)
   })
 
   it('opens the deactivated page for a deactivated organization', async () => {
@@ -73,7 +73,7 @@ describe('Restoring the session on startup', () => {
     const user = reopen('/business-context')
 
     await screen.findByRole('heading', { level: 1, name: 'Cannot connect to the server' })
-    expect(hasMockRole()).toBe(true)
+    expect(mockTokens.hasStored()).toBe(true)
 
     await user.click(screen.getByRole('button', { name: 'Retry' }))
 
@@ -98,7 +98,7 @@ describe('Signing in', () => {
     await user.click(await screen.findByRole('button', { name: 'Admin (customer_admin)' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Your account is disabled. Contact your administrator.')
-    expect(hasMockRole()).toBe(false)
+    expect(mockTokens.hasStored()).toBe(false)
   })
 })
 
@@ -131,7 +131,7 @@ describe('Returning after signing in', () => {
 
 // What this tab sees when another tab signs out: the tokens gone, and a storage event.
 function signOutInAnotherTab() {
-  forgetMockRole()
+  localStorage.removeItem(MOCK_ROLE_KEY)
   window.dispatchEvent(new StorageEvent('storage', { key: MOCK_ROLE_KEY, newValue: null, storageArea: localStorage }))
 }
 
@@ -160,7 +160,7 @@ describe('Session', () => {
     await user.click(await screen.findByRole('button', { name: 'Sign out' }))
 
     expect(await findSignInPage()).toBeInTheDocument()
-    expect(hasMockRole()).toBe(false)
+    expect(mockTokens.hasStored()).toBe(false)
   })
 
   it('sends a deactivated user to the deactivated page, and signing out to the sign-in form', async () => {

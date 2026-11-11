@@ -6,13 +6,13 @@ import { useTranslation } from 'react-i18next'
 import { Navigate, useLocation } from 'react-router'
 import { z } from 'zod'
 import { completeNewPassword, signIn } from '../../auth/cognito'
+import { setMockRole } from '../../auth/mockTokens'
 import { returnToOf } from '../../auth/returnTo'
 import { completeSignIn } from '../../auth/session'
 import { useAuthStore, useCurrentUser, type Role } from '../../auth/store'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { MOCK_MODE } from '../../mockMode'
-import { setMockRole } from '../../test/mocks/handlers/auth'
 
 // ── Mock roles (VITE_USE_MOCK=true) ─────────────────────────────────────────
 

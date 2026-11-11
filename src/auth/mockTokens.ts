@@ -1,15 +1,27 @@
-import { forgetMockRole, hasMockRole, MOCK_ROLE_KEY } from '../test/mocks/handlers/auth'
-import type { Tokens } from './tokens'
+import type { Role } from './store'
 import { onStorageKeyRemoved } from './storageEvents'
+import type { Tokens } from './tokens'
 
-const MOCK_ACCESS_TOKEN = 'mock-access-token'
+/*
+ * In mock mode the role picked on the sign-in page stands in for Cognito's tokens, and the
+ * mock backend answers /me as that role. It lives in localStorage like the tokens do, so
+ * reloads, new tabs and signing out elsewhere behave the same.
+ */
+export const MOCK_ROLE_KEY = 'barbattack_mock_role'
 
-// The picked mock role is the whole session: having one is having a token.
+export function setMockRole(role: Role) {
+  localStorage.setItem(MOCK_ROLE_KEY, role)
+}
+
+export function storedMockRole(): Role | null {
+  return localStorage.getItem(MOCK_ROLE_KEY) as Role | null
+}
+
 export const mockTokens: Tokens = {
-  hasStored: hasMockRole,
-  currentAccessToken: () => Promise.resolve(hasMockRole() ? MOCK_ACCESS_TOKEN : null),
+  hasStored: () => storedMockRole() !== null,
+  currentAccessToken: () => Promise.resolve(storedMockRole() === null ? null : 'mock-access-token'),
   forget: () => {
-    forgetMockRole()
+    localStorage.removeItem(MOCK_ROLE_KEY)
     return Promise.resolve()
   },
   onForgottenElsewhere: (listener) => onStorageKeyRemoved(MOCK_ROLE_KEY, listener),
