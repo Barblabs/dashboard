@@ -7,7 +7,7 @@ import { CmdbSelector } from './CmdbSelector'
 import { ItopForm } from './ItopForm'
 import { ConnectedBar } from './ConnectedBar'
 import { EditConnectionDialog } from './EditConnectionDialog'
-import { TechStackTable } from './TechStackTable'
+import { ConfigTabs } from './ConfigTabs'
 
 type View =
   | { step: 'loading' }
@@ -56,7 +56,7 @@ export function ConfigPage() {
       ) : view.step === 'connected' ? (
         <div className="flex animate-fade-in flex-col gap-6">
           <ConnectedBar source={view.source} onEdit={() => setEditing(true)} readOnly={readOnly} />
-          <TechStackTable />
+          <ConfigTabs />
           {!readOnly && (
             <EditConnectionDialog
               source={view.source}

@@ -1,6 +1,6 @@
 import type { Asset } from '../../api/assets'
 
-const SOURCE_ID = '6f1c2a9e-4b7d-4e8a-9c3f-2d5b8e1a7c40'
+export const SOURCE_ID = '6f1c2a9e-4b7d-4e8a-9c3f-2d5b8e1a7c40'
 
 export const mockAssets: Asset[] = [
   {
