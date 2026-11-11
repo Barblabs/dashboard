@@ -102,6 +102,33 @@ describe('Signing in', () => {
   })
 })
 
+describe('Returning after signing in', () => {
+  it('opens the page that was asked for', async () => {
+    const user = renderApp('/business-context?section=1', null)
+
+    await user.click(await screen.findByRole('button', { name: 'Admin (customer_admin)' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Business context' })).toBeInTheDocument()
+    expect(`${window.location.pathname}${window.location.search}`).toBe('/business-context?section=1')
+  })
+
+  it("opens the role's home when no page was asked for", async () => {
+    const user = renderApp('/login', null)
+
+    await user.click(await screen.findByRole('button', { name: 'Admin (customer_admin)' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
+  })
+
+  it('denies a page the role cannot see', async () => {
+    const user = renderApp('/users', null)
+
+    await user.click(await screen.findByRole('button', { name: 'Viewer (viewer)' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
+  })
+})
+
 describe('Session', () => {
   it('forgets the stored tokens on signing out, so a reload does not sign back in', async () => {
     const user = renderApp('/config')

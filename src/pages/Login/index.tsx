@@ -3,9 +3,10 @@ import type { CognitoUser } from 'amazon-cognito-identity-js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { Navigate } from 'react-router'
+import { Navigate, useLocation } from 'react-router'
 import { z } from 'zod'
 import { completeNewPassword, signIn } from '../../auth/cognito'
+import { returnToOf } from '../../auth/returnTo'
 import { completeSignIn } from '../../auth/session'
 import { useAuthStore, useCurrentUser, type Role } from '../../auth/store'
 import { Button } from '../../components/ui/Button'
@@ -305,14 +306,18 @@ type Step =
   | { kind: 'credentials' }
   | { kind: 'newPassword'; cognitoUser: CognitoUser }
 
-// Signing in moves the session; this page follows it wherever it lands.
+/*
+ * Signing in moves the session; this page follows it wherever it lands: back to the page
+ * that was asked for, or else the role's home. RoleGuard handles a page the role cannot see.
+ */
 export function LoginPage() {
   const user = useCurrentUser()
+  const returnTo = returnToOf(useLocation().state)
   const deactivated = useAuthStore((s) => s.session.status === 'deactivated')
   const [step, setStep] = useState<Step>({ kind: 'credentials' })
 
   if (deactivated) return <Navigate to="/deactivated" replace />
-  if (user) return <Navigate to={destForRole(user.role)} replace />
+  if (user) return <Navigate to={returnTo ?? destForRole(user.role)} replace />
   if (MOCK_MODE) return <MockSignIn />
 
   return (

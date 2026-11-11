@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
-import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router'
+import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router'
+import { returnToState } from './auth/returnTo'
 import { restoreSession } from './auth/session'
 import { useAuthStore, useCurrentUser, type Role } from './auth/store'
 import { RestoringSession, ServerUnreachable } from './components/SessionScreens'
@@ -28,8 +29,9 @@ const CUSTOMER_ROLES: Role[] = ['customer_admin', 'viewer']
 
 function AuthGuard() {
   const status = useAuthStore((s) => s.session.status)
+  const location = useLocation()
   if (status === 'deactivated') return <Navigate to="/deactivated" replace />
-  if (status !== 'signedIn') return <Navigate to="/login" replace />
+  if (status !== 'signedIn') return <Navigate to="/login" replace state={returnToState(location)} />
   return <Outlet />
 }
 
