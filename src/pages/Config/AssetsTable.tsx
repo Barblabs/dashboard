@@ -2,15 +2,11 @@ import { Fragment, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { assetKey, type Asset } from '../../api/assets'
 import { Badge } from '../../components/ui/Badge'
+import { CELL, HEADER_CELL, NONE, useDateFormat } from './table'
 
-const NONE = '-'
-
-const HEADER_CELL =
-  'px-4 py-3 text-left font-body text-[0.75rem] font-semibold tracking-[0.06em] whitespace-nowrap text-gray uppercase'
-const CELL = 'border-b border-border-row px-4 py-3.5 align-middle text-navy'
 const MONO = 'font-mono text-[0.8125rem]'
 const DETAIL_LABEL = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase'
-const COLUMN_COUNT = 7
+const COLUMN_COUNT = 8
 
 function versioned(name: string, version: string) {
   return version ? `${name} ${version}` : name
@@ -19,14 +15,6 @@ function versioned(name: string, version: string) {
 function osLabel(asset: Asset): string {
   const os = asset.software.find((s) => s.role === 'operating_system')
   return os ? versioned(os.name, os.version) : NONE
-}
-
-function useDateFormat() {
-  const { i18n } = useTranslation()
-  const format = new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, {
-    dateStyle: 'medium',
-  })
-  return (iso: string) => format.format(new Date(iso))
 }
 
 function AssetStatus({ asset }: { asset: Asset }) {
@@ -132,6 +120,7 @@ export function AssetsTable({ assets, busy }: { assets: Asset[]; busy: boolean }
             <th className={HEADER_CELL}>{t('config.inventory.columns.os')}</th>
             <th className={HEADER_CELL}>{t('config.inventory.columns.criticality')}</th>
             <th className={HEADER_CELL}>{t('config.inventory.columns.owner')}</th>
+            <th className={HEADER_CELL}>{t('config.inventory.columns.area')}</th>
             <th className={HEADER_CELL}>{t('config.inventory.columns.status')}</th>
             <th className={HEADER_CELL}>
               <span className="sr-only">{t('config.inventory.columns.details')}</span>
@@ -179,6 +168,7 @@ export function AssetsTable({ assets, busy }: { assets: Asset[]; busy: boolean }
                       NONE
                     )}
                   </td>
+                  <td className={CELL}>{asset.area?.name ?? NONE}</td>
                   <td className={CELL}>
                     <AssetStatus asset={asset} />
                   </td>

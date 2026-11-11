@@ -38,6 +38,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/areas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the Customer's Areas
+         * @description Lists every Area imported from the Customer's CMDB Sources, sorted by name. An Area is what iTop calls an Organization. The list is not paged.
+         */
+        get: operations["list-areas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/areas/{id}/owner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * State whom to reach about an Area
+         * @description Only a Customer Admin states it. A null email clears it. A Sync never changes it, not even when it renames the Area.
+         */
+        put: operations["set-area-owner"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assets": {
         parameters: {
             query?: never;
@@ -437,6 +477,34 @@ export interface components {
         AnalistaMessage: {
             message: string;
         };
+        AreaListResponse: {
+            areas: components["schemas"]["AreaResponse"][];
+        };
+        AreaRefResponse: {
+            /**
+             * Format: int64
+             * @description The Area's id, as in GET /areas
+             */
+            id: number;
+            name: string;
+        };
+        AreaResponse: {
+            /** @description False once the CMDB Source marks the Area inactive, stops returning it, or is disconnected */
+            active: boolean;
+            /** Format: int64 */
+            id: number;
+            /**
+             * Format: date-time
+             * @description When the Area became Inactive; null while it is Active
+             */
+            inactive_since: string | null;
+            name: string;
+            /** @description Whom to reach about the Area, as a Customer Admin states it; null until one does */
+            owner_email: string | null;
+            /** @description The Area's id in its CMDB Source */
+            record_id: string;
+            source_id: string;
+        };
         AssetListResponse: {
             assets: components["schemas"]["AssetResponse"][];
             next_cursor: string | null;
@@ -445,6 +513,7 @@ export interface components {
         };
         AssetResponse: {
             active: boolean;
+            area: components["schemas"]["AreaRefResponse"] | null;
             criticality: string | null;
             description: string;
             exposure: string | null;
@@ -793,6 +862,15 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        SetAreaOwnerRequest: {
+            /**
+             * Format: email
+             * @description Whom to reach about the Area; null clears it
+             */
+            email: string | null;
+        } & {
+            [key: string]: unknown;
+        };
         SoftwareResponse: {
             name: string;
             product: components["schemas"]["ProductResponse"] | null;
@@ -994,6 +1072,135 @@ export interface operations {
             };
             /** @description Bad Gateway */
             502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "list-areas": {
+        parameters: {
+            query?: {
+                active?: "true" | "false" | "all";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AreaListResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "set-area-owner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetAreaOwnerRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AreaResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };

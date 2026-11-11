@@ -1,6 +1,6 @@
 import type { Asset } from '../../api/assets'
 
-const SOURCE_ID = '6f1c2a9e-4b7d-4e8a-9c3f-2d5b8e1a7c40'
+export const SOURCE_ID = '6f1c2a9e-4b7d-4e8a-9c3f-2d5b8e1a7c40'
 
 export const mockAssets: Asset[] = [
   {
@@ -33,6 +33,7 @@ export const mockAssets: Asset[] = [
     criticality: 'high',
     exposure: 'internet_facing',
     owner: { email: 'devops@example.com', source: 'imported' },
+    area: { id: 1, name: 'Infrastructure' },
     retired: false,
     active: true,
     inactive_since: null,
@@ -61,6 +62,7 @@ export const mockAssets: Asset[] = [
     criticality: 'medium',
     exposure: null,
     owner: { email: 'data-eng@example.com', source: 'declared' },
+    area: { id: 2, name: 'Data Platform' },
     retired: false,
     active: true,
     inactive_since: null,
@@ -89,6 +91,7 @@ export const mockAssets: Asset[] = [
     criticality: 'high',
     exposure: 'internal',
     owner: { email: 'crm-ops@example.com', source: 'imported' },
+    area: { id: 1, name: 'Infrastructure' },
     retired: false,
     active: true,
     inactive_since: null,
@@ -104,6 +107,7 @@ export const mockAssets: Asset[] = [
     criticality: 'low',
     exposure: null,
     owner: null,
+    area: null,
     retired: false,
     active: true,
     inactive_since: null,
@@ -132,6 +136,7 @@ export const mockAssets: Asset[] = [
     criticality: null,
     exposure: null,
     owner: null,
+    area: { id: 3, name: 'Legacy ERP' },
     retired: true,
     active: false,
     inactive_since: '2026-09-01T12:00:00Z',

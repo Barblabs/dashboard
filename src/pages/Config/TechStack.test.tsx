@@ -43,9 +43,9 @@ describe('Tech stack', () => {
     const row = await screen.findByRole('row', { name: /prod-api-01/ })
     expect(screen.getByText('4 assets')).toBeInTheDocument()
     expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual([
-      'Asset', 'Type', 'Operating system', 'Criticality', 'Owner', 'Status', 'Details',
+      'Asset', 'Type', 'Operating system', 'Criticality', 'Owner', 'Area', 'Status', 'Details',
     ])
-    expect(row).toHaveTextContent('prod-api-01SRV-001ServerUbuntu 22.04Highdevops@example.comActive')
+    expect(row).toHaveTextContent('prod-api-01SRV-001ServerUbuntu 22.04Highdevops@example.comInfrastructureActive')
     expect(screen.getByRole('row', { name: /analytics-worker-03/ })).toHaveTextContent(
       'Virtual Machine',
     )
@@ -53,6 +53,19 @@ describe('Tech stack', () => {
       'data-eng@example.comDeclared',
     )
     expect(screen.queryByRole('row', { name: /erp-app-02/ })).not.toBeInTheDocument()
+  })
+
+  it('shows the area of each asset, and a dash for an asset without one', async () => {
+    await renderInventory()
+    await screen.findByRole('row', { name: /prod-api-01/ })
+    const areaColumn = screen
+      .getAllByRole('columnheader')
+      .findIndex((cell) => cell.textContent === 'Area')
+    const areaOf = (name: RegExp) =>
+      within(screen.getByRole('row', { name })).getAllByRole('cell')[areaColumn]
+
+    expect(areaOf(/analytics-worker-03/)).toHaveTextContent('Data Platform')
+    expect(areaOf(/core-switch-01/)).toHaveTextContent(/^-$/)
   })
 
   it('shows the inventory in Spanish', async () => {
@@ -65,7 +78,7 @@ describe('Tech stack', () => {
     const row = await screen.findByRole('row', { name: /prod-api-01/ })
     expect(screen.getByRole('heading', { name: 'Stack tecnológico' })).toBeInTheDocument()
     expect(screen.getByText('4 activos')).toBeInTheDocument()
-    expect(row).toHaveTextContent('prod-api-01SRV-001ServidorUbuntu 22.04Altadevops@example.comActivo')
+    expect(row).toHaveTextContent('prod-api-01SRV-001ServidorUbuntu 22.04Altadevops@example.comInfrastructureActivo')
   })
 
   it('the inactive filter reaches assets no longer monitored and says since when', async () => {

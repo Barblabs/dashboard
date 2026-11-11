@@ -11,7 +11,7 @@ import {
 const SELECT =
   'focus-ring w-full cursor-pointer appearance-none rounded-md border border-border-panel bg-white py-2 pr-9 pl-3 font-body text-[0.875rem] text-navy outline-none focus:border-navy'
 
-function FilterSelect({
+export function FilterSelect({
   label,
   value,
   onChange,
