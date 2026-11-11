@@ -66,6 +66,24 @@ function storedKeys() {
   return Object.keys(localStorage).filter((key) => key.startsWith(PREFIX))
 }
 
+/*
+ * The SDK retries every failed renewal with growing delays, scheduling each retry only once
+ * the previous request has settled, which takes real time. Moving the fake clock once would
+ * race those requests, so it moves until the renewal gives up.
+ */
+async function giveUpRetrying<T>(promise: Promise<T>): Promise<T> {
+  const renewal = { settled: false }
+  const done = () => {
+    renewal.settled = true
+  }
+  promise.then(done, done)
+  while (!renewal.settled) {
+    await vi.advanceTimersByTimeAsync(1_000)
+    await new Promise((resolve) => setImmediate(resolve))
+  }
+  return promise
+}
+
 afterEach(() => {
   vi.useRealTimers()
 })
@@ -101,15 +119,11 @@ describe('Cognito tokens', () => {
   })
 
   it('has no token when Cognito rejects the renewal, and keeps nothing stored', async () => {
-    // The SDK retries every failure for a few seconds before giving up.
     vi.useFakeTimers({ toFake: ['setTimeout'] })
     cognito(() => cognitoError(400, 'NotAuthorizedException'))
     storeSession({ expiresIn: -60 })
 
-    const accessToken = cognitoTokens.currentAccessToken()
-    await vi.advanceTimersByTimeAsync(10_000)
-
-    expect(await accessToken).toBeNull()
+    expect(await giveUpRetrying(cognitoTokens.currentAccessToken())).toBeNull()
     expect(storedKeys()).toEqual([])
   })
 
@@ -118,11 +132,7 @@ describe('Cognito tokens', () => {
     cognito(() => HttpResponse.error())
     storeSession({ expiresIn: -60 })
 
-    const accessToken = cognitoTokens.currentAccessToken()
-    const settled = accessToken.catch((error: unknown) => error)
-    await vi.advanceTimersByTimeAsync(10_000)
-
-    expect(await settled).toBeInstanceOf(TokensUnreachable)
+    await expect(giveUpRetrying(cognitoTokens.currentAccessToken())).rejects.toBeInstanceOf(TokensUnreachable)
     expect(cognitoTokens.hasStored()).toBe(true)
   })
 
