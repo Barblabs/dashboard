@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSourceQuery, type CmdbSource } from '../../api/cmdb'
 import { useCurrentUser } from '../../auth/store'
+import { Button } from '../../components/ui/Button'
 import { ConfigStepPanel } from './ConfigStepPanel'
 import { CmdbSelector } from './CmdbSelector'
 import { ItopForm } from './ItopForm'
@@ -11,16 +12,19 @@ import { ConfigTabs } from './ConfigTabs'
 
 type View =
   | { step: 'loading' }
+  | { step: 'failed' }
   | { step: 'select' }
   | { step: 'form' }
   | { step: 'connected'; source: CmdbSource }
 
-function deriveView(
-  isPending: boolean,
-  connecting: boolean,
-  source: CmdbSource | null | undefined,
-): View {
+/*
+ * `source` is undefined until the backend has answered once: without that answer the
+ * page cannot tell "not connected" apart, so it must not offer to connect. A failed
+ * refetch keeps the source it already had.
+ */
+function deriveView(isPending: boolean, connecting: boolean, source: CmdbSource | null | undefined): View {
   if (isPending) return { step: 'loading' }
+  if (source === undefined) return { step: 'failed' }
   if (connecting) return { step: 'form' }
   if (source) return { step: 'connected', source }
   return { step: 'select' }
@@ -53,6 +57,13 @@ export function ConfigPage() {
 
       {view.step === 'loading' ? (
         <div className="py-12 text-center text-[0.875rem] text-gray">{t('config.loading')}</div>
+      ) : view.step === 'failed' ? (
+        <div className="flex flex-col items-center gap-4 py-12">
+          <p className="font-body text-[0.875rem] text-critical">{t('config.loadFailed')}</p>
+          <Button variant="secondary" size="sm" onClick={() => void sourceQuery.refetch()}>
+            {t('config.retry')}
+          </Button>
+        </div>
       ) : view.step === 'connected' ? (
         <div className="flex animate-fade-in flex-col gap-6">
           <ConnectedBar source={view.source} onEdit={() => setEditing(true)} readOnly={readOnly} />

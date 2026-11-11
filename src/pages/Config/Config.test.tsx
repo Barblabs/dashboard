@@ -435,13 +435,21 @@ describe('Configuration', () => {
     expect(assetRequests).toBe(0)
   })
 
-  it('shows the CMDB list right away when the source cannot be read', async () => {
+  // An unreadable source says nothing about the connection, so the page must not offer a new one.
+  it('shows the error right away when the source cannot be read, and retries on demand', async () => {
     server.use(http.get(apiUrl('/cmdb/source'), () => new HttpResponse(null, { status: 500 })))
-    renderApp()
+    const user = renderApp()
 
     expect(
-      await screen.findByRole('heading', { name: 'Choose your CMDB' }, { timeout: 1000 }),
+      await screen.findByText('Could not load the CMDB connection.', undefined, { timeout: 1000 }),
     ).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Choose your CMDB' })).not.toBeInTheDocument()
+
+    server.resetHandlers()
+    seedSource()
+    await user.click(screen.getByRole('button', { name: 'Retry' }))
+
+    expect(await screen.findByText('iTop connected')).toBeInTheDocument()
   })
 
   it('sends the provider with the login when testing and connecting', async () => {
