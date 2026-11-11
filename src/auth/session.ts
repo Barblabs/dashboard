@@ -1,4 +1,4 @@
-import { ApiError } from '../api/client'
+import { authOutcomeOf } from '../api/client'
 import { fetchMe } from '../api/me'
 import { signOut } from './signOut'
 import { singleFlight } from './singleFlight'
@@ -23,15 +23,15 @@ async function verifyStoredTokens(): Promise<Verification> {
     store.establishSession({ id: me.id, email: me.email, role: me.role, customer: me.customer })
     return 'settled'
   } catch (error) {
-    if (error instanceof ApiError && error.failure.kind === 'http') {
-      const { status, code } = error.failure
-      if (status === 401) return reject()
-      if (status === 403 && code === 'customer_deactivated') {
+    switch (authOutcomeOf(error)) {
+      case 'rejected':
+        return reject()
+      case 'deactivated':
         store.deactivate()
         return 'settled'
-      }
+      case null:
+        return 'unreachable'
     }
-    return 'unreachable'
   }
 }
 
