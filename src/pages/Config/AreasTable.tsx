@@ -140,9 +140,7 @@ export function AreasTable({ readOnly }: { readOnly: boolean }) {
       ) : (
         <AreaRows areas={query.data.areas} onEditOwner={readOnly ? undefined : setEditing} />
       )}
-      {!readOnly && (
-        <AreaOwnerDialog key={editing?.id} area={editing} onClose={() => setEditing(null)} />
-      )}
+      {editing && <AreaOwnerDialog area={editing} onClose={() => setEditing(null)} />}
     </section>
   )
 }

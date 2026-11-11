@@ -17,7 +17,7 @@ const ownerSchema = z.object({ email: z.email('config.areas.owner.invalidEmail')
 type OwnerFields = z.infer<typeof ownerSchema>
 
 interface Props {
-  area: Area | null
+  area: Area
   onClose: () => void
 }
 
@@ -32,12 +32,11 @@ export function AreaOwnerDialog({ area, onClose }: Props) {
     formState: { errors },
   } = useForm<OwnerFields>({
     resolver: zodResolver(ownerSchema),
-    defaultValues: { email: area?.owner_email ?? '' },
+    defaultValues: { email: area.owner_email ?? '' },
   })
 
-  const save = (email: string | null) => {
-    if (area) setOwner.mutate({ id: area.id, email }, { onSuccess: onClose })
-  }
+  const save = (email: string | null) =>
+    setOwner.mutate({ id: area.id, email }, { onSuccess: onClose })
 
   const onSubmit = handleSubmit(({ email }) => save(email))
 
@@ -49,7 +48,7 @@ export function AreaOwnerDialog({ area, onClose }: Props) {
   const saving = setOwner.isPending && !removing
 
   return (
-    <Modal open={area !== null} onClose={onClose} labelledBy={titleId}>
+    <Modal open onClose={onClose} labelledBy={titleId}>
       <form
         noValidate
         onSubmit={(event) => void onSubmit(event)}
@@ -57,7 +56,7 @@ export function AreaOwnerDialog({ area, onClose }: Props) {
       >
         <div className="flex flex-col gap-1">
           <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-            {t('config.areas.owner.title', { area: area?.name })}
+            {t('config.areas.owner.title', { area: area.name })}
           </h2>
           <p className="font-body text-[0.8125rem] text-gray">
             {t('config.areas.owner.description')}
@@ -87,7 +86,7 @@ export function AreaOwnerDialog({ area, onClose }: Props) {
         )}
 
         <div className="flex flex-wrap items-center gap-2">
-          {area?.owner_email && (
+          {area.owner_email && (
             <Button
               variant="ghost"
               size="sm"

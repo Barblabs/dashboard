@@ -42,7 +42,7 @@ async function openOwnerDialog(user: User, area: RegExp) {
   return screen.findByRole('dialog')
 }
 
-// The dialog remounts closed as soon as a save succeeds, so there is no exit to wait on.
+// The dialog unmounts as soon as a save succeeds, so there is no exit to wait on.
 async function dialogClosed() {
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
 }
