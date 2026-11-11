@@ -10,43 +10,53 @@ export interface AuthUser {
 }
 
 /*
- * The lifecycle of a sign-in, one state at a time:
+ * The lifecycle of a session, one state at a time:
+ *   restoring -> signedIn | deactivated | signedOut | unreachable
+ *   unreachable -> restoring
  *   signedOut -> verifying -> signedIn -> deactivated
- * and any state -> signedOut. `verifying` holds a Cognito token the backend has not
- * yet resolved to a user; requests carry it, but no route treats it as signed in.
+ * and any state -> signedOut. The tokens are not part of it: they are asked for per request.
  */
 export type Session =
+  /** On startup, while the backend says who the tokens kept from a previous visit belong to. */
+  | { status: 'restoring' }
+  /** The backend could not be reached while restoring; the tokens are kept for a retry. */
+  | { status: 'unreachable' }
   | { status: 'signedOut' }
-  | { status: 'verifying'; accessToken: string }
-  | { status: 'signedIn'; user: AuthUser; accessToken: string }
-  /** The backend reported the user's Customer deactivated mid-session; only signing out is left. */
-  | { status: 'deactivated'; user: AuthUser }
+  /** Just signed in: the backend has not yet said who the new tokens belong to. */
+  | { status: 'verifying' }
+  | { status: 'signedIn'; user: AuthUser }
+  /** The backend reported the user's Customer deactivated; only signing out is left. */
+  | { status: 'deactivated' }
+
+type Status = Session['status']
 
 interface AuthState {
   session: Session
-  beginVerification: (accessToken: string) => void
-  establishSession: (user: AuthUser, accessToken: string) => void
+  retryRestoring: () => void
+  becomeUnreachable: () => void
+  beginVerification: () => void
+  establishSession: (user: AuthUser) => void
   deactivate: () => void
   endSession: () => void
 }
 
-const SIGNED_OUT: Session = { status: 'signedOut' }
+/*
+ * Each transition only leaves the states listed for it, so an answer arriving after the
+ * session moved on (say, signed out from another tab) changes nothing.
+ */
+function from(allowed: Status[], next: Session) {
+  return ({ session }: { session: Session }) => (allowed.includes(session.status) ? { session: next } : {})
+}
 
 export const useAuthStore = create<AuthState>((set) => ({
-  session: SIGNED_OUT,
-  beginVerification: (accessToken) => set({ session: { status: 'verifying', accessToken } }),
-  establishSession: (user, accessToken) => set({ session: { status: 'signedIn', user, accessToken } }),
-  // Only a signed-in user can be deactivated: a late 403 after signing out changes nothing.
-  deactivate: () =>
-    set(({ session }) =>
-      session.status === 'signedIn' ? { session: { status: 'deactivated', user: session.user } } : {},
-    ),
-  endSession: () => set({ session: SIGNED_OUT }),
+  session: { status: 'restoring' },
+  retryRestoring: () => set(from(['unreachable'], { status: 'restoring' })),
+  becomeUnreachable: () => set(from(['restoring'], { status: 'unreachable' })),
+  beginVerification: () => set(from(['signedOut'], { status: 'verifying' })),
+  establishSession: (user) => set(from(['restoring', 'verifying'], { status: 'signedIn', user })),
+  deactivate: () => set(from(['restoring', 'verifying', 'signedIn'], { status: 'deactivated' })),
+  endSession: () => set({ session: { status: 'signedOut' } }),
 }))
-
-export function accessTokenOf(session: Session): string | null {
-  return session.status === 'verifying' || session.status === 'signedIn' ? session.accessToken : null
-}
 
 /** The signed-in user, or `null` in every other state. */
 export function useCurrentUser(): AuthUser | null {

@@ -1,19 +1,31 @@
 import { http, HttpResponse } from 'msw'
 import type { components } from '../../../api/generated'
+import { apiUrl } from '../url'
 
 type MeResponse = components['schemas']['MeResponse']
-import { apiUrl } from '../url'
 
 type MockRole = 'platform_admin' | 'customer_admin' | 'viewer'
 
-const MOCK_ROLE_KEY = 'barbattack_mock_role'
+/*
+ * The role picked on the mock sign-in page stands in for Cognito's tokens. It lives in
+ * localStorage like they do, so reloads, new tabs and signing out elsewhere behave the same.
+ */
+export const MOCK_ROLE_KEY = 'barbattack_mock_role'
 
 export function setMockRole(role: MockRole) {
-  sessionStorage.setItem(MOCK_ROLE_KEY, role)
+  localStorage.setItem(MOCK_ROLE_KEY, role)
+}
+
+export function hasMockRole(): boolean {
+  return localStorage.getItem(MOCK_ROLE_KEY) !== null
+}
+
+export function forgetMockRole() {
+  localStorage.removeItem(MOCK_ROLE_KEY)
 }
 
 function getMockRole(): MockRole {
-  return (sessionStorage.getItem(MOCK_ROLE_KEY) as MockRole | null) ?? 'customer_admin'
+  return (localStorage.getItem(MOCK_ROLE_KEY) as MockRole | null) ?? 'customer_admin'
 }
 
 const MOCK_USERS: Record<MockRole, MeResponse> = {

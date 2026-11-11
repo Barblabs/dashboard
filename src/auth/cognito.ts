@@ -4,48 +4,38 @@ import {
   CognitoUserPool,
   type IAuthenticationCallback,
 } from 'amazon-cognito-identity-js'
+import { onStorageKeyRemoved } from './storageEvents'
+import { TokensUnreachable, type Tokens } from './tokens'
 
 const REGION = import.meta.env.VITE_COGNITO_REGION as string
 const USER_POOL_ID = import.meta.env.VITE_COGNITO_USER_POOL_ID as string
 const CLIENT_ID = import.meta.env.VITE_COGNITO_CLIENT_ID as string
 
-// Tokens live only in memory — not in localStorage or sessionStorage.
-const mem = new Map<string, string>()
-const MemoryStorage = {
-  setItem: (key: string, value: string) => { mem.set(key, value) },
-  getItem: (key: string) => mem.get(key) ?? null,
-  removeItem: (key: string) => { mem.delete(key) },
-  clear: () => { mem.clear() },
-}
+// The SDK's own key layout in localStorage, its default storage.
+const KEY_PREFIX = `CognitoIdentityServiceProvider.${CLIENT_ID}`
+const LAST_AUTH_USER_KEY = `${KEY_PREFIX}.LastAuthUser`
 
-function makePool() {
-  return new CognitoUserPool({
-    UserPoolId: USER_POOL_ID,
-    ClientId: CLIENT_ID,
-    Storage: MemoryStorage as Storage,
-  })
-}
+// Built on first use: mock mode never configures Cognito, and the pool rejects missing ids.
+let poolInstance: CognitoUserPool | null = null
 
-function makeUser(email: string) {
-  return new CognitoUser({
-    Username: email,
-    Pool: makePool(),
-    Storage: MemoryStorage as Storage,
-  })
+function pool(): CognitoUserPool {
+  poolInstance ??= new CognitoUserPool({ UserPoolId: USER_POOL_ID, ClientId: CLIENT_ID })
+  return poolInstance
 }
 
 export type SignInResult =
-  | { kind: 'success'; accessToken: string }
+  | { kind: 'success' }
   | { kind: 'newPasswordRequired'; cognitoUser: CognitoUser; userAttributes: Record<string, string> }
 
+// On success the SDK has stored the tokens; `cognitoTokens` hands them out from there.
 export function signIn(email: string, password: string): Promise<SignInResult> {
-  const cognitoUser = makeUser(email)
+  const cognitoUser = new CognitoUser({ Username: email, Pool: pool() })
   const authDetails = new AuthenticationDetails({ Username: email, Password: password })
 
   return new Promise((resolve, reject) => {
     const callbacks: IAuthenticationCallback = {
-      onSuccess(session) {
-        resolve({ kind: 'success', accessToken: session.getAccessToken().getJwtToken() })
+      onSuccess() {
+        resolve({ kind: 'success' })
       },
       onFailure(err) {
         reject(err)
@@ -58,14 +48,11 @@ export function signIn(email: string, password: string): Promise<SignInResult> {
   })
 }
 
-export function completeNewPassword(
-  cognitoUser: CognitoUser,
-  newPassword: string,
-): Promise<string> {
+export function completeNewPassword(cognitoUser: CognitoUser, newPassword: string): Promise<void> {
   return new Promise((resolve, reject) => {
     cognitoUser.completeNewPasswordChallenge(newPassword, {}, {
-      onSuccess(session) {
-        resolve(session.getAccessToken().getJwtToken())
+      onSuccess() {
+        resolve()
       },
       onFailure(err) {
         reject(err)
@@ -74,24 +61,76 @@ export function completeNewPassword(
   })
 }
 
-// Cognito keeps nothing outside this memory, so forgetting it signs the browser out.
-export function forgetTokens() {
-  mem.clear()
+/*
+ * Failures that say nothing about the session: Cognito was not reached, or could not answer
+ * for now. Any other failure to renew (an expired or revoked refresh token, a deleted user)
+ * means the session is over.
+ */
+const TRANSIENT_FAILURES = new Set(['NetworkError', 'InternalErrorException', 'TooManyRequestsException'])
+
+function isTransient(error: Error): boolean {
+  const code = (error as Error & { code?: unknown }).code
+  return typeof code === 'string' && TRANSIENT_FAILURES.has(code)
 }
 
-// In dev mode: expose a helper to test token refresh from the browser console.
-// Usage: window.forceTokenRefresh() — watch for InitiateAuth with REFRESH_TOKEN_AUTH in Network.
-if (import.meta.env.DEV) {
-  const pool = makePool()
-  ;(window as unknown as Record<string, unknown>)['forceTokenRefresh'] = () => {
-    const user = pool.getCurrentUser()
-    if (!user) { console.warn('No current user in memory'); return }
-    user.getSession((err: Error | null, session: { getAccessToken(): { getExpiration(): number } } | null) => {
-      if (err) { console.error('Refresh failed', err); return }
-      const exp = session?.getAccessToken().getExpiration() ?? 0
-      console.log('Token refreshed. Expires at:', new Date(exp * 1000).toLocaleTimeString())
+/*
+ * A fresh CognitoUser reads the tokens from storage every time, so a renewal made by
+ * another tab is picked up here too. `getSession` renews the access token if it expired.
+ */
+function readAccessToken(): Promise<string | null> {
+  const user = pool().getCurrentUser()
+  if (!user) return Promise.resolve(null)
+  return new Promise((resolve, reject) => {
+    user.getSession((error: Error | null, session: { getAccessToken(): { getJwtToken(): string } } | null) => {
+      if (session) resolve(session.getAccessToken().getJwtToken())
+      else if (error && isTransient(error)) reject(new TokensUnreachable(error))
+      else resolve(null)
     })
+  })
+}
+
+// Requests that find the token expired at the same time wait on a single renewal.
+let pendingAccessToken: Promise<string | null> | null = null
+
+function currentAccessToken(): Promise<string | null> {
+  pendingAccessToken ??= readAccessToken().finally(() => {
+    pendingAccessToken = null
+  })
+  return pendingAccessToken
+}
+
+// RevokeToken is a public, unauthenticated Cognito operation the SDK's typings do not expose.
+async function revoke(refreshToken: string) {
+  await fetch(`https://cognito-idp.${REGION}.amazonaws.com/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-amz-json-1.1',
+      'X-Amz-Target': 'AWSCognitoIdentityProviderService.RevokeToken',
+    },
+    body: JSON.stringify({ Token: refreshToken, ClientId: CLIENT_ID }),
+  })
+}
+
+/*
+ * Clearing storage comes first and is synchronous: a reload or another tab can no longer
+ * restore the session, whatever happens to the revocation.
+ */
+async function forget() {
+  const user = pool().getCurrentUser()
+  if (!user) return
+  const refreshToken = localStorage.getItem(`${KEY_PREFIX}.${user.getUsername()}.refreshToken`)
+  user.signOut()
+  if (!refreshToken) return
+  try {
+    await revoke(refreshToken)
+  } catch {
+    // Best effort: the local session is already over, and the token expires on its own.
   }
 }
 
-export { REGION, USER_POOL_ID, CLIENT_ID }
+export const cognitoTokens: Tokens = {
+  hasStored: () => pool().getCurrentUser() !== null,
+  currentAccessToken,
+  forget,
+  onForgottenElsewhere: (listener) => onStorageKeyRemoved(LAST_AUTH_USER_KEY, listener),
+}

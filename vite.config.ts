@@ -24,7 +24,9 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Mock mode: tokens come from the mock role, so tests sign in and restore for real.
     env: {
+      VITE_USE_MOCK: 'true',
       VITE_API_URL: 'http://localhost:8080',
       VITE_COGNITO_REGION: 'us-east-1',
       VITE_COGNITO_USER_POOL_ID: 'us-east-1_testpool',

@@ -1,5 +1,7 @@
 import axios from 'axios'
-import { accessTokenOf, useAuthStore } from '../auth/store'
+import { signOut } from '../auth/signOut'
+import { useAuthStore } from '../auth/store'
+import { tokens } from '../auth/tokenSource'
 
 /*
  * `network` means the backend never answered (down, CORS, offline), so there is no
@@ -57,8 +59,15 @@ const apiClient = axios.create({
   adapter: 'fetch',
 })
 
-apiClient.interceptors.request.use((config) => {
-  const token = accessTokenOf(useAuthStore.getState().session)
+// Asked per request, so an expired token is renewed before the request goes out.
+apiClient.interceptors.request.use(async (config) => {
+  let token: string | null
+  try {
+    token = await tokens.currentAccessToken()
+  } catch (error) {
+    // Cognito out of reach is, to the caller, the same as the backend out of reach.
+    throw new ApiError(error instanceof Error ? error.message : 'Network error', { kind: 'network' })
+  }
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
@@ -68,7 +77,7 @@ apiClient.interceptors.response.use(undefined, (error: unknown) => {
     const { status, data } = error.response
     const body = (typeof data === 'object' && data !== null ? data : {}) as ErrorBody
     const code = typeof body.code === 'string' ? body.code : null
-    if (status === 401) useAuthStore.getState().endSession()
+    if (status === 401) signOut()
     else if (status === 403 && code === 'customer_deactivated') useAuthStore.getState().deactivate()
   }
   return Promise.reject(toApiError(error))

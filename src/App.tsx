@@ -1,7 +1,11 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
-import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router'
+import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router'
+import { returnToState } from './auth/returnTo'
+import { restoreSession } from './auth/session'
 import { useAuthStore, useCurrentUser, type Role } from './auth/store'
+import { tokens } from './auth/tokenSource'
+import { RestoringSession, ServerUnreachable } from './components/SessionScreens'
 import { Sidebar } from './components/Sidebar'
 import { AdminDashboardPage } from './pages/AdminDashboard'
 import { BusinessContextPage } from './pages/BusinessContext'
@@ -26,8 +30,9 @@ const CUSTOMER_ROLES: Role[] = ['customer_admin', 'viewer']
 
 function AuthGuard() {
   const status = useAuthStore((s) => s.session.status)
+  const location = useLocation()
   if (status === 'deactivated') return <Navigate to="/deactivated" replace />
-  if (status !== 'signedIn') return <Navigate to="/login" replace />
+  if (status !== 'signedIn') return <Navigate to="/login" replace state={returnToState(location)} />
   return <Outlet />
 }
 
@@ -44,8 +49,31 @@ function useClearCacheWhenSignedOut() {
   }, [signedOut, queryClient])
 }
 
+// Entering `restoring`, on startup or on a retry, is what starts a restoration.
+function useRestoreSession() {
+  const restoring = useAuthStore((s) => s.session.status === 'restoring')
+  useEffect(() => {
+    if (restoring) void restoreSession()
+  }, [restoring])
+}
+
+// The tokens are shared by every tab: once another tab forgets them, this session is over too.
+function useEndSessionWhenForgottenElsewhere() {
+  const endSession = useAuthStore((s) => s.endSession)
+  useEffect(() => tokens.onForgottenElsewhere(endSession), [endSession])
+}
+
+/*
+ * Until restoring settles no route is rendered, so no guard redirects: a reload stays on
+ * the page it was on.
+ */
 function SessionScope({ children }: { children: ReactNode }) {
   useClearCacheWhenSignedOut()
+  useRestoreSession()
+  useEndSessionWhenForgottenElsewhere()
+  const status = useAuthStore((s) => s.session.status)
+  if (status === 'restoring') return <RestoringSession />
+  if (status === 'unreachable') return <ServerUnreachable />
   return <>{children}</>
 }
 
