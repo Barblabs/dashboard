@@ -1,6 +1,7 @@
 import { ApiError } from '../api/client'
 import { fetchMe } from '../api/me'
 import { signOut } from './signOut'
+import { singleFlight } from './singleFlight'
 import { useAuthStore } from './store'
 import { tokens } from './tokenSource'
 
@@ -71,12 +72,5 @@ async function restore() {
   if ((await verifyStoredTokens()) === 'unreachable') useAuthStore.getState().becomeUnreachable()
 }
 
-let pendingRestore: Promise<void> | null = null
-
 // One restoration at a time, however many times the app asks while one is under way.
-export function restoreSession(): Promise<void> {
-  pendingRestore ??= restore().finally(() => {
-    pendingRestore = null
-  })
-  return pendingRestore
-}
+export const restoreSession = singleFlight(restore)
