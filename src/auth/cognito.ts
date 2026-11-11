@@ -2,6 +2,7 @@ import {
   AuthenticationDetails,
   CognitoUser,
   CognitoUserPool,
+  type CognitoUserSession,
   type IAuthenticationCallback,
 } from 'amazon-cognito-identity-js'
 import { singleFlight } from './singleFlight'
@@ -82,7 +83,7 @@ function readAccessToken(): Promise<string | null> {
   const user = pool().getCurrentUser()
   if (!user) return Promise.resolve(null)
   return new Promise((resolve, reject) => {
-    user.getSession((error: Error | null, session: { getAccessToken(): { getJwtToken(): string } } | null) => {
+    user.getSession((error: Error | null, session: CognitoUserSession | null) => {
       if (session) resolve(session.getAccessToken().getJwtToken())
       else if (error && isTransient(error)) reject(new TokensUnreachable(error))
       else resolve(null)
