@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Navigate } from 'react-router'
-import { signOut } from '../../auth/session'
+import { signOut } from '../../auth/signOut'
 import { useAuthStore } from '../../auth/store'
 import { Button } from '../../components/ui/Button'
 

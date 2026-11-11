@@ -2,9 +2,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/globals.css'
 import { App } from './App'
+import { MOCK_MODE } from './mockMode'
 
 async function main() {
-  if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCK === 'true') {
+  if (MOCK_MODE) {
     const { worker } = await import('./mocks/browser')
     await worker.start({ onUnhandledFrame: 'bypass' })
   }

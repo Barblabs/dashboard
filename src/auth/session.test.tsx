@@ -1,6 +1,7 @@
 import { act, screen } from '@testing-library/react'
-import { http } from 'msw'
+import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
+import { hasMockRole, setMockRole } from '../test/mocks/handlers/auth'
 import { failure } from '../test/mocks/handlers/responses'
 import { apiUrl } from '../test/mocks/url'
 import { renderApp, seedSource } from '../test/render'
@@ -20,7 +21,97 @@ function deactivateOnSync() {
   )
 }
 
+function answerMe(answer: () => Response, options: { once?: boolean } = {}) {
+  server.use(http.get(apiUrl('/me'), answer, options))
+}
+
+// In mock mode the sign-in page offers one button per role.
+function findSignInPage() {
+  return screen.findByRole('heading', { level: 1, name: 'Test mode' })
+}
+
+// A browser that signed in on an earlier visit, opening `path` again.
+function reopen(path: string) {
+  setMockRole('customer_admin')
+  return renderApp(path, null)
+}
+
+describe('Restoring the session on startup', () => {
+  it('stays on the page that was open, signed in', async () => {
+    reopen('/business-context')
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Business context' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/business-context')
+  })
+
+  it('opens the sign-in page when nothing was stored', async () => {
+    renderApp('/config', null)
+
+    expect(await findSignInPage()).toBeInTheDocument()
+  })
+
+  it('signs out and forgets the tokens the backend rejects', async () => {
+    answerMe(() => failure(401, 'unauthorized', 'invalid token'))
+    reopen('/config')
+
+    expect(await findSignInPage()).toBeInTheDocument()
+    expect(hasMockRole()).toBe(false)
+  })
+
+  it('opens the deactivated page for a deactivated organization', async () => {
+    answerMe(() => failure(403, 'customer_deactivated', 'customer deactivated'))
+    reopen('/config')
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Organization deactivated' })).toBeInTheDocument()
+  })
+
+  it.each([
+    ['the backend is down', () => HttpResponse.error()],
+    ['the backend fails', () => failure(503, 'unavailable', 'service unavailable')],
+  ])('keeps the tokens when %s, and retrying enters the session', async (_, answer) => {
+    answerMe(answer, { once: true })
+    const user = reopen('/business-context')
+
+    await screen.findByRole('heading', { level: 1, name: 'Cannot connect to the server' })
+    expect(hasMockRole()).toBe(true)
+
+    await user.click(screen.getByRole('button', { name: 'Retry' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Business context' })).toBeInTheDocument()
+  })
+})
+
+describe('Signing in', () => {
+  it('opens the deactivated page for a deactivated organization', async () => {
+    answerMe(() => failure(403, 'customer_deactivated', 'customer deactivated'))
+    const user = renderApp('/login', null)
+
+    await user.click(await screen.findByRole('button', { name: 'Admin (customer_admin)' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Organization deactivated' })).toBeInTheDocument()
+  })
+
+  it('tells a user the backend rejects that their account is disabled, and forgets the tokens', async () => {
+    answerMe(() => failure(401, 'unauthorized', 'user disabled'))
+    const user = renderApp('/login', null)
+
+    await user.click(await screen.findByRole('button', { name: 'Admin (customer_admin)' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Your account is disabled. Contact your administrator.')
+    expect(hasMockRole()).toBe(false)
+  })
+})
+
 describe('Session', () => {
+  it('forgets the stored tokens on signing out, so a reload does not sign back in', async () => {
+    const user = renderApp('/config')
+
+    await user.click(await screen.findByRole('button', { name: 'Sign out' }))
+
+    expect(await findSignInPage()).toBeInTheDocument()
+    expect(hasMockRole()).toBe(false)
+  })
+
   it('sends a deactivated user to the deactivated page, and signing out to the sign-in form', async () => {
     seedSource()
     deactivateOnSync()
@@ -32,7 +123,7 @@ describe('Session', () => {
 
     await user.click(screen.getByRole('button', { name: 'Sign out' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Sign in' })).toBeInTheDocument()
+    expect(await findSignInPage()).toBeInTheDocument()
   })
 
   it('shows the next user none of the data the deactivated session loaded', async () => {
@@ -41,10 +132,11 @@ describe('Session', () => {
     const user = renderApp('/config')
     await user.click(await screen.findByRole('button', { name: 'Sync now' }))
     await user.click(await screen.findByRole('button', { name: 'Sign out' }))
-    await screen.findByRole('heading', { level: 1, name: 'Sign in' })
+    await findSignInPage()
 
     holdRequests('get', '/cmdb/source')
-    act(() => useAuthStore.getState().establishSession(NEXT_USER, 'next-token'))
+    answerMe(() => HttpResponse.json(NEXT_USER))
+    await user.click(screen.getByRole('button', { name: 'Admin (customer_admin)' }))
 
     expect(await screen.findByText('Loading configuration…')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Sync now' })).not.toBeInTheDocument()
@@ -57,6 +149,8 @@ describe('Session', () => {
   })
 
   it('ignores a deactivation that arrives after signing out', () => {
+    act(() => useAuthStore.getState().endSession())
+
     useAuthStore.getState().deactivate()
 
     expect(useAuthStore.getState().session).toEqual({ status: 'signedOut' })

@@ -72,6 +72,14 @@ export const es: Translations = {
       'El acceso de tu organización ha sido desactivado. Contacta a tu administrador de BARBATTACK para más información.',
     signOut: 'Cerrar sesión',
   },
+  session: {
+    restoring: 'Cargando…',
+    unreachable: {
+      title: 'No se puede conectar con el servidor',
+      message: 'Tu sesión sigue abierta. Revisa tu conexión e inténtalo de nuevo.',
+      retry: 'Reintentar',
+    },
+  },
   placeholder: {
     comingSoon: 'Próximamente',
   },

@@ -1,7 +1,9 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router'
+import { restoreSession } from './auth/session'
 import { useAuthStore, useCurrentUser, type Role } from './auth/store'
+import { RestoringSession, ServerUnreachable } from './components/SessionScreens'
 import { Sidebar } from './components/Sidebar'
 import { AdminDashboardPage } from './pages/AdminDashboard'
 import { BusinessContextPage } from './pages/BusinessContext'
@@ -44,8 +46,24 @@ function useClearCacheWhenSignedOut() {
   }, [signedOut, queryClient])
 }
 
+// Entering `restoring`, on startup or on a retry, is what starts a restoration.
+function useRestoreSession() {
+  const restoring = useAuthStore((s) => s.session.status === 'restoring')
+  useEffect(() => {
+    if (restoring) void restoreSession()
+  }, [restoring])
+}
+
+/*
+ * Until restoring settles no route is rendered, so no guard redirects: a reload stays on
+ * the page it was on.
+ */
 function SessionScope({ children }: { children: ReactNode }) {
   useClearCacheWhenSignedOut()
+  useRestoreSession()
+  const status = useAuthStore((s) => s.session.status)
+  if (status === 'restoring') return <RestoringSession />
+  if (status === 'unreachable') return <ServerUnreachable />
   return <>{children}</>
 }
 

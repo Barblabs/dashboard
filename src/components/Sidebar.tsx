@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { NavLink, useNavigate } from 'react-router'
-import { signOut } from '../auth/session'
+import { signOut } from '../auth/signOut'
 import { useCurrentUser, type Role } from '../auth/store'
 import { chooseLanguage, LANGUAGES } from '../i18n'
 

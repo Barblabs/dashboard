@@ -3,37 +3,28 @@ import type { CognitoUser } from 'amazon-cognito-identity-js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { Navigate, useNavigate } from 'react-router'
+import { Navigate } from 'react-router'
 import { z } from 'zod'
 import { completeNewPassword, signIn } from '../../auth/cognito'
 import { completeSignIn } from '../../auth/session'
-import { useAuthStore, useCurrentUser, type AuthUser, type Role } from '../../auth/store'
+import { useAuthStore, useCurrentUser, type Role } from '../../auth/store'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
+import { MOCK_MODE } from '../../mockMode'
 import { setMockRole } from '../../test/mocks/handlers/auth'
 
-// ── Mock login (VITE_USE_MOCK=true) ─────────────────────────────────────────
+// ── Mock roles (VITE_USE_MOCK=true) ─────────────────────────────────────────
 
 interface MockRoleOption {
   role: Role
-  email: string
   labelKey: 'login.mock.platformAdmin' | 'login.mock.customerAdmin' | 'login.mock.viewer'
 }
 
 const MOCK_ROLES: MockRoleOption[] = [
-  { role: 'platform_admin', email: 'superadmin@barbattack.example', labelKey: 'login.mock.platformAdmin' },
-  { role: 'customer_admin', email: 'admin@barbattack.example', labelKey: 'login.mock.customerAdmin' },
-  { role: 'viewer', email: 'viewer@barbattack.example', labelKey: 'login.mock.viewer' },
+  { role: 'platform_admin', labelKey: 'login.mock.platformAdmin' },
+  { role: 'customer_admin', labelKey: 'login.mock.customerAdmin' },
+  { role: 'viewer', labelKey: 'login.mock.viewer' },
 ]
-
-function mockUser(role: Role, email: string): AuthUser {
-  return {
-    id: `mock-${role}`,
-    email,
-    role,
-    customer: role !== 'platform_admin' ? { id: 'mock-customer-id', name: 'ACME Corp' } : null,
-  }
-}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -109,7 +100,6 @@ interface CredFormProps {
 
 function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const [serverError, setServerError] = useState<string | null>(null)
 
   const { register, handleSubmit, formState: { isSubmitting } } = useForm<CredFields>({
@@ -126,9 +116,8 @@ function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
         return
       }
 
-      const outcome = await completeSignIn(result.accessToken)
-      if (outcome.ok) void navigate(destForRole(outcome.user.role), { replace: true })
-      else setServerError(t(outcome.error))
+      const failure = await completeSignIn()
+      if (failure) setServerError(t(failure))
     } catch (err) {
       setServerError(t(cognitoErrorKey(err)))
     }
@@ -204,7 +193,6 @@ interface NewPasswordFormProps {
 
 function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const [serverError, setServerError] = useState<string | null>(null)
 
   const { register, handleSubmit, formState: { isSubmitting } } = useForm<NewPwFields>({
@@ -214,10 +202,9 @@ function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
   async function onSubmit({ newPassword }: NewPwFields) {
     setServerError(null)
     try {
-      const accessToken = await completeNewPassword(cognitoUser, newPassword)
-      const outcome = await completeSignIn(accessToken)
-      if (outcome.ok) void navigate(destForRole(outcome.user.role), { replace: true })
-      else setServerError(t(outcome.error))
+      await completeNewPassword(cognitoUser, newPassword)
+      const failure = await completeSignIn()
+      if (failure) setServerError(t(failure))
     } catch (err) {
       setServerError(t(cognitoErrorKey(err)))
     }
@@ -265,55 +252,68 @@ function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
   )
 }
 
+// ── Mock sign-in (VITE_USE_MOCK=true) ─────────────────────────────────────────
+
+// Picking a role stands in for Cognito storing tokens; the rest is the real sign-in.
+function MockSignIn() {
+  const { t } = useTranslation()
+  const [serverError, setServerError] = useState<string | null>(null)
+
+  async function signInAs(role: Role) {
+    setServerError(null)
+    setMockRole(role)
+    const failure = await completeSignIn()
+    if (failure) setServerError(t(failure))
+  }
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-panel px-8">
+      <div className="flex flex-col items-center gap-2">
+        <span className="font-title text-[2rem] leading-none">
+          <span className="text-navy">BARB</span>
+          <span className="text-cyan">ATTACK</span>
+        </span>
+        <p className="font-body text-[0.9375rem] text-gray">{t('login.mock.subtitle')}</p>
+      </div>
+      <div className="flex w-full max-w-xs flex-col gap-3">
+        <h1 className="font-body text-[0.8125rem] font-semibold uppercase tracking-wider text-gray">
+          {t('login.mock.title')}
+        </h1>
+        {serverError && (
+          <p role="alert" className="rounded-md bg-critical/10 px-3.5 py-2.5 font-body text-[0.875rem] text-critical">
+            {serverError}
+          </p>
+        )}
+        {MOCK_ROLES.map(({ role, labelKey }) => (
+          <Button
+            key={role}
+            variant="secondary"
+            className="w-full justify-start"
+            onClick={() => { void signInAs(role) }}
+          >
+            {t(labelKey)}
+          </Button>
+        ))}
+      </div>
+    </main>
+  )
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 type Step =
   | { kind: 'credentials' }
   | { kind: 'newPassword'; cognitoUser: CognitoUser }
 
+// Signing in moves the session; this page follows it wherever it lands.
 export function LoginPage() {
-  const { t } = useTranslation()
   const user = useCurrentUser()
-  const establishSession = useAuthStore((s) => s.establishSession)
-  const navigate = useNavigate()
+  const deactivated = useAuthStore((s) => s.session.status === 'deactivated')
   const [step, setStep] = useState<Step>({ kind: 'credentials' })
 
-  if (user) {
-    return <Navigate to={destForRole(user.role)} replace />
-  }
-
-  if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCK === 'true') {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-panel px-8">
-        <div className="flex flex-col items-center gap-2">
-          <span className="font-title text-[2rem] leading-none">
-            <span className="text-navy">BARB</span>
-            <span className="text-cyan">ATTACK</span>
-          </span>
-          <p className="font-body text-[0.9375rem] text-gray">{t('login.mock.subtitle')}</p>
-        </div>
-        <div className="flex w-full max-w-xs flex-col gap-3">
-          <p className="font-body text-[0.8125rem] font-semibold uppercase tracking-wider text-gray">
-            {t('login.mock.title')}
-          </p>
-          {MOCK_ROLES.map(({ role, email, labelKey }) => (
-            <Button
-              key={role}
-              variant="secondary"
-              className="w-full justify-start"
-              onClick={() => {
-                setMockRole(role)
-                establishSession(mockUser(role, email), 'mock-access-token')
-                void navigate(destForRole(role), { replace: true })
-              }}
-            >
-              {t(labelKey)}
-            </Button>
-          ))}
-        </div>
-      </main>
-    )
-  }
+  if (deactivated) return <Navigate to="/deactivated" replace />
+  if (user) return <Navigate to={destForRole(user.role)} replace />
+  if (MOCK_MODE) return <MockSignIn />
 
   return (
     <LoginLayout>

@@ -70,6 +70,14 @@ export const en = {
       "Your organization's access has been deactivated. Contact your BARBATTACK administrator for more information.",
     signOut: 'Sign out',
   },
+  session: {
+    restoring: 'Loading…',
+    unreachable: {
+      title: 'Cannot connect to the server',
+      message: 'Your session is still open. Check your connection and try again.',
+      retry: 'Retry',
+    },
+  },
   placeholder: {
     comingSoon: 'Coming soon',
   },
