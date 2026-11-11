@@ -1,6 +1,5 @@
 import { useId } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Dialog } from '@base-ui/react/dialog'
 import type { ParseKeys } from 'i18next'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -9,18 +8,13 @@ import { useSetAreaOwnerMutation, type Area } from '../../api/areas'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
+import { Modal } from '../../components/ui/Modal'
 import { requestErrorText } from '../../i18n/errors'
 
 // The owner is free text: the backend accepts any email, not only dashboard users.
 const ownerSchema = z.object({ email: z.email('config.areas.owner.invalidEmail') })
 
 type OwnerFields = z.infer<typeof ownerSchema>
-
-const BACKDROP =
-  'fixed inset-0 bg-navy/40 transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0'
-
-const POPUP =
-  'fixed top-1/2 left-1/2 w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-2xl transition-[opacity,scale] duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:scale-[0.96] motion-safe:data-starting-style:scale-[0.96]'
 
 interface Props {
   area: Area | null
@@ -55,70 +49,65 @@ export function AreaOwnerDialog({ area, onClose }: Props) {
   const saving = setOwner.isPending && !removing
 
   return (
-    <Dialog.Root open={area !== null} onOpenChange={(next) => !next && onClose()}>
-      <Dialog.Portal>
-        <Dialog.Backdrop className={BACKDROP} />
-        <Dialog.Popup aria-labelledby={titleId} className={POPUP}>
-          <form
-            noValidate
-            onSubmit={(event) => void onSubmit(event)}
-            className="flex flex-col gap-5 p-6"
+    <Modal open={area !== null} onClose={onClose} labelledBy={titleId}>
+      <form
+        noValidate
+        onSubmit={(event) => void onSubmit(event)}
+        className="flex flex-col gap-5 p-6"
+      >
+        <div className="flex flex-col gap-1">
+          <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
+            {t('config.areas.owner.title', { area: area?.name })}
+          </h2>
+          <p className="font-body text-[0.8125rem] text-gray">
+            {t('config.areas.owner.description')}
+          </p>
+        </div>
+
+        <Field
+          label={t('config.areas.owner.email')}
+          error={errors.email?.message && t(errors.email.message as ParseKeys)}
+        >
+          <Input
+            type="email"
+            placeholder="nombre@empresa.com"
+            autoComplete="off"
+            disabled={setOwner.isPending}
+            {...register('email', { onChange: () => setOwner.reset() })}
+          />
+        </Field>
+
+        {errorText && (
+          <p
+            role="alert"
+            className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
           >
-            <div className="flex flex-col gap-1">
-              <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-                {t('config.areas.owner.title', { area: area?.name })}
-              </h2>
-              <p className="font-body text-[0.8125rem] text-gray">
-                {t('config.areas.owner.description')}
-              </p>
-            </div>
+            {errorText}
+          </p>
+        )}
 
-            <Field
-              label={t('config.areas.owner.email')}
-              error={errors.email?.message && t(errors.email.message as ParseKeys)}
+        <div className="flex flex-wrap items-center gap-2">
+          {area?.owner_email && (
+            <Button
+              variant="ghost"
+              size="sm"
+              loading={removing}
+              disabled={saving}
+              onClick={() => save(null)}
             >
-              <Input
-                type="email"
-                placeholder="nombre@empresa.com"
-                autoComplete="off"
-                disabled={setOwner.isPending}
-                {...register('email', { onChange: () => setOwner.reset() })}
-              />
-            </Field>
-
-            {errorText && (
-              <p
-                role="alert"
-                className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
-              >
-                {errorText}
-              </p>
-            )}
-
-            <div className="flex flex-wrap items-center gap-2">
-              {area?.owner_email && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  loading={removing}
-                  disabled={saving}
-                  onClick={() => save(null)}
-                >
-                  {t('config.areas.owner.remove')}
-                </Button>
-              )}
-              <div className="ml-auto flex gap-2">
-                <Button variant="secondary" size="sm" onClick={onClose}>
-                  {t('config.areas.owner.cancel')}
-                </Button>
-                <Button type="submit" size="sm" loading={saving} disabled={removing}>
-                  {saving ? t('config.areas.owner.saving') : t('config.areas.owner.save')}
-                </Button>
-              </div>
-            </div>
-          </form>
-        </Dialog.Popup>
-      </Dialog.Portal>
-    </Dialog.Root>
+              {t('config.areas.owner.remove')}
+            </Button>
+          )}
+          <div className="ml-auto flex gap-2">
+            <Button variant="secondary" size="sm" onClick={onClose}>
+              {t('config.areas.owner.cancel')}
+            </Button>
+            <Button type="submit" size="sm" loading={saving} disabled={removing}>
+              {saving ? t('config.areas.owner.saving') : t('config.areas.owner.save')}
+            </Button>
+          </div>
+        </div>
+      </form>
+    </Modal>
   )
 }
