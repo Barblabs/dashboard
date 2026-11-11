@@ -2,8 +2,10 @@ import {
   AuthenticationDetails,
   CognitoUser,
   CognitoUserPool,
+  type CognitoUserSession,
   type IAuthenticationCallback,
 } from 'amazon-cognito-identity-js'
+import { singleFlight } from './singleFlight'
 import { onStorageKeyRemoved } from './storageEvents'
 import { TokensUnreachable, type Tokens } from './tokens'
 
@@ -81,7 +83,7 @@ function readAccessToken(): Promise<string | null> {
   const user = pool().getCurrentUser()
   if (!user) return Promise.resolve(null)
   return new Promise((resolve, reject) => {
-    user.getSession((error: Error | null, session: { getAccessToken(): { getJwtToken(): string } } | null) => {
+    user.getSession((error: Error | null, session: CognitoUserSession | null) => {
       if (session) resolve(session.getAccessToken().getJwtToken())
       else if (error && isTransient(error)) reject(new TokensUnreachable(error))
       else resolve(null)
@@ -90,14 +92,7 @@ function readAccessToken(): Promise<string | null> {
 }
 
 // Requests that find the token expired at the same time wait on a single renewal.
-let pendingAccessToken: Promise<string | null> | null = null
-
-function currentAccessToken(): Promise<string | null> {
-  pendingAccessToken ??= readAccessToken().finally(() => {
-    pendingAccessToken = null
-  })
-  return pendingAccessToken
-}
+const currentAccessToken = singleFlight(readAccessToken)
 
 // RevokeToken is a public, unauthenticated Cognito operation the SDK's typings do not expose.
 async function revoke(refreshToken: string) {

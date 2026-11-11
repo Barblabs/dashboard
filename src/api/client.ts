@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { signOut } from '../auth/signOut'
 import { useAuthStore } from '../auth/store'
+import { TokensUnreachable } from '../auth/tokens'
 import { tokens } from '../auth/tokenSource'
 
 /*
@@ -66,7 +67,8 @@ apiClient.interceptors.request.use(async (config) => {
     token = await tokens.currentAccessToken()
   } catch (error) {
     // Cognito out of reach is, to the caller, the same as the backend out of reach.
-    throw new ApiError(error instanceof Error ? error.message : 'Network error', { kind: 'network' })
+    if (error instanceof TokensUnreachable) throw new ApiError(error.message, { kind: 'network' })
+    throw error
   }
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
