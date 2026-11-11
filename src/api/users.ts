@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
+import { appendTo, replaceById } from './listCache'
 import type { components } from './generated'
 
 type _UserSchema = components['schemas']['UserResponse']
@@ -31,11 +32,7 @@ export function useInviteUserMutation() {
   return useMutation({
     mutationFn: (data: { email: string; role: CustomerRole }) =>
       api.post<UserResponse>('/users', data),
-    onSuccess: (user) => {
-      queryClient.setQueryData<UserListResponse>(USERS_KEY, (prev) =>
-        prev ? { users: [...prev.users, user] } : { users: [user] },
-      )
-    },
+    onSuccess: (invited) => appendTo(queryClient, USERS_KEY, 'users', invited),
   })
 }
 
@@ -44,11 +41,7 @@ export function useChangeRoleMutation() {
   return useMutation({
     mutationFn: ({ id, role }: { id: string; role: CustomerRole }) =>
       api.patch<UserResponse>(`/users/${id}`, { role }),
-    onSuccess: (updated) => {
-      queryClient.setQueryData<UserListResponse>(USERS_KEY, (prev) =>
-        prev ? { users: prev.users.map((u) => (u.id === updated.id ? updated : u)) } : prev,
-      )
-    },
+    onSuccess: (updated) => replaceById(queryClient, USERS_KEY, 'users', updated),
   })
 }
 
@@ -56,10 +49,6 @@ export function useDisableUserMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => api.post<UserResponse>(`/users/${id}/disable`),
-    onSuccess: (updated) => {
-      queryClient.setQueryData<UserListResponse>(USERS_KEY, (prev) =>
-        prev ? { users: prev.users.map((u) => (u.id === updated.id ? updated : u)) } : prev,
-      )
-    },
+    onSuccess: (updated) => replaceById(queryClient, USERS_KEY, 'users', updated),
   })
 }

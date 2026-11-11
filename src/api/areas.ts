@@ -3,6 +3,7 @@ import type { ActivityFilter } from './assets'
 import { api } from './client'
 import { connectionScopeKey } from './cmdb'
 import type { components } from './generated'
+import { replaceById } from './listCache'
 
 export type Area = components['schemas']['AreaResponse']
 export type AreaListResponse = components['schemas']['AreaListResponse']
@@ -23,12 +24,6 @@ export function useSetAreaOwnerMutation() {
     mutationFn: ({ id, email }: { id: number; email: string | null }) =>
       api.put<Area>(`/areas/${id}/owner`, { email }),
     // Every cached filter variant may list the area, so each one gets the updated row.
-    onSuccess: (updated) => {
-      queryClient.setQueriesData<AreaListResponse>(
-        { queryKey: areasKey },
-        (prev) =>
-          prev ? { areas: prev.areas.map((a) => (a.id === updated.id ? updated : a)) } : prev,
-      )
-    },
+    onSuccess: (updated) => replaceById(queryClient, areasKey, 'areas', updated),
   })
 }
