@@ -5,7 +5,7 @@ import {
   CRITICALITIES,
   type Asset,
   type AssetsPage,
-} from '../../../api/assets'
+} from '../../api/assets'
 import { mockAssets } from '../assets'
 import { apiUrl } from '../url'
 import { failure, isOneOf } from './responses'

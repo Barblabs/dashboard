@@ -1,10 +1,10 @@
 import { screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
-import { apiUrl } from '../../test/mocks/url'
+import { apiUrl } from '../../mocks/url'
 import { renderApp, seedUsers } from '../../test/render'
 import { server } from '../../test/server'
-import { MOCK_USERS } from '../../test/mocks/users-store'
+import { MOCK_USERS } from '../../mocks/users-store'
 
 const ADMIN = MOCK_USERS[0]!
 const VIEWER = MOCK_USERS[1]!

@@ -1,5 +1,5 @@
 import { delay, http, HttpResponse } from 'msw'
-import { isStated, type BusinessContextFields, type DraftSource } from '../../../api/businessContext'
+import { isStated, type BusinessContextFields, type DraftSource } from '../../api/businessContext'
 import { KEY_FIELDS, loadBusinessContext, MOCK_DRAFT, saveBusinessContext } from '../business-context-store'
 import { apiUrl } from '../url'
 import { failure } from './responses'

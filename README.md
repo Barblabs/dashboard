@@ -14,7 +14,7 @@ de activos del CMDB y los hallazgos de vulnerabilidades priorizados.
 | `@tanstack/react-query-devtools` | Inspeccionar la caché | Solo en desarrollo; se carga sola en `App.tsx` y no entra al build. |
 | `react-hook-form` + `zod` + `@hookform/resolvers` | Formularios | Todo formulario: el esquema zod declara las reglas una vez y `zodResolver` las conecta. Los mensajes de error del esquema son claves de traducción, no texto. |
 | `i18next`, `react-i18next`, `i18next-browser-languagedetector` | Traducciones | Todo texto visible, con `useTranslation()` y `t('clave')`. Ver [Idiomas](#idiomas-i18n). |
-| `msw` | Backend falso de las pruebas | Solo en pruebas: handlers en `src/test/mocks/`. Un endpoint nuevo del contrato se agrega ahí. Ver [Pruebas](#pruebas). |
+| `msw` | Backend falso de las pruebas y del modo mock | Handlers en `src/mocks/`, compartidos por las pruebas y el modo mock de desarrollo. Un endpoint nuevo del contrato se agrega ahí. Ver [Pruebas](#pruebas). |
 | `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom` | Pruebas | Ver [Pruebas](#pruebas). Interactuar con `user-event`, buscar por rol, label o texto, nunca por clases o estado interno. |
 | `react-router`, `zustand` | Ruteo y estado global de cliente | Instaladas pero todavía sin usar. `react-router` cuando la navegación entre Hallazgos, Configuración y Notificaciones sea real. `zustand` solo para estado de UI compartido entre ramas lejanas del árbol; el estado del servidor va en react-query y el estado local en `useState`. |
 
@@ -113,11 +113,12 @@ visible), contra un servidor MSW de Node. Cada archivo de prueba está junto a l
 primitivas con comportamiento propio en `src/components/ui/`. La suite corre
 en inglés, salvo las pruebas de cambio de idioma.
 
-- Hay un archivo de handlers por dominio en `src/test/mocks/handlers/`,
+- Hay un archivo de handlers por dominio en `src/mocks/handlers/`,
   siguiendo la API de barbackend, y los datos de ejemplo viven en
-  `src/test/mocks/`. Para sobrescribir un handler en una prueba, arma la URL
-  con `apiUrl()` de `src/test/mocks/url.ts`.
-- La conexión CMDB se guarda en `localStorage` (`src/test/mocks/store.ts`).
+  `src/mocks/`. Para sobrescribir un handler en una prueba, arma la URL
+  con `apiUrl()` de `src/mocks/url.ts`.
+- Cada recurso mock se guarda en `localStorage` con `localStore()` de
+  `src/mocks/localStore.ts`; la conexión CMDB, en `src/mocks/store.ts`.
   `seedSource()` y `renderApp()` de `src/test/render.tsx` preparan el estado y
   montan la app.
 - El usuario `admin` hace fallar la prueba de conexión con el código

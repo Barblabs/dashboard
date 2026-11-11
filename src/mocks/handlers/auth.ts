@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
-import type { MeResponse } from '../../../api/me'
-import { storedMockRole } from '../../../auth/mockTokens'
-import type { Role } from '../../../auth/store'
+import type { MeResponse } from '../../api/me'
+import { storedMockRole } from '../../auth/mockTokens'
+import type { Role } from '../../auth/store'
 import { apiUrl } from '../url'
 
 const MOCK_USERS: Record<Role, MeResponse> = {

@@ -1,6 +1,5 @@
-import type { CustomerResponse } from '../../api/customers'
-
-const STORAGE_KEY = 'barbattack_mock_customers'
+import type { CustomerResponse } from '../api/customers'
+import { localStore } from './localStore'
 
 export const MOCK_CUSTOMERS: CustomerResponse[] = [
   {
@@ -23,11 +22,7 @@ export const MOCK_CUSTOMERS: CustomerResponse[] = [
   },
 ]
 
-export function loadCustomers(): CustomerResponse[] {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  return raw ? (JSON.parse(raw) as CustomerResponse[]) : MOCK_CUSTOMERS
-}
-
-export function saveCustomers(customers: CustomerResponse[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(customers))
-}
+export const { load: loadCustomers, save: saveCustomers } = localStore(
+  'barbattack_mock_customers',
+  MOCK_CUSTOMERS,
+)
