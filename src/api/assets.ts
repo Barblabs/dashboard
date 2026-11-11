@@ -1,4 +1,4 @@
-import type { components } from './generated'
+import type { Override, Schemas } from './schemas'
 
 export const ASSET_KINDS = ['server', 'virtual_machine', 'workstation', 'network_device'] as const
 export type AssetKind = (typeof ASSET_KINDS)[number]
@@ -13,56 +13,34 @@ export type SoftwareRole = 'operating_system' | 'application'
 
 export type Exposure = 'internet_facing' | 'internal'
 
-export interface Product {
-  vendor: string
-  name: string
-}
+export type Product = Schemas['ProductResponse']
 
-export interface SoftwareComponent {
-  role: SoftwareRole
-  name: string
-  version: string
-  /** `null` for an Unidentified Component: threats cannot be checked against it. */
-  product: Product | null
-}
+/** `product` is `null` for an Unidentified Component: threats cannot be checked against it. */
+export type SoftwareComponent = Override<Schemas['SoftwareResponse'], { role: SoftwareRole }>
 
-export interface Hardware {
-  vendor: string
-  model: string
-}
+export type Hardware = Schemas['HardwareResponse']
 
-export interface AssetOwner {
-  email: string
-  source: 'declared' | 'imported'
-}
+export type AssetOwner = Override<Schemas['OwnerResponse'], { source: 'declared' | 'imported' }>
 
-export type AreaRef = components['schemas']['AreaRefResponse']
+export type AreaRef = Schemas['AreaRefResponse']
 
-export interface Asset {
-  source_id: string
-  record_id: string
-  name: string
-  description: string
-  kind: AssetKind
-  hardware: Hardware | null
-  /** Already in display order. */
-  software: SoftwareComponent[]
-  criticality: Criticality | null
-  exposure: Exposure | null
-  owner: AssetOwner | null
-  area: AreaRef | null
-  /** What the CMDB reports; independent of whether the Asset is still monitored. */
-  retired: boolean
-  active: boolean
-  inactive_since: string | null
-}
+/*
+ * The spec types the vocabularies as plain strings. `retired` is what the CMDB reports,
+ * independent of whether the Asset is still monitored (`active`).
+ */
+export type Asset = Override<
+  Schemas['AssetResponse'],
+  {
+    kind: AssetKind
+    criticality: Criticality | null
+    exposure: Exposure | null
+    owner: AssetOwner | null
+    /** Already in display order. */
+    software: SoftwareComponent[]
+  }
+>
 
-export interface AssetsPage {
-  assets: Asset[]
-  next_cursor: string | null
-  /** Assets matching the filters, ignoring paging. */
-  total: number
-}
+export type AssetsPage = Override<Schemas['AssetListResponse'], { assets: Asset[] }>
 
 export interface AssetFilters {
   active: ActivityFilter

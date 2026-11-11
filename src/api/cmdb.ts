@@ -6,49 +6,33 @@ import {
   type QueryClient,
 } from '@tanstack/react-query'
 import { api, type BackendFailure } from './client'
+import type { Known, Override, Schemas } from './schemas'
 
 // The CMDBs the dashboard knows how to talk to; only iTop has a connection flow today.
 export type CmdbProvider = 'itop' | 'servicenow'
 
-export interface CmdbSyncFailure {
-  at: string
-  error: string
-}
+export type CmdbSyncFailure = Schemas['SyncFailureResponse']
 
-export interface CmdbSource {
-  provider: CmdbProvider
-  url: string
-  /** `null` for token-auth sources, which only the backend CLI can create. */
-  user: string | null
-  /** When the latest successful Sync finished. */
-  last_sync: string | null
-  /** Set only while the latest Sync failed; it carries no code, only the message. */
-  last_sync_failure: CmdbSyncFailure | null
-}
+/*
+ * `last_sync` is when the latest successful Sync finished; `last_sync_failure` is set only
+ * while the latest Sync failed, and carries no code, only the message.
+ */
+export type CmdbSource = Override<Schemas['CmdbSourceResponse'], { provider: CmdbProvider }>
 
-export interface CmdbLogin {
-  url: string
-  user: string
-  password: string
-}
+export type CmdbLogin = Known<Schemas['LoginRequest']>
 
-export interface CmdbSourceRequest extends CmdbLogin {
-  provider: CmdbProvider
-}
+export type CmdbSourceRequest = Override<Known<Schemas['ConnectRequest']>, { provider: CmdbProvider }>
 
+/*
+ * Written by hand: the spec's TestResponse makes `code` and `error` optional whatever `ok`
+ * says, while the backend sends both exactly when `ok` is false.
+ */
 export type CmdbTestResult =
   | { ok: true }
   /** `code` is a stable id used to translate the failure; it may be unknown to the frontend. */
   | ({ ok: false } & BackendFailure)
 
-export interface CmdbSyncResult {
-  last_sync: string
-  created: number
-  updated: number
-  deactivated: number
-  reactivated: number
-  skipped: number
-}
+export type CmdbSyncResult = Schemas['SyncResponse']
 
 /*
  * Data that only exists while a CMDB is connected lives under this root key, so

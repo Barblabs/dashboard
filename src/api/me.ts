@@ -1,7 +1,7 @@
 import { api } from './client'
-import type { components } from './generated'
+import type { Schemas } from './schemas'
 
-type MeResponse = components['schemas']['MeResponse']
+export type MeResponse = Schemas['MeResponse']
 
 export function fetchMe(): Promise<MeResponse> {
   return api.get<MeResponse>('/me')

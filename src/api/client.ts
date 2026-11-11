@@ -3,6 +3,7 @@ import { signOut } from '../auth/signOut'
 import { useAuthStore } from '../auth/store'
 import { TokensUnreachable } from '../auth/tokens'
 import { tokens } from '../auth/tokenSource'
+import type { Schemas } from './schemas'
 
 /*
  * `network` means the backend never answered (down, CORS, offline), so there is no
@@ -12,10 +13,8 @@ export type ApiFailure =
   | { kind: 'http'; status: number; code: string | null }
   | { kind: 'network' }
 
-export interface BackendFailure {
-  code: string
-  error: string
-}
+/** The body of a failure the backend explains: a stable code and a readable message. */
+export type BackendFailure = Schemas['CodedError']
 
 // Every request failure surfaces as an ApiError.
 export class ApiError extends Error {

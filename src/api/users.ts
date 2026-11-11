@@ -1,22 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import { appendTo, replaceById } from './listCache'
-import type { components } from './generated'
+import type { Schemas } from './schemas'
 
-type _UserSchema = components['schemas']['UserResponse']
-export type CustomerRole = _UserSchema['role']
-
-export interface UserResponse {
-  id: string
-  email: string
-  role: CustomerRole
-  created_at: string
-  disabled_at: string | null
-}
-
-interface UserListResponse {
-  users: UserResponse[]
-}
+export type UserResponse = Schemas['UserResponse']
+type UserListResponse = Schemas['UserListResponse']
+export type CustomerRole = UserResponse['role']
 
 const USERS_KEY = ['users'] as const
 

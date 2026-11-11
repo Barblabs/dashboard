@@ -2,11 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { ActivityFilter } from './assets'
 import { api } from './client'
 import { connectionScopeKey } from './cmdb'
-import type { components } from './generated'
 import { replaceById } from './listCache'
+import type { Schemas } from './schemas'
 
-export type Area = components['schemas']['AreaResponse']
-export type AreaListResponse = components['schemas']['AreaListResponse']
+export type Area = Schemas['AreaResponse']
+export type AreaListResponse = Schemas['AreaListResponse']
 
 // Areas are imported by the connected CMDB, so a sync refetches them and a disconnect drops them.
 const areasKey = [...connectionScopeKey, 'areas'] as const
