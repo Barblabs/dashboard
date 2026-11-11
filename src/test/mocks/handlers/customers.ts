@@ -2,10 +2,7 @@ import { http, HttpResponse } from 'msw'
 import type { CustomerResponse } from '../../../api/customers'
 import { loadCustomers, saveCustomers } from '../customers-store'
 import { apiUrl } from '../url'
-
-function failure(status: number, code: string, error: string) {
-  return HttpResponse.json({ code, error }, { status })
-}
+import { failure } from './responses'
 
 export const customersHandlers = [
   http.get(apiUrl('/customers'), () => {

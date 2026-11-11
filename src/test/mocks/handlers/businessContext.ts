@@ -3,10 +3,7 @@ import type { BusinessContextFields, DraftSource } from '../../../api/businessCo
 import { isStated } from '../../../pages/BusinessContext/model'
 import { KEY_FIELDS, loadBusinessContext, MOCK_DRAFT, saveBusinessContext } from '../business-context-store'
 import { apiUrl } from '../url'
-
-function failure(status: number, code: string, error: string) {
-  return HttpResponse.json({ code, error }, { status })
-}
+import { failure } from './responses'
 
 const gaps = (context: BusinessContextFields) => KEY_FIELDS.filter((path) => !isStated(context, path))
 

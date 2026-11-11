@@ -2,10 +2,7 @@ import { http, HttpResponse } from 'msw'
 import type { CustomerRole, UserResponse } from '../../../api/users'
 import { loadUsers, saveUsers } from '../users-store'
 import { apiUrl } from '../url'
-
-function failure(status: number, code: string, error: string) {
-  return HttpResponse.json({ code, error }, { status })
-}
+import { failure } from './responses'
 
 function isLastAdmin(users: UserResponse[], excludeId?: string): boolean {
   return (
