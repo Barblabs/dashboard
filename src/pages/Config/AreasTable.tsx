@@ -6,7 +6,8 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { requestErrorText } from '../../i18n/errors'
 import { AreaOwnerDialog } from './AreaOwnerDialog'
-import { FilterSelect } from './AssetFilterBar'
+import { FilterSelect } from './FilterSelect'
+import { pick } from './filters'
 import { CELL, HEADER_CELL, MESSAGE, useDateFormat } from './table'
 
 const DEFAULT_ACTIVITY: ActivityFilter = 'true'
@@ -108,9 +109,7 @@ export function AreasTable({ readOnly }: { readOnly: boolean }) {
           <FilterSelect
             label={t('config.areas.filter')}
             value={active}
-            onChange={(value) =>
-              setActive(ACTIVITY_FILTERS.find((option) => option === value) ?? active)
-            }
+            onChange={(value) => setActive(pick(ACTIVITY_FILTERS, value) ?? active)}
           >
             {ACTIVITY_FILTERS.map((activity) => (
               <option key={activity} value={activity}>
