@@ -1,39 +1,10 @@
-import type { BusinessContextFields, CriticalService } from '../../api/businessContext'
-
-export function emptyFields(): BusinessContextFields {
-  return {
-    profile: {
-      summary: '',
-      mission: '',
-      vision: '',
-      sectors: [],
-      organization_type: '',
-      employees: '',
-      annual_revenue: '',
-    },
-    geography: { headquarters: '', countries: [] },
-    operations: { critical_services: [], data_categories: [], regulations: [], environments: [] },
-    footprint: { domains: [], brands: [], technologies: [], third_parties: [] },
-    risk: { appetite: '', concerns: [], past_incidents: '', constraints: '', notes: '' },
-  }
-}
+import {
+  isStatedValue,
+  type BusinessContextFields,
+  type CriticalService,
+} from '../../api/businessContext'
 
 type Section = keyof BusinessContextFields
-
-function valueAt(fields: BusinessContextFields, path: string): unknown {
-  const [section, field] = path.split('.') as [Section, string]
-  return (fields[section] as Record<string, unknown> | undefined)?.[field]
-}
-
-function stated(value: unknown): boolean {
-  if (Array.isArray(value)) return value.length > 0
-  return typeof value === 'string' && value.trim() !== ''
-}
-
-/** Whether the field at a path such as `profile.sectors` says anything. */
-export function isStated(fields: BusinessContextFields, path: string): boolean {
-  return stated(valueAt(fields, path))
-}
 
 function sameEntry(a: string, b: string) {
   return a.trim().toLowerCase() === b.trim().toLowerCase()
@@ -87,7 +58,7 @@ export function mergeDraft(current: BusinessContextFields, draft: BusinessContex
         after = mergeServices(before as CriticalService[], offered as CriticalService[])
       } else if (Array.isArray(before)) {
         after = union(before as string[], offered as string[])
-      } else if (!stated(before) && stated(offered)) {
+      } else if (!isStatedValue(before) && isStatedValue(offered)) {
         after = offered
       }
       if (JSON.stringify(after) !== JSON.stringify(before)) {

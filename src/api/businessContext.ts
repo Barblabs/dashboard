@@ -114,6 +114,36 @@ export interface BusinessContextFields {
   risk: Known<Schemas['RiskFields']>
 }
 
+export function emptyFields(): BusinessContextFields {
+  return {
+    profile: {
+      summary: '',
+      mission: '',
+      vision: '',
+      sectors: [],
+      organization_type: '',
+      employees: '',
+      annual_revenue: '',
+    },
+    geography: { headquarters: '', countries: [] },
+    operations: { critical_services: [], data_categories: [], regulations: [], environments: [] },
+    footprint: { domains: [], brands: [], technologies: [], third_parties: [] },
+    risk: { appetite: '', concerns: [], past_incidents: '', constraints: '', notes: '' },
+  }
+}
+
+/** Whether a field's value says anything: non-blank text, a code, or a non-empty list. */
+export function isStatedValue(value: unknown): boolean {
+  if (Array.isArray(value)) return value.length > 0
+  return typeof value === 'string' && value.trim() !== ''
+}
+
+/** Whether the field at a path such as `profile.sectors` says anything. */
+export function isStated(fields: BusinessContextFields, path: string): boolean {
+  const [section, field] = path.split('.') as [keyof BusinessContextFields, string]
+  return isStatedValue((fields[section] as Record<string, unknown> | undefined)?.[field])
+}
+
 export type BusinessContext = Override<
   Schemas['BusinessContextResponse'],
   { context: BusinessContextFields }

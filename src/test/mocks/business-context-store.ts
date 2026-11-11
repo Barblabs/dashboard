@@ -1,5 +1,4 @@
-import type { BusinessContext, BusinessContextFields } from '../../api/businessContext'
-import { emptyFields } from '../../pages/BusinessContext/model'
+import { emptyFields, type BusinessContext, type BusinessContextFields } from '../../api/businessContext'
 
 const STORAGE_KEY = 'barbattack_mock_business_context'
 
