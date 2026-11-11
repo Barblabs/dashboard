@@ -11,7 +11,7 @@ afterEach(async () => {
   cleanup()
   server.resetHandlers()
   localStorage.clear()
-  useAuthStore.getState().clearSession()
+  useAuthStore.getState().endSession()
   await i18n.changeLanguage()
 })
 afterAll(() => server.close())

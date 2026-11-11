@@ -1,39 +1,17 @@
 import { useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LIMITS, useDraftBusinessContextMutation, type Draft, type DraftFile } from '../../api/businessContext'
+import {
+  DRAFT_FILE_EXTENSIONS,
+  LIMITS,
+  draftMediaTypeOf,
+  useDraftBusinessContextMutation,
+  type Draft,
+} from '../../api/businessContext'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { requestErrorText } from '../../i18n/errors'
 
-// Browsers often send no type for Markdown or CSV, so the extension decides.
-const MEDIA_TYPES: Record<string, string> = {
-  pdf: 'application/pdf',
-  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  txt: 'text/plain',
-  md: 'text/markdown',
-  markdown: 'text/markdown',
-  csv: 'text/csv',
-  json: 'application/json',
-}
-
-const ACCEPT = Object.keys(MEDIA_TYPES)
-  .map((ext) => `.${ext}`)
-  .join(',')
-
-function mediaTypeOf(file: File): string | null {
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
-  return MEDIA_TYPES[ext] ?? null
-}
-
-// The backend takes the bytes in base64, which is what a data URL carries after its comma.
-function readBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.addEventListener('load', () => resolve(String(reader.result).split(',', 2)[1] ?? ''))
-    reader.addEventListener('error', () => reject(reader.error ?? new Error('read failed')))
-    reader.readAsDataURL(file)
-  })
-}
+const ACCEPT = DRAFT_FILE_EXTENSIONS.map((ext) => `.${ext}`).join(',')
 
 function sizeOf(bytes: number) {
   return bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`
@@ -78,22 +56,19 @@ export function ImportDialog({
     if (files.length === 0 && !text.trim()) return t('businessContext.import.required')
     if (files.length > LIMITS.documents) return t('businessContext.import.tooMany')
     for (const file of files) {
-      if (!mediaTypeOf(file)) return t('businessContext.import.fileType', { name: file.name })
+      if (!draftMediaTypeOf(file)) return t('businessContext.import.fileType', { name: file.name })
       if (file.size > LIMITS.documentBytes) return t('businessContext.import.fileTooLarge', { name: file.name })
     }
     if (files.reduce((sum, f) => sum + f.size, 0) > LIMITS.documentsBytes) return t('businessContext.import.tooLargeTogether')
     return null
   }
 
-  async function submit() {
+  function submit() {
     const failure = check()
     setProblem(failure)
     if (failure) return
-    const encoded: DraftFile[] = await Promise.all(
-      files.map(async (file) => ({ name: file.name, media_type: mediaTypeOf(file)!, data: await readBase64(file) })),
-    )
     draft.mutate(
-      { ...(text.trim() ? { text } : {}), ...(encoded.length > 0 ? { files: encoded } : {}) },
+      { text, files },
       {
         onSuccess: (result) => {
           onDraft(result)
@@ -216,7 +191,7 @@ export function ImportDialog({
           <Button variant="secondary" size="sm" disabled={draft.isPending} onClick={close}>
             {t('businessContext.import.cancel')}
           </Button>
-          <Button size="sm" loading={draft.isPending} onClick={() => void submit()}>
+          <Button size="sm" loading={draft.isPending} onClick={submit}>
             {draft.isPending ? t('businessContext.import.submitting') : t('businessContext.import.submit')}
           </Button>
         </div>

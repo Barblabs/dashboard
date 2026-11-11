@@ -241,6 +241,8 @@ export const en = {
   },
   config: {
     loading: 'Loading configuration…',
+    loadFailed: 'Could not load the CMDB connection.',
+    retry: 'Retry',
     header: {
       title: 'Configuration',
       subtitle: 'Connect your CMDB to load the tech stack.',

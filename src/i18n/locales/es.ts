@@ -243,6 +243,8 @@ export const es: Translations = {
   },
   config: {
     loading: 'Cargando configuración…',
+    loadFailed: 'No se pudo cargar la conexión con la CMDB.',
+    retry: 'Reintentar',
     header: {
       title: 'Configuración',
       subtitle: 'Conecta tu CMDB para cargar el stack tecnológico.',

@@ -211,9 +211,54 @@ export function useSaveBusinessContextMutation() {
   })
 }
 
+// Browsers often send no type for Markdown or CSV, so the extension decides.
+const DRAFT_MEDIA_TYPES: Record<string, string> = {
+  pdf: 'application/pdf',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  txt: 'text/plain',
+  md: 'text/markdown',
+  markdown: 'text/markdown',
+  csv: 'text/csv',
+  json: 'application/json',
+}
+
+export const DRAFT_FILE_EXTENSIONS = Object.keys(DRAFT_MEDIA_TYPES)
+
+/** `null` for a file the draft cannot read. */
+export function draftMediaTypeOf(file: File): string | null {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+  return DRAFT_MEDIA_TYPES[ext] ?? null
+}
+
+// The backend takes the bytes in base64, which is what a data URL carries after its comma.
+function readBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.addEventListener('load', () => resolve(String(reader.result).split(',', 2)[1] ?? ''))
+    reader.addEventListener('error', () => reject(reader.error ?? new Error('read failed')))
+    reader.readAsDataURL(file)
+  })
+}
+
+async function draftSourceOf(text: string, files: File[]): Promise<DraftSource> {
+  const encoded = await Promise.all(
+    files.map(async (file): Promise<DraftFile> => ({
+      name: file.name,
+      media_type: draftMediaTypeOf(file) ?? 'application/octet-stream',
+      data: await readBase64(file),
+    })),
+  )
+  return { ...(text.trim() ? { text } : {}), ...(encoded.length > 0 ? { files: encoded } : {}) }
+}
+
+/*
+ * Reading the files is part of the mutation, so it is pending from the click on: a
+ * large document cannot be sent twice while it is still being read.
+ */
 export function useDraftBusinessContextMutation() {
   return useMutation({
-    mutationFn: (source: DraftSource) => api.post<Draft>('/business-context/draft', source),
+    mutationFn: async ({ text, files }: { text: string; files: File[] }) =>
+      api.post<Draft>('/business-context/draft', await draftSourceOf(text, files)),
   })
 }
 

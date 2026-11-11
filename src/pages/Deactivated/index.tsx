@@ -1,17 +1,15 @@
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router'
+import { Navigate } from 'react-router'
+import { signOut } from '../../auth/session'
 import { useAuthStore } from '../../auth/store'
 import { Button } from '../../components/ui/Button'
 
+// Only a deactivated session sees this page; signing out moves the session, and the redirect follows.
 export function DeactivatedPage() {
   const { t } = useTranslation()
-  const clearSession = useAuthStore((s) => s.clearSession)
-  const navigate = useNavigate()
+  const deactivated = useAuthStore((s) => s.session.status === 'deactivated')
 
-  function handleSignOut() {
-    clearSession()
-    void navigate('/login', { replace: true })
-  }
+  if (!deactivated) return <Navigate to="/" replace />
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-panel px-8 text-center">
@@ -19,7 +17,7 @@ export function DeactivatedPage() {
       <p className="max-w-md font-body text-[0.9375rem] leading-[1.5] text-gray">
         {t('deactivated.message')}
       </p>
-      <Button variant="secondary" onClick={handleSignOut}>
+      <Button variant="secondary" onClick={signOut}>
         {t('deactivated.signOut')}
       </Button>
     </main>
