@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { NavLink, useNavigate } from 'react-router'
-import { signOut } from '../auth/cognito'
-import { useAuthStore, type Role } from '../auth/store'
+import { signOut } from '../auth/session'
+import { useCurrentUser, type Role } from '../auth/store'
 import { chooseLanguage, LANGUAGES } from '../i18n'
 
 type NavId =
@@ -37,14 +37,12 @@ const ROLE_KEY: Record<Role, 'sidebar.user.role.platform_admin' | 'sidebar.user.
 
 export function Sidebar() {
   const { t } = useTranslation()
-  const user = useAuthStore((s) => s.user)
-  const clearSession = useAuthStore((s) => s.clearSession)
+  const user = useCurrentUser()
   const navigate = useNavigate()
   const navItems = user ? NAV_BY_ROLE[user.role] : []
 
   function handleSignOut() {
-    if (import.meta.env.VITE_USE_MOCK !== 'true' && user) signOut(user.email)
-    clearSession()
+    signOut()
     void navigate('/', { replace: true })
   }
 

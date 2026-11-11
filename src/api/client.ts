@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useAuthStore } from '../auth/store'
+import { accessTokenOf, useAuthStore } from '../auth/store'
 
 /*
  * `network` means the backend never answered (down, CORS, offline), so there is no
@@ -58,7 +58,7 @@ const apiClient = axios.create({
 })
 
 apiClient.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().accessToken
+  const token = accessTokenOf(useAuthStore.getState().session)
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
@@ -68,8 +68,8 @@ apiClient.interceptors.response.use(undefined, (error: unknown) => {
     const { status, data } = error.response
     const body = (typeof data === 'object' && data !== null ? data : {}) as ErrorBody
     const code = typeof body.code === 'string' ? body.code : null
-    if (status === 401) useAuthStore.getState().clearSession()
-    else if (status === 403 && code === 'customer_deactivated') useAuthStore.getState().setDeactivated()
+    if (status === 401) useAuthStore.getState().endSession()
+    else if (status === 403 && code === 'customer_deactivated') useAuthStore.getState().deactivate()
   }
   return Promise.reject(toApiError(error))
 })

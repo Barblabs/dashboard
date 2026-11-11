@@ -5,12 +5,11 @@ import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useNavigate } from 'react-router'
 import { z } from 'zod'
-import { completeNewPassword, signIn, signOut } from '../../auth/cognito'
-import { useAuthStore, type AuthUser, type Role } from '../../auth/store'
+import { completeNewPassword, signIn } from '../../auth/cognito'
+import { completeSignIn } from '../../auth/session'
+import { useAuthStore, useCurrentUser, type AuthUser, type Role } from '../../auth/store'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-import { fetchMe } from '../../api/me'
-import { ApiError } from '../../api/client'
 import { setMockRole } from '../../test/mocks/handlers/auth'
 
 // ── Mock login (VITE_USE_MOCK=true) ─────────────────────────────────────────
@@ -105,13 +104,11 @@ const credSchema = z.object({
 type CredFields = z.infer<typeof credSchema>
 
 interface CredFormProps {
-  onNewPasswordRequired: (cognitoUser: CognitoUser, email: string) => void
+  onNewPasswordRequired: (cognitoUser: CognitoUser) => void
 }
 
 function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
   const { t } = useTranslation()
-  const setSession = useAuthStore((s) => s.setSession)
-  const clearSession = useAuthStore((s) => s.clearSession)
   const navigate = useNavigate()
   const [serverError, setServerError] = useState<string | null>(null)
 
@@ -125,28 +122,13 @@ function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
       const result = await signIn(email, password)
 
       if (result.kind === 'newPasswordRequired') {
-        onNewPasswordRequired(result.cognitoUser, email)
+        onNewPasswordRequired(result.cognitoUser)
         return
       }
 
-      // Temporarily expose the token so fetchMe can use the axios interceptor.
-      useAuthStore.setState({ accessToken: result.accessToken })
-      try {
-        const me = await fetchMe()
-        setSession(
-          { id: me.id, email: me.email, role: me.role, customer: me.customer },
-          result.accessToken,
-        )
-        void navigate(destForRole(me.role), { replace: true })
-      } catch (meErr) {
-        clearSession()
-        signOut(email)
-        if (meErr instanceof ApiError && meErr.failure.kind === 'http' && meErr.failure.status === 401) {
-          setServerError(t('login.errors.userDisabled'))
-        } else {
-          setServerError(t('login.errors.network'))
-        }
-      }
+      const outcome = await completeSignIn(result.accessToken)
+      if (outcome.ok) void navigate(destForRole(outcome.user.role), { replace: true })
+      else setServerError(t(outcome.error))
     } catch (err) {
       setServerError(t(cognitoErrorKey(err)))
     }
@@ -218,13 +200,10 @@ type NewPwFields = z.infer<typeof newPwSchema>
 
 interface NewPasswordFormProps {
   cognitoUser: CognitoUser
-  email: string
 }
 
-function NewPasswordForm({ cognitoUser, email }: NewPasswordFormProps) {
+function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
   const { t } = useTranslation()
-  const setSession = useAuthStore((s) => s.setSession)
-  const clearSession = useAuthStore((s) => s.clearSession)
   const navigate = useNavigate()
   const [serverError, setServerError] = useState<string | null>(null)
 
@@ -236,23 +215,9 @@ function NewPasswordForm({ cognitoUser, email }: NewPasswordFormProps) {
     setServerError(null)
     try {
       const accessToken = await completeNewPassword(cognitoUser, newPassword)
-      useAuthStore.setState({ accessToken })
-      try {
-        const me = await fetchMe()
-        setSession(
-          { id: me.id, email: me.email, role: me.role, customer: me.customer },
-          accessToken,
-        )
-        void navigate(destForRole(me.role), { replace: true })
-      } catch (meErr) {
-        clearSession()
-        signOut(email)
-        if (meErr instanceof ApiError && meErr.failure.kind === 'http' && meErr.failure.status === 401) {
-          setServerError(t('login.errors.userDisabled'))
-        } else {
-          setServerError(t('login.errors.network'))
-        }
-      }
+      const outcome = await completeSignIn(accessToken)
+      if (outcome.ok) void navigate(destForRole(outcome.user.role), { replace: true })
+      else setServerError(t(outcome.error))
     } catch (err) {
       setServerError(t(cognitoErrorKey(err)))
     }
@@ -304,12 +269,12 @@ function NewPasswordForm({ cognitoUser, email }: NewPasswordFormProps) {
 
 type Step =
   | { kind: 'credentials' }
-  | { kind: 'newPassword'; cognitoUser: CognitoUser; email: string }
+  | { kind: 'newPassword'; cognitoUser: CognitoUser }
 
 export function LoginPage() {
   const { t } = useTranslation()
-  const user = useAuthStore((s) => s.user)
-  const setSession = useAuthStore((s) => s.setSession)
+  const user = useCurrentUser()
+  const establishSession = useAuthStore((s) => s.establishSession)
   const navigate = useNavigate()
   const [step, setStep] = useState<Step>({ kind: 'credentials' })
 
@@ -338,7 +303,7 @@ export function LoginPage() {
               className="w-full justify-start"
               onClick={() => {
                 setMockRole(role)
-                setSession(mockUser(role, email), 'mock-access-token')
+                establishSession(mockUser(role, email), 'mock-access-token')
                 void navigate(destForRole(role), { replace: true })
               }}
             >
@@ -354,12 +319,10 @@ export function LoginPage() {
     <LoginLayout>
       {step.kind === 'credentials' ? (
         <CredentialsForm
-          onNewPasswordRequired={(cognitoUser, email) =>
-            setStep({ kind: 'newPassword', cognitoUser, email })
-          }
+          onNewPasswordRequired={(cognitoUser) => setStep({ kind: 'newPassword', cognitoUser })}
         />
       ) : (
-        <NewPasswordForm cognitoUser={step.cognitoUser} email={step.email} />
+        <NewPasswordForm cognitoUser={step.cognitoUser} />
       )}
     </LoginLayout>
   )

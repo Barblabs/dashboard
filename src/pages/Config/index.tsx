@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSourceQuery, type CmdbSource } from '../../api/cmdb'
-import { useAuthStore } from '../../auth/store'
+import { useCurrentUser } from '../../auth/store'
 import { ConfigStepPanel } from './ConfigStepPanel'
 import { CmdbSelector } from './CmdbSelector'
 import { ItopForm } from './ItopForm'
@@ -33,7 +33,7 @@ const NEW_CONNECTION = { url: '', user: '' }
 export function ConfigPage() {
   const { t } = useTranslation()
   const sourceQuery = useSourceQuery()
-  const role = useAuthStore((s) => s.user?.role)
+  const role = useCurrentUser()?.role
   const readOnly = role === 'viewer'
 
   const [connecting, setConnecting] = useState(false)

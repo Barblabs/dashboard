@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router'
-import { useAuthStore, type Role } from './auth/store'
+import { useAuthStore, useCurrentUser, type Role } from './auth/store'
 import { Sidebar } from './components/Sidebar'
 import { AdminDashboardPage } from './pages/AdminDashboard'
 import { BusinessContextPage } from './pages/BusinessContext'
@@ -25,27 +25,38 @@ const ReactQueryDevtools = import.meta.env.DEV
 const CUSTOMER_ROLES: Role[] = ['customer_admin', 'viewer']
 
 function AuthGuard() {
-  const user = useAuthStore((s) => s.user)
-  const deactivated = useAuthStore((s) => s.deactivated)
-  const queryClient = useQueryClient()
-
-  useEffect(() => {
-    if (!user) queryClient.clear()
-  }, [user, queryClient])
-
-  if (deactivated) return <Navigate to="/deactivated" replace />
-  if (!user) return <Navigate to="/login" replace />
+  const status = useAuthStore((s) => s.session.status)
+  if (status === 'deactivated') return <Navigate to="/deactivated" replace />
+  if (status !== 'signedIn') return <Navigate to="/login" replace />
   return <Outlet />
 }
 
+/*
+ * Cached data belongs to the session that fetched it. Clearing it here, outside every
+ * route, covers each way a session ends, including from pages no guard wraps.
+ * Being an effect, it runs after the guards have unmounted the pages that used it.
+ */
+function useClearCacheWhenSignedOut() {
+  const queryClient = useQueryClient()
+  const signedOut = useAuthStore((s) => s.session.status === 'signedOut')
+  useEffect(() => {
+    if (signedOut) queryClient.clear()
+  }, [signedOut, queryClient])
+}
+
+function SessionScope({ children }: { children: ReactNode }) {
+  useClearCacheWhenSignedOut()
+  return <>{children}</>
+}
+
 function RoleGuard({ roles, children }: { roles: Role[]; children: ReactNode }) {
-  const user = useAuthStore((s) => s.user)
+  const user = useCurrentUser()
   if (!user || !roles.includes(user.role)) return <Navigate to="/forbidden" replace />
   return <>{children}</>
 }
 
 function DefaultRedirect() {
-  const user = useAuthStore((s) => s.user)
+  const user = useCurrentUser()
   if (!user) return null
   return <Navigate to={user.role === 'platform_admin' ? '/tenants' : '/config'} replace />
 }
@@ -114,7 +125,9 @@ export function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <SessionScope>
+        <RouterProvider router={router} />
+      </SessionScope>
       {ReactQueryDevtools && (
         <Suspense fallback={null}>
           <ReactQueryDevtools />

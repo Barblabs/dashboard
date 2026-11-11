@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { errorCode } from '../../api/client'
 import { useBusinessContextQuery, useSaveBusinessContextMutation } from '../../api/businessContext'
-import { useAuthStore } from '../../auth/store'
+import { useCurrentUser } from '../../auth/store'
 import { Button } from '../../components/ui/Button'
 import { requestErrorText } from '../../i18n/errors'
 import { BusinessContextForm } from './Form'
@@ -12,7 +12,7 @@ export function BusinessContextPage() {
   const { t } = useTranslation()
   const query = useBusinessContextQuery()
   const save = useSaveBusinessContextMutation()
-  const readOnly = useAuthStore((s) => s.user?.role) !== 'customer_admin'
+  const readOnly = useCurrentUser()?.role !== 'customer_admin'
 
   if (query.isPending) {
     return (

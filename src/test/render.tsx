@@ -20,7 +20,7 @@ const DEFAULT_TEST_USER: AuthUser = {
 // jsdom keeps the URL between tests: every render opens the given path explicitly.
 // Seeds the auth store with a customer_admin by default so protected routes render.
 export function renderApp(path = '/', user: AuthUser | null = DEFAULT_TEST_USER) {
-  if (user !== null) useAuthStore.getState().setSession(user, 'test-token')
+  if (user !== null) useAuthStore.getState().establishSession(user, 'test-token')
   window.history.replaceState(null, '', path)
   const testUser = userEvent.setup()
   render(<App />)

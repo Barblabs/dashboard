@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
-import { useAuthStore } from '../../auth/store'
+import { useCurrentUser } from '../../auth/store'
 import {
   useChangeRoleMutation,
   useDisableUserMutation,
@@ -288,7 +288,7 @@ function DisableModal({
 
 export function UsersPage() {
   const { t } = useTranslation()
-  const currentUser = useAuthStore((s) => s.user)
+  const currentUser = useCurrentUser()
   const usersQuery = useUsersQuery()
   const [search, setSearch] = useState('')
   const [inviteOpen, setInviteOpen] = useState(false)

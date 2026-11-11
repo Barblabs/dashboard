@@ -74,9 +74,8 @@ export function completeNewPassword(
   })
 }
 
-export function signOut(email: string) {
-  const user = makeUser(email)
-  user.signOut()
+// Cognito keeps nothing outside this memory, so forgetting it signs the browser out.
+export function forgetTokens() {
   mem.clear()
 }
 
