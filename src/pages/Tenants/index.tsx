@@ -199,12 +199,17 @@ const emailSchema = z.object({
 })
 type EmailFields = z.infer<typeof emailSchema>
 
+// The organization's name exists only once the first step accepted it.
+type CreateStep = { number: 1 } | { number: 2; name: string }
+
+const NAME_STEP: CreateStep = { number: 1 }
+
 function CreateModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t } = useTranslation()
   const titleId = useId()
   const create = useCreateCustomerMutation()
-  const [step, setStep] = useState<1 | 2>(1)
-  const [orgName, setOrgName] = useState('')
+  const [current, setCurrent] = useState<CreateStep>(NAME_STEP)
+  const step = current.number
 
   const step1Form = useForm<NameFields>({
     resolver: zodResolver(nameSchema),
@@ -219,21 +224,15 @@ function CreateModal({ open, onClose }: { open: boolean; onClose: () => void }) 
     step1Form.reset()
     step2Form.reset()
     create.reset()
-    setStep(1)
-    setOrgName('')
+    setCurrent(NAME_STEP)
     onClose()
   }
 
-  const handleNext = step1Form.handleSubmit((data) => {
-    setOrgName(data.name)
-    setStep(2)
-  })
+  const handleNext = step1Form.handleSubmit((data) => setCurrent({ number: 2, name: data.name }))
 
   const handleSubmit = step2Form.handleSubmit((data) => {
-    create.mutate(
-      { name: orgName, admin_email: data.admin_email },
-      { onSuccess: handleClose },
-    )
+    if (current.number !== 2) return
+    create.mutate({ name: current.name, admin_email: data.admin_email }, { onSuccess: handleClose })
   })
 
   const errorText = create.isError
@@ -325,7 +324,7 @@ function CreateModal({ open, onClose }: { open: boolean; onClose: () => void }) 
               size="sm"
               onClick={() => {
                 create.reset()
-                setStep(1)
+                setCurrent(NAME_STEP)
               }}
             >
               {t('tenants.create.step2.back')}
