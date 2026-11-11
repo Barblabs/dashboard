@@ -14,7 +14,6 @@ export function useAreasQuery(active: ActivityFilter) {
   return useQuery({
     queryKey: [...areasKey, active],
     queryFn: () => api.get<AreaListResponse>(`/areas?active=${active}`),
-    retry: false,
   })
 }
 

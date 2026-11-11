@@ -23,7 +23,6 @@ export function useUsersQuery() {
   return useQuery({
     queryKey: USERS_KEY,
     queryFn: () => api.get<UserListResponse>('/users'),
-    retry: false,
   })
 }
 

@@ -59,7 +59,6 @@ export const connectionScopeKey = ['source'] as const
 const sourceQuery = queryOptions({
   queryKey: ['cmdb', 'source'],
   queryFn: () => api.get<CmdbSource | null>('/cmdb/source'),
-  retry: false,
 })
 
 export function useSourceQuery() {

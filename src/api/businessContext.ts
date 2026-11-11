@@ -198,7 +198,6 @@ export function useBusinessContextQuery() {
   return useQuery({
     queryKey: BUSINESS_CONTEXT_KEY,
     queryFn: () => api.get<BusinessContext>('/business-context'),
-    retry: false,
   })
 }
 
@@ -270,6 +269,5 @@ export function useAssetNamesQuery() {
     queryKey: [...connectionScopeKey, 'asset-names'],
     queryFn: () => api.get<AssetsPage>(`/assets?limit=${ASSET_SUGGESTIONS}&active=true`),
     select: (page) => page.assets.map((a) => a.name),
-    retry: false,
   })
 }

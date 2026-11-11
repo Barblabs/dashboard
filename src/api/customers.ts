@@ -14,7 +14,6 @@ export function useCustomersQuery() {
   return useQuery({
     queryKey: CUSTOMERS_KEY,
     queryFn: () => api.get<CustomerListResponse>('/customers'),
-    retry: false,
   })
 }
 
