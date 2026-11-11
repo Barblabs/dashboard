@@ -1,7 +1,7 @@
 import { act, screen } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
-import { hasMockRole, setMockRole } from '../test/mocks/handlers/auth'
+import { forgetMockRole, hasMockRole, MOCK_ROLE_KEY, setMockRole } from '../test/mocks/handlers/auth'
 import { failure } from '../test/mocks/handlers/responses'
 import { apiUrl } from '../test/mocks/url'
 import { renderApp, seedSource } from '../test/render'
@@ -126,6 +126,30 @@ describe('Returning after signing in', () => {
     await user.click(await screen.findByRole('button', { name: 'Viewer (viewer)' }))
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
+  })
+})
+
+// What this tab sees when another tab signs out: the tokens gone, and a storage event.
+function signOutInAnotherTab() {
+  forgetMockRole()
+  window.dispatchEvent(new StorageEvent('storage', { key: MOCK_ROLE_KEY, newValue: null, storageArea: localStorage }))
+}
+
+describe('Signing out in another tab', () => {
+  it('signs this tab out, and the next user sees none of its data', async () => {
+    seedSource()
+    const user = renderApp('/config')
+    await screen.findByRole('button', { name: 'Sync now' })
+
+    act(signOutInAnotherTab)
+
+    expect(await findSignInPage()).toBeInTheDocument()
+
+    holdRequests('get', '/cmdb/source')
+    await user.click(screen.getByRole('button', { name: 'Admin (customer_admin)' }))
+
+    expect(await screen.findByText('Loading configuration…')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Sync now' })).not.toBeInTheDocument()
   })
 })
 
