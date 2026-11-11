@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { AuthUser } from '../../auth/store'
@@ -7,7 +7,7 @@ import { mockAreas } from '../../test/mocks/areas'
 import { saveAreas } from '../../test/mocks/areas-store'
 import { apiUrl } from '../../test/mocks/url'
 import { renderApp, seedSource } from '../../test/render'
-import { server } from '../../test/server'
+import { holdRequests, server } from '../../test/server'
 
 const VIEWER: AuthUser = {
   id: 'viewer-id',
@@ -36,6 +36,17 @@ async function renderConnected(user?: AuthUser) {
   return testUser
 }
 
+async function openOwnerDialog(user: User, area: RegExp) {
+  const row = await screen.findByRole('row', { name: area })
+  await user.click(within(row).getByRole('button', { name: /owner/ }))
+  return screen.findByRole('dialog')
+}
+
+// The dialog remounts closed as soon as a save succeeds, so there is no exit to wait on.
+async function dialogClosed() {
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+}
+
 async function openAreas(user: User) {
   await user.click(screen.getByRole('tab', { name: 'Areas' }))
   return screen.findByRole('table')
@@ -62,7 +73,7 @@ describe('Areas', () => {
     expect(queries).toEqual(['true'])
     expect(screen.getByText('2 areas')).toBeInTheDocument()
     expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual([
-      'Area', 'Owner', 'Status',
+      'Area', 'Owner', 'Status', '',
     ])
     expect(areaNames()).toEqual(['Data Platform', 'Infrastructure'])
     expect(screen.getByRole('row', { name: /Infrastructure/ })).toHaveTextContent(
@@ -122,13 +133,15 @@ describe('Areas', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
-  it('a viewer sees the areas', async () => {
+  it('a viewer sees the areas without owner actions', async () => {
     const user = await renderConnected(VIEWER)
     await openAreas(user)
 
     expect(screen.getByRole('row', { name: /Infrastructure/ })).toHaveTextContent(
       'infra-lead@example.com',
     )
+    expect(screen.getAllByRole('columnheader')).toHaveLength(3)
+    expect(screen.queryByRole('button', { name: /owner/ })).not.toBeInTheDocument()
   })
 
   it('a sync refetches the areas', async () => {
@@ -170,5 +183,107 @@ describe('Areas', () => {
     expect(row).toHaveTextContent('Sin dueño')
     expect(row).toHaveTextContent('Activa')
     expect(screen.getByText('2 áreas')).toBeInTheDocument()
+  })
+
+  describe('owner', () => {
+    it('sets an owner on an area without one', async () => {
+      const user = await renderConnected()
+      await openAreas(user)
+      const row = screen.getByRole('row', { name: /Data Platform/ })
+      expect(within(row).getByRole('button', { name: 'Set owner' })).toBeInTheDocument()
+
+      const dialog = await openOwnerDialog(user, /Data Platform/)
+      expect(dialog).toHaveAccessibleName('Owner of Data Platform')
+      expect(within(dialog).queryByRole('button', { name: 'Remove owner' })).not.toBeInTheDocument()
+      await user.type(within(dialog).getByLabelText('Email'), 'data-lead@example.com')
+      await user.click(within(dialog).getByRole('button', { name: 'Save' }))
+
+      await dialogClosed()
+      const updated = screen.getByRole('row', { name: /Data Platform/ })
+      expect(updated).toHaveTextContent('data-lead@example.com')
+      expect(within(updated).getByRole('button', { name: 'Edit owner' })).toBeInTheDocument()
+    })
+
+    it('changes an owner, then removes it', async () => {
+      const user = await renderConnected()
+      await openAreas(user)
+
+      let dialog = await openOwnerDialog(user, /Infrastructure/)
+      const email = within(dialog).getByLabelText('Email')
+      expect(email).toHaveValue('infra-lead@example.com')
+      await user.clear(email)
+      await user.type(email, 'new-lead@example.com{Enter}')
+
+      await dialogClosed()
+      expect(screen.getByRole('row', { name: /Infrastructure/ })).toHaveTextContent(
+        'new-lead@example.com',
+      )
+
+      dialog = await openOwnerDialog(user, /Infrastructure/)
+      await user.click(within(dialog).getByRole('button', { name: 'Remove owner' }))
+
+      await dialogClosed()
+      const row = screen.getByRole('row', { name: /Infrastructure/ })
+      expect(row).toHaveTextContent('No owner')
+      expect(within(row).getByRole('button', { name: 'Set owner' })).toBeInTheDocument()
+    })
+
+    it('an invalid email shows the field error and sends nothing', async () => {
+      let puts = 0
+      server.use(
+        http.put(apiUrl('/areas/:id/owner'), () => {
+          puts += 1
+        }),
+      )
+      const user = await renderConnected()
+      await openAreas(user)
+
+      const dialog = await openOwnerDialog(user, /Data Platform/)
+      await user.type(within(dialog).getByLabelText('Email'), 'not-an-email')
+      await user.click(within(dialog).getByRole('button', { name: 'Save' }))
+
+      expect(await within(dialog).findByText('Enter a valid email.')).toBeInTheDocument()
+      expect(within(dialog).getByLabelText('Email')).toHaveAttribute('aria-invalid', 'true')
+      expect(puts).toBe(0)
+    })
+
+    it('a failed save shows the backend error and keeps the dialog open', async () => {
+      server.use(
+        http.put(apiUrl('/areas/:id/owner'), () =>
+          HttpResponse.json({ code: 'not_found', error: 'area not found' }, { status: 404 }),
+        ),
+      )
+      const user = await renderConnected()
+      await openAreas(user)
+
+      const dialog = await openOwnerDialog(user, /Data Platform/)
+      await user.type(within(dialog).getByLabelText('Email'), 'data-lead@example.com')
+      await user.click(within(dialog).getByRole('button', { name: 'Save' }))
+
+      expect(await within(dialog).findByRole('alert')).toHaveTextContent('area not found')
+      expect(screen.getByRole('dialog')).toBe(dialog)
+      expect(within(dialog).getByLabelText('Email')).toHaveValue('data-lead@example.com')
+    })
+
+    it('an owner saved under one filter shows under the others without a refetch', async () => {
+      const user = await renderConnected()
+      await openAreas(user)
+      await user.selectOptions(screen.getByRole('combobox', { name: 'Status' }), 'All')
+      await screen.findByText('3 areas')
+
+      const dialog = await openOwnerDialog(user, /Data Platform/)
+      await user.type(within(dialog).getByLabelText('Email'), 'data-lead@example.com')
+      await user.click(within(dialog).getByRole('button', { name: 'Save' }))
+      await dialogClosed()
+
+      const release = holdRequests('get', '/areas')
+      await user.selectOptions(screen.getByRole('combobox', { name: 'Status' }), 'Active')
+
+      expect(screen.getByText('2 areas')).toBeInTheDocument()
+      expect(screen.getByRole('row', { name: /Data Platform/ })).toHaveTextContent(
+        'data-lead@example.com',
+      )
+      release()
+    })
   })
 })

@@ -56,7 +56,7 @@ export function ConfigPage() {
       ) : view.step === 'connected' ? (
         <div className="flex animate-fade-in flex-col gap-6">
           <ConnectedBar source={view.source} onEdit={() => setEditing(true)} readOnly={readOnly} />
-          <ConfigTabs />
+          <ConfigTabs readOnly={readOnly} />
           {!readOnly && (
             <EditConnectionDialog
               source={view.source}

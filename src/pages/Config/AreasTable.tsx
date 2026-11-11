@@ -5,6 +5,7 @@ import { ACTIVITY_FILTERS, type ActivityFilter } from '../../api/assets'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { requestErrorText } from '../../i18n/errors'
+import { AreaOwnerDialog } from './AreaOwnerDialog'
 import { FilterSelect } from './AssetFilterBar'
 import { CELL, HEADER_CELL, MESSAGE, useDateFormat } from './table'
 
@@ -24,7 +25,15 @@ function AreaStatus({ area }: { area: Area }) {
   )
 }
 
-function AreaRows({ areas }: { areas: Area[] }) {
+const OWNER_ACTION =
+  'cursor-pointer p-0 font-body text-[0.8125rem] whitespace-nowrap text-navy underline decoration-navy/30 underline-offset-2 transition-colors hover:decoration-navy focus-ring'
+
+interface AreaRowsProps {
+  areas: Area[]
+  onEditOwner?: (area: Area) => void
+}
+
+function AreaRows({ areas, onEditOwner }: AreaRowsProps) {
   const { t } = useTranslation()
 
   return (
@@ -35,6 +44,7 @@ function AreaRows({ areas }: { areas: Area[] }) {
             <th className={HEADER_CELL}>{t('config.areas.columns.area')}</th>
             <th className={HEADER_CELL}>{t('config.areas.columns.owner')}</th>
             <th className={HEADER_CELL}>{t('config.areas.columns.status')}</th>
+            {onEditOwner && <th className={HEADER_CELL} />}
           </tr>
         </thead>
         <tbody>
@@ -59,6 +69,13 @@ function AreaRows({ areas }: { areas: Area[] }) {
               <td className={CELL}>
                 <AreaStatus area={area} />
               </td>
+              {onEditOwner && (
+                <td className={`${CELL} text-right`}>
+                  <button type="button" className={OWNER_ACTION} onClick={() => onEditOwner(area)}>
+                    {area.owner_email ? t('config.areas.owner.edit') : t('config.areas.owner.set')}
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
@@ -67,9 +84,10 @@ function AreaRows({ areas }: { areas: Area[] }) {
   )
 }
 
-export function AreasTable() {
+export function AreasTable({ readOnly }: { readOnly: boolean }) {
   const { t } = useTranslation()
   const [active, setActive] = useState<ActivityFilter>(DEFAULT_ACTIVITY)
+  const [editing, setEditing] = useState<Area | null>(null)
   const query = useAreasQuery(active)
 
   return (
@@ -120,7 +138,10 @@ export function AreasTable() {
           {active === DEFAULT_ACTIVITY ? t('config.areas.empty') : t('config.areas.noMatches')}
         </div>
       ) : (
-        <AreaRows areas={query.data.areas} />
+        <AreaRows areas={query.data.areas} onEditOwner={readOnly ? undefined : setEditing} />
+      )}
+      {!readOnly && (
+        <AreaOwnerDialog key={editing?.id} area={editing} onClose={() => setEditing(null)} />
       )}
     </section>
   )

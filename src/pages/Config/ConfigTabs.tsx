@@ -13,7 +13,7 @@ const TAB =
  * The tech stack stays mounted instead: its filters and page are local state, and
  * visiting the areas must not reset them.
  */
-export function ConfigTabs() {
+export function ConfigTabs({ readOnly }: { readOnly: boolean }) {
   const { t } = useTranslation()
 
   return (
@@ -36,7 +36,7 @@ export function ConfigTabs() {
         <TechStackTable />
       </Tabs.Panel>
       <Tabs.Panel value="areas" className="outline-none">
-        <AreasTable />
+        <AreasTable readOnly={readOnly} />
       </Tabs.Panel>
     </Tabs.Root>
   )
