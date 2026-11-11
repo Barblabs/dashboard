@@ -2,10 +2,7 @@ import { http, HttpResponse } from 'msw'
 import type { CmdbLogin, CmdbSource, CmdbSourceRequest } from '../../../api/cmdb'
 import { clearSource, loadSource, saveSource } from '../store'
 import { apiUrl } from '../url'
-
-function failure(status: number, code: string, error: string) {
-  return HttpResponse.json({ code, error }, { status })
-}
+import { failure } from './responses'
 
 function notConnected() {
   return failure(404, 'not_connected', 'no CMDB source is connected')

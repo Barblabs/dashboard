@@ -5,21 +5,14 @@ import { ACTIVITY_FILTERS } from '../../../api/assets'
 import type { components } from '../../../api/generated'
 import { loadAreas, saveAreas } from '../areas-store'
 import { apiUrl } from '../url'
+import { failure, isOneOf } from './responses'
 
 type SetAreaOwnerRequest = components['schemas']['SetAreaOwnerRequest']
-
-function failure(status: number, code: string, error: string) {
-  return HttpResponse.json({ code, error }, { status })
-}
-
-function isActivityFilter(value: string) {
-  return ACTIVITY_FILTERS.some((option) => option === value)
-}
 
 export const areasHandlers = [
   http.get(apiUrl('/areas'), ({ request }) => {
     const active = new URL(request.url).searchParams.get('active') ?? 'true'
-    if (!isActivityFilter(active)) {
+    if (!isOneOf(ACTIVITY_FILTERS, active)) {
       return failure(400, 'invalid_request', 'invalid active')
     }
     const matches = (area: Area) => active === 'all' || area.active === (active === 'true')

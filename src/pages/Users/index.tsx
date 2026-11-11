@@ -1,6 +1,5 @@
 import { useId, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Dialog } from '@base-ui/react/dialog'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
@@ -17,18 +16,13 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
+import { Modal } from '../../components/ui/Modal'
 import { requestErrorText } from '../../i18n/errors'
 
 const ROLE_LABEL: Record<CustomerRole, 'users.role.customer_admin' | 'users.role.viewer'> = {
   customer_admin: 'users.role.customer_admin',
   viewer: 'users.role.viewer',
 }
-
-const BACKDROP =
-  'fixed inset-0 bg-navy/40 transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0'
-
-const POPUP =
-  'fixed top-1/2 left-1/2 w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-2xl transition-[opacity,scale] duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:scale-[0.96] motion-safe:data-starting-style:scale-[0.96]'
 
 function PencilIcon() {
   return (
@@ -89,70 +83,65 @@ function InviteModal({ open, onClose }: { open: boolean; onClose: () => void }) 
     : null
 
   return (
-    <Dialog.Root open={open} onOpenChange={(next) => !next && handleClose()}>
-      <Dialog.Portal>
-        <Dialog.Backdrop className={BACKDROP} />
-        <Dialog.Popup aria-labelledby={titleId} className={POPUP}>
-          <div className="flex flex-col gap-5 p-6">
-            <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-              {t('users.invite.title')}
-            </h2>
+    <Modal open={open} onClose={handleClose} labelledBy={titleId}>
+      <div className="flex flex-col gap-5 p-6">
+        <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
+          {t('users.invite.title')}
+        </h2>
 
-            <div className="flex flex-col gap-4">
-              <Field
-                label={t('users.invite.email.label')}
-                error={
-                  errors.email?.message
-                    ? t(errors.email.message as 'users.invite.email.required')
-                    : undefined
-                }
-              >
-                <Input
-                  type="email"
-                  placeholder="nombre@empresa.com"
-                  autoComplete="off"
-                  disabled={invite.isPending}
-                  {...register('email')}
-                />
-              </Field>
+        <div className="flex flex-col gap-4">
+          <Field
+            label={t('users.invite.email.label')}
+            error={
+              errors.email?.message
+                ? t(errors.email.message as 'users.invite.email.required')
+                : undefined
+            }
+          >
+            <Input
+              type="email"
+              placeholder="nombre@empresa.com"
+              autoComplete="off"
+              disabled={invite.isPending}
+              {...register('email')}
+            />
+          </Field>
 
-              <Field label={t('users.invite.role.label')}>
-                <select
-                  className="h-10 w-full rounded-lg border border-border-panel bg-white px-3 font-body text-[0.9375rem] text-navy focus-ring disabled:opacity-50"
-                  disabled={invite.isPending}
-                  {...register('role')}
-                >
-                  <option value="viewer">{t(ROLE_LABEL['viewer'])}</option>
-                  <option value="customer_admin">{t(ROLE_LABEL['customer_admin'])}</option>
-                </select>
-              </Field>
+          <Field label={t('users.invite.role.label')}>
+            <select
+              className="h-10 w-full rounded-lg border border-border-panel bg-white px-3 font-body text-[0.9375rem] text-navy focus-ring disabled:opacity-50"
+              disabled={invite.isPending}
+              {...register('role')}
+            >
+              <option value="viewer">{t(ROLE_LABEL['viewer'])}</option>
+              <option value="customer_admin">{t(ROLE_LABEL['customer_admin'])}</option>
+            </select>
+          </Field>
 
-              <p className="rounded-md border border-border-panel bg-panel px-4 py-3 font-body text-[0.8125rem] text-gray">
-                {t('users.invite.tempPasswordNotice')}
-              </p>
-            </div>
+          <p className="rounded-md border border-border-panel bg-panel px-4 py-3 font-body text-[0.8125rem] text-gray">
+            {t('users.invite.tempPasswordNotice')}
+          </p>
+        </div>
 
-            {errorText && (
-              <p
-                role="alert"
-                className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
-              >
-                {errorText}
-              </p>
-            )}
+        {errorText && (
+          <p
+            role="alert"
+            className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
+          >
+            {errorText}
+          </p>
+        )}
 
-            <div className="flex justify-end gap-2">
-              <Button variant="secondary" size="sm" onClick={handleClose}>
-                {t('users.invite.cancel')}
-              </Button>
-              <Button loading={invite.isPending} size="sm" onClick={onSubmit}>
-                {invite.isPending ? t('users.invite.submitting') : t('users.invite.submit')}
-              </Button>
-            </div>
-          </div>
-        </Dialog.Popup>
-      </Dialog.Portal>
-    </Dialog.Root>
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={handleClose}>
+            {t('users.invite.cancel')}
+          </Button>
+          <Button loading={invite.isPending} size="sm" onClick={onSubmit}>
+            {invite.isPending ? t('users.invite.submitting') : t('users.invite.submit')}
+          </Button>
+        </div>
+      </div>
+    </Modal>
   )
 }
 
@@ -182,58 +171,53 @@ function ChangeRoleModal({
     : null
 
   return (
-    <Dialog.Root open={open} onOpenChange={(next) => !next && handleClose()}>
-      <Dialog.Portal>
-        <Dialog.Backdrop className={BACKDROP} />
-        <Dialog.Popup aria-labelledby={titleId} className={POPUP}>
-          <div className="flex flex-col gap-5 p-6">
-            <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-              {t('users.changeRole.title')}
-            </h2>
+    <Modal open={open} onClose={handleClose} labelledBy={titleId}>
+      <div className="flex flex-col gap-5 p-6">
+        <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
+          {t('users.changeRole.title')}
+        </h2>
 
-            <Field label={t('users.invite.role.label')}>
-              <select
-                className="h-10 w-full rounded-lg border border-border-panel bg-white px-3 font-body text-[0.9375rem] text-navy focus-ring disabled:opacity-50"
-                value={selectedRole}
-                disabled={changeRole.isPending}
-                onChange={(e) => {
-                  changeRole.reset()
-                  setSelectedRole(e.target.value as CustomerRole)
-                }}
-              >
-                <option value="viewer">{t(ROLE_LABEL['viewer'])}</option>
-                <option value="customer_admin">{t(ROLE_LABEL['customer_admin'])}</option>
-              </select>
-            </Field>
+        <Field label={t('users.invite.role.label')}>
+          <select
+            className="h-10 w-full rounded-lg border border-border-panel bg-white px-3 font-body text-[0.9375rem] text-navy focus-ring disabled:opacity-50"
+            value={selectedRole}
+            disabled={changeRole.isPending}
+            onChange={(e) => {
+              changeRole.reset()
+              setSelectedRole(e.target.value as CustomerRole)
+            }}
+          >
+            <option value="viewer">{t(ROLE_LABEL['viewer'])}</option>
+            <option value="customer_admin">{t(ROLE_LABEL['customer_admin'])}</option>
+          </select>
+        </Field>
 
-            {errorText && (
-              <p
-                role="alert"
-                className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
-              >
-                {errorText}
-              </p>
-            )}
+        {errorText && (
+          <p
+            role="alert"
+            className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
+          >
+            {errorText}
+          </p>
+        )}
 
-            <div className="flex justify-end gap-2">
-              <Button variant="secondary" size="sm" onClick={handleClose}>
-                {t('users.confirm.cancel')}
-              </Button>
-              <Button
-                loading={changeRole.isPending}
-                size="sm"
-                onClick={() => {
-                  if (!user) return
-                  changeRole.mutate({ id: user.id, role: selectedRole }, { onSuccess: handleClose })
-                }}
-              >
-                {t('users.changeRole.save')}
-              </Button>
-            </div>
-          </div>
-        </Dialog.Popup>
-      </Dialog.Portal>
-    </Dialog.Root>
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={handleClose}>
+            {t('users.confirm.cancel')}
+          </Button>
+          <Button
+            loading={changeRole.isPending}
+            size="sm"
+            onClick={() => {
+              if (!user) return
+              changeRole.mutate({ id: user.id, role: selectedRole }, { onSuccess: handleClose })
+            }}
+          >
+            {t('users.changeRole.save')}
+          </Button>
+        </div>
+      </div>
+    </Modal>
   )
 }
 
@@ -262,46 +246,41 @@ function DisableModal({
     : null
 
   return (
-    <Dialog.Root open={open} onOpenChange={(next) => !next && handleClose()}>
-      <Dialog.Portal>
-        <Dialog.Backdrop className={BACKDROP} />
-        <Dialog.Popup aria-labelledby={titleId} className={POPUP}>
-          <div className="flex flex-col gap-5 p-6">
-            <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-              {t('users.disable.title')}
-            </h2>
+    <Modal open={open} onClose={handleClose} labelledBy={titleId}>
+      <div className="flex flex-col gap-5 p-6">
+        <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
+          {t('users.disable.title')}
+        </h2>
 
-            <p className="font-body text-[0.9375rem] text-navy">{t('users.confirm.text')}</p>
+        <p className="font-body text-[0.9375rem] text-navy">{t('users.confirm.text')}</p>
 
-            {errorText && (
-              <p
-                role="alert"
-                className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
-              >
-                {errorText}
-              </p>
-            )}
+        {errorText && (
+          <p
+            role="alert"
+            className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
+          >
+            {errorText}
+          </p>
+        )}
 
-            <div className="flex justify-end gap-2">
-              <Button variant="secondary" size="sm" onClick={handleClose}>
-                {t('users.confirm.cancel')}
-              </Button>
-              <Button
-                variant="danger"
-                loading={disable.isPending}
-                size="sm"
-                onClick={() => {
-                  if (!user) return
-                  disable.mutate(user.id, { onSuccess: handleClose })
-                }}
-              >
-                {t('users.confirm.confirm')}
-              </Button>
-            </div>
-          </div>
-        </Dialog.Popup>
-      </Dialog.Portal>
-    </Dialog.Root>
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={handleClose}>
+            {t('users.confirm.cancel')}
+          </Button>
+          <Button
+            variant="danger"
+            loading={disable.isPending}
+            size="sm"
+            onClick={() => {
+              if (!user) return
+              disable.mutate(user.id, { onSuccess: handleClose })
+            }}
+          >
+            {t('users.confirm.confirm')}
+          </Button>
+        </div>
+      </div>
+    </Modal>
   )
 }
 

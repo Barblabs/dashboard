@@ -1,6 +1,5 @@
 import { useId, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Dialog } from '@base-ui/react/dialog'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
@@ -15,13 +14,8 @@ import {
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
+import { Modal } from '../../components/ui/Modal'
 import { requestErrorText } from '../../i18n/errors'
-
-const BACKDROP =
-  'fixed inset-0 bg-navy/40 transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0'
-
-const POPUP =
-  'fixed top-1/2 left-1/2 w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-2xl transition-[opacity,scale] duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:scale-[0.96] motion-safe:data-starting-style:scale-[0.96]'
 
 function PencilIcon() {
   return (
@@ -106,40 +100,35 @@ function RenameModal({
     : null
 
   return (
-    <Dialog.Root open={open} onOpenChange={(next) => !next && handleClose()}>
-      <Dialog.Portal>
-        <Dialog.Backdrop className={BACKDROP} />
-        <Dialog.Popup aria-labelledby={titleId} className={POPUP}>
-          <div className="flex flex-col gap-5 p-6">
-            <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-              {t('tenants.rename.title')}
-            </h2>
+    <Modal open={open} onClose={handleClose} labelledBy={titleId}>
+      <div className="flex flex-col gap-5 p-6">
+        <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
+          {t('tenants.rename.title')}
+        </h2>
 
-            <Field
-              label={t('tenants.rename.label')}
-              error={errors.name?.message ? t(errors.name.message as 'tenants.create.step1.required') : undefined}
-            >
-              <Input disabled={rename.isPending} {...register('name')} />
-            </Field>
+        <Field
+          label={t('tenants.rename.label')}
+          error={errors.name?.message ? t(errors.name.message as 'tenants.create.step1.required') : undefined}
+        >
+          <Input disabled={rename.isPending} {...register('name')} />
+        </Field>
 
-            {errorText && (
-              <p role="alert" className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical">
-                {errorText}
-              </p>
-            )}
+        {errorText && (
+          <p role="alert" className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical">
+            {errorText}
+          </p>
+        )}
 
-            <div className="flex justify-end gap-2">
-              <Button variant="secondary" size="sm" onClick={handleClose}>
-                {t('tenants.rename.cancel')}
-              </Button>
-              <Button loading={rename.isPending} size="sm" onClick={onSubmit}>
-                {t('tenants.rename.save')}
-              </Button>
-            </div>
-          </div>
-        </Dialog.Popup>
-      </Dialog.Portal>
-    </Dialog.Root>
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={handleClose}>
+            {t('tenants.rename.cancel')}
+          </Button>
+          <Button loading={rename.isPending} size="sm" onClick={onSubmit}>
+            {t('tenants.rename.save')}
+          </Button>
+        </div>
+      </div>
+    </Modal>
   )
 }
 
@@ -168,43 +157,38 @@ function DeactivateModal({
     : null
 
   return (
-    <Dialog.Root open={open} onOpenChange={(next) => !next && handleClose()}>
-      <Dialog.Portal>
-        <Dialog.Backdrop className={BACKDROP} />
-        <Dialog.Popup aria-labelledby={titleId} className={POPUP}>
-          <div className="flex flex-col gap-5 p-6">
-            <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-              {t('tenants.deactivate.title')}
-            </h2>
+    <Modal open={open} onClose={handleClose} labelledBy={titleId}>
+      <div className="flex flex-col gap-5 p-6">
+        <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
+          {t('tenants.deactivate.title')}
+        </h2>
 
-            <p className="font-body text-[0.9375rem] text-navy">{t('tenants.deactivate.body')}</p>
+        <p className="font-body text-[0.9375rem] text-navy">{t('tenants.deactivate.body')}</p>
 
-            {errorText && (
-              <p role="alert" className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical">
-                {errorText}
-              </p>
-            )}
+        {errorText && (
+          <p role="alert" className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical">
+            {errorText}
+          </p>
+        )}
 
-            <div className="flex justify-end gap-2">
-              <Button variant="secondary" size="sm" onClick={handleClose}>
-                {t('tenants.deactivate.cancel')}
-              </Button>
-              <Button
-                variant="danger"
-                loading={deactivate.isPending}
-                size="sm"
-                onClick={() => {
-                  if (!customer) return
-                  deactivate.mutate(customer.id, { onSuccess: handleClose })
-                }}
-              >
-                {t('tenants.deactivate.confirm')}
-              </Button>
-            </div>
-          </div>
-        </Dialog.Popup>
-      </Dialog.Portal>
-    </Dialog.Root>
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={handleClose}>
+            {t('tenants.deactivate.cancel')}
+          </Button>
+          <Button
+            variant="danger"
+            loading={deactivate.isPending}
+            size="sm"
+            onClick={() => {
+              if (!customer) return
+              deactivate.mutate(customer.id, { onSuccess: handleClose })
+            }}
+          >
+            {t('tenants.deactivate.confirm')}
+          </Button>
+        </div>
+      </div>
+    </Modal>
   )
 }
 
@@ -259,111 +243,106 @@ function CreateModal({ open, onClose }: { open: boolean; onClose: () => void }) 
   const stepTitle = step === 1 ? t('tenants.create.step1.title') : t('tenants.create.step2.title')
 
   return (
-    <Dialog.Root open={open} onOpenChange={(next) => !next && handleClose()}>
-      <Dialog.Portal>
-        <Dialog.Backdrop className={BACKDROP} />
-        <Dialog.Popup aria-labelledby={titleId} className={POPUP}>
-          <div className="flex flex-col gap-5 p-6">
-            {/* Step indicator */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <div
-                  className={`flex h-6 w-6 items-center justify-center rounded-full text-[0.75rem] font-semibold ${step === 1 ? 'bg-navy text-white' : 'bg-panel text-gray'}`}
-                >
-                  1
-                </div>
-                <div className="h-px w-8 bg-border-panel" />
-                <div
-                  className={`flex h-6 w-6 items-center justify-center rounded-full text-[0.75rem] font-semibold ${step === 2 ? 'bg-navy text-white' : 'bg-panel text-gray'}`}
-                >
-                  2
-                </div>
-              </div>
-              <span className="font-body text-[0.75rem] text-gray">
-                {t('tenants.create.step', { current: step, total: 2 })}
-              </span>
+    <Modal open={open} onClose={handleClose} labelledBy={titleId}>
+      <div className="flex flex-col gap-5 p-6">
+        {/* Step indicator */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div
+              className={`flex h-6 w-6 items-center justify-center rounded-full text-[0.75rem] font-semibold ${step === 1 ? 'bg-navy text-white' : 'bg-panel text-gray'}`}
+            >
+              1
             </div>
-
-            <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-              {stepTitle}
-            </h2>
-
-            {step === 1 && (
-              <Field
-                label={t('tenants.create.step1.label')}
-                error={
-                  step1Form.formState.errors.name?.message
-                    ? t(step1Form.formState.errors.name.message as 'tenants.create.step1.required')
-                    : undefined
-                }
-              >
-                <Input
-                  placeholder={t('tenants.create.step1.placeholder')}
-                  autoFocus
-                  {...step1Form.register('name')}
-                />
-              </Field>
-            )}
-
-            {step === 2 && (
-              <div className="flex flex-col gap-4">
-                <Field
-                  label={t('tenants.create.step2.label')}
-                  error={
-                    step2Form.formState.errors.admin_email?.message
-                      ? t(step2Form.formState.errors.admin_email.message as 'tenants.create.step2.required')
-                      : undefined
-                  }
-                >
-                  <Input
-                    type="email"
-                    placeholder="admin@empresa.com"
-                    autoComplete="off"
-                    disabled={create.isPending}
-                    autoFocus
-                    {...step2Form.register('admin_email')}
-                  />
-                </Field>
-
-                <p className="rounded-md border border-border-panel bg-panel px-4 py-3 font-body text-[0.8125rem] text-gray">
-                  {t('tenants.create.step2.notice')}
-                </p>
-              </div>
-            )}
-
-            {errorText && (
-              <p role="alert" className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical">
-                {errorText}
-              </p>
-            )}
-
-            <div className="flex justify-end gap-2">
-              {step === 2 && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => {
-                    create.reset()
-                    setStep(1)
-                  }}
-                >
-                  {t('tenants.create.step2.back')}
-                </Button>
-              )}
-              {step === 1 ? (
-                <Button size="sm" onClick={handleNext}>
-                  {t('tenants.create.step1.next')}
-                </Button>
-              ) : (
-                <Button loading={create.isPending} size="sm" onClick={handleSubmit}>
-                  {create.isPending ? t('tenants.create.step2.submitting') : t('tenants.create.step2.submit')}
-                </Button>
-              )}
+            <div className="h-px w-8 bg-border-panel" />
+            <div
+              className={`flex h-6 w-6 items-center justify-center rounded-full text-[0.75rem] font-semibold ${step === 2 ? 'bg-navy text-white' : 'bg-panel text-gray'}`}
+            >
+              2
             </div>
           </div>
-        </Dialog.Popup>
-      </Dialog.Portal>
-    </Dialog.Root>
+          <span className="font-body text-[0.75rem] text-gray">
+            {t('tenants.create.step', { current: step, total: 2 })}
+          </span>
+        </div>
+
+        <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
+          {stepTitle}
+        </h2>
+
+        {step === 1 && (
+          <Field
+            label={t('tenants.create.step1.label')}
+            error={
+              step1Form.formState.errors.name?.message
+                ? t(step1Form.formState.errors.name.message as 'tenants.create.step1.required')
+                : undefined
+            }
+          >
+            <Input
+              placeholder={t('tenants.create.step1.placeholder')}
+              autoFocus
+              {...step1Form.register('name')}
+            />
+          </Field>
+        )}
+
+        {step === 2 && (
+          <div className="flex flex-col gap-4">
+            <Field
+              label={t('tenants.create.step2.label')}
+              error={
+                step2Form.formState.errors.admin_email?.message
+                  ? t(step2Form.formState.errors.admin_email.message as 'tenants.create.step2.required')
+                  : undefined
+              }
+            >
+              <Input
+                type="email"
+                placeholder="admin@empresa.com"
+                autoComplete="off"
+                disabled={create.isPending}
+                autoFocus
+                {...step2Form.register('admin_email')}
+              />
+            </Field>
+
+            <p className="rounded-md border border-border-panel bg-panel px-4 py-3 font-body text-[0.8125rem] text-gray">
+              {t('tenants.create.step2.notice')}
+            </p>
+          </div>
+        )}
+
+        {errorText && (
+          <p role="alert" className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical">
+            {errorText}
+          </p>
+        )}
+
+        <div className="flex justify-end gap-2">
+          {step === 2 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                create.reset()
+                setStep(1)
+              }}
+            >
+              {t('tenants.create.step2.back')}
+            </Button>
+          )}
+          {step === 1 ? (
+            <Button size="sm" onClick={handleNext}>
+              {t('tenants.create.step1.next')}
+            </Button>
+          ) : (
+            <Button loading={create.isPending} size="sm" onClick={handleSubmit}>
+              {create.isPending ? t('tenants.create.step2.submitting') : t('tenants.create.step2.submit')}
+            </Button>
+          )}
+        </div>
+      </div>
+    </Modal>
   )
 }
 

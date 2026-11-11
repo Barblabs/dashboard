@@ -8,11 +8,11 @@ export type Area = components['schemas']['AreaResponse']
 export type AreaListResponse = components['schemas']['AreaListResponse']
 
 // Areas are imported by the connected CMDB, so a sync refetches them and a disconnect drops them.
-export const areasKey = (active: ActivityFilter) => [...connectionScopeKey, 'areas', active] as const
+const areasKey = [...connectionScopeKey, 'areas'] as const
 
 export function useAreasQuery(active: ActivityFilter) {
   return useQuery({
-    queryKey: areasKey(active),
+    queryKey: [...areasKey, active],
     queryFn: () => api.get<AreaListResponse>(`/areas?active=${active}`),
     retry: false,
   })
@@ -26,7 +26,7 @@ export function useSetAreaOwnerMutation() {
     // Every cached filter variant may list the area, so each one gets the updated row.
     onSuccess: (updated) => {
       queryClient.setQueriesData<AreaListResponse>(
-        { queryKey: [...connectionScopeKey, 'areas'] },
+        { queryKey: areasKey },
         (prev) =>
           prev ? { areas: prev.areas.map((a) => (a.id === updated.id ? updated : a)) } : prev,
       )
