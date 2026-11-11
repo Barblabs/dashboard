@@ -1,58 +1,62 @@
 import { ApiError } from '../api/client'
 import { fetchMe } from '../api/me'
 import { signOut } from './signOut'
-import { useAuthStore, type AuthUser } from './store'
+import { useAuthStore } from './store'
 import { tokens } from './tokenSource'
 
-export type SignInFailure = 'login.errors.userDisabled' | 'login.errors.network'
+/*
+ * Where asking the backend about the stored tokens leaves things:
+ *   settled     - signed in, or deactivated
+ *   rejected    - the backend answered 401, or Cognito would not renew them: signed out
+ *   unreachable - no answer worth acting on (the network, a 5xx, Cognito out of reach);
+ *                 the session is left for the caller to decide
+ * Signing in and restoring agree on everything but `unreachable`.
+ */
+type Verification = 'settled' | 'rejected' | 'unreachable'
 
-// What the backend says about the stored tokens.
-type Identity =
-  | { kind: 'user'; user: AuthUser }
-  /** The tokens are no good: the backend answered 401, or Cognito would not renew them. */
-  | { kind: 'rejected' }
-  | { kind: 'deactivated' }
-  /** No answer worth acting on: the network, a 5xx, or Cognito could not be reached. */
-  | { kind: 'unreachable' }
-
-async function identify(): Promise<Identity> {
+async function verifyStoredTokens(): Promise<Verification> {
+  const store = useAuthStore.getState()
   try {
-    if ((await tokens.currentAccessToken()) === null) return { kind: 'rejected' }
+    if ((await tokens.currentAccessToken()) === null) return reject()
     const me = await fetchMe()
-    return { kind: 'user', user: { id: me.id, email: me.email, role: me.role, customer: me.customer } }
+    store.establishSession({ id: me.id, email: me.email, role: me.role, customer: me.customer })
+    return 'settled'
   } catch (error) {
     if (error instanceof ApiError && error.failure.kind === 'http') {
       const { status, code } = error.failure
-      if (status === 401) return { kind: 'rejected' }
-      if (status === 403 && code === 'customer_deactivated') return { kind: 'deactivated' }
+      if (status === 401) return reject()
+      if (status === 403 && code === 'customer_deactivated') {
+        store.deactivate()
+        return 'settled'
+      }
     }
-    return { kind: 'unreachable' }
+    return 'unreachable'
   }
 }
 
+function reject(): Verification {
+  signOut()
+  return 'rejected'
+}
+
+const SIGN_IN_FAILURES = {
+  rejected: 'login.errors.userDisabled',
+  unreachable: 'login.errors.network',
+} as const satisfies Record<Exclude<Verification, 'settled'>, string>
+
+export type SignInFailure = (typeof SIGN_IN_FAILURES)[keyof typeof SIGN_IN_FAILURES]
+
 /*
  * Turns freshly stored tokens into a session: the backend decides who they belong to.
- * Returns why signing in failed, or `null` once the session moved on (signed in or
- * deactivated). Unlike restoring, any failure here forgets the tokens.
+ * Returns why signing in failed, or `null` once the session moved on. Unlike restoring,
+ * a backend out of reach forgets the tokens too: the sign-in did not happen.
  */
 export async function completeSignIn(): Promise<SignInFailure | null> {
-  const store = useAuthStore.getState()
-  store.beginVerification()
-  const identity = await identify()
-  switch (identity.kind) {
-    case 'user':
-      store.establishSession(identity.user)
-      return null
-    case 'deactivated':
-      store.deactivate()
-      return null
-    case 'rejected':
-      signOut()
-      return 'login.errors.userDisabled'
-    case 'unreachable':
-      signOut()
-      return 'login.errors.network'
-  }
+  useAuthStore.getState().beginVerification()
+  const verification = await verifyStoredTokens()
+  if (verification === 'settled') return null
+  if (verification === 'unreachable') signOut()
+  return SIGN_IN_FAILURES[verification]
 }
 
 /*
@@ -60,26 +64,11 @@ export async function completeSignIn(): Promise<SignInFailure | null> {
  * keeps them for a retry: a brief outage must not sign anyone out.
  */
 async function restore() {
-  const store = useAuthStore.getState()
   if (!tokens.hasStored()) {
-    store.endSession()
+    useAuthStore.getState().endSession()
     return
   }
-  const identity = await identify()
-  switch (identity.kind) {
-    case 'user':
-      store.establishSession(identity.user)
-      return
-    case 'deactivated':
-      store.deactivate()
-      return
-    case 'rejected':
-      signOut()
-      return
-    case 'unreachable':
-      store.becomeUnreachable()
-      return
-  }
+  if ((await verifyStoredTokens()) === 'unreachable') useAuthStore.getState().becomeUnreachable()
 }
 
 let pendingRestore: Promise<void> | null = null
