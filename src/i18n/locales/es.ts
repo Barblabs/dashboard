@@ -368,6 +368,7 @@ export const es: Translations = {
         os: 'Sistema operativo',
         criticality: 'Criticidad',
         owner: 'Dueño',
+        area: 'Área',
         status: 'Estado',
         details: 'Detalle',
       },

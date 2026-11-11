@@ -366,6 +366,7 @@ export const en = {
         os: 'Operating system',
         criticality: 'Criticality',
         owner: 'Owner',
+        area: 'Area',
         status: 'Status',
         details: 'Details',
       },

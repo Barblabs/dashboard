@@ -1,3 +1,5 @@
+import type { components } from './generated'
+
 export const ASSET_KINDS = ['server', 'virtual_machine', 'workstation', 'network_device'] as const
 export type AssetKind = (typeof ASSET_KINDS)[number]
 
@@ -34,6 +36,8 @@ export interface AssetOwner {
   source: 'declared' | 'imported'
 }
 
+export type AreaRef = components['schemas']['AreaRefResponse']
+
 export interface Asset {
   source_id: string
   record_id: string
@@ -46,6 +50,7 @@ export interface Asset {
   criticality: Criticality | null
   exposure: Exposure | null
   owner: AssetOwner | null
+  area: AreaRef | null
   /** What the CMDB reports; independent of whether the Asset is still monitored. */
   retired: boolean
   active: boolean
