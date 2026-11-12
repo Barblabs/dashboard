@@ -42,7 +42,6 @@ const KEYS = {
   loading: 'adminDashboard.loading',
   failed: 'adminDashboard.loadFailed',
   network: 'adminDashboard.networkError',
-  retry: 'adminDashboard.retry',
 } as const
 
 export function AdminDashboardPage() {

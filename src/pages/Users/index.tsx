@@ -357,7 +357,6 @@ const KEYS = {
   loading: 'users.loading',
   failed: 'users.loadFailed',
   network: 'users.networkError',
-  retry: 'users.retry',
 } as const
 
 export function UsersPage() {

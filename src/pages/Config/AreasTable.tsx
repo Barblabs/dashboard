@@ -17,7 +17,6 @@ const KEYS = {
   loading: 'config.areas.loading',
   failed: 'config.areas.loadFailed',
   network: 'config.areas.networkError',
-  retry: 'config.areas.retry',
 } as const
 
 function AreaStatus({ area }: { area: Area }) {

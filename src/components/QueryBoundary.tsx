@@ -11,7 +11,6 @@ interface Keys {
   failed: ParseKeys
   /** Said instead of `failed` when the server could not be reached at all. */
   network: ParseKeys
-  retry: ParseKeys
 }
 
 interface Props<T> {
@@ -34,7 +33,7 @@ export function QueryBoundary<T>({ query, keys, children }: Props<T>) {
       <Message tone="error">
         {requestErrorText(query.error, t, { fallback: keys.failed, network: keys.network })}
         <Button variant="secondary" size="sm" onClick={() => void query.refetch()}>
-          {t(keys.retry)}
+          {t('common.retry')}
         </Button>
       </Message>
     )

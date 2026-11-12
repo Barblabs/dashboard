@@ -237,7 +237,7 @@ describe('Tech stack', () => {
     expect(screen.queryByText('There are no assets in the inventory.')).not.toBeInTheDocument()
 
     failing = false
-    await user.click(screen.getByRole('button', { name: 'Try again' }))
+    await user.click(screen.getByRole('button', { name: 'Retry' }))
     expect(await screen.findByRole('row', { name: /prod-api-01/ })).toBeInTheDocument()
   })
 

@@ -15,7 +15,6 @@ const KEYS = {
   loading: 'config.loading',
   failed: 'config.loadFailed',
   network: 'config.networkError',
-  retry: 'config.retry',
 } as const
 
 const NEW_CONNECTION = { url: '', user: '' }

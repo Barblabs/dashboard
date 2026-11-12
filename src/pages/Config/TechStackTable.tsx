@@ -10,7 +10,6 @@ const KEYS = {
   loading: 'config.inventory.loading',
   failed: 'config.inventory.loadFailed',
   network: 'config.inventory.networkError',
-  retry: 'config.inventory.retry',
 } as const
 
 export function TechStackTable() {

@@ -17,7 +17,6 @@ const KEYS = {
   loading: 'businessContext.loading',
   failed: 'businessContext.loadFailed',
   network: 'businessContext.networkError',
-  retry: 'businessContext.retry',
 } as const
 
 export function BusinessContextPage() {

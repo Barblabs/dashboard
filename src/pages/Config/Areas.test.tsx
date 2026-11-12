@@ -127,7 +127,7 @@ describe('Areas', () => {
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent('The server had an internal error. Try again.')
 
-    await user.click(within(alert).getByRole('button', { name: 'Try again' }))
+    await user.click(within(alert).getByRole('button', { name: 'Retry' }))
 
     expect(await screen.findByRole('row', { name: /Infrastructure/ })).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()

@@ -453,7 +453,6 @@ const KEYS = {
   loading: 'tenants.loading',
   failed: 'tenants.loadFailed',
   network: 'tenants.networkError',
-  retry: 'tenants.retry',
 } as const
 
 export function TenantsPage() {

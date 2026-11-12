@@ -1,4 +1,7 @@
 export const en = {
+  common: {
+    retry: 'Retry',
+  },
   sidebar: {
     superAdmin: 'Super Admin',
     signOut: 'Sign out',
@@ -93,7 +96,6 @@ export const en = {
     loadFailed: 'Could not load users.',
     networkError: 'Could not reach the server to load the users.',
     empty: 'No users yet.',
-    retry: 'Retry',
     you: 'You',
     search: { placeholder: 'Search by email…' },
     counter: {
@@ -158,7 +160,6 @@ export const en = {
     loadFailed: 'Could not load organizations.',
     networkError: 'Could not reach the server to load the organizations.',
     empty: 'No organizations yet.',
-    retry: 'Retry',
     search: { placeholder: 'Search by name…' },
     counter: {
       organizations: 'organizations',
@@ -222,7 +223,6 @@ export const en = {
     loading: 'Loading…',
     loadFailed: 'Could not load dashboard data.',
     networkError: 'Could not reach the server to load the dashboard.',
-    retry: 'Retry',
     stats: {
       total: 'Organizations',
       active: 'Active',
@@ -257,7 +257,6 @@ export const en = {
     loading: 'Loading configuration…',
     loadFailed: 'Could not load the CMDB connection.',
     networkError: 'Could not reach the server to load the CMDB connection.',
-    retry: 'Retry',
     header: {
       title: 'Configuration',
       subtitle: 'Connect your CMDB to load the tech stack.',
@@ -354,7 +353,6 @@ export const en = {
       noMatches: 'No assets match these filters.',
       loadFailed: 'Could not load the inventory.',
       networkError: 'Could not reach the server to load the inventory.',
-      retry: 'Try again',
       total_one: '{{count}} asset',
       total_other: '{{count}} assets',
       filters: {
@@ -444,7 +442,6 @@ export const en = {
       noMatches: 'No areas match this filter.',
       loadFailed: 'Could not load the areas.',
       networkError: 'Could not reach the server to load the areas.',
-      retry: 'Try again',
       total_one: '{{count}} area',
       total_other: '{{count}} areas',
       filter: 'Status',
@@ -510,7 +507,6 @@ export const en = {
     loading: 'Loading the business context…',
     loadFailed: "Couldn't load the business context.",
     networkError: 'Could not reach the server to load the business context.',
-    retry: 'Retry',
     previous: 'Previous',
     next: 'Next',
     unset: 'Not stated',
