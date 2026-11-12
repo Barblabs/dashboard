@@ -1,6 +1,9 @@
 import type { Translations } from './en'
 
 export const es: Translations = {
+  common: {
+    retry: 'Reintentar',
+  },
   sidebar: {
     superAdmin: 'Super Admin',
     signOut: 'Cerrar sesión',
@@ -95,7 +98,6 @@ export const es: Translations = {
     loadFailed: 'No se pudo cargar la lista de usuarios.',
     networkError: 'No se pudo contactar al servidor para cargar los usuarios.',
     empty: 'Aún no hay usuarios.',
-    retry: 'Reintentar',
     you: 'Tú',
     search: { placeholder: 'Buscar por correo…' },
     counter: {
@@ -160,7 +162,6 @@ export const es: Translations = {
     loadFailed: 'No se pudo cargar la lista de organizaciones.',
     networkError: 'No se pudo contactar al servidor para cargar las organizaciones.',
     empty: 'Aún no hay organizaciones.',
-    retry: 'Reintentar',
     search: { placeholder: 'Buscar por nombre…' },
     counter: {
       organizations: 'organizaciones',
@@ -224,7 +225,6 @@ export const es: Translations = {
     loading: 'Cargando…',
     loadFailed: 'No se pudo cargar el dashboard.',
     networkError: 'No se pudo contactar al servidor para cargar el dashboard.',
-    retry: 'Reintentar',
     stats: {
       total: 'Organizaciones',
       active: 'Activas',
@@ -259,7 +259,6 @@ export const es: Translations = {
     loading: 'Cargando configuración…',
     loadFailed: 'No se pudo cargar la conexión con la CMDB.',
     networkError: 'No se pudo contactar al servidor para cargar la conexión con la CMDB.',
-    retry: 'Reintentar',
     header: {
       title: 'Configuración',
       subtitle: 'Conecta tu CMDB para cargar el stack tecnológico.',
@@ -356,7 +355,6 @@ export const es: Translations = {
       noMatches: 'Ningún activo coincide con estos filtros.',
       loadFailed: 'No se pudo cargar el inventario.',
       networkError: 'No se pudo contactar al servidor para cargar el inventario.',
-      retry: 'Reintentar',
       total_one: '{{count}} activo',
       total_other: '{{count}} activos',
       filters: {
@@ -446,7 +444,6 @@ export const es: Translations = {
       noMatches: 'Ninguna área coincide con este filtro.',
       loadFailed: 'No se pudieron cargar las áreas.',
       networkError: 'No se pudo contactar al servidor para cargar las áreas.',
-      retry: 'Reintentar',
       total_one: '{{count}} área',
       total_other: '{{count}} áreas',
       filter: 'Estado',
@@ -513,7 +510,6 @@ export const es: Translations = {
     loading: 'Cargando el contexto empresarial…',
     loadFailed: 'No se pudo cargar el contexto empresarial.',
     networkError: 'No se pudo contactar al servidor para cargar el contexto empresarial.',
-    retry: 'Reintentar',
     previous: 'Anterior',
     next: 'Siguiente',
     unset: 'Sin especificar',

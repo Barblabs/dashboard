@@ -1,4 +1,5 @@
 import { SearchIcon } from './icons'
+import { Input } from './Input'
 
 interface Props {
   /** Names the field and shows as its placeholder. */
@@ -14,13 +15,13 @@ export function SearchField({ label, value, onChange, counter }: Props) {
     <div className="flex items-center gap-4">
       <div className="relative flex-1">
         <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray" />
-        <input
+        <Input
           type="search"
           aria-label={label}
           placeholder={label}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-md border border-border-panel bg-white py-2.5 pr-3 pl-9 font-body text-[0.9375rem] text-navy outline-none transition-[border-color] duration-150 ease-[ease] focus:border-navy focus-ring"
+          className="pl-9"
         />
       </div>
       {counter && <p className="shrink-0 font-body text-[0.875rem] text-gray">{counter}</p>}

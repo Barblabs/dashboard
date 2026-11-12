@@ -4,13 +4,12 @@ import { QueryBoundary } from '../../components/QueryBoundary'
 import { Button } from '../../components/ui/Button'
 import { AssetFilterBar } from './AssetFilterBar'
 import { AssetsTable } from './AssetsTable'
-import { MESSAGE } from './table'
+import { Message } from '../../components/ui/Message'
 
 const KEYS = {
   loading: 'config.inventory.loading',
   failed: 'config.inventory.loadFailed',
   network: 'config.inventory.networkError',
-  retry: 'config.inventory.retry',
 } as const
 
 export function TechStackTable() {
@@ -34,9 +33,9 @@ export function TechStackTable() {
       <QueryBoundary query={query} keys={KEYS}>
         {({ assets }) =>
           assets.length === 0 ? (
-            <div className={MESSAGE}>
+            <Message>
               {filtered ? t('config.inventory.noMatches') : t('config.inventory.empty')}
-            </div>
+            </Message>
           ) : (
             <AssetsTable assets={assets} busy={navigating} />
           )

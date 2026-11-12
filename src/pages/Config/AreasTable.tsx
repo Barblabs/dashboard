@@ -8,7 +8,8 @@ import { useDateFormat } from '../../i18n/format'
 import { AreaOwnerDialog } from './AreaOwnerDialog'
 import { FilterSelect } from './FilterSelect'
 import { pick } from './filters'
-import { CELL, HEADER_CELL, MESSAGE } from './table'
+import { CELL, HEADER_CELL } from './table'
+import { Message } from '../../components/ui/Message'
 
 const DEFAULT_ACTIVITY: ActivityFilter = 'true'
 
@@ -16,7 +17,6 @@ const KEYS = {
   loading: 'config.areas.loading',
   failed: 'config.areas.loadFailed',
   network: 'config.areas.networkError',
-  retry: 'config.areas.retry',
 } as const
 
 function AreaStatus({ area }: { area: Area }) {
@@ -130,9 +130,9 @@ export function AreasTable({ readOnly }: { readOnly: boolean }) {
       <QueryBoundary query={query} keys={KEYS}>
         {({ areas }) =>
           areas.length === 0 ? (
-            <div className={MESSAGE}>
+            <Message>
               {active === DEFAULT_ACTIVITY ? t('config.areas.empty') : t('config.areas.noMatches')}
-            </div>
+            </Message>
           ) : (
             <AreaRows areas={areas} onEditOwner={readOnly ? undefined : setEditing} />
           )

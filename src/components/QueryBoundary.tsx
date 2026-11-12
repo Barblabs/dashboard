@@ -1,25 +1,23 @@
 import type { ReactNode } from 'react'
-import type { UseQueryResult } from '@tanstack/react-query'
 import type { ParseKeys } from 'i18next'
 import { useTranslation } from 'react-i18next'
+import type { Loadable } from '../api/loadable'
 import { requestErrorText } from '../i18n/errors'
 import { Button } from './ui/Button'
+import { Message } from './ui/Message'
 
 interface Keys {
   loading: ParseKeys
   failed: ParseKeys
   /** Said instead of `failed` when the server could not be reached at all. */
   network: ParseKeys
-  retry: ParseKeys
 }
 
 interface Props<T> {
-  query: Pick<UseQueryResult<T>, 'data' | 'error' | 'refetch'>
+  query: Loadable<T>
   keys: Keys
   children: (data: T) => ReactNode
 }
-
-const MESSAGE = 'px-6 py-12 text-center font-body text-[0.875rem]'
 
 /*
  * Data already on screen wins over a failed refetch: the user keeps what they were reading
@@ -32,14 +30,14 @@ export function QueryBoundary<T>({ query, keys, children }: Props<T>) {
 
   if (query.error) {
     return (
-      <div role="alert" className={`${MESSAGE} flex flex-col items-center gap-4 text-critical`}>
+      <Message tone="error">
         {requestErrorText(query.error, t, { fallback: keys.failed, network: keys.network })}
         <Button variant="secondary" size="sm" onClick={() => void query.refetch()}>
-          {t(keys.retry)}
+          {t('common.retry')}
         </Button>
-      </div>
+      </Message>
     )
   }
 
-  return <p className={`${MESSAGE} text-gray`}>{t(keys.loading)}</p>
+  return <Message>{t(keys.loading)}</Message>
 }

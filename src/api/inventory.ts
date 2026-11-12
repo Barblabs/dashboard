@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { keepPreviousData, queryOptions, useQuery, type UseQueryResult } from '@tanstack/react-query'
+import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import type { AssetFilters, AssetsPage } from './assets'
 import { api, errorCode } from './client'
 import { connectionScopeKey } from './cmdb'
+import type { Loadable } from './loadable'
 
 const DEFAULT_ASSET_FILTERS: AssetFilters = { active: 'true', kind: null, criticality: null }
 
@@ -47,7 +48,7 @@ export interface Pager {
 }
 
 export interface Inventory {
-  query: UseQueryResult<AssetsPage>
+  query: Loadable<AssetsPage>
   /** Tells "nothing matches the filters" apart from an empty inventory. */
   filtered: boolean
   /** The assets shown belong to the previous page while the requested one loads. */

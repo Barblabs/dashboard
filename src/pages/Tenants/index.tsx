@@ -19,6 +19,7 @@ import { Fab } from '../../components/ui/Fab'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
 import { PencilIcon, PowerOffIcon, RestoreIcon } from '../../components/ui/icons'
+import { Message } from '../../components/ui/Message'
 import { Modal } from '../../components/ui/Modal'
 import { SearchField } from '../../components/ui/SearchField'
 import { requestErrorText } from '../../i18n/errors'
@@ -428,7 +429,7 @@ function CustomerGrid({
       <SearchField label={t('tenants.search.placeholder')} value={search} onChange={setSearch} counter={counter} />
 
       {filtered.length === 0 ? (
-        <p className="py-12 text-center font-body text-[0.875rem] text-gray">{t('tenants.empty')}</p>
+        <Message>{t('tenants.empty')}</Message>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((customer) => (
@@ -452,7 +453,6 @@ const KEYS = {
   loading: 'tenants.loading',
   failed: 'tenants.loadFailed',
   network: 'tenants.networkError',
-  retry: 'tenants.retry',
 } as const
 
 export function TenantsPage() {

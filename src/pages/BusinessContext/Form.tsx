@@ -30,6 +30,7 @@ import {
   type BusinessContextFields,
   type Draft,
   type Section,
+  type SaveBusinessContext,
 } from '../../api/businessContext'
 import { Button } from '../../components/ui/Button'
 import { CloseIcon, UploadFileIcon } from '../../components/ui/icons'
@@ -37,6 +38,7 @@ import { Input } from '../../components/ui/Input'
 import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { CountriesField, CountryField, MultiSelectField, SelectField, TagField, TextAreaField } from './controls'
 import { ImportDialog } from './ImportDialog'
+import { SaveStatus } from './SaveStatus'
 import { canonicalDomain, mergeDraft } from './model'
 import { businessContextSchema, type ValidationKey } from './schema'
 
@@ -504,10 +506,8 @@ const CONTENT: Record<Section, () => ReactNode> = {
 interface FormProps {
   stored: BusinessContext
   readOnly: boolean
-  saving: boolean
-  /** The outcome of the latest save, shown beside the save button. */
-  saveStatus: ReactNode
-  onSave: (context: Fields) => void
+  /** Owned by the page: it outlives this form, which remounts on every new version. */
+  save: SaveBusinessContext
   /** Until something is saved, importing documents is the way in; filling by hand is the alternative. */
   started: boolean
   onStart: () => void
@@ -519,9 +519,7 @@ interface FormProps {
 export function BusinessContextForm({
   stored,
   readOnly,
-  saving,
-  saveStatus,
-  onSave,
+  save,
   started,
   onStart,
   importOpen,
@@ -534,6 +532,7 @@ export function BusinessContextForm({
   const [applied, setApplied] = useState<number | null>(null)
   const meta = useMemo<Meta>(() => ({ filled, readOnly }), [filled, readOnly])
   const dirty = form.formState.isDirty
+  const saving = save.isPending
   const position = SECTIONS.indexOf(section)
   const previous = SECTIONS[position - 1]
   const next = SECTIONS[position + 1]
@@ -619,7 +618,7 @@ export function BusinessContextForm({
         {started && (
           <form
             noValidate
-            onSubmit={(e) => void form.handleSubmit(onSave, showFirstError)(e)}
+            onSubmit={(e) => void form.handleSubmit((context) => save.mutate({ version: stored.version, context }), showFirstError)(e)}
             className="flex flex-col rounded-xl border border-border-panel bg-white"
           >
             <Tabs value={section} onValueChange={(value) => setSection(value as Section)}>
@@ -657,7 +656,7 @@ export function BusinessContextForm({
                 )}
               </div>
               <div className="flex flex-wrap items-center justify-end gap-3">
-                {saveStatus}
+                <SaveStatus save={save} version={stored.version} />
                 {!readOnly && dirty && !saving && (
                   <button
                     type="button"
