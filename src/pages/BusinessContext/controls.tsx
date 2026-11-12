@@ -3,12 +3,10 @@ import { useTranslation } from 'react-i18next'
 import { MultiSelect, type Option } from '../../components/ui/MultiSelect'
 import { Select } from '../../components/ui/Select'
 import { CloseIcon } from '../../components/ui/icons'
+import { FIELD_SURFACE } from '../../components/ui/fieldSurface'
 import { LIMITS } from '../../api/businessContext'
 import { useLocale } from '../../i18n/format'
 import { COUNTRIES, countryNamer } from './model'
-
-const BOX =
-  'w-full rounded-md border border-border-panel bg-white px-3 font-body text-[0.9375rem] text-navy outline-none transition-[border-color] duration-150 ease-[ease] placeholder:text-gray focus:border-navy aria-invalid:border-critical'
 
 export interface FieldMeta {
   /** Filled from a document and not saved yet. */
@@ -97,7 +95,7 @@ export function TextAreaField({ label, placeholder, value, onChange, max, rows =
           aria-invalid={Boolean(error) || length > max}
           aria-describedby={error ? `${id}-error` : undefined}
           onChange={(e) => onChange(e.target.value)}
-          className={`${BOX} resize-y py-2.5 leading-[1.5]`}
+          className={`${FIELD_SURFACE} resize-y px-3 py-2.5 text-[0.9375rem] leading-[1.5] focus:border-navy aria-invalid:border-critical`}
         />
       )}
     </Shell>

@@ -1,9 +1,10 @@
 import type { ComponentProps } from 'react'
+import { FIELD_SURFACE } from './fieldSurface'
 import { ChevronDownIcon } from './icons'
 
 // The native arrow can't be positioned, so it is hidden and drawn as an icon with its own inset.
 const SELECT =
-  'focus-ring w-full cursor-pointer appearance-none rounded-md border border-border-panel bg-white py-2 pr-9 pl-3 font-body text-[0.875rem] text-navy outline-none transition-[border-color] duration-150 ease-[ease] focus:border-navy disabled:cursor-not-allowed disabled:bg-panel disabled:text-gray aria-invalid:border-critical'
+  `${FIELD_SURFACE} cursor-pointer appearance-none py-2 pr-9 pl-3 text-[0.875rem] focus:border-navy disabled:cursor-not-allowed disabled:bg-panel disabled:text-gray aria-invalid:border-critical`
 
 export function Select({ className = '', ...props }: ComponentProps<'select'>) {
   return (
