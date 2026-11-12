@@ -33,5 +33,5 @@ export function useMeta(name: Path<BusinessContextFields>) {
 /** The schema's messages are translation keys; the field passes the limit that applies. */
 export function useErrorText() {
   const { t } = useTranslation()
-  return (message: string | undefined, max: number) => (message ? t(message as ValidationKey, { max }) : undefined)
+  return (message: string | undefined, max?: number) => (message ? t(message as ValidationKey, { max }) : undefined)
 }

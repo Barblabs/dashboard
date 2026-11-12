@@ -2,7 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
-import type { DraftSource } from '../../api/businessContext'
+import type { CountryCode, DraftSource } from '../../api/businessContext'
 import type { AuthUser } from '../../auth/store'
 import { businessContextStore, MOCK_DRAFT, unsaved } from '../../mocks/business-context-store'
 import { apiUrl } from '../../mocks/url'
@@ -197,6 +197,23 @@ describe('Business context', () => {
     expect(screen.queryByText('Financial services')).not.toBeInTheDocument()
     await user.click(screen.getByRole('tab', { name: /Operations/ }))
     expect(screen.queryByDisplayValue('Pagos en línea')).not.toBeInTheDocument()
+  })
+
+  it('says why codes outside the lists stop a save', async () => {
+    const stored = unsaved()
+    stored.version = 1
+    // Stored data comes from the backend, which types the code as any string.
+    stored.context.geography.headquarters = 'XX' as CountryCode
+    stored.context.geography.countries = ['MX', 'XX' as CountryCode]
+    businessContextStore.save(stored)
+    const user = await renderPage()
+    await user.type(screen.getByLabelText('What does your organization do?'), 'We sell shoes online.')
+
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(await screen.findAllByText('Pick one of the listed options.')).toHaveLength(2)
+    expect(screen.getByRole('tab', { name: /Location/ })).toHaveAttribute('aria-selected', 'true')
+    expect(businessContextStore.load().version).toBe(1)
   })
 
   it('moves focus to the field that stops a save in the open section', async () => {

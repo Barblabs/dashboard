@@ -6,7 +6,7 @@ import { Input } from '../../components/ui/Input'
 import { MultiSelect, type Option } from '../../components/ui/MultiSelect'
 import { Select } from '../../components/ui/Select'
 import { Shell, Shown } from './FieldShell'
-import type { BusinessContextFields } from '../../api/businessContext'
+import { LIMITS, type BusinessContextFields } from '../../api/businessContext'
 import { useErrorText, useMeta, type FieldPathOf } from './meta'
 import { useVocab, type Codes, type Vocab } from './vocab'
 
@@ -91,16 +91,20 @@ export function SelectField({ name, vocab, label, emptyLabel, hint, hideLabel }:
   const id = useId()
   const meta = useMeta(name)
   const { codes, labelOf } = useVocab(vocab)
-  const { field } = useController<BusinessContextFields, OneOf['name']>({ name })
+  const errorText = useErrorText()
+  const { field, fieldState } = useController<BusinessContextFields, OneOf['name']>({ name })
+  const error = errorText(fieldState.error?.message)
+  const described = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ')
   return (
-    <Shell id={id} label={label} hideLabel={hideLabel} {...meta}>
+    <Shell id={id} label={label} error={error} hideLabel={hideLabel} {...meta}>
       {meta.readOnly ? (
         <Shown value={field.value ? labelOf(field.value) : ''} />
       ) : (
         <Select
           id={id}
           {...field}
-          aria-describedby={hint ? `${id}-hint` : undefined}
+          aria-invalid={Boolean(error)}
+          aria-describedby={described || undefined}
           // As tall as the inputs it shares rows with; an unset value reads like a placeholder.
           className={`h-11 ${field.value === '' ? 'text-gray' : ''}`}
         >
@@ -131,10 +135,12 @@ export function MultiSelectField({ name, vocab, label, placeholder }: MultiSelec
   const id = useId()
   const meta = useMeta(name)
   const { codes, labelOf } = useVocab(vocab)
-  const { field } = useController<BusinessContextFields, SomeOf['name']>({ name })
+  const errorText = useErrorText()
+  const { field, fieldState } = useController<BusinessContextFields, SomeOf['name']>({ name })
+  const error = errorText(fieldState.error?.message, LIMITS.entries)
   const options = useMemo<Option[]>(() => codes.map((code) => ({ value: code, label: labelOf(code) })), [codes, labelOf])
   return (
-    <Shell id={id} label={label} {...meta}>
+    <Shell id={id} label={label} error={error} {...meta}>
       {meta.readOnly ? (
         <Shown value={field.value.map(labelOf).join(', ')} />
       ) : (

@@ -587,6 +587,7 @@ export const es: Translations = {
       serviceName: 'Ponle un nombre al servicio.',
       serviceNameTaken: 'Otro servicio ya tiene este nombre.',
       domain: '“{{value}}” no es un dominio como ejemplo.com.',
+      unknownCode: 'Elige una de las opciones de la lista.',
     },
     save: {
       discard: 'Descartar cambios',
