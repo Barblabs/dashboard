@@ -164,8 +164,11 @@ export const en = {
     empty: 'No organizations yet.',
     search: { placeholder: 'Search by name…' },
     counter: {
-      organizations: 'organizations',
-      deactivated: 'deactivated',
+      total_one: '{{count}} organization',
+      total_other: '{{count}} organizations',
+      deactivated_one: '{{count}} deactivated',
+      deactivated_other: '{{count}} deactivated',
+      summary: '{{total}} · {{deactivated}}',
     },
     status: {
       active: 'Active',

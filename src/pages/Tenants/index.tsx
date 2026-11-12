@@ -334,11 +334,16 @@ function CustomerGrid({
   const filtered = customers.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
   const deactivatedCount = customers.filter((c) => c.deactivated_at !== null).length
 
+  const total = t('tenants.counter.total', { count: customers.length })
   const counter =
-    customers.length > 0
-      ? `${customers.length} ${t('tenants.counter.organizations')}` +
-        (deactivatedCount > 0 ? ` · ${deactivatedCount} ${t('tenants.counter.deactivated')}` : '')
-      : ''
+    customers.length === 0
+      ? ''
+      : deactivatedCount === 0
+        ? total
+        : t('tenants.counter.summary', {
+            total,
+            deactivated: t('tenants.counter.deactivated', { count: deactivatedCount }),
+          })
 
   return (
     <>

@@ -166,8 +166,11 @@ export const es: Translations = {
     empty: 'Aún no hay organizaciones.',
     search: { placeholder: 'Buscar por nombre…' },
     counter: {
-      organizations: 'organizaciones',
-      deactivated: 'desactivadas',
+      total_one: '{{count}} organización',
+      total_other: '{{count}} organizaciones',
+      deactivated_one: '{{count}} desactivada',
+      deactivated_other: '{{count}} desactivadas',
+      summary: '{{total}} · {{deactivated}}',
     },
     status: {
       active: 'Activa',
