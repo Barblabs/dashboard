@@ -41,11 +41,11 @@ describe('Tech stack', () => {
     await renderInventory()
 
     const row = await screen.findByRole('row', { name: /prod-api-01/ })
-    expect(screen.getByText('4 assets')).toBeInTheDocument()
+    expect(screen.getByText('7 assets')).toBeInTheDocument()
     expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual([
-      'Asset', 'Type', 'Operating system', 'Criticality', 'Owner', 'Area', 'Status', 'Details',
+      'Asset', 'Type', 'Operating system', 'Criticality', 'Exposure', 'Owner', 'Area', 'Status', 'Details',
     ])
-    expect(row).toHaveTextContent('prod-api-01SRV-001ServerUbuntu 22.04Highdevops@example.comInfrastructureActive')
+    expect(row).toHaveTextContent('prod-api-01SRV-001ServerUbuntu 22.04HighInternet-facing·iTopdevops@example.comInfrastructureActive')
     expect(screen.getByRole('row', { name: /analytics-worker-03/ })).toHaveTextContent(
       'Virtual Machine',
     )
@@ -77,8 +77,8 @@ describe('Tech stack', () => {
     expect(await screen.findByText('Cargando inventario…')).toBeInTheDocument()
     const row = await screen.findByRole('row', { name: /prod-api-01/ })
     expect(screen.getByRole('heading', { name: 'Stack tecnológico' })).toBeInTheDocument()
-    expect(screen.getByText('4 activos')).toBeInTheDocument()
-    expect(row).toHaveTextContent('prod-api-01SRV-001ServidorUbuntu 22.04Altadevops@example.comInfrastructureActivo')
+    expect(screen.getByText('7 activos')).toBeInTheDocument()
+    expect(row).toHaveTextContent('prod-api-01SRV-001ServidorUbuntu 22.04AltaExpuesto a internet·iTopdevops@example.comInfrastructureActivo')
   })
 
   it('the inactive filter reaches assets no longer monitored and says since when', async () => {
@@ -113,15 +113,15 @@ describe('Tech stack', () => {
     expect(screen.queryByText('Dell PowerEdge R640')).not.toBeInTheDocument()
   })
 
-  it('details of an asset without hardware or declared exposure say so', async () => {
+  it('details of an asset without hardware or a known exposure say so', async () => {
     const user = await renderInventory()
 
     await user.click(
       await screen.findByRole('button', { name: 'Show details of analytics-worker-03' }),
     )
 
-    expect(screen.getByText('No hardware recorded')).toBeInTheDocument()
-    expect(screen.getByText('Not declared')).toBeInTheDocument()
+    const details = within(screen.getByRole('row', { name: /No hardware recorded/ }))
+    expect(details.getByText('Exposure').nextElementSibling).toHaveTextContent(/^Unknown$/)
   })
 
   it('pages forward and back repeating the filters on every request', async () => {

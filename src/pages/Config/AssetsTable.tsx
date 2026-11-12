@@ -4,19 +4,11 @@ import { assetKey, type Asset } from '../../api/assets'
 import { Badge } from '../../components/ui/Badge'
 import { EMPTY, useDateFormat } from '../../i18n/format'
 import { CELL, HEADER_CELL } from '../../components/ui/table'
+import { exposureLabel, osLabel, versioned } from './assetText'
 
 const MONO = 'font-mono text-[0.8125rem]'
 const DETAIL_LABEL = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase'
-const COLUMN_COUNT = 8
-
-function versioned(name: string, version: string) {
-  return version ? `${name} ${version}` : name
-}
-
-function osLabel(asset: Asset): string {
-  const os = asset.software.find((s) => s.role === 'operating_system')
-  return os ? versioned(os.name, os.version) : EMPTY
-}
+const COLUMN_COUNT = 9
 
 function AssetStatus({ asset }: { asset: Asset }) {
   const { t } = useTranslation()
@@ -33,6 +25,33 @@ function AssetStatus({ asset }: { asset: Asset }) {
           ? t('config.inventory.status.inactiveSince', { date: formatDate(asset.inactive_since) })
           : t('config.inventory.status.inactive')}
     </span>
+  )
+}
+
+/** The effective Exposure and where it comes from; opens the Exposure sheet for the Asset. */
+function ExposureCell({ asset, onOpen }: { asset: Asset; onOpen: (asset: Asset) => void }) {
+  const { t } = useTranslation()
+  const { value, source } = asset.exposure
+  const valueText = exposureLabel(t, value)
+  return (
+    <button
+      type="button"
+      aria-label={t(`config.exposure.cellLabel.${source}`, { name: asset.name, value: valueText })}
+      onClick={(event) => {
+        // The row toggles its details on click; opening the sheet is not a request to expand.
+        event.stopPropagation()
+        onOpen(asset)
+      }}
+      className={`focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-sm border px-2.5 py-[3px] font-body text-[0.75rem] font-medium whitespace-nowrap text-navy transition-[border-color] duration-150 ease-out hover:border-navy ${value ? 'border-border-panel bg-white' : 'border-high bg-high/10'}`}
+    >
+      {valueText}
+      <span aria-hidden="true" className="text-gray">
+        ·
+      </span>
+      <span className={source === 'declared' ? 'font-semibold text-nav-active-bg' : 'text-gray'}>
+        {t(`config.exposure.source.${source}`)}
+      </span>
+    </button>
   )
 }
 
@@ -56,9 +75,7 @@ function AssetDetails({ asset }: { asset: Asset }) {
         </div>
         <div className="flex flex-col gap-1">
           <dt className={DETAIL_LABEL}>{t('config.inventory.details.exposure')}</dt>
-          <dd>
-            {t(`config.inventory.exposure.${asset.exposure ?? 'undeclared'}`)}
-          </dd>
+          <dd>{exposureLabel(t, asset.exposure.value)}</dd>
         </div>
         <div className="flex flex-col gap-1">
           <dt className={DETAIL_LABEL}>{t('config.inventory.details.retired')}</dt>
@@ -97,7 +114,13 @@ function AssetDetails({ asset }: { asset: Asset }) {
   )
 }
 
-export function AssetsTable({ assets, busy }: { assets: Asset[]; busy: boolean }) {
+interface AssetsTableProps {
+  assets: Asset[]
+  busy: boolean
+  onOpenExposure: (asset: Asset) => void
+}
+
+export function AssetsTable({ assets, busy, onOpenExposure }: AssetsTableProps) {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set())
 
@@ -120,6 +143,7 @@ export function AssetsTable({ assets, busy }: { assets: Asset[]; busy: boolean }
             <th className={HEADER_CELL}>{t('config.inventory.columns.type')}</th>
             <th className={HEADER_CELL}>{t('config.inventory.columns.os')}</th>
             <th className={HEADER_CELL}>{t('config.inventory.columns.criticality')}</th>
+            <th className={HEADER_CELL}>{t('config.inventory.columns.exposure')}</th>
             <th className={HEADER_CELL}>{t('config.inventory.columns.owner')}</th>
             <th className={HEADER_CELL}>{t('config.inventory.columns.area')}</th>
             <th className={HEADER_CELL}>{t('config.inventory.columns.status')}</th>
@@ -156,6 +180,9 @@ export function AssetsTable({ assets, busy }: { assets: Asset[]; busy: boolean }
                     <Badge variant={asset.criticality ? 'outline' : 'muted'}>
                       {t(`config.inventory.criticality.${asset.criticality ?? 'unknown'}`)}
                     </Badge>
+                  </td>
+                  <td className={CELL}>
+                    <ExposureCell asset={asset} onOpen={onOpenExposure} />
                   </td>
                   <td className={`${CELL} ${MONO}`}>
                     {asset.owner ? (

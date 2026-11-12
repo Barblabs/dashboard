@@ -1,9 +1,15 @@
-import type { Asset } from '../api/assets'
+import type { Asset, AssetExposure, Exposure } from '../api/assets'
 
 export const SOURCE_ID = '6f1c2a9e-4b7d-4e8a-9c3f-2d5b8e1a7c40'
 
+/** What the CMDB Source gives, with nothing declared over it. */
+export function importedExposure(value: Exposure | null): AssetExposure {
+  return { value, source: 'imported', imported: value, declared_by: null, declared_at: null }
+}
+
 export const mockAssets: Asset[] = [
   {
+    id: 1,
     source_id: SOURCE_ID,
     record_id: 'SRV-001',
     name: 'prod-api-01',
@@ -31,7 +37,7 @@ export const mockAssets: Asset[] = [
       },
     ],
     criticality: 'high',
-    exposure: 'internet_facing',
+    exposure: importedExposure('internet_facing'),
     owner: { email: 'devops@example.com', source: 'imported' },
     area: { id: 1, name: 'Infrastructure' },
     retired: false,
@@ -39,6 +45,7 @@ export const mockAssets: Asset[] = [
     inactive_since: null,
   },
   {
+    id: 2,
     source_id: SOURCE_ID,
     record_id: 'VM-002',
     name: 'analytics-worker-03',
@@ -60,7 +67,7 @@ export const mockAssets: Asset[] = [
       },
     ],
     criticality: 'medium',
-    exposure: null,
+    exposure: importedExposure(null),
     owner: { email: 'data-eng@example.com', source: 'declared' },
     area: { id: 2, name: 'Data Platform' },
     retired: false,
@@ -68,6 +75,7 @@ export const mockAssets: Asset[] = [
     inactive_since: null,
   },
   {
+    id: 3,
     source_id: SOURCE_ID,
     record_id: 'SRV-003',
     name: 'crm-db-primary',
@@ -89,7 +97,7 @@ export const mockAssets: Asset[] = [
       },
     ],
     criticality: 'high',
-    exposure: 'internal',
+    exposure: importedExposure('internal'),
     owner: { email: 'crm-ops@example.com', source: 'imported' },
     area: { id: 1, name: 'Infrastructure' },
     retired: false,
@@ -97,6 +105,7 @@ export const mockAssets: Asset[] = [
     inactive_since: null,
   },
   {
+    id: 4,
     source_id: SOURCE_ID,
     record_id: 'ND-004',
     name: 'core-switch-01',
@@ -105,7 +114,7 @@ export const mockAssets: Asset[] = [
     hardware: { vendor: 'Cisco', model: 'Catalyst 9500' },
     software: [],
     criticality: 'low',
-    exposure: null,
+    exposure: importedExposure(null),
     owner: null,
     area: null,
     retired: false,
@@ -113,6 +122,7 @@ export const mockAssets: Asset[] = [
     inactive_since: null,
   },
   {
+    id: 5,
     source_id: SOURCE_ID,
     record_id: 'VM-005',
     name: 'erp-app-02',
@@ -134,11 +144,89 @@ export const mockAssets: Asset[] = [
       },
     ],
     criticality: null,
-    exposure: null,
+    exposure: importedExposure(null),
     owner: null,
     area: { id: 3, name: 'Legacy ERP' },
     retired: true,
     active: false,
     inactive_since: '2026-09-01T12:00:00Z',
+  },
+  {
+    id: 6,
+    source_id: SOURCE_ID,
+    record_id: 'VM-006',
+    name: 'payments-gateway',
+    description: 'Card payments gateway',
+    kind: 'virtual_machine',
+    hardware: null,
+    software: [
+      {
+        role: 'operating_system',
+        name: 'Amazon Linux',
+        version: '2023',
+        product: { vendor: 'Amazon', name: 'Amazon Linux' },
+      },
+    ],
+    criticality: 'high',
+    exposure: importedExposure(null),
+    owner: { email: 'payments@example.com', source: 'imported' },
+    area: { id: 1, name: 'Infrastructure' },
+    retired: false,
+    active: true,
+    inactive_since: null,
+  },
+  {
+    id: 7,
+    source_id: SOURCE_ID,
+    record_id: 'VM-007',
+    name: 'reporting-batch-01',
+    description: 'Nightly reporting jobs',
+    kind: 'virtual_machine',
+    hardware: null,
+    software: [
+      {
+        role: 'operating_system',
+        name: 'Debian',
+        version: '12',
+        product: { vendor: 'Debian', name: 'Debian GNU/Linux' },
+      },
+    ],
+    criticality: 'low',
+    exposure: importedExposure(null),
+    owner: null,
+    area: { id: 2, name: 'Data Platform' },
+    retired: false,
+    active: true,
+    inactive_since: null,
+  },
+  {
+    id: 8,
+    source_id: SOURCE_ID,
+    record_id: 'VM-008',
+    name: 'ledger-db',
+    description: 'Accounting ledger database',
+    kind: 'virtual_machine',
+    hardware: null,
+    software: [
+      {
+        role: 'operating_system',
+        name: 'RHEL',
+        version: '9.2',
+        product: { vendor: 'Red Hat', name: 'Enterprise Linux' },
+      },
+    ],
+    criticality: 'high',
+    exposure: {
+      value: 'internal',
+      source: 'declared',
+      imported: null,
+      declared_by: 'admin@barbattack.example',
+      declared_at: '2026-11-03T15:20:00Z',
+    },
+    owner: { email: 'finance-it@example.com', source: 'imported' },
+    area: { id: 1, name: 'Infrastructure' },
+    retired: false,
+    active: true,
+    inactive_since: null,
   },
 ]

@@ -103,5 +103,6 @@ export const api = {
   post: <T>(url: string, body?: unknown) => apiClient.post<T>(url, body).then((r) => r.data),
   put: <T>(url: string, body?: unknown) => apiClient.put<T>(url, body).then((r) => r.data),
   patch: <T>(url: string, body?: unknown) => apiClient.patch<T>(url, body).then((r) => r.data),
-  delete: (url: string) => apiClient.delete(url).then(() => undefined),
+  // A 204 has an empty body, so the result is only typed when the caller names it.
+  delete: <T = unknown>(url: string) => apiClient.delete<T>(url).then((r) => r.data),
 }

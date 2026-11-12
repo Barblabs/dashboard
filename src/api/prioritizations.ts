@@ -56,7 +56,7 @@ export interface CurrentOrder {
 }
 
 // Findings belong to the connected CMDB Source: disconnecting clears them with the rest.
-const PRIORITIZATIONS_KEY = [...connectionScopeKey, 'prioritizations'] as const
+export const PRIORITIZATIONS_KEY = [...connectionScopeKey, 'prioritizations'] as const
 
 const CURRENT_KEY = [...PRIORITIZATIONS_KEY, 'current'] as const
 

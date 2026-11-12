@@ -1,10 +1,15 @@
 import { useTranslation } from 'react-i18next'
+import { useUnknownExposureQuery } from '../../api/exposure'
 import { useInventory } from '../../api/inventory'
+import { useCanEdit } from '../../auth/permissions'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Button } from '../../components/ui/Button'
+import { CheckIcon } from '../../components/ui/icons'
+import { Message } from '../../components/ui/Message'
+import { useDialogTarget } from '../../components/ui/useDialogTarget'
 import { AssetFilterBar } from './AssetFilterBar'
 import { AssetsTable } from './AssetsTable'
-import { Message } from '../../components/ui/Message'
+import { ExposureSheet, type ExposureSheetTarget } from './ExposureSheet'
 
 const KEYS = {
   loading: 'config.inventory.loading',
@@ -12,9 +17,43 @@ const KEYS = {
   network: 'config.inventory.networkError',
 } as const
 
+/*
+ * Unknown Exposure is a to-do: the count covers the whole inventory, not the page on screen.
+ * Nothing shows until the count is known, so it never claims everything is answered.
+ */
+function UnknownExposureBanner({ onAnswer }: { onAnswer: (sheet: ExposureSheetTarget) => void }) {
+  const { t } = useTranslation()
+  const canEdit = useCanEdit()
+  const { data: unknown } = useUnknownExposureQuery()
+  if (!unknown) return null
+
+  if (unknown.length === 0) {
+    return (
+      <p className="flex items-center gap-2 font-body text-[0.8125rem] text-gray">
+        <CheckIcon size={13} className="text-nav-active-bg" />
+        {t('config.exposure.banner.none')}
+      </p>
+    )
+  }
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-md border border-high bg-high/10 px-4 py-2.5 font-body text-[0.8125rem] text-navy">
+      <p className="min-w-0 flex-1 leading-[1.4]">
+        <strong className="font-semibold">{t('config.exposure.banner.count', { count: unknown.length })}</strong>{' '}
+        <span className="text-gray">{t('config.exposure.banner.dataGap')}</span>
+      </p>
+      {canEdit && (
+        <Button size="sm" onClick={() => onAnswer({ mode: 'queue', assets: unknown })}>
+          {t('config.exposure.banner.answer')}
+        </Button>
+      )}
+    </div>
+  )
+}
+
 export function TechStackTable() {
   const { t } = useTranslation()
   const { query, filtered, navigating, filters, filterBy, pager } = useInventory()
+  const exposureSheet = useDialogTarget<ExposureSheetTarget>()
 
   return (
     <section>
@@ -27,6 +66,7 @@ export function TechStackTable() {
             </span>
           )}
         </div>
+        <UnknownExposureBanner onAnswer={exposureSheet.show} />
         <AssetFilterBar filters={filters} onChange={filterBy} />
       </div>
 
@@ -37,7 +77,11 @@ export function TechStackTable() {
               {filtered ? t('config.inventory.noMatches') : t('config.inventory.empty')}
             </Message>
           ) : (
-            <AssetsTable assets={assets} busy={navigating} />
+            <AssetsTable
+              assets={assets}
+              busy={navigating}
+              onOpenExposure={(asset) => exposureSheet.show({ mode: 'single', asset })}
+            />
           )
         }
       </QueryBoundary>
@@ -68,6 +112,8 @@ export function TechStackTable() {
           </Button>
         </nav>
       )}
+
+      <ExposureSheet dialog={exposureSheet} />
     </section>
   )
 }

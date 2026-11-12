@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
-import type { AssetFilters, AssetsPage } from './assets'
+import type { Asset, AssetFilters, AssetsPage } from './assets'
 import { api, errorCode } from './client'
 import { connectionScopeKey } from './cmdb'
 import type { Loadable } from './loadable'
@@ -9,20 +9,36 @@ const DEFAULT_ASSET_FILTERS: AssetFilters = { active: 'true', kind: null, critic
 
 const ASSETS_PAGE_SIZE = 50
 
+// The backend's maximum: reading the whole inventory takes as few requests as possible.
+const MAX_ASSETS_PAGE_SIZE = 200
+
 // The backend rejects a cursor sent with other filters, so every page request repeats them.
-function assetsPath(filters: AssetFilters, cursor: string | null) {
-  const params = new URLSearchParams({ limit: String(ASSETS_PAGE_SIZE), active: filters.active })
+function assetsPath(filters: AssetFilters, cursor: string | null, limit: number) {
+  const params = new URLSearchParams({ limit: String(limit), active: filters.active })
   if (filters.kind) params.set('kind', filters.kind)
   if (filters.criticality) params.set('criticality', filters.criticality)
   if (cursor) params.set('cursor', cursor)
   return `/assets?${params}`
 }
 
+/** Every Asset matching the filters, one page of the backend's maximum size at a time. */
+export async function* allAssetPages(filters: Partial<AssetFilters>): AsyncGenerator<Asset[]> {
+  const complete = { ...DEFAULT_ASSET_FILTERS, ...filters }
+  let cursor: string | null = null
+  do {
+    const page: AssetsPage = await api.get<AssetsPage>(assetsPath(complete, cursor, MAX_ASSETS_PAGE_SIZE))
+    yield page.assets
+    cursor = page.next_cursor
+  } while (cursor !== null)
+}
+
 // The inventory comes from the connected CMDB, so it is dropped on disconnect.
+export const ASSETS_KEY = [...connectionScopeKey, 'assets'] as const
+
 function assetsQuery(filters: AssetFilters, cursor: string | null) {
   return queryOptions({
-    queryKey: [...connectionScopeKey, 'assets', filters, cursor],
-    queryFn: () => api.get<AssetsPage>(assetsPath(filters, cursor)),
+    queryKey: [...ASSETS_KEY, filters, cursor],
+    queryFn: () => api.get<AssetsPage>(assetsPath(filters, cursor, ASSETS_PAGE_SIZE)),
     // Keeps the current page on screen while the next one loads, instead of flashing "Loading".
     placeholderData: keepPreviousData,
   })
