@@ -21,6 +21,7 @@ import { Fab } from '../../components/ui/Fab'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
 import { BanIcon, PencilIcon } from '../../components/ui/icons'
+import { Message } from '../../components/ui/Message'
 import { Modal } from '../../components/ui/Modal'
 import { SearchField } from '../../components/ui/SearchField'
 import { Select } from '../../components/ui/Select'
@@ -282,9 +283,7 @@ function UserTable({
       <SearchField label={t('users.search.placeholder')} value={search} onChange={setSearch} counter={counter} />
 
       {filtered.length === 0 ? (
-        <p className="py-12 text-center font-body text-[0.875rem] text-gray">
-          {t('users.empty')}
-        </p>
+        <Message>{t('users.empty')}</Message>
       ) : (
         <div className="overflow-hidden rounded-lg border border-border-panel">
           <table className="w-full border-collapse">
