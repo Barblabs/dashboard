@@ -10,12 +10,10 @@ function CustomerCard({
   customer,
   onRename,
   onDeactivate,
-  onReactivate,
 }: {
   customer: CustomerResponse
   onRename: () => void
   onDeactivate: () => void
-  onReactivate: () => void
 }) {
   const { t } = useTranslation()
   const formatDate = useDateFormat('numeric')
@@ -23,10 +21,6 @@ function CustomerCard({
   const initial = customer.name[0]?.toUpperCase() ?? '?'
 
   const reactivate = useReactivateCustomerMutation()
-
-  const handleReactivate = () => {
-    reactivate.mutate(customer.id, { onSuccess: onReactivate })
-  }
 
   return (
     <div
@@ -53,7 +47,7 @@ function CustomerCard({
               aria-label={t('tenants.actions.reactivate')}
               disabled={reactivate.isPending}
               className="rounded-md p-1.5 text-navy transition-colors hover:bg-panel focus-ring disabled:opacity-30"
-              onClick={handleReactivate}
+              onClick={() => reactivate.mutate(customer.id)}
             >
               <RestoreIcon />
             </button>
@@ -132,7 +126,6 @@ export function CustomerGrid({
               customer={customer}
               onRename={() => onRename(customer)}
               onDeactivate={() => onDeactivate(customer)}
-              onReactivate={() => {/* cache update handled inside CustomerCard */}}
             />
           ))}
         </div>
