@@ -21,6 +21,7 @@ import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
 import { BanIcon, PencilIcon, PlusIcon, SearchIcon } from '../../components/ui/icons'
 import { Modal } from '../../components/ui/Modal'
+import { Select } from '../../components/ui/Select'
 import { requestErrorText } from '../../i18n/errors'
 
 const ROLE_LABEL: Record<CustomerRole, 'users.role.customer_admin' | 'users.role.viewer'> = {
@@ -89,14 +90,13 @@ function InviteModal({ open, onClose }: { open: boolean; onClose: () => void }) 
           </Field>
 
           <Field label={t('users.invite.role.label')}>
-            <select
-              className="h-10 w-full rounded-lg border border-border-panel bg-white px-3 font-body text-[0.9375rem] text-navy focus-ring disabled:opacity-50"
+            <Select
               disabled={invite.isPending}
               {...register('role')}
             >
               <option value="viewer">{t(ROLE_LABEL['viewer'])}</option>
               <option value="customer_admin">{t(ROLE_LABEL['customer_admin'])}</option>
-            </select>
+            </Select>
           </Field>
 
           <Alert tone="info">{t('users.invite.tempPasswordNotice')}</Alert>
@@ -152,8 +152,7 @@ function ChangeRoleModal({
         </h2>
 
         <Field label={t('users.invite.role.label')}>
-          <select
-            className="h-10 w-full rounded-lg border border-border-panel bg-white px-3 font-body text-[0.9375rem] text-navy focus-ring disabled:opacity-50"
+          <Select
             value={selectedRole}
             disabled={changeRole.isPending}
             onChange={(e) => {
@@ -163,7 +162,7 @@ function ChangeRoleModal({
           >
             <option value="viewer">{t(ROLE_LABEL['viewer'])}</option>
             <option value="customer_admin">{t(ROLE_LABEL['customer_admin'])}</option>
-          </select>
+          </Select>
         </Field>
 
         {errorText && (
