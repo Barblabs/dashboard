@@ -661,7 +661,7 @@ export const en = {
         turnedInactive: "This Asset just turned Inactive, so its Exposure can't be declared.",
         answered: '{{answered}} of {{total}} answered',
         rescored: 'Their open Findings were rescored, so the Findings list may have reordered.',
-        skipped: 'The ones you skipped still show Unknown in the table.',
+        skipped: 'The ones you skipped still show Unknown in the inventory.',
         done: 'Done',
       },
       toast: {

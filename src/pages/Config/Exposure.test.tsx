@@ -118,7 +118,7 @@ describe('Exposure', () => {
     await user.click(sheet.getByRole('button', { name: 'Skip' }))
 
     expect(await sheet.findByText('1 of 4 answered')).toBeInTheDocument()
-    expect(sheet.getByText(/The ones you skipped still show Unknown in the table\./)).toBeInTheDocument()
+    expect(sheet.getByText(/The ones you skipped still show Unknown in the inventory\./)).toBeInTheDocument()
     // Each answer is confirmed by the progress and the summary, not by a toast.
     expect(toasts().queryByText(/Declared/)).not.toBeInTheDocument()
     expect(await screen.findByText('3 Active Assets have Unknown Exposure.')).toBeInTheDocument()

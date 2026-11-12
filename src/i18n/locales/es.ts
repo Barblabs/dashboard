@@ -663,7 +663,7 @@ export const es: Translations = {
         turnedInactive: 'Este activo acaba de quedar inactivo, así que su Exposición no se puede declarar.',
         answered: '{{answered}} de {{total}} respondidos',
         rescored: 'Sus hallazgos abiertos se recalcularon, así que la lista de hallazgos puede haber cambiado de orden.',
-        skipped: 'Los que saltaste siguen como desconocidos en la tabla.',
+        skipped: 'Los que saltaste siguen como desconocidos en el inventario.',
         done: 'Listo',
       },
       toast: {
