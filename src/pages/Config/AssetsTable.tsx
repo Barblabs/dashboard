@@ -2,8 +2,8 @@ import { Fragment, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { assetKey, type Asset } from '../../api/assets'
 import { Badge } from '../../components/ui/Badge'
-import { useDateFormat } from '../../i18n/format'
-import { CELL, HEADER_CELL, NONE } from './table'
+import { EMPTY, useDateFormat } from '../../i18n/format'
+import { CELL, HEADER_CELL } from './table'
 
 const MONO = 'font-mono text-[0.8125rem]'
 const DETAIL_LABEL = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase'
@@ -15,7 +15,7 @@ function versioned(name: string, version: string) {
 
 function osLabel(asset: Asset): string {
   const os = asset.software.find((s) => s.role === 'operating_system')
-  return os ? versioned(os.name, os.version) : NONE
+  return os ? versioned(os.name, os.version) : EMPTY
 }
 
 function AssetStatus({ asset }: { asset: Asset }) {
@@ -44,7 +44,7 @@ function AssetDetails({ asset }: { asset: Asset }) {
       <dl className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
         <div className="flex flex-col gap-1">
           <dt className={DETAIL_LABEL}>{t('config.inventory.details.description')}</dt>
-          <dd>{asset.description || NONE}</dd>
+          <dd>{asset.description || EMPTY}</dd>
         </div>
         <div className="flex flex-col gap-1">
           <dt className={DETAIL_LABEL}>{t('config.inventory.details.hardware')}</dt>
@@ -166,10 +166,10 @@ export function AssetsTable({ assets, busy }: { assets: Asset[]; busy: boolean }
                         )}
                       </span>
                     ) : (
-                      NONE
+                      EMPTY
                     )}
                   </td>
-                  <td className={CELL}>{asset.area?.name ?? NONE}</td>
+                  <td className={CELL}>{asset.area?.name ?? EMPTY}</td>
                   <td className={CELL}>
                     <AssetStatus asset={asset} />
                   </td>

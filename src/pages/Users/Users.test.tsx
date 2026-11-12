@@ -28,6 +28,13 @@ describe('Users', () => {
     expect(screen.getByText(/2 users/)).toBeInTheDocument()
   })
 
+  it('shows a counter for a single user in the singular', async () => {
+    seedUsers([ADMIN])
+    await renderUsers()
+
+    expect(screen.getByText('1 user')).toBeInTheDocument()
+  })
+
   it('shows the counter with disabled count when applicable', async () => {
     const disabled = {
       ...VIEWER,
@@ -38,7 +45,7 @@ describe('Users', () => {
     seedUsers([ADMIN, VIEWER, disabled])
     await renderUsers()
 
-    expect(screen.getByText(/3 users · 1 disabled/)).toBeInTheDocument()
+    expect(screen.getByText('3 users · 1 disabled')).toBeInTheDocument()
   })
 
   it('shows a disabled user with no action buttons', async () => {

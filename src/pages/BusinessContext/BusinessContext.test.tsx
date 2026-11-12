@@ -270,7 +270,7 @@ describe('Business context', () => {
     await renderPage(VIEWER)
 
     expect(screen.getByText('We sell shoes online.')).toBeInTheDocument()
-    expect(screen.getAllByText('—').length).toBeGreaterThan(3)
+    expect(screen.getAllByText('-').length).toBeGreaterThan(3)
     expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Import documents' })).not.toBeInTheDocument()
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument()

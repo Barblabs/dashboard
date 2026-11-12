@@ -36,6 +36,7 @@ import { Button } from '../../components/ui/Button'
 import { CloseIcon, UploadFileIcon } from '../../components/ui/icons'
 import { Input } from '../../components/ui/Input'
 import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
+import { EMPTY } from '../../i18n/format'
 import { CountriesField, CountryField, MultiSelectField, SelectField, TagField, TextAreaField } from './controls'
 import { ImportDialog } from './ImportDialog'
 import { SaveStatus } from './SaveStatus'
@@ -278,7 +279,7 @@ function CriticalServices() {
       <span className={`font-body font-semibold ${readOnly ? 'text-[0.8125rem] text-gray' : 'text-[0.875rem] text-navy'}`}>
         {t('businessContext.fields.criticalServices.label')}
       </span>
-      {readOnly && fields.length === 0 && <p className="font-body text-[0.9375rem] text-muted-bg">—</p>}
+      {readOnly && fields.length === 0 && <p className="font-body text-[0.9375rem] text-muted-bg">{EMPTY}</p>}
       {fields.map((item, index) =>
         readOnly ? (
           <ShownService key={item.id} index={index} />
@@ -332,7 +333,7 @@ function CriticalServices() {
               <SelectAt
                 name={`operations.critical_services.${index}.impact`}
                 label={t('businessContext.fields.criticalServices.impact')}
-                emptyLabel={`${t('businessContext.fields.criticalServices.impact')}…`}
+                emptyLabel={t('businessContext.fields.criticalServices.impactPlaceholder')}
                 options={IMPACTS}
                 labelOf={(c) => t(`businessContext.vocab.impact.${c}`)}
                 hideLabel
@@ -340,7 +341,7 @@ function CriticalServices() {
               <SelectAt
                 name={`operations.critical_services.${index}.max_downtime`}
                 label={t('businessContext.fields.criticalServices.maxDowntime')}
-                emptyLabel={`${t('businessContext.fields.criticalServices.maxDowntime')}…`}
+                emptyLabel={t('businessContext.fields.criticalServices.maxDowntimePlaceholder')}
                 options={DOWNTIMES}
                 labelOf={(c) => t(`businessContext.vocab.downtime.${c}`)}
                 hideLabel

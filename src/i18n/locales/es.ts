@@ -103,10 +103,11 @@ export const es: Translations = {
     you: 'Tú',
     search: { placeholder: 'Buscar por correo…' },
     counter: {
-      user: 'usuario',
-      users: 'usuarios',
-      disabled: 'deshabilitado',
-      disabledMany: 'deshabilitados',
+      total_one: '{{count}} usuario',
+      total_other: '{{count}} usuarios',
+      disabled_one: '{{count}} deshabilitado',
+      disabled_other: '{{count}} deshabilitados',
+      summary: '{{total}} · {{disabled}}',
     },
     invite: {
       button: 'Invitar usuario',
@@ -166,8 +167,11 @@ export const es: Translations = {
     empty: 'Aún no hay organizaciones.',
     search: { placeholder: 'Buscar por nombre…' },
     counter: {
-      organizations: 'organizaciones',
-      deactivated: 'desactivadas',
+      total_one: '{{count}} organización',
+      total_other: '{{count}} organizaciones',
+      deactivated_one: '{{count}} desactivada',
+      deactivated_other: '{{count}} desactivadas',
+      summary: '{{total}} · {{deactivated}}',
     },
     status: {
       active: 'Activa',
@@ -239,6 +243,10 @@ export const es: Translations = {
     recent: {
       title: 'Organizaciones recientes',
       empty: 'Aún no hay organizaciones.',
+      status: {
+        active: 'Activa',
+        deactivated: 'Desactivada',
+      },
     },
     notice:
       'Como Platform Admin solo tienes visibilidad del nombre, fecha de alta y estado. El acceso a usuarios, CMDB y activos pertenece a cada organización.',
@@ -552,7 +560,9 @@ export const es: Translations = {
         assets: 'Activos que lo sostienen',
         assetsPlaceholder: 'Activos que lo sostienen, p. ej. srv-pagos-01',
         impact: 'Impacto si se cae',
+        impactPlaceholder: 'Impacto si se cae…',
         maxDowntime: 'Tiempo máximo sin el servicio',
+        maxDowntimePlaceholder: 'Tiempo máximo sin el servicio…',
       },
       dataCategories: 'Datos que maneja',
       regulations: 'Regulaciones y estándares',

@@ -188,19 +188,21 @@ function UserTable({
   const [search, setSearch] = useState('')
 
   const disabledCount = users.filter((u) => u.disabled_at !== null).length
-  const counter =
-    users.length > 0
-      ? `${users.length} ${users.length === 1 ? t('users.counter.user') : t('users.counter.users')}` +
-        (disabledCount > 0
-          ? ` · ${disabledCount} ${disabledCount === 1 ? t('users.counter.disabled') : t('users.counter.disabledMany')}`
-          : '')
-      : ''
+  function counterText(): string | undefined {
+    if (users.length === 0) return undefined
+    const total = t('users.counter.total', { count: users.length })
+    if (disabledCount === 0) return total
+    return t('users.counter.summary', {
+      total,
+      disabled: t('users.counter.disabled', { count: disabledCount }),
+    })
+  }
 
   const filtered = users.filter((u) => u.email.toLowerCase().includes(search.toLowerCase()))
 
   return (
     <>
-      <SearchField label={t('users.search.placeholder')} value={search} onChange={setSearch} counter={counter} />
+      <SearchField label={t('users.search.placeholder')} value={search} onChange={setSearch} counter={counterText()} />
 
       {filtered.length === 0 ? (
         <Message>{t('users.empty')}</Message>

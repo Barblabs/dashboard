@@ -91,16 +91,16 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#D9E1E8" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-panel)" vertical={false} />
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 12, fill: '#637180', fontFamily: 'var(--font-body)' }}
+                tick={{ fontSize: 12, fill: 'var(--color-gray)', fontFamily: 'var(--font-body)' }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
                 allowDecimals={false}
-                tick={{ fontSize: 12, fill: '#637180', fontFamily: 'var(--font-body)' }}
+                tick={{ fontSize: 12, fill: 'var(--color-gray)', fontFamily: 'var(--font-body)' }}
                 axisLine={false}
                 tickLine={false}
               />
@@ -108,12 +108,12 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
                 contentStyle={{
                   fontFamily: 'var(--font-body)',
                   fontSize: 13,
-                  borderColor: '#D9E1E8',
+                  borderColor: 'var(--color-border-panel)',
                   borderRadius: 8,
                 }}
-                cursor={{ fill: '#F4F7FA' }}
+                cursor={{ fill: 'var(--color-panel)' }}
               />
-              <Bar dataKey="count" fill="#0F385B" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="var(--color-navy)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -143,9 +143,7 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
                     {formatDate(c.created_at)}
                   </span>
                   <Badge variant={c.deactivated_at ? 'muted' : 'outline'}>
-                    {c.deactivated_at
-                      ? t('tenants.status.deactivated').split(' ·')[0]
-                      : t('tenants.status.active')}
+                    {t(`adminDashboard.recent.status.${c.deactivated_at ? 'deactivated' : 'active'}`)}
                   </Badge>
                 </div>
               </li>

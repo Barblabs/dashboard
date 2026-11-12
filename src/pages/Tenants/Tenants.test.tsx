@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
+import { i18n } from '../../i18n'
 import { apiUrl } from '../../mocks/url'
 import { PLATFORM_ADMIN, renderApp, seedCustomers } from '../../test/render'
 import { server } from '../../test/server'
@@ -29,7 +30,21 @@ describe('Tenants', () => {
 
   it('shows the counter with total and deactivated count', async () => {
     await renderTenants()
-    expect(screen.getByText(/3 organizations · 1 deactivated/)).toBeInTheDocument()
+    expect(screen.getByText('3 organizations · 1 deactivated')).toBeInTheDocument()
+  })
+
+  it('shows a counter for a single organization in the singular', async () => {
+    seedCustomers([ORG_A])
+    await renderTenants()
+    expect(screen.getByText('1 organization')).toBeInTheDocument()
+  })
+
+  it('shows the counter in Spanish with the deactivated count agreeing in number', async () => {
+    localStorage.setItem('language', 'es')
+    await i18n.changeLanguage()
+    seedCustomers([ORG_A, ORG_C])
+    await renderTenants()
+    expect(screen.getByText('2 organizaciones · 1 desactivada')).toBeInTheDocument()
   })
 
   it('filters organizations by name', async () => {

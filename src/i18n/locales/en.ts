@@ -101,10 +101,11 @@ export const en = {
     you: 'You',
     search: { placeholder: 'Search by email…' },
     counter: {
-      user: 'user',
-      users: 'users',
-      disabled: 'disabled',
-      disabledMany: 'disabled',
+      total_one: '{{count}} user',
+      total_other: '{{count}} users',
+      disabled_one: '{{count}} disabled',
+      disabled_other: '{{count}} disabled',
+      summary: '{{total}} · {{disabled}}',
     },
     invite: {
       button: 'Invite user',
@@ -164,8 +165,11 @@ export const en = {
     empty: 'No organizations yet.',
     search: { placeholder: 'Search by name…' },
     counter: {
-      organizations: 'organizations',
-      deactivated: 'deactivated',
+      total_one: '{{count}} organization',
+      total_other: '{{count}} organizations',
+      deactivated_one: '{{count}} deactivated',
+      deactivated_other: '{{count}} deactivated',
+      summary: '{{total}} · {{deactivated}}',
     },
     status: {
       active: 'Active',
@@ -237,6 +241,10 @@ export const en = {
     recent: {
       title: 'Recent organizations',
       empty: 'No organizations yet.',
+      status: {
+        active: 'Active',
+        deactivated: 'Deactivated',
+      },
     },
     notice:
       'As Platform Admin you can see names, creation dates and status only. Access to users, CMDB and assets belongs to each organization.',
@@ -549,7 +557,9 @@ export const en = {
         assets: 'Assets that run it',
         assetsPlaceholder: 'Assets that run it, e.g. srv-pay-01',
         impact: 'Impact if it goes down',
+        impactPlaceholder: 'Impact if it goes down…',
         maxDowntime: 'Maximum time without it',
+        maxDowntimePlaceholder: 'Maximum time without it…',
       },
       dataCategories: 'Data it holds',
       regulations: 'Regulations and standards',
