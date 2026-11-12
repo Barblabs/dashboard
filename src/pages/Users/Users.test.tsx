@@ -1,6 +1,8 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
+import type { UserEvent } from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
+import type { UserResponse } from '../../api/users'
 import { apiUrl } from '../../mocks/url'
 import { renderApp, seedUsers } from '../../test/render'
 import { server } from '../../test/server'
@@ -8,6 +10,13 @@ import { MOCK_USERS } from '../../mocks/users-store'
 
 const ADMIN = MOCK_USERS[0]!
 const VIEWER = MOCK_USERS[1]!
+
+async function inviteUser(user: UserEvent, email: string) {
+  await user.click(screen.getByRole('button', { name: 'Invite user' }))
+  await user.type(screen.getByLabelText('Email'), email)
+  await user.click(screen.getByRole('button', { name: 'Send invitation' }))
+  await waitFor(() => expect(screen.queryByRole('heading', { name: 'Invite user' })).not.toBeInTheDocument())
+}
 
 async function renderUsers() {
   const user = renderApp('/users')
@@ -99,6 +108,41 @@ describe('Users', () => {
 
     await screen.findByText('new@acme.example')
     expect(screen.queryByRole('heading', { name: 'Invite user' })).not.toBeInTheDocument()
+  })
+
+  it('confirms that the invitation was sent', async () => {
+    const user = await renderUsers()
+
+    await inviteUser(user, 'new@acme.example')
+
+    const toasts = screen.getByRole('region', { name: 'Notifications' })
+    expect(await within(toasts).findByText('Invitation sent to new@acme.example.')).toBeInTheDocument()
+    const row = screen.getByText('new@acme.example').closest('tr')!
+    expect(within(row).queryByText('Invitation pending')).not.toBeInTheDocument()
+  })
+
+  it('warns when the invitation email has not gone out yet, and lists the user as pending', async () => {
+    server.use(
+      http.post(apiUrl('/users'), async ({ request }) => {
+        const { email, role } = (await request.json()) as { email: string; role: UserResponse['role'] }
+        return HttpResponse.json(
+          { id: 'user-new', email, role, created_at: '2026-11-12T00:00:00Z', disabled_at: null, pending: true },
+          { status: 201 },
+        )
+      }),
+    )
+    const user = await renderUsers()
+
+    await inviteUser(user, 'new@acme.example')
+
+    const toasts = screen.getByRole('region', { name: 'Notifications' })
+    expect(
+      await within(toasts).findByText(
+        "User created. The invitation email to new@acme.example hasn't gone out yet; it will be retried automatically.",
+      ),
+    ).toBeInTheDocument()
+    const row = screen.getByText('new@acme.example').closest('tr')!
+    expect(within(row).getByText('Invitation pending')).toBeInTheDocument()
   })
 
   it('pressing Enter in the email field sends the invitation', async () => {

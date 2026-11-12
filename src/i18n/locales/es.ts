@@ -291,7 +291,10 @@ export const es: Translations = {
       submitting: 'Enviando…',
       failed: 'No se pudo enviar la invitación.',
       emailTaken: 'Ya existe un usuario con este correo.',
-      tempPasswordNotice: 'El usuario recibirá un correo con una contraseña temporal.',
+      tempPasswordNotice: 'Le enviaremos un correo con una contraseña temporal.',
+      sent: 'Invitación enviada a {{email}}.',
+      pending:
+        'Usuario creado. El correo de invitación a {{email}} todavía no salió; se reintentará automáticamente.',
     },
     columns: {
       email: 'Correo',

@@ -289,7 +289,10 @@ export const en = {
       submitting: 'Sending…',
       failed: 'Could not send the invitation.',
       emailTaken: 'A user with this email already exists.',
-      tempPasswordNotice: 'The user will receive an email with a temporary password.',
+      tempPasswordNotice: "We'll send the user an email with a temporary password.",
+      sent: 'Invitation sent to {{email}}.',
+      pending:
+        "User created. The invitation email to {{email}} hasn't gone out yet; it will be retried automatically.",
     },
     columns: {
       email: 'Email',

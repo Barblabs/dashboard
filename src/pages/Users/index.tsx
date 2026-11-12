@@ -27,6 +27,7 @@ import { Modal } from '../../components/ui/Modal'
 import { SearchField } from '../../components/ui/SearchField'
 import { Select } from '../../components/ui/Select'
 import { useDialogTarget } from '../../components/ui/useDialogTarget'
+import { useToast } from '../../components/ui/useToast'
 import { requestErrorText } from '../../i18n/errors'
 
 function RoleOptions() {
@@ -50,6 +51,7 @@ type InviteFields = z.infer<typeof inviteSchema>
 function InviteBody({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation()
   const invite = useInviteUserMutation()
+  const toast = useToast()
 
   const {
     register,
@@ -60,7 +62,22 @@ function InviteBody({ onClose }: { onClose: () => void }) {
     defaultValues: { email: '', role: 'viewer' },
   })
 
-  const onSubmit = handleSubmit((data) => invite.mutate(data, { onSuccess: onClose }))
+  function announce(invited: UserResponse) {
+    toast.show(
+      invited.pending
+        ? { tone: 'warning', text: t('users.invite.pending', { email: invited.email }) }
+        : { tone: 'success', text: t('users.invite.sent', { email: invited.email }) },
+    )
+  }
+
+  const onSubmit = handleSubmit((data) =>
+    invite.mutate(data, {
+      onSuccess: (invited) => {
+        announce(invited)
+        onClose()
+      },
+    }),
+  )
 
   return (
     <DialogLayout
