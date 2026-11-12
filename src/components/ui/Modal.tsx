@@ -14,12 +14,14 @@ const WIDTH = {
   lg: 'w-[min(40rem,calc(100vw-2rem))]',
 }
 
+export type ModalWidth = keyof typeof WIDTH
+
 interface Props {
   open: boolean
   onClose: () => void
-  /** Id of the heading the caller renders inside, which names the dialog. */
-  labelledBy: string
-  width?: keyof typeof WIDTH
+  /** Id of the heading that names the dialog, when it is not a DialogLayout title. */
+  labelledBy?: string
+  width?: ModalWidth
   children: ReactNode
 }
 
@@ -28,7 +30,11 @@ export function Modal({ open, onClose, labelledBy, width = 'sm', children }: Pro
     <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
       <Dialog.Portal>
         <Dialog.Backdrop className={BACKDROP} />
-        <Dialog.Popup aria-labelledby={labelledBy} className={`${POPUP} ${WIDTH[width]}`}>
+        {/* Even an undefined aria-labelledby would override the one Dialog.Title sets. */}
+        <Dialog.Popup
+          {...(labelledBy && { 'aria-labelledby': labelledBy })}
+          className={`${POPUP} ${WIDTH[width]}`}
+        >
           {children}
         </Dialog.Popup>
       </Dialog.Portal>

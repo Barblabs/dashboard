@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -15,6 +15,7 @@ import { Page } from '../../components/Page'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
+import { ConfirmDialog, DialogLayout, TargetModal } from '../../components/ui/Dialog'
 import { Fab } from '../../components/ui/Fab'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
@@ -22,144 +23,84 @@ import { PencilIcon, PowerOffIcon, RestoreIcon } from '../../components/ui/icons
 import { Message } from '../../components/ui/Message'
 import { Modal } from '../../components/ui/Modal'
 import { SearchField } from '../../components/ui/SearchField'
+import { useDialogTarget } from '../../components/ui/useDialogTarget'
 import { requestErrorText } from '../../i18n/errors'
 import { useDateFormat } from '../../i18n/format'
 
-// ── Rename modal ──────────────────────────────────────────────────────────────
+// ── Rename dialog ─────────────────────────────────────────────────────────────
 
 const nameSchema = z.object({
   name: z.string().trim().min(1, 'tenants.create.step1.required'),
 })
 type NameFields = z.infer<typeof nameSchema>
 
-function RenameModal({
-  customer,
-  open,
-  onClose,
-}: {
-  customer: CustomerResponse | null
-  open: boolean
-  onClose: () => void
-}) {
+function RenameBody({ customer, onClose }: { customer: CustomerResponse; onClose: () => void }) {
   const { t } = useTranslation()
-  const titleId = useId()
   const rename = useRenameCustomerMutation()
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<NameFields>({
     resolver: zodResolver(nameSchema),
-    defaultValues: { name: customer?.name ?? '' },
+    defaultValues: { name: customer.name },
   })
 
-  const handleClose = () => {
-    reset()
-    rename.reset()
-    onClose()
-  }
-
-  const onSubmit = handleSubmit((data) => {
-    if (!customer) return
-    rename.mutate({ id: customer.id, name: data.name }, { onSuccess: handleClose })
-  })
-
-  const errorText = rename.isError
-    ? requestErrorText(rename.error, t, { fallback: 'tenants.rename.failed' })
-    : null
+  const onSubmit = handleSubmit((data) =>
+    rename.mutate({ id: customer.id, name: data.name }, { onSuccess: onClose }),
+  )
 
   return (
-    <Modal open={open} onClose={handleClose} labelledBy={titleId}>
-      <div className="flex flex-col gap-5 p-6">
-        <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-          {t('tenants.rename.title')}
-        </h2>
-
-        <Field
-          label={t('tenants.rename.label')}
-          error={errors.name?.message ? t(errors.name.message as 'tenants.create.step1.required') : undefined}
-        >
-          <Input disabled={rename.isPending} {...register('name')} />
-        </Field>
-
-        {errorText && (
-          <Alert tone="error">{errorText}</Alert>
-        )}
-
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" size="sm" onClick={handleClose}>
+    <DialogLayout
+      title={t('tenants.rename.title')}
+      error={rename.isError ? requestErrorText(rename.error, t, { fallback: 'tenants.rename.failed' }) : null}
+      actions={
+        <>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('tenants.rename.cancel')}
           </Button>
           <Button loading={rename.isPending} size="sm" onClick={onSubmit}>
             {t('tenants.rename.save')}
           </Button>
-        </div>
-      </div>
-    </Modal>
+        </>
+      }
+    >
+      <Field
+        label={t('tenants.rename.label')}
+        error={errors.name?.message ? t(errors.name.message as 'tenants.create.step1.required') : undefined}
+      >
+        <Input disabled={rename.isPending} {...register('name')} />
+      </Field>
+    </DialogLayout>
   )
 }
 
-// ── Deactivate confirmation modal ─────────────────────────────────────────────
+// ── Deactivate confirmation dialog ────────────────────────────────────────────
 
-function DeactivateModal({
-  customer,
-  open,
-  onClose,
-}: {
-  customer: CustomerResponse | null
-  open: boolean
-  onClose: () => void
-}) {
+function DeactivateBody({ customer, onClose }: { customer: CustomerResponse; onClose: () => void }) {
   const { t } = useTranslation()
-  const titleId = useId()
   const deactivate = useDeactivateCustomerMutation()
 
-  const handleClose = () => {
-    deactivate.reset()
-    onClose()
-  }
-
-  const errorText = deactivate.isError
-    ? requestErrorText(deactivate.error, t, { fallback: 'tenants.deactivate.failed' })
-    : null
-
   return (
-    <Modal open={open} onClose={handleClose} labelledBy={titleId}>
-      <div className="flex flex-col gap-5 p-6">
-        <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-          {t('tenants.deactivate.title')}
-        </h2>
-
-        <p className="font-body text-[0.9375rem] text-navy">{t('tenants.deactivate.body')}</p>
-
-        {errorText && (
-          <Alert tone="error">{errorText}</Alert>
-        )}
-
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" size="sm" onClick={handleClose}>
-            {t('tenants.deactivate.cancel')}
-          </Button>
-          <Button
-            variant="danger"
-            loading={deactivate.isPending}
-            size="sm"
-            onClick={() => {
-              if (!customer) return
-              deactivate.mutate(customer.id, { onSuccess: handleClose })
-            }}
-          >
-            {t('tenants.deactivate.confirm')}
-          </Button>
-        </div>
-      </div>
-    </Modal>
+    <ConfirmDialog
+      title={t('tenants.deactivate.title')}
+      text={t('tenants.deactivate.body')}
+      cancelLabel={t('tenants.deactivate.cancel')}
+      confirmLabel={t('tenants.deactivate.confirm')}
+      pending={deactivate.isPending}
+      error={
+        deactivate.isError
+          ? requestErrorText(deactivate.error, t, { fallback: 'tenants.deactivate.failed' })
+          : null
+      }
+      onConfirm={() => deactivate.mutate(customer.id, { onSuccess: onClose })}
+      onCancel={onClose}
+    />
   )
 }
 
-// ── Create wizard modal ───────────────────────────────────────────────────────
+// ── Create wizard dialog ──────────────────────────────────────────────────────
 
 const emailSchema = z.object({
   admin_email: z.string().trim().min(1, 'tenants.create.step2.required').email('tenants.create.step2.invalid'),
@@ -169,14 +110,29 @@ type EmailFields = z.infer<typeof emailSchema>
 // The organization's name exists only once the first step accepted it.
 type CreateStep = { number: 1 } | { number: 2; name: string }
 
-const NAME_STEP: CreateStep = { number: 1 }
-
-function CreateModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function StepIndicator({ step }: { step: CreateStep['number'] }) {
   const { t } = useTranslation()
-  const titleId = useId()
+  const dot = (n: CreateStep['number']) =>
+    `flex h-6 w-6 items-center justify-center rounded-full text-[0.75rem] font-semibold ${step === n ? 'bg-navy text-white' : 'bg-panel text-gray'}`
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
+        <div className={dot(1)}>1</div>
+        <div className="h-px w-8 bg-border-panel" />
+        <div className={dot(2)}>2</div>
+      </div>
+      <span className="font-body text-[0.75rem] text-gray">
+        {t('tenants.create.step', { current: step, total: 2 })}
+      </span>
+    </div>
+  )
+}
+
+function CreateBody({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation()
   const create = useCreateCustomerMutation()
-  const [current, setCurrent] = useState<CreateStep>(NAME_STEP)
-  const step = current.number
+  const [current, setCurrent] = useState<CreateStep>({ number: 1 })
 
   const step1Form = useForm<NameFields>({
     resolver: zodResolver(nameSchema),
@@ -187,124 +143,89 @@ function CreateModal({ open, onClose }: { open: boolean; onClose: () => void }) 
     defaultValues: { admin_email: '' },
   })
 
-  const handleClose = () => {
-    step1Form.reset()
-    step2Form.reset()
-    create.reset()
-    setCurrent(NAME_STEP)
-    onClose()
-  }
-
   const handleNext = step1Form.handleSubmit((data) => setCurrent({ number: 2, name: data.name }))
 
-  const handleSubmit = step2Form.handleSubmit((data) => {
-    if (current.number !== 2) return
-    create.mutate({ name: current.name, admin_email: data.admin_email }, { onSuccess: handleClose })
-  })
+  const handleBack = () => {
+    create.reset()
+    setCurrent({ number: 1 })
+  }
 
   const errorText = create.isError
     ? requestErrorText(create.error, t, { fallback: 'tenants.create.failed' })
     : null
 
-  const stepTitle = step === 1 ? t('tenants.create.step1.title') : t('tenants.create.step2.title')
+  if (current.number === 1) {
+    return (
+      <DialogLayout
+        eyebrow={<StepIndicator step={1} />}
+        title={t('tenants.create.step1.title')}
+        actions={
+          <Button size="sm" onClick={handleNext}>
+            {t('tenants.create.step1.next')}
+          </Button>
+        }
+      >
+        <Field
+          label={t('tenants.create.step1.label')}
+          error={
+            step1Form.formState.errors.name?.message
+              ? t(step1Form.formState.errors.name.message as 'tenants.create.step1.required')
+              : undefined
+          }
+        >
+          <Input
+            placeholder={t('tenants.create.step1.placeholder')}
+            autoFocus
+            {...step1Form.register('name')}
+          />
+        </Field>
+      </DialogLayout>
+    )
+  }
+
+  const { name } = current
+  const handleSubmit = step2Form.handleSubmit((data) =>
+    create.mutate({ name, admin_email: data.admin_email }, { onSuccess: onClose }),
+  )
 
   return (
-    <Modal open={open} onClose={handleClose} labelledBy={titleId}>
-      <div className="flex flex-col gap-5 p-6">
-        {/* Step indicator */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div
-              className={`flex h-6 w-6 items-center justify-center rounded-full text-[0.75rem] font-semibold ${step === 1 ? 'bg-navy text-white' : 'bg-panel text-gray'}`}
-            >
-              1
-            </div>
-            <div className="h-px w-8 bg-border-panel" />
-            <div
-              className={`flex h-6 w-6 items-center justify-center rounded-full text-[0.75rem] font-semibold ${step === 2 ? 'bg-navy text-white' : 'bg-panel text-gray'}`}
-            >
-              2
-            </div>
-          </div>
-          <span className="font-body text-[0.75rem] text-gray">
-            {t('tenants.create.step', { current: step, total: 2 })}
-          </span>
-        </div>
+    <DialogLayout
+      eyebrow={<StepIndicator step={2} />}
+      title={t('tenants.create.step2.title')}
+      error={errorText}
+      actions={
+        <>
+          <Button variant="secondary" size="sm" onClick={handleBack}>
+            {t('tenants.create.step2.back')}
+          </Button>
+          <Button loading={create.isPending} size="sm" onClick={handleSubmit}>
+            {create.isPending ? t('tenants.create.step2.submitting') : t('tenants.create.step2.submit')}
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <Field
+          label={t('tenants.create.step2.label')}
+          error={
+            step2Form.formState.errors.admin_email?.message
+              ? t(step2Form.formState.errors.admin_email.message as 'tenants.create.step2.required')
+              : undefined
+          }
+        >
+          <Input
+            type="email"
+            placeholder="admin@empresa.com"
+            autoComplete="off"
+            disabled={create.isPending}
+            autoFocus
+            {...step2Form.register('admin_email')}
+          />
+        </Field>
 
-        <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-          {stepTitle}
-        </h2>
-
-        {step === 1 && (
-          <Field
-            label={t('tenants.create.step1.label')}
-            error={
-              step1Form.formState.errors.name?.message
-                ? t(step1Form.formState.errors.name.message as 'tenants.create.step1.required')
-                : undefined
-            }
-          >
-            <Input
-              placeholder={t('tenants.create.step1.placeholder')}
-              autoFocus
-              {...step1Form.register('name')}
-            />
-          </Field>
-        )}
-
-        {step === 2 && (
-          <div className="flex flex-col gap-4">
-            <Field
-              label={t('tenants.create.step2.label')}
-              error={
-                step2Form.formState.errors.admin_email?.message
-                  ? t(step2Form.formState.errors.admin_email.message as 'tenants.create.step2.required')
-                  : undefined
-              }
-            >
-              <Input
-                type="email"
-                placeholder="admin@empresa.com"
-                autoComplete="off"
-                disabled={create.isPending}
-                autoFocus
-                {...step2Form.register('admin_email')}
-              />
-            </Field>
-
-            <Alert tone="info">{t('tenants.create.step2.notice')}</Alert>
-          </div>
-        )}
-
-        {errorText && (
-          <Alert tone="error">{errorText}</Alert>
-        )}
-
-        <div className="flex justify-end gap-2">
-          {step === 2 && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                create.reset()
-                setCurrent(NAME_STEP)
-              }}
-            >
-              {t('tenants.create.step2.back')}
-            </Button>
-          )}
-          {step === 1 ? (
-            <Button size="sm" onClick={handleNext}>
-              {t('tenants.create.step1.next')}
-            </Button>
-          ) : (
-            <Button loading={create.isPending} size="sm" onClick={handleSubmit}>
-              {create.isPending ? t('tenants.create.step2.submitting') : t('tenants.create.step2.submit')}
-            </Button>
-          )}
-        </div>
+        <Alert tone="info">{t('tenants.create.step2.notice')}</Alert>
       </div>
-    </Modal>
+    </DialogLayout>
   )
 }
 
@@ -459,31 +380,28 @@ export function TenantsPage() {
   const { t } = useTranslation()
   const customersQuery = useCustomersQuery()
   const [createOpen, setCreateOpen] = useState(false)
-  const [renameTarget, setRenameTarget] = useState<CustomerResponse | null>(null)
-  const [deactivateTarget, setDeactivateTarget] = useState<CustomerResponse | null>(null)
+  const renameDialog = useDialogTarget<CustomerResponse>()
+  const deactivateDialog = useDialogTarget<CustomerResponse>()
 
   return (
     <Page title={t('tenants.title')}>
       <QueryBoundary query={customersQuery} keys={KEYS}>
         {({ customers }) => (
-          <CustomerGrid customers={customers} onRename={setRenameTarget} onDeactivate={setDeactivateTarget} />
+          <CustomerGrid customers={customers} onRename={renameDialog.show} onDeactivate={deactivateDialog.show} />
         )}
       </QueryBoundary>
 
       <Fab label={t('tenants.create.button')} onClick={() => setCreateOpen(true)} />
 
-      <CreateModal open={createOpen} onClose={() => setCreateOpen(false)} />
-      <RenameModal
-        key={renameTarget?.id ?? ''}
-        customer={renameTarget}
-        open={renameTarget !== null}
-        onClose={() => setRenameTarget(null)}
-      />
-      <DeactivateModal
-        customer={deactivateTarget}
-        open={deactivateTarget !== null}
-        onClose={() => setDeactivateTarget(null)}
-      />
+      <Modal open={createOpen} onClose={() => setCreateOpen(false)}>
+        <CreateBody onClose={() => setCreateOpen(false)} />
+      </Modal>
+      <TargetModal dialog={renameDialog}>
+        {(customer) => <RenameBody customer={customer} onClose={renameDialog.close} />}
+      </TargetModal>
+      <TargetModal dialog={deactivateDialog}>
+        {(customer) => <DeactivateBody customer={customer} onClose={deactivateDialog.close} />}
+      </TargetModal>
     </Page>
   )
 }

@@ -4,6 +4,7 @@ import { useAreasQuery, type Area } from '../../api/areas'
 import { ACTIVITY_FILTERS, type ActivityFilter } from '../../api/assets'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge } from '../../components/ui/Badge'
+import { useDialogTarget } from '../../components/ui/useDialogTarget'
 import { useDateFormat } from '../../i18n/format'
 import { AreaOwnerDialog } from './AreaOwnerDialog'
 import { FilterSelect } from './FilterSelect'
@@ -95,7 +96,7 @@ function AreaRows({ areas, onEditOwner }: AreaRowsProps) {
 export function AreasTable({ readOnly }: { readOnly: boolean }) {
   const { t } = useTranslation()
   const [active, setActive] = useState<ActivityFilter>(DEFAULT_ACTIVITY)
-  const [editing, setEditing] = useState<Area | null>(null)
+  const ownerDialog = useDialogTarget<Area>()
   const query = useAreasQuery(active)
 
   return (
@@ -134,11 +135,11 @@ export function AreasTable({ readOnly }: { readOnly: boolean }) {
               {active === DEFAULT_ACTIVITY ? t('config.areas.empty') : t('config.areas.noMatches')}
             </Message>
           ) : (
-            <AreaRows areas={areas} onEditOwner={readOnly ? undefined : setEditing} />
+            <AreaRows areas={areas} onEditOwner={readOnly ? undefined : ownerDialog.show} />
           )
         }
       </QueryBoundary>
-      {editing && <AreaOwnerDialog area={editing} onClose={() => setEditing(null)} />}
+      <AreaOwnerDialog dialog={ownerDialog} />
     </section>
   )
 }
