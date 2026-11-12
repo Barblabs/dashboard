@@ -4,6 +4,7 @@ interface ScrollBox {
 }
 
 interface Item {
+  /** Measured from the list, so the list must be the item's offsetParent (positioned). */
   offsetTop: number
   offsetHeight: number
 }

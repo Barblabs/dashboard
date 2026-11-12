@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { assetKey, unidentifiedCount, type Asset, type Criticality } from '../../api/assets'
 import type { Pager } from '../../api/inventory'
@@ -91,8 +91,8 @@ export function AssetInspector({ assets, busy, pager, onOpenExposure }: AssetIns
   // The fallback is stored, so paging back to a page that holds the old selection doesn't revive it.
   if (assetKey(selected) !== selectedKey) setSelectedKey(assetKey(selected))
 
-  // The list is `relative` so each option's offsetTop is measured from it.
-  useEffect(() => {
+  // Before paint, so a selection moved past the edge is never drawn out of view.
+  useLayoutEffect(() => {
     const list = listRef.current
     const option = document.getElementById(selectedId)
     if (list && option) list.scrollTop = revealInList(list, option)
