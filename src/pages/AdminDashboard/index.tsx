@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useCustomersQuery, type CustomerResponse } from '../../api/customers'
+import { Page } from '../../components/Page'
 import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -60,30 +61,27 @@ export function AdminDashboardPage() {
 
   if (customersQuery.isPending) {
     return (
-      <main className="flex flex-1 items-center justify-center px-10 py-8">
-        <p className="font-body text-[0.875rem] text-gray">{t('adminDashboard.loading')}</p>
-      </main>
+      <Page title={t('adminDashboard.title')}>
+        <p className="py-12 text-center font-body text-[0.875rem] text-gray">{t('adminDashboard.loading')}</p>
+      </Page>
     )
   }
 
   if (customersQuery.isError) {
     return (
-      <main className="flex flex-1 flex-col items-center justify-center gap-4 px-10 py-8">
-        <p className="font-body text-[0.875rem] text-critical">{t('adminDashboard.loadFailed')}</p>
-        <Button variant="secondary" size="sm" onClick={() => void customersQuery.refetch()}>
-          {t('adminDashboard.retry')}
-        </Button>
-      </main>
+      <Page title={t('adminDashboard.title')}>
+        <div className="flex flex-col items-center gap-4 py-12">
+          <p className="font-body text-[0.875rem] text-critical">{t('adminDashboard.loadFailed')}</p>
+          <Button variant="secondary" size="sm" onClick={() => void customersQuery.refetch()}>
+            {t('adminDashboard.retry')}
+          </Button>
+        </div>
+      </Page>
     )
   }
 
   return (
-    <main className="flex flex-1 flex-col gap-8 overflow-y-auto px-10 py-8">
-      <header>
-        <h1 className="font-title text-[1.875rem] leading-[1.15] tracking-[-0.01em] text-navy">
-          {t('adminDashboard.title')}
-        </h1>
-      </header>
+    <Page title={t('adminDashboard.title')}>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -166,6 +164,6 @@ export function AdminDashboardPage() {
 
       {/* Platform-admin notice */}
       <Alert tone="info">{t('adminDashboard.notice')}</Alert>
-    </main>
+    </Page>
   )
 }

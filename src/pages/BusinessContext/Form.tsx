@@ -508,16 +508,29 @@ interface FormProps {
   /** The outcome of the latest save, shown beside the save button. */
   saveStatus: ReactNode
   onSave: (context: Fields) => void
+  /** Until something is saved, importing documents is the way in; filling by hand is the alternative. */
+  started: boolean
+  onStart: () => void
+  /** The page header opens the import dialog too, so its state lives with the page. */
+  importOpen: boolean
+  onImportOpenChange: (open: boolean) => void
 }
 
-export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSave }: FormProps) {
+export function BusinessContextForm({
+  stored,
+  readOnly,
+  saving,
+  saveStatus,
+  onSave,
+  started,
+  onStart,
+  importOpen,
+  onImportOpenChange,
+}: FormProps) {
   const { t } = useTranslation()
   const form = useForm<Fields>({ defaultValues: stored.context, resolver: zodResolver(businessContextSchema) })
   const [section, setSection] = useState<Section>('profile')
-  // Until something is saved, importing documents is the way in; filling by hand is the alternative.
-  const [started, setStarted] = useState(stored.version > 0)
   const [filled, setFilled] = useState<Set<string>>(new Set())
-  const [importOpen, setImportOpen] = useState(false)
   const [applied, setApplied] = useState<number | null>(null)
   const meta = useMemo<Meta>(() => ({ filled, readOnly }), [filled, readOnly])
   const dirty = form.formState.isDirty
@@ -534,7 +547,7 @@ export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSa
     }
     setFilled((prev) => new Set([...prev, ...merge.filled]))
     setApplied(merge.filled.length)
-    setStarted(true)
+    onStart()
   }
 
   function discard() {
@@ -552,20 +565,6 @@ export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSa
   return (
     <FormProvider {...form}>
       <MetaContext.Provider value={meta}>
-        <header className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex max-w-[44rem] flex-col gap-1.5">
-            <h1 className="font-title text-[1.875rem] leading-[1.15] tracking-[-0.01em] text-navy">
-              {t('businessContext.header.title')}
-            </h1>
-            <p className="font-body text-[0.9375rem] leading-[1.4] text-gray">{t('businessContext.header.subtitle')}</p>
-          </div>
-          {!readOnly && started && (
-            <Button variant="secondary" onClick={() => setImportOpen(true)}>
-              {t('businessContext.import.button')}
-            </Button>
-          )}
-        </header>
-
         {!started && readOnly && (
           <p className="rounded-xl border border-border-panel bg-white px-6 py-10 text-center font-body text-[0.9375rem] text-gray">
             {t('businessContext.empty')}
@@ -587,12 +586,12 @@ export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSa
               <p className="font-body text-[0.9375rem] leading-[1.5] text-gray">{t('businessContext.start.description')}</p>
             </div>
             <div className="flex flex-col items-center gap-3">
-              <Button size="lg" onClick={() => setImportOpen(true)}>
+              <Button size="lg" onClick={() => onImportOpenChange(true)}>
                 {t('businessContext.start.import')}
               </Button>
               <button
                 type="button"
-                onClick={() => setStarted(true)}
+                onClick={onStart}
                 className="cursor-pointer rounded-md px-2 py-1 font-body text-[0.875rem] text-gray underline-offset-4 hover:text-navy hover:underline focus-ring"
               >
                 {t('businessContext.start.manual')}
@@ -688,7 +687,7 @@ export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSa
           </form>
         )}
 
-        {!readOnly && <ImportDialog open={importOpen} onClose={() => setImportOpen(false)} onDraft={applyDraft} />}
+        {!readOnly && <ImportDialog open={importOpen} onClose={() => onImportOpenChange(false)} onDraft={applyDraft} />}
       </MetaContext.Provider>
     </FormProvider>
   )

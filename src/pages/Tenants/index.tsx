@@ -11,6 +11,7 @@ import {
   useRenameCustomerMutation,
   type CustomerResponse,
 } from '../../api/customers'
+import { Page } from '../../components/Page'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
@@ -419,12 +420,7 @@ export function TenantsPage() {
       : ''
 
   return (
-    <main className="flex flex-1 flex-col gap-6 overflow-y-auto px-10 py-8">
-      <header>
-        <h1 className="font-title text-[1.875rem] leading-[1.15] tracking-[-0.01em] text-navy">
-          {t('tenants.title')}
-        </h1>
-      </header>
+    <Page title={t('tenants.title')}>
 
       {customersQuery.isPending ? (
         <p className="py-12 text-center font-body text-[0.875rem] text-gray">{t('tenants.loading')}</p>
@@ -496,6 +492,6 @@ export function TenantsPage() {
         open={deactivateTarget !== null}
         onClose={() => setDeactivateTarget(null)}
       />
-    </main>
+    </Page>
   )
 }

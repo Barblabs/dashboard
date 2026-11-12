@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
@@ -18,7 +18,9 @@ const VIEWER: AuthUser = {
 
 async function renderPage(user?: AuthUser) {
   const ui = renderApp('/business-context', user)
+  // The title shows while the context loads, so the page is ready once the loading message is gone.
   await screen.findByRole('heading', { name: 'Business context', level: 1 })
+  await waitFor(() => expect(screen.queryByText('Loading the business context…')).not.toBeInTheDocument())
   return ui
 }
 
