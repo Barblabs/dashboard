@@ -17,12 +17,19 @@ export function useUsersQuery() {
   })
 }
 
-export function useInviteUserMutation() {
+/*
+ * `onInvited` runs from the mutation itself, not from `mutate`: it still runs when the
+ * component that started the invitation unmounted before the answer came back.
+ */
+export function useInviteUserMutation({ onInvited }: { onInvited: (invited: UserResponse) => void }) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (data: { email: string; role: CustomerRole }) =>
       api.post<UserResponse>('/users', data),
-    onSuccess: (invited) => usersList.append(queryClient, invited),
+    onSuccess: (invited) => {
+      usersList.append(queryClient, invited)
+      onInvited(invited)
+    },
   })
 }
 

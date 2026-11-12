@@ -1,6 +1,8 @@
 export const en = {
   common: {
     retry: 'Retry',
+    close: 'Close',
+    toastRegion: 'Notifications',
   },
   sidebar: {
     superAdmin: 'Super Admin',
@@ -128,7 +130,6 @@ export const en = {
     },
     open: 'Open {{cve}}',
     detail: {
-      close: 'Close',
       placed: 'Placed {{date}}',
       closedOn: 'Closed {{date}}',
       plainText: 'Text from feeds, your CMDB and the agents, shown as written.',
@@ -287,7 +288,10 @@ export const en = {
       submitting: 'Sending…',
       failed: 'Could not send the invitation.',
       emailTaken: 'A user with this email already exists.',
-      tempPasswordNotice: 'The user will receive an email with a temporary password.',
+      tempPasswordNotice: "We'll send the user an email with a temporary password.",
+      sent: 'Invitation sent to {{email}}.',
+      pending:
+        "User created. The invitation email to {{email}} hasn't gone out yet; it will be retried automatically.",
     },
     columns: {
       email: 'Email',
@@ -299,6 +303,7 @@ export const en = {
     },
     status: {
       disabled: 'Disabled',
+      pending: 'Invitation pending',
     },
     actions: {
       editRole: 'Edit role',

@@ -43,7 +43,7 @@ export function FindingDetail({ order, finding, onClose }: Props) {
           </p>
         </div>
         <Button variant="secondary" size="sm" onClick={onClose}>
-          {t('findings.detail.close')}
+          {t('common.close')}
         </Button>
       </header>
 

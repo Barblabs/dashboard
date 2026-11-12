@@ -1069,6 +1069,8 @@ export interface components {
             disabled_at: string | null;
             email: string;
             id: string;
+            /** @description The invitation email has not been sent yet; it is retried until it is, and the User cannot sign in until then. */
+            pending: boolean;
             /** @enum {string} */
             role: "customer_admin" | "viewer";
         };

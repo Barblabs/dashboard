@@ -1,13 +1,27 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
+import type { UserEvent } from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
+import type { UserResponse } from '../../api/users'
 import { apiUrl } from '../../mocks/url'
 import { renderApp, seedUsers } from '../../test/render'
-import { server } from '../../test/server'
+import { holdRequests, server } from '../../test/server'
 import { MOCK_USERS } from '../../mocks/users-store'
 
 const ADMIN = MOCK_USERS[0]!
 const VIEWER = MOCK_USERS[1]!
+
+async function submitInvite(user: UserEvent, email: string) {
+  await user.click(screen.getByRole('button', { name: 'Invite user' }))
+  await user.type(screen.getByLabelText('Email'), email)
+  await user.click(screen.getByRole('button', { name: 'Send invitation' }))
+}
+
+// Invites and waits for the dialog to close, as it does once the invitation succeeds.
+async function inviteUser(user: UserEvent, email: string) {
+  await submitInvite(user, email)
+  await waitFor(() => expect(screen.queryByRole('heading', { name: 'Invite user' })).not.toBeInTheDocument())
+}
 
 async function renderUsers() {
   const user = renderApp('/users')
@@ -25,7 +39,7 @@ describe('Users', () => {
     const viewerRow = screen.getByText(VIEWER.email).closest('tr')!
     expect(within(adminRow).getByText('Admin')).toBeInTheDocument()
     expect(within(viewerRow).getByText('Viewer')).toBeInTheDocument()
-    expect(screen.getByText(/2 users/)).toBeInTheDocument()
+    expect(screen.getByText(/3 users/)).toBeInTheDocument()
   })
 
   it('shows a counter for a single user in the singular', async () => {
@@ -63,17 +77,77 @@ describe('Users', () => {
     expect(screen.getAllByRole('button', { name: 'Disable' })).toHaveLength(2)
   })
 
-  it('invites a new user and they appear in the list', async () => {
+  it('marks a user whose invitation has not been sent yet as pending', async () => {
+    const pending = { ...VIEWER, id: 'user-pending', email: 'invited@acme.example', pending: true }
+    seedUsers([ADMIN, VIEWER, pending])
+    await renderUsers()
+
+    const pendingRow = screen.getByText(pending.email).closest('tr')!
+    expect(within(pendingRow).getByText('Invitation pending')).toBeInTheDocument()
+    expect(screen.getAllByText('Invitation pending')).toHaveLength(1)
+  })
+
+  it('shows a user who is both disabled and pending as disabled only', async () => {
+    const both = {
+      ...VIEWER,
+      id: 'user-both',
+      email: 'gone@acme.example',
+      disabled_at: '2026-06-01T00:00:00Z',
+      pending: true,
+    }
+    seedUsers([ADMIN, both])
+    await renderUsers()
+
+    expect(screen.getByText('Disabled')).toBeInTheDocument()
+    expect(screen.queryByText('Invitation pending')).not.toBeInTheDocument()
+  })
+
+  it('invites a new user, confirms the invitation was sent, and lists them', async () => {
     const user = await renderUsers()
 
-    await user.click(screen.getByRole('button', { name: 'Invite user' }))
-    expect(screen.getByRole('heading', { name: 'Invite user' })).toBeInTheDocument()
+    await inviteUser(user, 'new@acme.example')
 
-    await user.type(screen.getByLabelText('Email'), 'new@acme.example')
-    await user.click(screen.getByRole('button', { name: 'Send invitation' }))
+    const toasts = screen.getByRole('region', { name: 'Notifications' })
+    expect(await within(toasts).findByText('Invitation sent to new@acme.example.')).toBeInTheDocument()
+    const row = screen.getByText('new@acme.example').closest('tr')!
+    expect(within(row).queryByText('Invitation pending')).not.toBeInTheDocument()
+  })
 
-    await screen.findByText('new@acme.example')
-    expect(screen.queryByRole('heading', { name: 'Invite user' })).not.toBeInTheDocument()
+  it('warns when the invitation email has not gone out yet, and lists the user as pending', async () => {
+    server.use(
+      http.post(apiUrl('/users'), async ({ request }) => {
+        const { email, role } = (await request.json()) as { email: string; role: UserResponse['role'] }
+        return HttpResponse.json(
+          { id: 'user-new', email, role, created_at: '2026-11-12T00:00:00Z', disabled_at: null, pending: true },
+          { status: 201 },
+        )
+      }),
+    )
+    const user = await renderUsers()
+
+    await inviteUser(user, 'new@acme.example')
+
+    const toasts = screen.getByRole('region', { name: 'Notifications' })
+    expect(
+      await within(toasts).findByText(
+        "User created. The invitation email to new@acme.example hasn't gone out yet; it will be retried automatically.",
+      ),
+    ).toBeInTheDocument()
+    const row = screen.getByText('new@acme.example').closest('tr')!
+    expect(within(row).getByText('Invitation pending')).toBeInTheDocument()
+  })
+
+  it('still reports the invitation when the dialog was closed before it finished', async () => {
+    const release = holdRequests('post', '/users')
+    const user = await renderUsers()
+
+    await submitInvite(user, 'new@acme.example')
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Invite user' })).not.toBeInTheDocument())
+    release()
+
+    const toasts = screen.getByRole('region', { name: 'Notifications' })
+    expect(await within(toasts).findByText('Invitation sent to new@acme.example.')).toBeInTheDocument()
   })
 
   it('pressing Enter in the email field sends the invitation', async () => {
@@ -88,9 +162,7 @@ describe('Users', () => {
   it('invite fails with email_taken and shows the error', async () => {
     const user = await renderUsers()
 
-    await user.click(screen.getByRole('button', { name: 'Invite user' }))
-    await user.type(screen.getByLabelText('Email'), ADMIN.email)
-    await user.click(screen.getByRole('button', { name: 'Send invitation' }))
+    await submitInvite(user, ADMIN.email)
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'A user with this email already exists.',
@@ -101,9 +173,7 @@ describe('Users', () => {
   it('reopening the invite dialog after a failed invite shows it clean', async () => {
     const user = await renderUsers()
 
-    await user.click(screen.getByRole('button', { name: 'Invite user' }))
-    await user.type(screen.getByLabelText('Email'), ADMIN.email)
-    await user.click(screen.getByRole('button', { name: 'Send invitation' }))
+    await submitInvite(user, ADMIN.email)
     await screen.findByRole('alert')
     await user.click(screen.getByRole('button', { name: 'Cancel' }))
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())

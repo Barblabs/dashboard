@@ -7,6 +7,7 @@ import { useAuthStore, useCurrentUser, type Role } from './auth/store'
 import { tokens } from './auth/tokenSource'
 import { RestoringSession, ServerUnreachable } from './components/SessionScreens'
 import { Sidebar } from './components/Sidebar'
+import { ToastProvider } from './components/ui/Toast'
 import { DeactivatedPage } from './pages/Deactivated'
 import { ForbiddenPage } from './pages/Forbidden'
 import { LoginPage } from './pages/Login'
@@ -129,9 +130,11 @@ export function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionScope>
-        <RouterProvider router={router} />
-      </SessionScope>
+      <ToastProvider>
+        <SessionScope>
+          <RouterProvider router={router} />
+        </SessionScope>
+      </ToastProvider>
       {ReactQueryDevtools && (
         <Suspense fallback={null}>
           <ReactQueryDevtools />
