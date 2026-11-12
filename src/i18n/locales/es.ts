@@ -167,7 +167,7 @@ export const es: Translations = {
           epss_pending: 'EPSS pendiente',
           kev_stale: 'KEV no se pudo leer',
           criticality_unknown: 'Criticidad desconocida',
-          exposure_undeclared: 'Exposición no declarada',
+          exposure_undeclared: 'Exposición desconocida',
         },
       },
       vulnerability: {

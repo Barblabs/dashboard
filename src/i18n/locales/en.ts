@@ -165,7 +165,7 @@ export const en = {
           epss_pending: 'EPSS pending',
           kev_stale: 'KEV could not be read',
           criticality_unknown: 'Criticality unknown',
-          exposure_undeclared: 'Exposure not declared',
+          exposure_undeclared: 'Exposure unknown',
         },
       },
       vulnerability: {
