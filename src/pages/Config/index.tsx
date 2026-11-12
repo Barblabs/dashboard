@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSourceQuery, type CmdbSource } from '../../api/cmdb'
 import { useCurrentUser } from '../../auth/store'
-import { Button } from '../../components/ui/Button'
+import { Page } from '../../components/Page'
+import { QueryBoundary } from '../../components/QueryBoundary'
 import { ConfigStepPanel } from './ConfigStepPanel'
 import { CmdbSelector } from './CmdbSelector'
 import { ItopForm } from './ItopForm'
@@ -10,92 +11,72 @@ import { ConnectedBar } from './ConnectedBar'
 import { EditConnectionDialog } from './EditConnectionDialog'
 import { ConfigTabs } from './ConfigTabs'
 
-type View =
-  | { step: 'loading' }
-  | { step: 'failed' }
-  | { step: 'select' }
-  | { step: 'form' }
-  | { step: 'connected'; source: CmdbSource }
-
-/*
- * `source` is undefined until the backend has answered once: without that answer the
- * page cannot tell "not connected" apart, so it must not offer to connect. A failed
- * refetch keeps the source it already had.
- */
-function deriveView(isPending: boolean, connecting: boolean, source: CmdbSource | null | undefined): View {
-  if (isPending) return { step: 'loading' }
-  if (source === undefined) return { step: 'failed' }
-  if (connecting) return { step: 'form' }
-  if (source) return { step: 'connected', source }
-  return { step: 'select' }
-}
-
-const PAGE = 'flex flex-1 flex-col gap-6 overflow-y-auto px-10 py-8'
+const KEYS = {
+  loading: 'config.loading',
+  failed: 'config.loadFailed',
+  network: 'config.networkError',
+  retry: 'config.retry',
+} as const
 
 const NEW_CONNECTION = { url: '', user: '' }
 
+/*
+ * The source is only known once the backend has answered: until then the page cannot tell
+ * "not connected" apart, so QueryBoundary keeps it from offering to connect.
+ */
 export function ConfigPage() {
   const { t } = useTranslation()
   const sourceQuery = useSourceQuery()
-  const role = useCurrentUser()?.role
-  const readOnly = role === 'viewer'
-
-  const [connecting, setConnecting] = useState(false)
-  const [editing, setEditing] = useState(false)
-  const view = deriveView(sourceQuery.isPending, connecting, sourceQuery.data)
+  const readOnly = useCurrentUser()?.role === 'viewer'
 
   return (
-    <main className={PAGE}>
-      <header className="flex flex-col gap-1.5">
-        <h1 className="font-title text-[1.875rem] leading-[1.15] tracking-[-0.01em] text-navy">
-          {t('config.header.title')}
-        </h1>
-        <p className="font-body text-[0.9375rem] leading-[1.4] text-gray">
-          {t('config.header.subtitle')}
-        </p>
-      </header>
+    <Page title={t('config.header.title')} subtitle={t('config.header.subtitle')}>
+      <QueryBoundary query={sourceQuery} keys={KEYS}>
+        {(source) => <ConfigBody source={source} readOnly={readOnly} />}
+      </QueryBoundary>
+    </Page>
+  )
+}
 
-      {view.step === 'loading' ? (
-        <div className="py-12 text-center text-[0.875rem] text-gray">{t('config.loading')}</div>
-      ) : view.step === 'failed' ? (
-        <div className="flex flex-col items-center gap-4 py-12">
-          <p className="font-body text-[0.875rem] text-critical">{t('config.loadFailed')}</p>
-          <Button variant="secondary" size="sm" onClick={() => void sourceQuery.refetch()}>
-            {t('config.retry')}
-          </Button>
-        </div>
-      ) : view.step === 'connected' ? (
-        <div className="flex animate-fade-in flex-col gap-6">
-          <ConnectedBar source={view.source} onEdit={() => setEditing(true)} readOnly={readOnly} />
-          <ConfigTabs readOnly={readOnly} />
-          {!readOnly && (
-            <EditConnectionDialog
-              source={view.source}
-              open={editing}
-              onClose={() => setEditing(false)}
-            />
-          )}
-        </div>
-      ) : readOnly ? (
-        <p className="animate-fade-in py-12 text-center font-body text-[0.9375rem] text-gray">
-          {t('config.viewer.notConnected')}
-        </p>
+function ConfigBody({ source, readOnly }: { source: CmdbSource | null; readOnly: boolean }) {
+  const { t } = useTranslation()
+  const [connecting, setConnecting] = useState(false)
+  const [editing, setEditing] = useState(false)
+
+  if (source && !connecting) {
+    return (
+      <div className="flex animate-fade-in flex-col gap-6">
+        <ConnectedBar source={source} onEdit={() => setEditing(true)} readOnly={readOnly} />
+        <ConfigTabs readOnly={readOnly} />
+        {!readOnly && (
+          <EditConnectionDialog source={source} open={editing} onClose={() => setEditing(false)} />
+        )}
+      </div>
+    )
+  }
+
+  if (readOnly) {
+    return (
+      <p className="animate-fade-in py-12 text-center font-body text-[0.9375rem] text-gray">
+        {t('config.viewer.notConnected')}
+      </p>
+    )
+  }
+
+  return (
+    <div className="flex items-start gap-[22px]">
+      <ConfigStepPanel activeStep={connecting ? 2 : 1} />
+      {connecting ? (
+        <ItopForm
+          className="animate-fade-in"
+          mode="connect"
+          initialValues={NEW_CONNECTION}
+          onBack={() => setConnecting(false)}
+          onSaved={() => setConnecting(false)}
+        />
       ) : (
-        <div className="flex items-start gap-[22px]">
-          <ConfigStepPanel activeStep={view.step === 'select' ? 1 : 2} />
-          {view.step === 'form' ? (
-            <ItopForm
-              className="animate-fade-in"
-              mode="connect"
-              initialValues={NEW_CONNECTION}
-              onBack={() => setConnecting(false)}
-              onSaved={() => setConnecting(false)}
-            />
-          ) : (
-            <CmdbSelector className="animate-fade-in" onSelect={() => setConnecting(true)} />
-          )}
-        </div>
+        <CmdbSelector className="animate-fade-in" onSelect={() => setConnecting(true)} />
       )}
-    </main>
+    </div>
   )
 }

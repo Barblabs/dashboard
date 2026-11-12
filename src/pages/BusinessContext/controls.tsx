@@ -1,6 +1,8 @@
 import { useId, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MultiSelect, type Option } from '../../components/ui/MultiSelect'
+import { Select } from '../../components/ui/Select'
+import { CloseIcon } from '../../components/ui/icons'
 import { LIMITS } from '../../api/businessContext'
 import { useLocale } from '../../i18n/format'
 import { COUNTRIES, countryNamer } from './model'
@@ -130,12 +132,13 @@ export function SelectField<T extends string>({
       {meta.readOnly ? (
         <Shown value={value ? labelOf(value as T) : ''} />
       ) : (
-        <select
+        <Select
           id={id}
           value={value}
           aria-describedby={hint ? `${id}-hint` : undefined}
           onChange={(e) => onChange(e.target.value as T | '')}
-          className={`${BOX} h-11 ${value === '' ? 'text-gray' : ''}`}
+          // As tall as the inputs it shares rows with; an unset value reads like a placeholder.
+          className={`h-11 ${value === '' ? 'text-gray' : ''}`}
         >
           <option value="">{emptyLabel ?? t('businessContext.unset')}</option>
           {options.map((code) => (
@@ -143,7 +146,7 @@ export function SelectField<T extends string>({
               {labelOf(code)}
             </option>
           ))}
-        </select>
+        </Select>
       )}
       {hint && !meta.readOnly && (
         <p id={`${id}-hint`} className="font-body text-[0.75rem] text-gray">
@@ -290,9 +293,7 @@ export function TagField({ label, placeholder, value, onChange, suggestions, can
                 onClick={() => onChange(value.filter((v) => v !== entry))}
                 className="flex size-4 cursor-pointer items-center justify-center rounded-xs text-gray hover:bg-border-panel hover:text-navy focus-ring"
               >
-                <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                  <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
+                <CloseIcon />
               </button>
             </span>
           ))}

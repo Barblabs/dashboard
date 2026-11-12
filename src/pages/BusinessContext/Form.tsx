@@ -1,5 +1,4 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
-import { Tabs } from '@base-ui/react/tabs'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Controller,
@@ -33,7 +32,9 @@ import {
   type Section,
 } from '../../api/businessContext'
 import { Button } from '../../components/ui/Button'
+import { CloseIcon, UploadFileIcon } from '../../components/ui/icons'
 import { Input } from '../../components/ui/Input'
+import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { CountriesField, CountryField, MultiSelectField, SelectField, TagField, TextAreaField } from './controls'
 import { ImportDialog } from './ImportDialog'
 import { canonicalDomain, mergeDraft } from './model'
@@ -349,9 +350,7 @@ function CriticalServices() {
               onClick={() => remove(index)}
               className="mt-2.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-gray hover:bg-panel hover:text-critical focus-ring"
             >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
+              <CloseIcon size={12} />
             </button>
           </div>
         ),
@@ -509,16 +508,29 @@ interface FormProps {
   /** The outcome of the latest save, shown beside the save button. */
   saveStatus: ReactNode
   onSave: (context: Fields) => void
+  /** Until something is saved, importing documents is the way in; filling by hand is the alternative. */
+  started: boolean
+  onStart: () => void
+  /** The page header opens the import dialog too, so its state lives with the page. */
+  importOpen: boolean
+  onImportOpenChange: (open: boolean) => void
 }
 
-export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSave }: FormProps) {
+export function BusinessContextForm({
+  stored,
+  readOnly,
+  saving,
+  saveStatus,
+  onSave,
+  started,
+  onStart,
+  importOpen,
+  onImportOpenChange,
+}: FormProps) {
   const { t } = useTranslation()
   const form = useForm<Fields>({ defaultValues: stored.context, resolver: zodResolver(businessContextSchema) })
   const [section, setSection] = useState<Section>('profile')
-  // Until something is saved, importing documents is the way in; filling by hand is the alternative.
-  const [started, setStarted] = useState(stored.version > 0)
   const [filled, setFilled] = useState<Set<string>>(new Set())
-  const [importOpen, setImportOpen] = useState(false)
   const [applied, setApplied] = useState<number | null>(null)
   const meta = useMemo<Meta>(() => ({ filled, readOnly }), [filled, readOnly])
   const dirty = form.formState.isDirty
@@ -535,7 +547,7 @@ export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSa
     }
     setFilled((prev) => new Set([...prev, ...merge.filled]))
     setApplied(merge.filled.length)
-    setStarted(true)
+    onStart()
   }
 
   function discard() {
@@ -553,20 +565,6 @@ export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSa
   return (
     <FormProvider {...form}>
       <MetaContext.Provider value={meta}>
-        <header className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex max-w-[44rem] flex-col gap-1.5">
-            <h1 className="font-title text-[1.875rem] leading-[1.15] tracking-[-0.01em] text-navy">
-              {t('businessContext.header.title')}
-            </h1>
-            <p className="font-body text-[0.9375rem] leading-[1.4] text-gray">{t('businessContext.header.subtitle')}</p>
-          </div>
-          {!readOnly && started && (
-            <Button variant="secondary" onClick={() => setImportOpen(true)}>
-              {t('businessContext.import.button')}
-            </Button>
-          )}
-        </header>
-
         {!started && readOnly && (
           <p className="rounded-xl border border-border-panel bg-white px-6 py-10 text-center font-body text-[0.9375rem] text-gray">
             {t('businessContext.empty')}
@@ -579,10 +577,7 @@ export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSa
             className="flex flex-col items-center gap-5 rounded-xl border border-border-panel bg-white px-6 py-14 text-center"
           >
             <span className="flex size-12 items-center justify-center rounded-full bg-cyan/15 text-nav-active-bg" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-                <path d="M14 3v5h5M12 18v-6M9 15l3-3 3 3" />
-              </svg>
+              <UploadFileIcon />
             </span>
             <div className="flex max-w-[34rem] flex-col gap-2">
               <h2 id="bc-start-title" className="font-title text-[1.375rem] leading-tight text-navy">
@@ -591,12 +586,12 @@ export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSa
               <p className="font-body text-[0.9375rem] leading-[1.5] text-gray">{t('businessContext.start.description')}</p>
             </div>
             <div className="flex flex-col items-center gap-3">
-              <Button size="lg" onClick={() => setImportOpen(true)}>
+              <Button size="lg" onClick={() => onImportOpenChange(true)}>
                 {t('businessContext.start.import')}
               </Button>
               <button
                 type="button"
-                onClick={() => setStarted(true)}
+                onClick={onStart}
                 className="cursor-pointer rounded-md px-2 py-1 font-body text-[0.875rem] text-gray underline-offset-4 hover:text-navy hover:underline focus-ring"
               >
                 {t('businessContext.start.manual')}
@@ -627,32 +622,27 @@ export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSa
             onSubmit={(e) => void form.handleSubmit(onSave, showFirstError)(e)}
             className="flex flex-col rounded-xl border border-border-panel bg-white"
           >
-            <Tabs.Root value={section} onValueChange={(value) => setSection(value as Section)}>
-              <Tabs.List className="relative flex gap-1 overflow-x-auto border-b border-border-panel px-4">
+            <Tabs value={section} onValueChange={(value) => setSection(value as Section)}>
+              <TabList>
                 {SECTIONS.map((s, i) => (
-                  <Tabs.Tab
-                    key={s}
-                    value={s}
-                    className="group flex cursor-pointer items-center gap-2 px-3 py-4 font-body text-[0.9375rem] whitespace-nowrap text-gray outline-none transition-colors hover:text-navy focus-visible:text-navy data-active:font-semibold data-active:text-navy"
-                  >
+                  <Tab key={s} value={s}>
                     <span className="flex size-6 items-center justify-center rounded-full border border-muted-bg font-mono text-[0.75rem] group-data-active:border-navy group-data-active:bg-navy group-data-active:text-white">
                       {i + 1}
                     </span>
                     {t(`businessContext.sections.${s}.title`)}
-                  </Tabs.Tab>
+                  </Tab>
                 ))}
-                <Tabs.Indicator className="absolute bottom-[-1px] left-0 h-0.5 w-(--active-tab-width) translate-x-(--active-tab-left) bg-cyan transition-[translate,width] duration-200 ease-out" />
-              </Tabs.List>
+              </TabList>
               {SECTIONS.map((s) => {
                 const Content = CONTENT[s]
                 return (
-                  <Tabs.Panel key={s} value={s} className="flex flex-col gap-6 p-6 outline-none md:p-8">
+                  <TabPanel key={s} value={s} className="flex flex-col gap-6 p-6 md:p-8">
                     <p className="font-body text-[0.9375rem] text-gray">{t(`businessContext.sections.${s}.description`)}</p>
                     <Content />
-                  </Tabs.Panel>
+                  </TabPanel>
                 )
               })}
-            </Tabs.Root>
+            </Tabs>
 
             <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border-panel px-6 py-4">
               <div>
@@ -692,7 +682,7 @@ export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSa
           </form>
         )}
 
-        {!readOnly && <ImportDialog open={importOpen} onClose={() => setImportOpen(false)} onDraft={applyDraft} />}
+        {!readOnly && <ImportDialog open={importOpen} onClose={() => onImportOpenChange(false)} onDraft={applyDraft} />}
       </MetaContext.Provider>
     </FormProvider>
   )

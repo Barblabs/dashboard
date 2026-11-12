@@ -93,6 +93,7 @@ export const es: Translations = {
     title: 'Usuarios',
     loading: 'Cargando usuarios…',
     loadFailed: 'No se pudo cargar la lista de usuarios.',
+    networkError: 'No se pudo contactar al servidor para cargar los usuarios.',
     empty: 'Aún no hay usuarios.',
     retry: 'Reintentar',
     you: 'Tú',
@@ -157,6 +158,7 @@ export const es: Translations = {
     title: 'Organizaciones',
     loading: 'Cargando organizaciones…',
     loadFailed: 'No se pudo cargar la lista de organizaciones.',
+    networkError: 'No se pudo contactar al servidor para cargar las organizaciones.',
     empty: 'Aún no hay organizaciones.',
     retry: 'Reintentar',
     search: { placeholder: 'Buscar por nombre…' },
@@ -221,6 +223,7 @@ export const es: Translations = {
     title: 'Dashboard',
     loading: 'Cargando…',
     loadFailed: 'No se pudo cargar el dashboard.',
+    networkError: 'No se pudo contactar al servidor para cargar el dashboard.',
     retry: 'Reintentar',
     stats: {
       total: 'Organizaciones',
@@ -255,6 +258,7 @@ export const es: Translations = {
   config: {
     loading: 'Cargando configuración…',
     loadFailed: 'No se pudo cargar la conexión con la CMDB.',
+    networkError: 'No se pudo contactar al servidor para cargar la conexión con la CMDB.',
     retry: 'Reintentar',
     header: {
       title: 'Configuración',
@@ -508,6 +512,7 @@ export const es: Translations = {
     },
     loading: 'Cargando el contexto empresarial…',
     loadFailed: 'No se pudo cargar el contexto empresarial.',
+    networkError: 'No se pudo contactar al servidor para cargar el contexto empresarial.',
     retry: 'Reintentar',
     previous: 'Anterior',
     next: 'Siguiente',

@@ -11,49 +11,18 @@ import {
   useRenameCustomerMutation,
   type CustomerResponse,
 } from '../../api/customers'
+import { Page } from '../../components/Page'
+import { QueryBoundary } from '../../components/QueryBoundary'
+import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
+import { Fab } from '../../components/ui/Fab'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
+import { PencilIcon, PowerOffIcon, RestoreIcon } from '../../components/ui/icons'
 import { Modal } from '../../components/ui/Modal'
+import { SearchField } from '../../components/ui/SearchField'
 import { requestErrorText } from '../../i18n/errors'
 import { useDateFormat } from '../../i18n/format'
-
-function PencilIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path
-        d="M9.917 1.75a1.65 1.65 0 0 1 2.333 2.333L4.083 12.25 1.167 12.833l.583-2.916L9.917 1.75z"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function PowerOffIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M5.5 3.5A6 6 0 1 0 10.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M8 1.5v5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function RestoreIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M2.5 8A5.5 5.5 0 1 1 4 12"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <path d="M2.5 12.5V8H7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
 
 // ── Rename modal ──────────────────────────────────────────────────────────────
 
@@ -115,9 +84,7 @@ function RenameModal({
         </Field>
 
         {errorText && (
-          <p role="alert" className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical">
-            {errorText}
-          </p>
+          <Alert tone="error">{errorText}</Alert>
         )}
 
         <div className="flex justify-end gap-2">
@@ -167,9 +134,7 @@ function DeactivateModal({
         <p className="font-body text-[0.9375rem] text-navy">{t('tenants.deactivate.body')}</p>
 
         {errorText && (
-          <p role="alert" className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical">
-            {errorText}
-          </p>
+          <Alert tone="error">{errorText}</Alert>
         )}
 
         <div className="flex justify-end gap-2">
@@ -306,16 +271,12 @@ function CreateModal({ open, onClose }: { open: boolean; onClose: () => void }) 
               />
             </Field>
 
-            <p className="rounded-md border border-border-panel bg-panel px-4 py-3 font-body text-[0.8125rem] text-gray">
-              {t('tenants.create.step2.notice')}
-            </p>
+            <Alert tone="info">{t('tenants.create.step2.notice')}</Alert>
           </div>
         )}
 
         {errorText && (
-          <p role="alert" className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical">
-            {errorText}
-          </p>
+          <Alert tone="error">{errorText}</Alert>
         )}
 
         <div className="flex justify-end gap-2">
@@ -439,20 +400,21 @@ function CustomerCard({
   )
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── Customer grid ─────────────────────────────────────────────────────────────
 
-export function TenantsPage() {
+function CustomerGrid({
+  customers,
+  onRename,
+  onDeactivate,
+}: {
+  customers: CustomerResponse[]
+  onRename: (customer: CustomerResponse) => void
+  onDeactivate: (customer: CustomerResponse) => void
+}) {
   const { t } = useTranslation()
-  const customersQuery = useCustomersQuery()
   const [search, setSearch] = useState('')
-  const [createOpen, setCreateOpen] = useState(false)
-  const [renameTarget, setRenameTarget] = useState<CustomerResponse | null>(null)
-  const [deactivateTarget, setDeactivateTarget] = useState<CustomerResponse | null>(null)
 
-  const customers = customersQuery.data?.customers ?? []
-  const filtered = customers.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()),
-  )
+  const filtered = customers.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
   const deactivatedCount = customers.filter((c) => c.deactivated_at !== null).length
 
   const counter =
@@ -462,75 +424,53 @@ export function TenantsPage() {
       : ''
 
   return (
-    <main className="flex flex-1 flex-col gap-6 overflow-y-auto px-10 py-8">
-      <header>
-        <h1 className="font-title text-[1.875rem] leading-[1.15] tracking-[-0.01em] text-navy">
-          {t('tenants.title')}
-        </h1>
-      </header>
+    <>
+      <SearchField label={t('tenants.search.placeholder')} value={search} onChange={setSearch} counter={counter} />
 
-      {customersQuery.isPending ? (
-        <p className="py-12 text-center font-body text-[0.875rem] text-gray">{t('tenants.loading')}</p>
-      ) : customersQuery.isError ? (
-        <div className="flex flex-col items-center gap-4 py-12">
-          <p className="font-body text-[0.875rem] text-critical">{t('tenants.loadFailed')}</p>
-          <Button variant="secondary" size="sm" onClick={() => void customersQuery.refetch()}>
-            {t('tenants.retry')}
-          </Button>
-        </div>
+      {filtered.length === 0 ? (
+        <p className="py-12 text-center font-body text-[0.875rem] text-gray">{t('tenants.empty')}</p>
       ) : (
-        <>
-          {/* Search + counter */}
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <circle cx="6.5" cy="6.5" r="4.25" stroke="currentColor" strokeWidth="1.4" />
-                  <path d="m11 11 2.5 2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                </svg>
-              </span>
-              <input
-                type="search"
-                placeholder={t('tenants.search.placeholder')}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-md border border-border-panel bg-white py-2.5 pl-9 pr-3 font-body text-[0.9375rem] text-navy outline-none transition-[border-color] duration-150 ease-[ease] focus:border-navy focus-ring"
-              />
-            </div>
-            {counter && (
-              <p className="shrink-0 font-body text-[0.875rem] text-gray">{counter}</p>
-            )}
-          </div>
-
-          {filtered.length === 0 ? (
-            <p className="py-12 text-center font-body text-[0.875rem] text-gray">{t('tenants.empty')}</p>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((customer) => (
-                <CustomerCard
-                  key={customer.id}
-                  customer={customer}
-                  onRename={() => setRenameTarget(customer)}
-                  onDeactivate={() => setDeactivateTarget(customer)}
-                  onReactivate={() => {/* cache update handled inside CustomerCard */}}
-                />
-              ))}
-            </div>
-          )}
-        </>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((customer) => (
+            <CustomerCard
+              key={customer.id}
+              customer={customer}
+              onRename={() => onRename(customer)}
+              onDeactivate={() => onDeactivate(customer)}
+              onReactivate={() => {/* cache update handled inside CustomerCard */}}
+            />
+          ))}
+        </div>
       )}
+    </>
+  )
+}
 
-      {/* FAB */}
-      <button
-        type="button"
-        aria-label={t('tenants.create.button')}
-        className="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-navy text-white shadow-lg transition-transform hover:scale-105 focus-ring"
-        onClick={() => setCreateOpen(true)}
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      </button>
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+const KEYS = {
+  loading: 'tenants.loading',
+  failed: 'tenants.loadFailed',
+  network: 'tenants.networkError',
+  retry: 'tenants.retry',
+} as const
+
+export function TenantsPage() {
+  const { t } = useTranslation()
+  const customersQuery = useCustomersQuery()
+  const [createOpen, setCreateOpen] = useState(false)
+  const [renameTarget, setRenameTarget] = useState<CustomerResponse | null>(null)
+  const [deactivateTarget, setDeactivateTarget] = useState<CustomerResponse | null>(null)
+
+  return (
+    <Page title={t('tenants.title')}>
+      <QueryBoundary query={customersQuery} keys={KEYS}>
+        {({ customers }) => (
+          <CustomerGrid customers={customers} onRename={setRenameTarget} onDeactivate={setDeactivateTarget} />
+        )}
+      </QueryBoundary>
+
+      <Fab label={t('tenants.create.button')} onClick={() => setCreateOpen(true)} />
 
       <CreateModal open={createOpen} onClose={() => setCreateOpen(false)} />
       <RenameModal
@@ -544,6 +484,6 @@ export function TenantsPage() {
         open={deactivateTarget !== null}
         onClose={() => setDeactivateTarget(null)}
       />
-    </main>
+    </Page>
   )
 }

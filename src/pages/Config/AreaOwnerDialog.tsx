@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { useSetAreaOwnerMutation, type Area } from '../../api/areas'
+import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
@@ -77,12 +78,7 @@ export function AreaOwnerDialog({ area, onClose }: Props) {
         </Field>
 
         {errorText && (
-          <p
-            role="alert"
-            className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
-          >
-            {errorText}
-          </p>
+          <Alert tone="error">{errorText}</Alert>
         )}
 
         <div className="flex flex-wrap items-center gap-2">

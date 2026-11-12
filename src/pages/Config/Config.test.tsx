@@ -550,6 +550,23 @@ describe('Configuration', () => {
     expect(screen.queryByRole('button', { name: 'Update credentials' })).not.toBeInTheDocument()
   })
 
+  // Losing the source to a failed refresh would hide the connection and its sync failure.
+  it('keeps the connection on screen when a failed sync cannot refresh it either', async () => {
+    const user = await renderConnected()
+    server.use(
+      http.post(apiUrl('/cmdb/source/sync'), () =>
+        HttpResponse.json({ code: 'sync_failed', error: 'sync failed' }, { status: 502 }),
+      ),
+      http.get(apiUrl('/cmdb/source'), () => new HttpResponse(null, { status: 500 })),
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Sync now' }))
+
+    expect(await screen.findByText('The sync failed.')).toBeInTheDocument()
+    expect(screen.getByText('iTop connected')).toBeInTheDocument()
+    expect(screen.queryByText('Could not load the CMDB connection.')).not.toBeInTheDocument()
+  })
+
   it('shows the failure recorded on the latest sync', async () => {
     seedSource({
       last_sync: TWO_HOURS_AGO,

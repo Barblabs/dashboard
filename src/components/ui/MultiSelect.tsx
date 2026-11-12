@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { Combobox } from '@base-ui/react/combobox'
+import { CheckIcon, CloseIcon } from './icons'
 
 export interface Option {
   value: string
@@ -84,21 +85,5 @@ export function MultiSelect({ id, options, value, onChange, placeholder, emptyTe
         </Combobox.Positioner>
       </Combobox.Portal>
     </Combobox.Root>
-  )
-}
-
-function CheckIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <path d="m2.5 8.5 4 4 7-9" />
-    </svg>
-  )
-}
-
-function CloseIcon() {
-  return (
-    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-      <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
   )
 }

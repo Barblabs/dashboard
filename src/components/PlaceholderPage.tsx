@@ -1,16 +1,7 @@
 import { useTranslation } from 'react-i18next'
+import { Page } from './Page'
 
-type PlaceholderPageProps = {
-  title: string
-}
-
-export function PlaceholderPage({ title }: PlaceholderPageProps) {
+export function PlaceholderPage({ title }: { title: string }) {
   const { t } = useTranslation()
-
-  return (
-    <main className="flex flex-1 flex-col gap-3 px-10 py-8">
-      <h1 className="font-title text-[1.75rem] text-navy">{title}</h1>
-      <p className="text-sm text-gray">{t('placeholder.comingSoon')}</p>
-    </main>
-  )
+  return <Page title={title} subtitle={t('placeholder.comingSoon')} />
 }

@@ -2,9 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAreasQuery, type Area } from '../../api/areas'
 import { ACTIVITY_FILTERS, type ActivityFilter } from '../../api/assets'
+import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge } from '../../components/ui/Badge'
-import { Button } from '../../components/ui/Button'
-import { requestErrorText } from '../../i18n/errors'
 import { useDateFormat } from '../../i18n/format'
 import { AreaOwnerDialog } from './AreaOwnerDialog'
 import { FilterSelect } from './FilterSelect'
@@ -12,6 +11,13 @@ import { pick } from './filters'
 import { CELL, HEADER_CELL, MESSAGE } from './table'
 
 const DEFAULT_ACTIVITY: ActivityFilter = 'true'
+
+const KEYS = {
+  loading: 'config.areas.loading',
+  failed: 'config.areas.loadFailed',
+  network: 'config.areas.networkError',
+  retry: 'config.areas.retry',
+} as const
 
 function AreaStatus({ area }: { area: Area }) {
   const { t } = useTranslation()
@@ -121,25 +127,17 @@ export function AreasTable({ readOnly }: { readOnly: boolean }) {
         </div>
       </div>
 
-      {query.isPending ? (
-        <div className={MESSAGE}>{t('config.areas.loading')}</div>
-      ) : query.isError ? (
-        <div role="alert" className={`${MESSAGE} flex flex-col items-center gap-3`}>
-          {requestErrorText(query.error, t, {
-            fallback: 'config.areas.loadFailed',
-            network: 'config.areas.networkError',
-          })}
-          <Button variant="secondary" size="sm" onClick={() => void query.refetch()}>
-            {t('config.areas.retry')}
-          </Button>
-        </div>
-      ) : query.data.areas.length === 0 ? (
-        <div className={MESSAGE}>
-          {active === DEFAULT_ACTIVITY ? t('config.areas.empty') : t('config.areas.noMatches')}
-        </div>
-      ) : (
-        <AreaRows areas={query.data.areas} onEditOwner={readOnly ? undefined : setEditing} />
-      )}
+      <QueryBoundary query={query} keys={KEYS}>
+        {({ areas }) =>
+          areas.length === 0 ? (
+            <div className={MESSAGE}>
+              {active === DEFAULT_ACTIVITY ? t('config.areas.empty') : t('config.areas.noMatches')}
+            </div>
+          ) : (
+            <AreaRows areas={areas} onEditOwner={readOnly ? undefined : setEditing} />
+          )
+        }
+      </QueryBoundary>
       {editing && <AreaOwnerDialog area={editing} onClose={() => setEditing(null)} />}
     </section>
   )

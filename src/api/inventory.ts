@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
-import type { Asset, AssetFilters, AssetsPage } from './assets'
+import { keepPreviousData, queryOptions, useQuery, type UseQueryResult } from '@tanstack/react-query'
+import type { AssetFilters, AssetsPage } from './assets'
 import { api, errorCode } from './client'
 import { connectionScopeKey } from './cmdb'
 
@@ -39,19 +39,6 @@ function isFiltered(filters: AssetFilters) {
   return keys.some((key) => filters[key] !== DEFAULT_ASSET_FILTERS[key])
 }
 
-export type InventoryStatus =
-  | { state: 'loading' }
-  | { state: 'failed'; error: Error; retry: () => void }
-  | {
-      state: 'ready'
-      assets: Asset[]
-      total: number
-      /** Tells "nothing matches the filters" apart from an empty inventory. */
-      filtered: boolean
-      /** The assets shown belong to the previous page while the requested one loads. */
-      navigating: boolean
-    }
-
 export interface Pager {
   page: number
   /** `null` when there is no page to move to, or the requested one is still loading. */
@@ -60,7 +47,11 @@ export interface Pager {
 }
 
 export interface Inventory {
-  status: InventoryStatus
+  query: UseQueryResult<AssetsPage>
+  /** Tells "nothing matches the filters" apart from an empty inventory. */
+  filtered: boolean
+  /** The assets shown belong to the previous page while the requested one loads. */
+  navigating: boolean
   filters: AssetFilters
   filterBy: (filters: AssetFilters) => void
   /** `null` while the whole inventory fits in one page. */
@@ -83,18 +74,6 @@ export function useInventory(): Inventory {
   const navigating = query.isPlaceholderData
   const nextCursor = query.data?.next_cursor ?? null
 
-  const status: InventoryStatus = query.isPending
-    ? { state: 'loading' }
-    : query.isError
-      ? { state: 'failed', error: query.error, retry: () => void query.refetch() }
-      : {
-          state: 'ready',
-          assets: query.data.assets,
-          total: query.data.total,
-          filtered: isFiltered(listing.filters),
-          navigating,
-        }
-
   const pager: Pager | null =
     page > 1 || nextCursor !== null
       ? {
@@ -112,7 +91,9 @@ export function useInventory(): Inventory {
       : null
 
   return {
-    status,
+    query,
+    filtered: isFiltered(listing.filters),
+    navigating,
     filters: listing.filters,
     // A cursor is only valid with the filters that produced it, so new filters start at page one.
     filterBy: (filters) => setListing({ filters, cursors: [] }),
