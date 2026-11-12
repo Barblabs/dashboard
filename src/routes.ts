@@ -9,7 +9,7 @@ import { TenantsPage } from './pages/Tenants'
 import { UsersPage } from './pages/Users'
 
 interface PageRoute {
-  /** The page's path, and its key under `sidebar.nav`. */
+  /** The page's path segment, and its key under `sidebar.nav`. */
   id: string
   Page: ComponentType
   roles: readonly Role[]
@@ -46,7 +46,11 @@ export function pagesFor(role: Role) {
   return PAGES.filter((page) => page.roles.includes(role))
 }
 
+export function pagePath(id: PageId) {
+  return `/${id}`
+}
+
 /** Where the role lands when no page was asked for. */
 export function homePath(role: Role) {
-  return `/${HOME[role]}`
+  return pagePath(HOME[role])
 }

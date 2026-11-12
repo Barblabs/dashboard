@@ -4,7 +4,7 @@ import { signOut } from '../auth/signOut'
 import { useCurrentUser } from '../auth/store'
 import { chooseLanguage, LANGUAGES } from '../i18n'
 import { useLocale } from '../i18n/format'
-import { pagesFor } from '../routes'
+import { pagePath, pagesFor } from '../routes'
 import { Wordmark } from './Wordmark'
 
 export function Sidebar() {
@@ -37,7 +37,7 @@ export function Sidebar() {
           {pages.map(({ id }) => (
             <NavLink
               key={id}
-              to={`/${id}`}
+              to={pagePath(id)}
               className={({ isActive }) =>
                 `flex h-11 items-center gap-3 rounded-md px-3 font-body text-[0.9375rem] transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan ${
                   isActive ? 'bg-nav-active-bg font-semibold text-white' : 'font-medium text-nav-text'
