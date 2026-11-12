@@ -1,6 +1,9 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+/** What a table cell or read-only field shows when it has no value. */
+export const EMPTY = '-'
+
 /** The language the UI is shown in, as the locale every `Intl` formatter takes. */
 export function useLocale(): string {
   const { i18n } = useTranslation()

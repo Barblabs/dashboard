@@ -5,7 +5,7 @@ import { Select } from '../../components/ui/Select'
 import { CloseIcon } from '../../components/ui/icons'
 import { FIELD_SURFACE } from '../../components/ui/fieldSurface'
 import { LIMITS } from '../../api/businessContext'
-import { useLocale } from '../../i18n/format'
+import { EMPTY, useLocale } from '../../i18n/format'
 import { COUNTRIES, countryNamer } from './model'
 
 export interface FieldMeta {
@@ -52,7 +52,7 @@ function Shown({ value }: { value: string }) {
   return value.trim() ? (
     <p className="whitespace-pre-wrap font-body text-[0.9375rem] leading-[1.5] text-navy">{value}</p>
   ) : (
-    <p className="font-body text-[0.9375rem] text-muted-bg">—</p>
+    <p className="font-body text-[0.9375rem] text-muted-bg">{EMPTY}</p>
   )
 }
 
