@@ -584,6 +584,7 @@ export const en = {
       serviceName: 'Give the service a name.',
       serviceNameTaken: 'Another service has this name.',
       domain: '“{{value}}” is not a domain such as example.com.',
+      unknownCode: 'Pick one of the listed options.',
     },
     save: {
       discard: 'Discard changes',

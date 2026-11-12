@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import {
   CONCERNS,
+  COUNTRIES,
   DATA_CATEGORIES,
   EMPLOYEE_RANGES,
   ENVIRONMENTS,
@@ -19,19 +20,27 @@ const TOO_LONG = 'businessContext.validation.tooLong'
 const TOO_MANY = 'businessContext.validation.tooMany'
 const SERVICE_NAME = 'businessContext.validation.serviceName'
 const SERVICE_NAME_TAKEN = 'businessContext.validation.serviceNameTaken'
+const UNKNOWN_CODE = 'businessContext.validation.unknownCode'
 
-export type ValidationKey = typeof TOO_LONG | typeof TOO_MANY | typeof SERVICE_NAME | typeof SERVICE_NAME_TAKEN
+export type ValidationKey =
+  | typeof TOO_LONG
+  | typeof TOO_MANY
+  | typeof SERVICE_NAME
+  | typeof SERVICE_NAME_TAKEN
+  | typeof UNKNOWN_CODE
 
 // The backend counts characters after trimming, as the user reads them.
 const text = (max: number) => z.string().refine((s) => [...s.trim()].length <= max, TOO_LONG)
 const entries = z.array(z.string()).max(LIMITS.entries, TOO_MANY)
 
-function oneOf<T extends string>(codes: T[]) {
-  return z.array(z.enum(codes as [T, ...T[]]))
+// Checked as a whole so the error sits on the field, which is what shows it, not on one entry.
+function oneOf<T extends string>(codes: readonly T[]) {
+  const known: ReadonlySet<string> = new Set(codes)
+  return z.custom<T[]>((list) => Array.isArray(list) && list.every((code) => known.has(code)), UNKNOWN_CODE)
 }
 
-function optional<T extends string>(codes: T[]) {
-  return z.enum(['', ...codes] as ['' | T, ...('' | T)[]])
+function optional<T extends string>(codes: readonly T[]) {
+  return z.enum(['', ...codes] as ['' | T, ...('' | T)[]], UNKNOWN_CODE)
 }
 
 const service = z.object({
@@ -53,8 +62,8 @@ export const businessContextSchema = z.object({
     annual_revenue: optional(REVENUE_RANGES),
   }),
   geography: z.object({
-    headquarters: z.string(),
-    countries: entries,
+    headquarters: optional(COUNTRIES),
+    countries: oneOf(COUNTRIES).refine((list) => list.length <= LIMITS.entries, TOO_MANY),
   }),
   operations: z.object({
     critical_services: z
