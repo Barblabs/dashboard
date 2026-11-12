@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useIsMutating, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AssetsPage } from './assets'
 import { api } from './client'
 import { connectionScopeKey } from './cmdb'
@@ -239,12 +239,20 @@ async function draftSourceOf(text: string, files: File[]): Promise<DraftSource> 
   return { ...(text.trim() ? { text } : {}), ...(encoded.length > 0 ? { files: encoded } : {}) }
 }
 
+const DRAFT_KEY = ['business-context', 'draft'] as const
+
+/** Whether a draft is being generated, seen from outside the component that started it. */
+export function useIsDraftingBusinessContext() {
+  return useIsMutating({ mutationKey: DRAFT_KEY }) > 0
+}
+
 /*
  * Reading the files is part of the mutation, so it is pending from the click on: a
  * large document cannot be sent twice while it is still being read.
  */
 export function useDraftBusinessContextMutation() {
   return useMutation({
+    mutationKey: DRAFT_KEY,
     mutationFn: async ({ text, files }: { text: string; files: File[] }) =>
       api.post<Draft>('/business-context/draft', await draftSourceOf(text, files)),
   })

@@ -183,6 +183,28 @@ describe('Business context', () => {
     expect(saved.operations.critical_services).toEqual(MOCK_DRAFT.operations.critical_services)
   })
 
+  it('keeps the import dialog open while the agent drafts, so the draft is not lost', async () => {
+    const user = await renderPage()
+    let answer!: () => void
+    const answered = new Promise<void>((resolve) => (answer = resolve))
+    // Holds the request until the test answers, then falls through to the mock agent.
+    server.use(
+      http.post(apiUrl('/business-context/draft'), async () => {
+        await answered
+      }),
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Import documents' }))
+    const dialog = await screen.findByRole('dialog')
+    await user.type(within(dialog).getByLabelText('Or paste text'), 'ACME')
+    await user.click(within(dialog).getByRole('button', { name: 'Generate draft' }))
+    await user.keyboard('{Escape}')
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    answer()
+    expect(await screen.findByText(/fields were filled from your documents/)).toBeInTheDocument()
+  })
+
   it('refuses a file the agent cannot read before sending anything', async () => {
     const user = await renderPage()
     let drafts = 0
