@@ -30,7 +30,11 @@ export function Modal({ open, onClose, labelledBy, width = 'sm', children }: Pro
     <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
       <Dialog.Portal>
         <Dialog.Backdrop className={BACKDROP} />
-        <Dialog.Popup aria-labelledby={labelledBy} className={`${POPUP} ${WIDTH[width]}`}>
+        {/* Even an undefined aria-labelledby would override the one Dialog.Title sets. */}
+        <Dialog.Popup
+          {...(labelledBy && { 'aria-labelledby': labelledBy })}
+          className={`${POPUP} ${WIDTH[width]}`}
+        >
           {children}
         </Dialog.Popup>
       </Dialog.Portal>
