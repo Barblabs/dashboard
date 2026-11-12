@@ -50,7 +50,6 @@ type InviteFields = z.infer<typeof inviteSchema>
 
 function InviteBody({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation()
-  const invite = useInviteUserMutation()
   const toast = useToast()
 
   const {
@@ -70,14 +69,9 @@ function InviteBody({ onClose }: { onClose: () => void }) {
     )
   }
 
-  const onSubmit = handleSubmit((data) =>
-    invite.mutate(data, {
-      onSuccess: (invited) => {
-        announce(invited)
-        onClose()
-      },
-    }),
-  )
+  const invite = useInviteUserMutation({ onInvited: announce })
+
+  const onSubmit = handleSubmit((data) => invite.mutate(data, { onSuccess: onClose }))
 
   return (
     <DialogLayout

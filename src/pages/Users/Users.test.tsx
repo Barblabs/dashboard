@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import type { UserResponse } from '../../api/users'
 import { apiUrl } from '../../mocks/url'
 import { renderApp, seedUsers } from '../../test/render'
-import { server } from '../../test/server'
+import { holdRequests, server } from '../../test/server'
 import { MOCK_USERS } from '../../mocks/users-store'
 
 const ADMIN = MOCK_USERS[0]!
@@ -143,6 +143,21 @@ describe('Users', () => {
     ).toBeInTheDocument()
     const row = screen.getByText('new@acme.example').closest('tr')!
     expect(within(row).getByText('Invitation pending')).toBeInTheDocument()
+  })
+
+  it('still reports the invitation when the dialog was closed before it finished', async () => {
+    const release = holdRequests('post', '/users')
+    const user = await renderUsers()
+
+    await user.click(screen.getByRole('button', { name: 'Invite user' }))
+    await user.type(screen.getByLabelText('Email'), 'new@acme.example')
+    await user.click(screen.getByRole('button', { name: 'Send invitation' }))
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Invite user' })).not.toBeInTheDocument())
+    release()
+
+    const toasts = screen.getByRole('region', { name: 'Notifications' })
+    expect(await within(toasts).findByText('Invitation sent to new@acme.example.')).toBeInTheDocument()
   })
 
   it('pressing Enter in the email field sends the invitation', async () => {
