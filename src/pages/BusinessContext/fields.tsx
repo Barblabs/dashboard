@@ -6,7 +6,8 @@ import { Input } from '../../components/ui/Input'
 import { MultiSelect, type Option } from '../../components/ui/MultiSelect'
 import { Select } from '../../components/ui/Select'
 import { Shell, Shown } from './FieldShell'
-import { useErrorText, useMeta, type FieldPathOf, type Fields } from './meta'
+import type { BusinessContextFields } from '../../api/businessContext'
+import { useErrorText, useMeta, type FieldPathOf } from './meta'
 import { useVocab, type Codes, type Vocab } from './vocab'
 
 /*
@@ -29,7 +30,7 @@ export function TextField({ name, label, placeholder, max, hideLabel, rows, clas
   const id = useId()
   const meta = useMeta(name)
   const errorText = useErrorText()
-  const { field, fieldState } = useController<Fields, TextProps['name']>({ name })
+  const { field, fieldState } = useController<BusinessContextFields, TextProps['name']>({ name })
   const error = errorText(fieldState.error?.message, max)
   const length = [...field.value].length
   const control = {
@@ -90,7 +91,7 @@ export function SelectField({ name, vocab, label, emptyLabel, hint, hideLabel }:
   const id = useId()
   const meta = useMeta(name)
   const { codes, labelOf } = useVocab(vocab)
-  const { field } = useController<Fields, OneOf['name']>({ name })
+  const { field } = useController<BusinessContextFields, OneOf['name']>({ name })
   return (
     <Shell id={id} label={label} hideLabel={hideLabel} {...meta}>
       {meta.readOnly ? (
@@ -130,7 +131,7 @@ export function MultiSelectField({ name, vocab, label, placeholder }: MultiSelec
   const id = useId()
   const meta = useMeta(name)
   const { codes, labelOf } = useVocab(vocab)
-  const { field } = useController<Fields, SomeOf['name']>({ name })
+  const { field } = useController<BusinessContextFields, SomeOf['name']>({ name })
   const options = useMemo<Option[]>(() => codes.map((code) => ({ value: code, label: labelOf(code) })), [codes, labelOf])
   return (
     <Shell id={id} label={label} {...meta}>

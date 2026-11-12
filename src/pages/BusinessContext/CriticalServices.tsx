@@ -1,17 +1,17 @@
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { LIMITS, useAssetNamesQuery } from '../../api/businessContext'
+import { LIMITS, useAssetNamesQuery, type BusinessContextFields } from '../../api/businessContext'
 import { CloseIcon } from '../../components/ui/icons'
 import { EMPTY } from '../../i18n/format'
 import { SelectField, TextField } from './fields'
-import { useMeta, type Fields } from './meta'
+import { useMeta } from './meta'
 import { TagField } from './TagField'
 import { useVocab } from './vocab'
 
 export function CriticalServices() {
   const { t } = useTranslation()
   const { suggested, readOnly } = useMeta('operations.critical_services')
-  const { control } = useFormContext<Fields>()
+  const { control } = useFormContext<BusinessContextFields>()
   const { fields, append, remove } = useFieldArray({ control, name: 'operations.critical_services' })
   const assetNames = useAssetNamesQuery()
 
@@ -95,7 +95,7 @@ export function CriticalServices() {
 }
 
 function ShownService({ index }: { index: number }) {
-  const { control } = useFormContext<Fields>()
+  const { control } = useFormContext<BusinessContextFields>()
   const service = useWatch({ control, name: `operations.critical_services.${index}` })
   const impact = useVocab('impact').labelOf
   const downtime = useVocab('downtime').labelOf

@@ -2,11 +2,18 @@ import { useMemo, useState, type ReactNode } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormProvider, useForm, type FieldErrors } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import type { BusinessContext, Draft, SaveBusinessContext, Section } from '../../api/businessContext'
+import type {
+  BusinessContext,
+  BusinessContextFields,
+  Draft,
+  FieldPath,
+  SaveBusinessContext,
+  Section,
+} from '../../api/businessContext'
 import { Button } from '../../components/ui/Button'
 import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { ImportDialog } from './ImportDialog'
-import { FormMetaContext, type Fields, type FormMeta } from './meta'
+import { FormMetaContext, type FormMeta } from './meta'
 import { mergeDraft } from './model'
 import { SaveStatus } from './SaveStatus'
 import { businessContextSchema } from './schema'
@@ -50,9 +57,9 @@ export function BusinessContextForm({
   onImportOpenChange,
 }: FormProps) {
   const { t } = useTranslation()
-  const form = useForm<Fields>({ defaultValues: stored.context, resolver: zodResolver(businessContextSchema) })
+  const form = useForm<BusinessContextFields>({ defaultValues: stored.context, resolver: zodResolver(businessContextSchema) })
   const [section, setSection] = useState<Section>('profile')
-  const [filled, setFilled] = useState<Set<string>>(new Set())
+  const [filled, setFilled] = useState<Set<FieldPath>>(new Set())
   const [applied, setApplied] = useState<number | null>(null)
   const meta = useMemo<FormMeta>(() => ({ filled, readOnly }), [filled, readOnly])
   const dirty = form.formState.isDirty
@@ -86,7 +93,7 @@ export function BusinessContextForm({
   }
 
   // Only the open section is on screen, so a save it cannot make shows the section that stops it.
-  function showFirstError(errors: FieldErrors<Fields>) {
+  function showFirstError(errors: FieldErrors<BusinessContextFields>) {
     const failing = SECTIONS.find((s) => errors[s])
     if (failing) setSection(failing)
   }

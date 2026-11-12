@@ -1,10 +1,10 @@
 import { useId, useState } from 'react'
 import { useController } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { LIMITS } from '../../api/businessContext'
+import { LIMITS, type BusinessContextFields } from '../../api/businessContext'
 import { CloseIcon } from '../../components/ui/icons'
 import { Shell, Shown } from './FieldShell'
-import { useMeta, type FieldPathOf, type Fields } from './meta'
+import { useMeta, type FieldPathOf } from './meta'
 
 interface TagProps {
   name: FieldPathOf<string[]>
@@ -24,7 +24,7 @@ export function TagField({ name, label, placeholder, hideLabel, suggestions, can
   const meta = useMeta(name)
   const {
     field: { value, onChange },
-  } = useController<Fields, TagProps['name']>({ name })
+  } = useController<BusinessContextFields, TagProps['name']>({ name })
   const [draft, setDraft] = useState('')
   const [error, setError] = useState<string | null>(null)
 

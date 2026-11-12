@@ -164,7 +164,7 @@ export type FieldPath = {
   [S in Section]: `${S}.${keyof BusinessContextFields[S] & string}`
 }[Section]
 
-export function valueAt(fields: BusinessContextFields, path: FieldPath): unknown {
+function valueAt(fields: BusinessContextFields, path: FieldPath): unknown {
   const [section, field] = path.split('.') as [Section, string]
   return (fields[section] as Record<string, unknown>)[field]
 }

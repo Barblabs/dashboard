@@ -4,26 +4,28 @@ import { useTranslation } from 'react-i18next'
 import type { BusinessContextFields } from '../../api/businessContext'
 import type { ValidationKey } from './schema'
 
-export type Fields = BusinessContextFields
-
 /*
  * The fields whose value is exactly `V`. react-hook-form's `FieldPathByValue` only checks
  * assignability, which lets a free-text field bind to a field of codes.
  */
 export type FieldPathOf<V> = {
-  [K in Path<Fields>]: [PathValue<Fields, K>] extends [V] ? ([V] extends [PathValue<Fields, K>] ? K : never) : never
-}[Path<Fields>]
+  [K in Path<BusinessContextFields>]: [PathValue<BusinessContextFields, K>] extends [V]
+    ? [V] extends [PathValue<BusinessContextFields, K>]
+      ? K
+      : never
+    : never
+}[Path<BusinessContextFields>]
 
 export interface FormMeta {
-  /** The fields a draft filled that are not saved yet. */
-  filled: Set<string>
+  /** The `FieldPath`s a draft filled that are not saved yet; read as strings so any field can ask. */
+  filled: ReadonlySet<string>
   readOnly: boolean
 }
 
 export const FormMetaContext = createContext<FormMeta>({ filled: new Set(), readOnly: true })
 
 /** How a field shows: marked as suggested when a draft filled it, read-only for a Viewer. */
-export function useMeta(name: string) {
+export function useMeta(name: Path<BusinessContextFields>) {
   const { filled, readOnly } = useContext(FormMetaContext)
   return { suggested: filled.has(name), readOnly }
 }
