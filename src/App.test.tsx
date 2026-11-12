@@ -61,7 +61,7 @@ describe('Pages by role', () => {
     expect(navLinks()).toEqual(['Findings', 'Configuration', 'Business context', 'Notifications', 'Users'])
   })
 
-  it('shows a Viewer the customer pages without Users, and denies it', () => {
+  it('shows a Viewer the customer pages without Users, and denies it the Users page', () => {
     renderApp('/users', VIEWER)
 
     expect(navLinks()).toEqual(['Findings', 'Configuration', 'Business context', 'Notifications'])
