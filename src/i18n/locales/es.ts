@@ -132,7 +132,6 @@ export const es: Translations = {
     },
     open: 'Abrir {{cve}}',
     detail: {
-      close: 'Cerrar',
       placed: 'Colocado {{date}}',
       closedOn: 'Cerrado {{date}}',
       plainText: 'Texto de los feeds, tu CMDB y los agentes, tal como lo escribieron.',

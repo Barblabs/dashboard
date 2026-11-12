@@ -130,7 +130,6 @@ export const en = {
     },
     open: 'Open {{cve}}',
     detail: {
-      close: 'Close',
       placed: 'Placed {{date}}',
       closedOn: 'Closed {{date}}',
       plainText: 'Text from feeds, your CMDB and the agents, shown as written.',
