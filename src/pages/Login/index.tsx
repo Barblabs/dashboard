@@ -15,6 +15,7 @@ import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { MOCK_MODE } from '../../mockMode'
+import { homePath } from '../../routes'
 
 // ── Mock roles (VITE_USE_MOCK=true) ─────────────────────────────────────────
 
@@ -47,10 +48,6 @@ function cognitoErrorKey(err: unknown): LoginErrorKey {
     }
   }
   return 'login.errors.network'
-}
-
-function destForRole(role: Role): string {
-  return role === 'platform_admin' ? '/tenants' : '/config'
 }
 
 // ── Shared layout wrapper ────────────────────────────────────────────────────
@@ -305,7 +302,7 @@ export function LoginPage() {
   const [step, setStep] = useState<Step>({ kind: 'credentials' })
 
   if (deactivated) return <Navigate to="/deactivated" replace />
-  if (user) return <Navigate to={returnTo ?? destForRole(user.role)} replace />
+  if (user) return <Navigate to={returnTo ?? homePath(user.role)} replace />
   if (MOCK_MODE) return <MockSignIn />
 
   return (
