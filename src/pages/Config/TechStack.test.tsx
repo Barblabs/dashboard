@@ -113,15 +113,15 @@ describe('Tech stack', () => {
     expect(screen.queryByText('Dell PowerEdge R640')).not.toBeInTheDocument()
   })
 
-  it('details of an asset without hardware or declared exposure say so', async () => {
+  it('details of an asset without hardware or a known exposure say so', async () => {
     const user = await renderInventory()
 
     await user.click(
       await screen.findByRole('button', { name: 'Show details of analytics-worker-03' }),
     )
 
-    expect(screen.getByText('No hardware recorded')).toBeInTheDocument()
-    expect(screen.getByText('Not declared')).toBeInTheDocument()
+    const details = within(screen.getByRole('row', { name: /No hardware recorded/ }))
+    expect(details.getByText('Exposure').nextElementSibling).toHaveTextContent(/^Unknown$/)
   })
 
   it('pages forward and back repeating the filters on every request', async () => {

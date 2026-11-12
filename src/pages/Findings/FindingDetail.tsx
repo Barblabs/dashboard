@@ -256,7 +256,6 @@ function Vulnerability({ details }: { details: FindingDetails }) {
 function AssetDetails({ finding }: { finding: Finding }) {
   const { t } = useTranslation()
   const { asset, component_role } = finding.details
-  const exposure = asset.exposure === 'unknown' ? 'undeclared' : asset.exposure
 
   return (
     <div className="flex flex-col gap-4">
@@ -266,7 +265,7 @@ function AssetDetails({ finding }: { finding: Finding }) {
           {t(`config.inventory.kind.${asset.kind}`)}
         </Fact>
         <Fact label={t('findings.detail.asset.criticality')}>{t(`config.inventory.criticality.${asset.criticality}`)}</Fact>
-        <Fact label={t('findings.detail.asset.exposure')}>{t(`config.inventory.exposure.${exposure}`)}</Fact>
+        <Fact label={t('findings.detail.asset.exposure')}>{t(`config.inventory.exposure.${asset.exposure}`)}</Fact>
         <Fact label={t('findings.detail.asset.component')}>
           <span className={MONO}>
             {finding.component} {finding.version}

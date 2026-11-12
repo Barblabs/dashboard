@@ -1,9 +1,15 @@
-import type { Asset } from '../api/assets'
+import type { Asset, AssetExposure, Exposure } from '../api/assets'
 
 export const SOURCE_ID = '6f1c2a9e-4b7d-4e8a-9c3f-2d5b8e1a7c40'
 
+/** What the CMDB Source gives, with nothing declared over it. */
+export function importedExposure(value: Exposure | null): AssetExposure {
+  return { value, source: 'imported', imported: value, declared_by: null, declared_at: null }
+}
+
 export const mockAssets: Asset[] = [
   {
+    id: 1,
     source_id: SOURCE_ID,
     record_id: 'SRV-001',
     name: 'prod-api-01',
@@ -31,7 +37,7 @@ export const mockAssets: Asset[] = [
       },
     ],
     criticality: 'high',
-    exposure: 'internet_facing',
+    exposure: importedExposure('internet_facing'),
     owner: { email: 'devops@example.com', source: 'imported' },
     area: { id: 1, name: 'Infrastructure' },
     retired: false,
@@ -39,6 +45,7 @@ export const mockAssets: Asset[] = [
     inactive_since: null,
   },
   {
+    id: 2,
     source_id: SOURCE_ID,
     record_id: 'VM-002',
     name: 'analytics-worker-03',
@@ -60,7 +67,7 @@ export const mockAssets: Asset[] = [
       },
     ],
     criticality: 'medium',
-    exposure: null,
+    exposure: importedExposure(null),
     owner: { email: 'data-eng@example.com', source: 'declared' },
     area: { id: 2, name: 'Data Platform' },
     retired: false,
@@ -68,6 +75,7 @@ export const mockAssets: Asset[] = [
     inactive_since: null,
   },
   {
+    id: 3,
     source_id: SOURCE_ID,
     record_id: 'SRV-003',
     name: 'crm-db-primary',
@@ -89,7 +97,7 @@ export const mockAssets: Asset[] = [
       },
     ],
     criticality: 'high',
-    exposure: 'internal',
+    exposure: importedExposure('internal'),
     owner: { email: 'crm-ops@example.com', source: 'imported' },
     area: { id: 1, name: 'Infrastructure' },
     retired: false,
@@ -97,6 +105,7 @@ export const mockAssets: Asset[] = [
     inactive_since: null,
   },
   {
+    id: 4,
     source_id: SOURCE_ID,
     record_id: 'ND-004',
     name: 'core-switch-01',
@@ -105,7 +114,7 @@ export const mockAssets: Asset[] = [
     hardware: { vendor: 'Cisco', model: 'Catalyst 9500' },
     software: [],
     criticality: 'low',
-    exposure: null,
+    exposure: importedExposure(null),
     owner: null,
     area: null,
     retired: false,
@@ -113,6 +122,7 @@ export const mockAssets: Asset[] = [
     inactive_since: null,
   },
   {
+    id: 5,
     source_id: SOURCE_ID,
     record_id: 'VM-005',
     name: 'erp-app-02',
@@ -134,7 +144,7 @@ export const mockAssets: Asset[] = [
       },
     ],
     criticality: null,
-    exposure: null,
+    exposure: importedExposure(null),
     owner: null,
     area: { id: 3, name: 'Legacy ERP' },
     retired: true,

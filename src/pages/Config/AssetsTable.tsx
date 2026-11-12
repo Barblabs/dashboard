@@ -56,9 +56,7 @@ function AssetDetails({ asset }: { asset: Asset }) {
         </div>
         <div className="flex flex-col gap-1">
           <dt className={DETAIL_LABEL}>{t('config.inventory.details.exposure')}</dt>
-          <dd>
-            {t(`config.inventory.exposure.${asset.exposure ?? 'undeclared'}`)}
-          </dd>
+          <dd>{t(`config.inventory.exposure.${asset.exposure.value ?? 'unknown'}`)}</dd>
         </div>
         <div className="flex flex-col gap-1">
           <dt className={DETAIL_LABEL}>{t('config.inventory.details.retired')}</dt>

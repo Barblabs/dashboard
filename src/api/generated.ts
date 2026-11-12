@@ -98,6 +98,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assets/{id}/exposure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Declare an Asset's Exposure
+         * @description Only a Customer Admin declares it, over the imported Exposure, and only on an Active Asset. Unknown cannot be declared: clear the Declaration instead. The Asset's open Findings are rescored before the response; if that fails, the request fails but the Declaration stands. A Sync never changes it.
+         */
+        put: operations["declare-asset-exposure"];
+        post?: never;
+        /**
+         * Clear an Asset's declared Exposure
+         * @description Only a Customer Admin clears it. The Asset's Exposure falls back to the imported one, and its open Findings are rescored before the response.
+         */
+        delete: operations["clear-asset-exposure"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/business-context": {
         parameters: {
             query?: never;
@@ -525,8 +549,13 @@ export interface components {
             area: components["schemas"]["AreaRefResponse"] | null;
             criticality: string | null;
             description: string;
-            exposure: string | null;
+            exposure: components["schemas"]["ExposureResponse"];
             hardware: components["schemas"]["HardwareResponse"] | null;
+            /**
+             * Format: int64
+             * @description The Asset's handle in this API, as in PUT /assets/{id}/exposure
+             */
+            id: number;
             /** Format: date-time */
             inactive_since: string | null;
             kind: string;
@@ -653,6 +682,15 @@ export interface components {
             vector: string;
             version: string;
         };
+        DeclareExposureRequest: {
+            /**
+             * @description Unknown cannot be declared; clear the Declaration instead
+             * @enum {string}
+             */
+            exposure: "internet_facing" | "internal";
+        } & {
+            [key: string]: unknown;
+        };
         DraftBusinessContextRequest: {
             files?: components["schemas"]["DraftFile"][];
             /** @description Pasted text, read as one more document */
@@ -686,6 +724,24 @@ export interface components {
             /** @description RFC 6901 pointer into what the Prioritizer read of the Finding */
             path: string;
             value: string;
+        };
+        ExposureResponse: {
+            /**
+             * Format: date-time
+             * @description When it was declared; null without a Declaration
+             */
+            declared_at: string | null;
+            /** @description Email of the User who declared it; null without a Declaration */
+            declared_by: string | null;
+            /** @description The Exposure the CMDB Source gives, internet_facing or internal, also beneath a Declaration; null when Unknown */
+            imported: string | null;
+            /**
+             * @description Whether value is the imported Exposure or a Declaration
+             * @enum {string}
+             */
+            source: "imported" | "declared";
+            /** @description The effective Exposure, internet_facing or internal: the declared one, otherwise the imported one; null when Unknown */
+            value: string | null;
         };
         FeedbackRequestBody: {
             finding_id: string;
@@ -1418,6 +1474,144 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "declare-asset-exposure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeclareExposureRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "clear-asset-exposure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

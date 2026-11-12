@@ -11,7 +11,17 @@ export type ActivityFilter = (typeof ACTIVITY_FILTERS)[number]
 
 export type SoftwareRole = 'operating_system' | 'application'
 
-export type Exposure = 'internet_facing' | 'internal'
+export const EXPOSURES = ['internet_facing', 'internal'] as const
+export type Exposure = (typeof EXPOSURES)[number]
+
+/**
+ * `value` is the effective Exposure: the Declaration when there is one, otherwise `imported`.
+ * Either is `null` when Unknown.
+ */
+export type AssetExposure = Override<
+  Schemas['ExposureResponse'],
+  { value: Exposure | null; imported: Exposure | null }
+>
 
 export type Product = Schemas['ProductResponse']
 
@@ -33,7 +43,7 @@ export type Asset = Override<
   {
     kind: AssetKind
     criticality: Criticality | null
-    exposure: Exposure | null
+    exposure: AssetExposure
     owner: AssetOwner | null
     /** Already in display order. */
     software: SoftwareComponent[]

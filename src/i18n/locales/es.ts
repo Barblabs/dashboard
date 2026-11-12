@@ -582,7 +582,7 @@ export const es: Translations = {
       exposure: {
         internet_facing: 'Expuesto a internet',
         internal: 'Interno',
-        undeclared: 'No declarada',
+        unknown: 'Desconocida',
       },
       role: {
         operating_system: 'Sistema operativo',

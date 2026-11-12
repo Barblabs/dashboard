@@ -580,7 +580,7 @@ export const en = {
       exposure: {
         internet_facing: 'Internet-facing',
         internal: 'Internal',
-        undeclared: 'Not declared',
+        unknown: 'Unknown',
       },
       role: {
         operating_system: 'Operating System',
