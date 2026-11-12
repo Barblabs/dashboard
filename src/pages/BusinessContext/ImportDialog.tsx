@@ -89,12 +89,13 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
       title={t('businessContext.import.title')}
       description={t('businessContext.import.subtitle')}
       error={errorText}
+      onSubmit={submit}
       actions={
         <>
           <Button variant="secondary" size="sm" disabled={draft.isPending} onClick={onClose}>
             {t('businessContext.import.cancel')}
           </Button>
-          <Button size="sm" loading={draft.isPending} onClick={submit}>
+          <Button type="submit" size="sm" loading={draft.isPending}>
             {draft.isPending ? t('businessContext.import.submitting') : t('businessContext.import.submit')}
           </Button>
         </>

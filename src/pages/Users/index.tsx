@@ -61,12 +61,13 @@ function InviteBody({ onClose }: { onClose: () => void }) {
     <DialogLayout
       title={t('users.invite.title')}
       error={requestErrorText(invite.error, t, { fallback: 'users.invite.failed' })}
+      onSubmit={onSubmit}
       actions={
         <>
           <Button variant="secondary" size="sm" onClick={onClose}>
             {t('users.invite.cancel')}
           </Button>
-          <Button loading={invite.isPending} size="sm" onClick={onSubmit}>
+          <Button type="submit" loading={invite.isPending} size="sm">
             {invite.isPending ? t('users.invite.submitting') : t('users.invite.submit')}
           </Button>
         </>
@@ -117,16 +118,13 @@ function ChangeRoleBody({ user, onClose }: { user: UserResponse; onClose: () => 
     <DialogLayout
       title={t('users.changeRole.title')}
       error={requestErrorText(changeRole.error, t, { fallback: 'users.actions.roleChangeFailed' })}
+      onSubmit={() => changeRole.mutate({ id: user.id, role: selectedRole }, { onSuccess: onClose })}
       actions={
         <>
           <Button variant="secondary" size="sm" onClick={onClose}>
             {t('users.confirm.cancel')}
           </Button>
-          <Button
-            loading={changeRole.isPending}
-            size="sm"
-            onClick={() => changeRole.mutate({ id: user.id, role: selectedRole }, { onSuccess: onClose })}
-          >
+          <Button type="submit" loading={changeRole.isPending} size="sm">
             {t('users.changeRole.save')}
           </Button>
         </>
