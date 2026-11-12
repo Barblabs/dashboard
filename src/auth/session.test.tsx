@@ -91,14 +91,20 @@ describe('Signing in', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Organization deactivated' })).toBeInTheDocument()
   })
 
-  it('tells a user the backend rejects that their account is disabled, and forgets the tokens', async () => {
-    answerMe(() => failure(401, 'unauthorized', 'user disabled'))
+  // Cognito still issues tokens to a User disabled in Postgres: only the backend turns them away.
+  it('tells a user the backend rejects that their account is disabled, forgets the tokens and does not ask again', async () => {
+    let meCalls = 0
+    answerMe(() => {
+      meCalls++
+      return failure(401, 'unauthenticated', 'user disabled')
+    })
     const user = renderApp('/login', null)
 
     await user.click(await screen.findByRole('button', { name: 'Admin (customer_admin)' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Your account is disabled. Contact your administrator.')
     expect(mockTokens.hasStored()).toBe(false)
+    expect(meCalls).toBe(1)
   })
 })
 
