@@ -25,6 +25,9 @@ const MOCK_USERS: Record<Role, MeResponse> = {
   },
 }
 
-export const authHandlers = [
-  http.get(apiUrl('/me'), () => HttpResponse.json(MOCK_USERS[storedMockRole() ?? 'customer_admin'])),
-]
+/** The User the mock backend serves the request for: the role picked at sign-in. */
+export function mockCaller(): MeResponse {
+  return MOCK_USERS[storedMockRole() ?? 'customer_admin']
+}
+
+export const authHandlers = [http.get(apiUrl('/me'), () => HttpResponse.json(mockCaller()))]

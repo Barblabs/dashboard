@@ -41,7 +41,7 @@ describe('Tech stack', () => {
     await renderInventory()
 
     const row = await screen.findByRole('row', { name: /prod-api-01/ })
-    expect(screen.getByText('4 assets')).toBeInTheDocument()
+    expect(screen.getByText('7 assets')).toBeInTheDocument()
     expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual([
       'Asset', 'Type', 'Operating system', 'Criticality', 'Owner', 'Area', 'Status', 'Details',
     ])
@@ -77,7 +77,7 @@ describe('Tech stack', () => {
     expect(await screen.findByText('Cargando inventario…')).toBeInTheDocument()
     const row = await screen.findByRole('row', { name: /prod-api-01/ })
     expect(screen.getByRole('heading', { name: 'Stack tecnológico' })).toBeInTheDocument()
-    expect(screen.getByText('4 activos')).toBeInTheDocument()
+    expect(screen.getByText('7 activos')).toBeInTheDocument()
     expect(row).toHaveTextContent('prod-api-01SRV-001ServidorUbuntu 22.04Altadevops@example.comInfrastructureActivo')
   })
 

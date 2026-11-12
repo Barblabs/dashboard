@@ -2,6 +2,7 @@ import { cleanup, screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { i18n } from '../../i18n'
+import { mockAssets } from '../../mocks/assets'
 import { apiUrl } from '../../mocks/url'
 import { renderApp, seedSource, VIEWER } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
@@ -163,7 +164,8 @@ describe('Configuration', () => {
       screen.getByText('Last sync: less than a minute ago'),
     ).toBeInTheDocument()
     expect(await screen.findByRole('cell', { name: /prod-api-01/ })).toBeInTheDocument()
-    expect(screen.getAllByRole('row')).toHaveLength(5)
+    // The header row, then one row per Active Asset.
+    expect(screen.getAllByRole('row')).toHaveLength(1 + mockAssets.filter((a) => a.active).length)
   })
 
   it('manual sync updates the last sync time', async () => {
