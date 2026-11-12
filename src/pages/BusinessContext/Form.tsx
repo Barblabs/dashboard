@@ -1,194 +1,29 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  Controller,
-  FormProvider,
-  useFieldArray,
-  useForm,
-  useFormContext,
-  useWatch,
-  type FieldErrors,
-  type FieldPathByValue,
-} from 'react-hook-form'
+import { FormProvider, useFieldArray, useForm, useFormContext, useWatch, type FieldErrors } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import {
-  CONCERNS,
-  DATA_CATEGORIES,
-  EMPLOYEE_RANGES,
-  ENVIRONMENTS,
   LIMITS,
-  ORGANIZATION_TYPES,
-  REGULATIONS,
-  DOWNTIMES,
-  IMPACTS,
-  REVENUE_RANGES,
-  RISK_APPETITES,
-  SECTORS,
   useAssetNamesQuery,
   type BusinessContext,
-  type BusinessContextFields,
   type Draft,
   type Section,
   type SaveBusinessContext,
 } from '../../api/businessContext'
 import { Button } from '../../components/ui/Button'
 import { CloseIcon, UploadFileIcon } from '../../components/ui/icons'
-import { Input } from '../../components/ui/Input'
 import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { EMPTY } from '../../i18n/format'
-import { CountriesField, CountryField, MultiSelectField, SelectField, TagField, TextAreaField } from './controls'
+import { MultiSelectField, SelectField, TextAreaField, TextField } from './fields'
 import { ImportDialog } from './ImportDialog'
+import { FormMetaContext, useMeta, type Fields, type FormMeta } from './meta'
 import { SaveStatus } from './SaveStatus'
+import { TagField } from './TagField'
 import { canonicalDomain, mergeDraft } from './model'
-import { businessContextSchema, type ValidationKey } from './schema'
-
-type Fields = BusinessContextFields
+import { businessContextSchema } from './schema'
+import { useVocab } from './vocab'
 
 const SECTIONS: Section[] = ['profile', 'geography', 'operations', 'footprint', 'risk']
-
-interface Meta {
-  filled: Set<string>
-  readOnly: boolean
-}
-
-const MetaContext = createContext<Meta>({ filled: new Set(), readOnly: true })
-
-function useMeta(path: string) {
-  const { filled, readOnly } = useContext(MetaContext)
-  return { suggested: filled.has(path), readOnly }
-}
-
-function useErrorText() {
-  const { t } = useTranslation()
-  return (message: string | undefined, max: number) => (message ? t(message as ValidationKey, { max }) : undefined)
-}
-
-function TextAt({
-  name,
-  label,
-  placeholder,
-  max,
-  rows,
-}: {
-  name: FieldPathByValue<Fields, string>
-  label: string
-  placeholder?: string
-  max: number
-  rows?: number
-}) {
-  const meta = useMeta(name)
-  const errorText = useErrorText()
-  return (
-    <Controller
-      name={name}
-      render={({ field, fieldState }) => (
-        <TextAreaField
-          label={label}
-          placeholder={placeholder}
-          max={max}
-          rows={rows}
-          value={field.value as string}
-          onChange={field.onChange}
-          error={errorText(fieldState.error?.message, max)}
-          {...meta}
-        />
-      )}
-    />
-  )
-}
-
-function MultiAt<T extends string>({
-  name,
-  label,
-  options,
-  labelOf,
-}: {
-  name: FieldPathByValue<Fields, T[]>
-  label: string
-  options: readonly T[]
-  labelOf: (code: T) => string
-}) {
-  const meta = useMeta(name)
-  return (
-    <Controller
-      name={name}
-      render={({ field }) => (
-        <MultiSelectField label={label} options={options} labelOf={labelOf} value={field.value as T[]} onChange={field.onChange} {...meta} />
-      )}
-    />
-  )
-}
-
-function SelectAt<T extends string>({
-  name,
-  label,
-  options,
-  labelOf,
-  emptyLabel,
-  hint,
-  hideLabel,
-}: {
-  name: FieldPathByValue<Fields, T | ''>
-  label: string
-  options: readonly T[]
-  labelOf: (code: T) => string
-  emptyLabel?: string
-  hint?: string
-  hideLabel?: boolean
-}) {
-  const meta = { ...useMeta(name), hideLabel }
-  return (
-    <Controller
-      name={name}
-      render={({ field }) => (
-        <SelectField
-          label={label}
-          options={options}
-          labelOf={labelOf}
-          emptyLabel={emptyLabel}
-          hint={hint}
-          value={field.value as T | ''}
-          onChange={field.onChange}
-          {...meta}
-        />
-      )}
-    />
-  )
-}
-
-function TagsAt({
-  name,
-  label,
-  placeholder,
-  suggestions,
-  canonical,
-  hideLabel,
-}: {
-  name: FieldPathByValue<Fields, string[]>
-  label: string
-  placeholder?: string
-  suggestions?: string[]
-  canonical?: (entry: string) => { value: string } | { error: string }
-  hideLabel?: boolean
-}) {
-  const meta = { ...useMeta(name), hideLabel }
-  return (
-    <Controller
-      name={name}
-      render={({ field }) => (
-        <TagField
-          label={label}
-          placeholder={placeholder}
-          suggestions={suggestions}
-          canonical={canonical}
-          value={field.value as string[]}
-          onChange={field.onChange}
-          {...meta}
-        />
-      )}
-    />
-  )
-}
 
 const ROW = 'grid gap-5 md:grid-cols-2'
 
@@ -196,42 +31,26 @@ function Profile() {
   const { t } = useTranslation()
   return (
     <>
-      <TextAt
+      <TextAreaField
         name="profile.summary"
         label={t('businessContext.fields.summary.label')}
         placeholder={t('businessContext.fields.summary.placeholder')}
         max={LIMITS.summary}
         rows={4}
       />
-      <MultiAt
-        name="profile.sectors"
-        label={t('businessContext.fields.sectors')}
-        options={SECTORS}
-        labelOf={(c) => t(`businessContext.vocab.sectors.${c}`)}
-      />
+      <MultiSelectField name="profile.sectors" vocab="sectors" label={t('businessContext.fields.sectors')} />
       <div className="grid gap-5 md:grid-cols-3">
-        <SelectAt
+        <SelectField
           name="profile.organization_type"
+          vocab="organizationTypes"
           label={t('businessContext.fields.organizationType')}
-          options={ORGANIZATION_TYPES}
-          labelOf={(c) => t(`businessContext.vocab.organizationTypes.${c}`)}
         />
-        <SelectAt
-          name="profile.employees"
-          label={t('businessContext.fields.employees')}
-          options={EMPLOYEE_RANGES}
-          labelOf={(c) => t(`businessContext.vocab.employees.${c}`)}
-        />
-        <SelectAt
-          name="profile.annual_revenue"
-          label={t('businessContext.fields.annualRevenue')}
-          options={REVENUE_RANGES}
-          labelOf={(c) => t(`businessContext.vocab.revenue.${c}`)}
-        />
+        <SelectField name="profile.employees" vocab="employees" label={t('businessContext.fields.employees')} />
+        <SelectField name="profile.annual_revenue" vocab="revenue" label={t('businessContext.fields.annualRevenue')} />
       </div>
       <div className={ROW}>
-        <TextAt name="profile.mission" label={t('businessContext.fields.mission')} max={LIMITS.statement} />
-        <TextAt name="profile.vision" label={t('businessContext.fields.vision')} max={LIMITS.statement} />
+        <TextAreaField name="profile.mission" label={t('businessContext.fields.mission')} max={LIMITS.statement} />
+        <TextAreaField name="profile.vision" label={t('businessContext.fields.vision')} max={LIMITS.statement} />
       </div>
     </>
   )
@@ -239,27 +58,14 @@ function Profile() {
 
 function Geography() {
   const { t } = useTranslation()
-  const hq = useMeta('geography.headquarters')
-  const countries = useMeta('geography.countries')
   return (
     <div className={ROW}>
-      <Controller
-        name="geography.headquarters"
-        render={({ field }) => (
-          <CountryField label={t('businessContext.fields.headquarters')} value={field.value as string} onChange={field.onChange} {...hq} />
-        )}
-      />
-      <Controller
+      <SelectField name="geography.headquarters" vocab="countries" label={t('businessContext.fields.headquarters')} />
+      <MultiSelectField
         name="geography.countries"
-        render={({ field }) => (
-          <CountriesField
-            label={t('businessContext.fields.countries.label')}
-            placeholder={t('businessContext.fields.countries.placeholder')}
-            value={field.value as string[]}
-            onChange={field.onChange}
-            {...countries}
-          />
-        )}
+        vocab="countries"
+        label={t('businessContext.fields.countries.label')}
+        placeholder={t('businessContext.fields.countries.placeholder')}
       />
     </div>
   )
@@ -267,7 +73,6 @@ function Geography() {
 
 function CriticalServices() {
   const { t } = useTranslation()
-  const errorText = useErrorText()
   const { suggested, readOnly } = useMeta('operations.critical_services')
   const { control } = useFormContext<Fields>()
   const { fields, append, remove } = useFieldArray({ control, name: 'operations.critical_services' })
@@ -285,26 +90,18 @@ function CriticalServices() {
         ) : (
           <div key={item.id} className="flex items-start gap-3 rounded-lg border border-border-panel p-3">
             <div className="grid min-w-0 flex-1 gap-2 md:grid-cols-4">
-              <Controller
-                name={`operations.critical_services.${index}.name`}
-                render={({ field, fieldState }) => (
-                  <div className="flex flex-col gap-1 md:col-span-2">
-                    <Input
-                      value={field.value as string}
-                      onChange={field.onChange}
-                      placeholder={t('businessContext.fields.criticalServices.namePlaceholder')}
-                      aria-label={t('businessContext.fields.criticalServices.name')}
-                      aria-invalid={Boolean(fieldState.error)}
-                      className="font-semibold"
-                    />
-                    {fieldState.error && (
-                      <p className="font-body text-[0.75rem] text-critical">{errorText(fieldState.error.message, LIMITS.entry)}</p>
-                    )}
-                  </div>
-                )}
-              />
               <div className="md:col-span-2">
-                <TagsAt
+                <TextField
+                  name={`operations.critical_services.${index}.name`}
+                  label={t('businessContext.fields.criticalServices.name')}
+                  placeholder={t('businessContext.fields.criticalServices.namePlaceholder')}
+                  max={LIMITS.entry}
+                  hideLabel
+                  className="font-semibold"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <TagField
                   name={`operations.critical_services.${index}.assets`}
                   label={t('businessContext.fields.criticalServices.assets')}
                   placeholder={t('businessContext.fields.criticalServices.assetsPlaceholder')}
@@ -312,37 +109,27 @@ function CriticalServices() {
                   hideLabel
                 />
               </div>
-              <Controller
-                name={`operations.critical_services.${index}.description`}
-                render={({ field, fieldState }) => (
-                  <div className="flex flex-col gap-1 md:col-span-2">
-                    <Input
-                      value={field.value as string}
-                      onChange={field.onChange}
-                      placeholder={t('businessContext.fields.criticalServices.descriptionPlaceholder')}
-                      aria-label={t('businessContext.fields.criticalServices.description')}
-                      aria-invalid={Boolean(fieldState.error)}
-                    />
-                    {fieldState.error && (
-                      <p className="font-body text-[0.75rem] text-critical">{errorText(fieldState.error.message, LIMITS.statement)}</p>
-                    )}
-                  </div>
-                )}
-              />
-              <SelectAt
+              <div className="md:col-span-2">
+                <TextField
+                  name={`operations.critical_services.${index}.description`}
+                  label={t('businessContext.fields.criticalServices.description')}
+                  placeholder={t('businessContext.fields.criticalServices.descriptionPlaceholder')}
+                  max={LIMITS.statement}
+                  hideLabel
+                />
+              </div>
+              <SelectField
                 name={`operations.critical_services.${index}.impact`}
+                vocab="impact"
                 label={t('businessContext.fields.criticalServices.impact')}
                 emptyLabel={t('businessContext.fields.criticalServices.impactPlaceholder')}
-                options={IMPACTS}
-                labelOf={(c) => t(`businessContext.vocab.impact.${c}`)}
                 hideLabel
               />
-              <SelectAt
+              <SelectField
                 name={`operations.critical_services.${index}.max_downtime`}
+                vocab="downtime"
                 label={t('businessContext.fields.criticalServices.maxDowntime')}
                 emptyLabel={t('businessContext.fields.criticalServices.maxDowntimePlaceholder')}
-                options={DOWNTIMES}
-                labelOf={(c) => t(`businessContext.vocab.downtime.${c}`)}
                 hideLabel
               />
             </div>
@@ -371,12 +158,13 @@ function CriticalServices() {
 }
 
 function ShownService({ index }: { index: number }) {
-  const { t } = useTranslation()
   const { control } = useFormContext<Fields>()
   const service = useWatch({ control, name: `operations.critical_services.${index}` })
+  const impact = useVocab('impact').labelOf
+  const downtime = useVocab('downtime').labelOf
   const tolerance = [
-    service.impact && t(`businessContext.vocab.impact.${service.impact}`),
-    service.max_downtime && t(`businessContext.vocab.downtime.${service.max_downtime}`),
+    service.impact && impact(service.impact),
+    service.max_downtime && downtime(service.max_downtime),
   ].filter(Boolean)
   return (
     <div className="flex flex-col gap-0.5">
@@ -393,24 +181,9 @@ function Operations() {
   return (
     <>
       <CriticalServices />
-      <MultiAt
-        name="operations.data_categories"
-        label={t('businessContext.fields.dataCategories')}
-        options={DATA_CATEGORIES}
-        labelOf={(c) => t(`businessContext.vocab.dataCategories.${c}`)}
-      />
-      <MultiAt
-        name="operations.regulations"
-        label={t('businessContext.fields.regulations')}
-        options={REGULATIONS}
-        labelOf={(c) => t(`businessContext.vocab.regulations.${c}`)}
-      />
-      <MultiAt
-        name="operations.environments"
-        label={t('businessContext.fields.environments')}
-        options={ENVIRONMENTS}
-        labelOf={(c) => t(`businessContext.vocab.environments.${c}`)}
-      />
+      <MultiSelectField name="operations.data_categories" vocab="dataCategories" label={t('businessContext.fields.dataCategories')} />
+      <MultiSelectField name="operations.regulations" vocab="regulations" label={t('businessContext.fields.regulations')} />
+      <MultiSelectField name="operations.environments" vocab="environments" label={t('businessContext.fields.environments')} />
     </>
   )
 }
@@ -424,25 +197,25 @@ function Footprint() {
   return (
     <>
       <div className={ROW}>
-        <TagsAt
+        <TagField
           name="footprint.domains"
           label={t('businessContext.fields.domains.label')}
           placeholder={t('businessContext.fields.domains.placeholder')}
           canonical={domain}
         />
-        <TagsAt
+        <TagField
           name="footprint.brands"
           label={t('businessContext.fields.brands.label')}
           placeholder={t('businessContext.fields.brands.placeholder')}
         />
       </div>
       <div className={ROW}>
-        <TagsAt
+        <TagField
           name="footprint.technologies"
           label={t('businessContext.fields.technologies.label')}
           placeholder={t('businessContext.fields.technologies.placeholder')}
         />
-        <TagsAt
+        <TagField
           name="footprint.third_parties"
           label={t('businessContext.fields.thirdParties.label')}
           placeholder={t('businessContext.fields.thirdParties.placeholder')}
@@ -457,34 +230,28 @@ function Risk() {
   return (
     <>
       <div className={ROW}>
-        <SelectAt
+        <SelectField
           name="risk.appetite"
+          vocab="appetite"
           label={t('businessContext.fields.appetite')}
           hint={t('businessContext.fields.appetiteHint')}
-          options={RISK_APPETITES}
-          labelOf={(c) => t(`businessContext.vocab.appetite.${c}`)}
         />
-        <MultiAt
-          name="risk.concerns"
-          label={t('businessContext.fields.concerns')}
-          options={CONCERNS}
-          labelOf={(c) => t(`businessContext.vocab.concerns.${c}`)}
-        />
+        <MultiSelectField name="risk.concerns" vocab="concerns" label={t('businessContext.fields.concerns')} />
       </div>
-      <TextAt
+      <TextAreaField
         name="risk.past_incidents"
         label={t('businessContext.fields.pastIncidents.label')}
         placeholder={t('businessContext.fields.pastIncidents.placeholder')}
         max={LIMITS.narrative}
       />
       <div className={ROW}>
-        <TextAt
+        <TextAreaField
           name="risk.constraints"
           label={t('businessContext.fields.constraints.label')}
           placeholder={t('businessContext.fields.constraints.placeholder')}
           max={LIMITS.narrative}
         />
-        <TextAt
+        <TextAreaField
           name="risk.notes"
           label={t('businessContext.fields.notes.label')}
           placeholder={t('businessContext.fields.notes.placeholder')}
@@ -530,7 +297,7 @@ export function BusinessContextForm({
   const [section, setSection] = useState<Section>('profile')
   const [filled, setFilled] = useState<Set<string>>(new Set())
   const [applied, setApplied] = useState<number | null>(null)
-  const meta = useMemo<Meta>(() => ({ filled, readOnly }), [filled, readOnly])
+  const meta = useMemo<FormMeta>(() => ({ filled, readOnly }), [filled, readOnly])
   const dirty = form.formState.isDirty
   const saving = save.isPending
   const position = SECTIONS.indexOf(section)
@@ -560,7 +327,7 @@ export function BusinessContextForm({
 
   return (
     <FormProvider {...form}>
-      <MetaContext.Provider value={meta}>
+      <FormMetaContext.Provider value={meta}>
         {!started && readOnly && (
           <p className="rounded-xl border border-border-panel bg-white px-6 py-10 text-center font-body text-[0.9375rem] text-gray">
             {t('businessContext.empty')}
@@ -679,7 +446,7 @@ export function BusinessContextForm({
         )}
 
         {!readOnly && <ImportDialog open={importOpen} onClose={() => onImportOpenChange(false)} onDraft={applyDraft} />}
-      </MetaContext.Provider>
+      </FormMetaContext.Provider>
     </FormProvider>
   )
 }
