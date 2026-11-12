@@ -26,7 +26,6 @@ import {
   SECTORS,
   useAssetNamesQuery,
   type BusinessContext,
-  valueAt,
   type BusinessContextFields,
   type Draft,
   type Section,
@@ -540,11 +539,8 @@ export function BusinessContextForm({
 
   function applyDraft(draft: Draft) {
     const merge = mergeDraft(form.getValues(), draft.context)
-    for (const path of merge.filled) {
-      form.setValue(path as FieldPathByValue<Fields, string>, valueAt(merge.fields, path) as string, {
-        shouldDirty: true,
-      })
-    }
+    // Keeping the defaults leaves them at the stored version, so the form reads dirty and Discard goes back to it.
+    form.reset(merge.fields, { keepDefaultValues: true })
     setFilled((prev) => new Set([...prev, ...merge.filled]))
     setApplied(merge.filled.length)
     onStart()
