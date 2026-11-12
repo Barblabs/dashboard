@@ -4,19 +4,11 @@ import { assetKey, type Asset } from '../../api/assets'
 import { Badge } from '../../components/ui/Badge'
 import { EMPTY, useDateFormat } from '../../i18n/format'
 import { CELL, HEADER_CELL } from '../../components/ui/table'
+import { osLabel, versioned } from './assetText'
 
 const MONO = 'font-mono text-[0.8125rem]'
 const DETAIL_LABEL = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase'
 const COLUMN_COUNT = 8
-
-function versioned(name: string, version: string) {
-  return version ? `${name} ${version}` : name
-}
-
-function osLabel(asset: Asset): string {
-  const os = asset.software.find((s) => s.role === 'operating_system')
-  return os ? versioned(os.name, os.version) : EMPTY
-}
 
 function AssetStatus({ asset }: { asset: Asset }) {
   const { t } = useTranslation()
