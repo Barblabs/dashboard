@@ -4,6 +4,7 @@ import { assetKey, unidentifiedCount, type Asset, type Criticality } from '../..
 import type { Pager } from '../../api/inventory'
 import { AssetPager } from './AssetPager'
 import { AssetRecord } from './AssetRecord'
+import { revealInList } from './revealInList'
 
 const CRITICALITY_DOT: Record<Criticality, string> = {
   high: 'bg-navy',
@@ -88,8 +89,11 @@ export function AssetInspector({ assets, busy, pager, onOpenExposure }: AssetIns
   // The fallback is stored, so paging back to a page that holds the old selection doesn't revive it.
   if (selected && assetKey(selected) !== selectedKey) setSelectedKey(assetKey(selected))
 
+  // The list is `relative` so each option's offsetTop is measured from it.
   useEffect(() => {
-    if (selectedId) document.getElementById(selectedId)?.scrollIntoView({ block: 'nearest' })
+    const list = listRef.current
+    const option = selectedId ? document.getElementById(selectedId) : null
+    if (list && option) list.scrollTop = revealInList(list, option)
   }, [selectedId])
 
   const onKeyDown = (event: KeyboardEvent) => {
@@ -111,7 +115,7 @@ export function AssetInspector({ assets, busy, pager, onOpenExposure }: AssetIns
           aria-activedescendant={selectedId}
           aria-busy={busy || undefined}
           onKeyDown={onKeyDown}
-          className={`min-h-0 flex-1 overflow-y-auto outline-none transition-opacity duration-150 focus-visible:shadow-[inset_0_0_0_2px_var(--color-navy)] ${busy ? 'opacity-60' : ''}`}
+          className={`relative min-h-0 flex-1 overflow-y-auto outline-none transition-opacity duration-150 focus-visible:shadow-[inset_0_0_0_2px_var(--color-navy)] ${busy ? 'opacity-60' : ''}`}
         >
           {assets.map((asset) => (
             <AssetOption
