@@ -28,7 +28,7 @@ async function renderTechStack(user = renderApp) {
 type User = Awaited<ReturnType<typeof renderTechStack>>
 
 /** The Exposure button of the Asset on screen; only the selected Asset's record shows one. */
-function exposureCell(name: string) {
+function exposureButton(name: string) {
   return within(screen.getByRole('article', { name })).getByRole('button', {
     name: new RegExp(`^Exposure of ${name}:`),
   })
@@ -36,7 +36,7 @@ function exposureCell(name: string) {
 
 async function openExposure(user: User, name: string) {
   await user.click(screen.getByRole('option', { name: new RegExp(name) }))
-  await user.click(exposureCell(name))
+  await user.click(exposureButton(name))
 }
 
 function sheetOpen() {
@@ -143,10 +143,10 @@ describe('Exposure', () => {
       await toasts().findByText('Declared core-switch-01 Internal. Its open Findings were rescored.'),
     ).toBeInTheDocument()
     await waitFor(() => expect(sheetOpen()).toBe(false))
-    expect(exposureCell('core-switch-01')).toHaveAccessibleName('Exposure of core-switch-01: Internal, declared')
+    expect(exposureButton('core-switch-01')).toHaveAccessibleName('Exposure of core-switch-01: Internal, declared')
     expect(screen.getByRole('option', { name: /core-switch-01/ })).toHaveAttribute('aria-selected', 'true')
 
-    await user.click(exposureCell('core-switch-01'))
+    await user.click(exposureButton('core-switch-01'))
     const reopened = within(await screen.findByRole('dialog', { name: 'Exposure' }))
     expect(reopened.getByText(/^Internal, declared by admin@barbattack\.example on /)).toBeInTheDocument()
   })
@@ -166,7 +166,7 @@ describe('Exposure', () => {
       await toasts().findByText("ledger-db is back to iTop's Exposure (Unknown). Its open Findings were rescored."),
     ).toBeInTheDocument()
     await waitFor(() =>
-      expect(exposureCell('ledger-db')).toHaveAccessibleName('Exposure of ledger-db: Unknown, from iTop'),
+      expect(exposureButton('ledger-db')).toHaveAccessibleName('Exposure of ledger-db: Unknown, from iTop'),
     )
     expect(await screen.findByText('5 Active Assets have Unknown Exposure.')).toBeInTheDocument()
   })

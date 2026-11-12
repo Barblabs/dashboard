@@ -26,7 +26,7 @@ function AssetStatus({ asset }: { asset: Asset }) {
 }
 
 /** The effective Exposure and where it comes from; opens the Exposure sheet for the Asset. */
-function ExposureCell({ asset, onOpen }: { asset: Asset; onOpen: (asset: Asset) => void }) {
+function ExposureButton({ asset, onOpen }: { asset: Asset; onOpen: (asset: Asset) => void }) {
   const { t } = useTranslation()
   const { value, source } = asset.exposure
   const valueText = exposureLabel(t, value)
@@ -130,7 +130,7 @@ export function AssetRecord({ asset, onOpenExposure }: { asset: Asset; onOpenExp
           </Badge>
         </Fact>
         <Fact label={t('config.inventory.record.exposure')}>
-          <ExposureCell asset={asset} onOpen={onOpenExposure} />
+          <ExposureButton asset={asset} onOpen={onOpenExposure} />
         </Fact>
         <Fact label={t('config.inventory.record.owner')}>
           {asset.owner ? (
