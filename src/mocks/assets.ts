@@ -1,4 +1,4 @@
-import type { Asset } from '../../api/assets'
+import type { Asset } from '../api/assets'
 
 export const SOURCE_ID = '6f1c2a9e-4b7d-4e8a-9c3f-2d5b8e1a7c40'
 

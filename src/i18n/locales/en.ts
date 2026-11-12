@@ -236,6 +236,9 @@ export const en = {
     notice:
       'As Platform Admin you can see names, creation dates and status only. Access to users, CMDB and assets belongs to each organization.',
   },
+  time: {
+    lessThanAMinute: 'less than a minute ago',
+  },
   status: {
     backHome: 'Back to home',
     notFound: {
@@ -324,7 +327,6 @@ export const en = {
       badge: '{{provider}} connected',
       lastSync: 'Last sync: {{time}}',
       never: 'never',
-      lessThanAMinute: 'less than a minute ago',
       lastSyncFailed: 'Last sync failed {{time}}: {{error}}',
       syncSucceeded: 'Sync complete.',
       disconnectFailed: 'Could not disconnect the CMDB.',

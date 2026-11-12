@@ -147,8 +147,16 @@ function createAppRouter() {
   ])
 }
 
+/*
+ * A failed query shows its error right away instead of staying on "Loading" for several
+ * seconds while it retries; every error screen offers its own retry.
+ */
+function createQueryClient() {
+  return new QueryClient({ defaultOptions: { queries: { retry: false } } })
+}
+
 export function App() {
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(createQueryClient)
   const [router] = useState(createAppRouter)
 
   return (

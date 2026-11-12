@@ -238,6 +238,9 @@ export const es: Translations = {
     notice:
       'Como Platform Admin solo tienes visibilidad del nombre, fecha de alta y estado. El acceso a usuarios, CMDB y activos pertenece a cada organización.',
   },
+  time: {
+    lessThanAMinute: 'hace menos de un minuto',
+  },
   status: {
     backHome: 'Volver al inicio',
     notFound: {
@@ -326,7 +329,6 @@ export const es: Translations = {
       badge: '{{provider}} conectado',
       lastSync: 'Última sincronización: {{time}}',
       never: 'nunca',
-      lessThanAMinute: 'hace menos de un minuto',
       lastSyncFailed: 'La última sincronización falló {{time}}: {{error}}',
       syncSucceeded: 'Sincronización completa.',
       disconnectFailed: 'No se pudo desconectar el CMDB.',

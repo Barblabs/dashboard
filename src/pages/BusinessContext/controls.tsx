@@ -2,6 +2,7 @@ import { useId, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MultiSelect, type Option } from '../../components/ui/MultiSelect'
 import { LIMITS } from '../../api/businessContext'
+import { useLocale } from '../../i18n/format'
 import { COUNTRIES, countryNamer } from './model'
 
 const BOX =
@@ -194,8 +195,7 @@ export function MultiSelectField<T extends string>({
 }
 
 function useCountries() {
-  const { i18n } = useTranslation()
-  const language = i18n.resolvedLanguage ?? 'en'
+  const language = useLocale()
   return useMemo(() => {
     const name = countryNamer(language)
     const codes = COUNTRIES.toSorted((a, b) => name(a).localeCompare(name(b), language))

@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router'
 import { signOut } from '../auth/signOut'
 import { useCurrentUser, type Role } from '../auth/store'
 import { chooseLanguage, LANGUAGES } from '../i18n'
+import { useLocale } from '../i18n/format'
 
 type NavId =
   | 'findings'
@@ -120,12 +121,13 @@ export function Sidebar() {
 }
 
 function LanguageSwitcher() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const locale = useLocale()
 
   return (
     <div role="group" aria-label={t('sidebar.language.label')} className="flex gap-1">
       {LANGUAGES.map((language) => {
-        const active = i18n.resolvedLanguage === language
+        const active = locale === language
         return (
           <button
             key={language}

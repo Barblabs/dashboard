@@ -16,6 +16,7 @@ import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
 import { requestErrorText } from '../../i18n/errors'
+import { useDateFormat } from '../../i18n/format'
 
 function PencilIcon() {
   return (
@@ -358,9 +359,9 @@ function CustomerCard({
   onDeactivate: () => void
   onReactivate: () => void
 }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const formatDate = useDateFormat('numeric')
   const isDeactivated = customer.deactivated_at !== null
-  const language = i18n.resolvedLanguage ?? i18n.language
   const initial = customer.name[0]?.toUpperCase() ?? '?'
 
   const reactivate = useReactivateCustomerMutation()
@@ -420,7 +421,7 @@ function CustomerCard({
         </h3>
         <p className="mt-0.5 font-body text-[0.8125rem] text-gray">
           {t('tenants.created', {
-            date: new Date(customer.created_at).toLocaleDateString(language),
+            date: formatDate(customer.created_at),
           })}
         </p>
       </div>

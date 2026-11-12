@@ -3,6 +3,7 @@ import { signOut } from '../auth/signOut'
 import { useAuthStore } from '../auth/store'
 import { TokensUnreachable } from '../auth/tokens'
 import { tokens } from '../auth/tokenSource'
+import type { Schemas } from './schemas'
 
 /*
  * `network` means the backend never answered (down, CORS, offline), so there is no
@@ -12,10 +13,8 @@ export type ApiFailure =
   | { kind: 'http'; status: number; code: string | null }
   | { kind: 'network' }
 
-export interface BackendFailure {
-  code: string
-  error: string
-}
+/** The body of a failure the backend explains: a stable code and a readable message. */
+export type BackendFailure = Schemas['CodedError']
 
 // Every request failure surfaces as an ApiError.
 export class ApiError extends Error {
@@ -30,6 +29,22 @@ export class ApiError extends Error {
 
 export function errorCode(error: Error | null): string | null {
   return error instanceof ApiError && error.failure.kind === 'http' ? error.failure.code : null
+}
+
+/*
+ * What a failed request means for the session: `rejected` (401) signs out, `deactivated`
+ * (the Customer was deactivated) ends it on the deactivated screen. Decided here once, for
+ * every request and for verifying stored tokens alike.
+ */
+export type AuthOutcome = 'rejected' | 'deactivated'
+
+/** `null` when the failure says nothing about the session. */
+export function authOutcomeOf(error: unknown): AuthOutcome | null {
+  if (!(error instanceof ApiError) || error.failure.kind !== 'http') return null
+  const { status, code } = error.failure
+  if (status === 401) return 'rejected'
+  if (status === 403 && code === 'customer_deactivated') return 'deactivated'
+  return null
 }
 
 interface ErrorBody {
@@ -75,14 +90,11 @@ apiClient.interceptors.request.use(async (config) => {
 })
 
 apiClient.interceptors.response.use(undefined, (error: unknown) => {
-  if (axios.isAxiosError(error) && !axios.isCancel(error) && error.response) {
-    const { status, data } = error.response
-    const body = (typeof data === 'object' && data !== null ? data : {}) as ErrorBody
-    const code = typeof body.code === 'string' ? body.code : null
-    if (status === 401) signOut()
-    else if (status === 403 && code === 'customer_deactivated') useAuthStore.getState().deactivate()
-  }
-  return Promise.reject(toApiError(error))
+  const failure = toApiError(error)
+  const outcome = authOutcomeOf(failure)
+  if (outcome === 'rejected') signOut()
+  else if (outcome === 'deactivated') useAuthStore.getState().deactivate()
+  return Promise.reject(failure)
 })
 
 // Callers only ever need the response body.

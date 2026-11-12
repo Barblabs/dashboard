@@ -2,10 +2,10 @@ import { screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it, vi } from 'vitest'
 import type { AuthUser } from '../../auth/store'
-import { apiUrl } from '../../test/mocks/url'
+import { apiUrl } from '../../mocks/url'
 import { renderApp } from '../../test/render'
 import { server } from '../../test/server'
-import { MOCK_CUSTOMERS } from '../../test/mocks/customers-store'
+import { MOCK_CUSTOMERS } from '../../mocks/customers-store'
 
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: unknown }) => <div>{children as never}</div>,

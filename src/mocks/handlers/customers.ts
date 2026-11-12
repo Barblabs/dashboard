@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import type { CustomerResponse } from '../../../api/customers'
+import type { CustomerResponse } from '../../api/customers'
 import { loadCustomers, saveCustomers } from '../customers-store'
 import { apiUrl } from '../url'
 import { failure } from './responses'

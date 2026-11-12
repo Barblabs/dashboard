@@ -22,9 +22,6 @@ function assetsQuery(filters: AssetFilters, cursor: string | null) {
   return queryOptions({
     queryKey: [...connectionScopeKey, 'assets', filters, cursor],
     queryFn: () => api.get<AssetsPage>(assetsPath(filters, cursor)),
-    // An unreadable inventory shows its error right away instead of staying on
-    // "Loading" for several seconds while it retries.
-    retry: false,
     // Keeps the current page on screen while the next one loads, instead of flashing "Loading".
     placeholderData: keepPreviousData,
   })

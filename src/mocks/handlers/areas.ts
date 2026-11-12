@@ -1,13 +1,13 @@
 import { http, HttpResponse } from 'msw'
 import { z } from 'zod'
-import type { Area, AreaListResponse } from '../../../api/areas'
-import { ACTIVITY_FILTERS } from '../../../api/assets'
-import type { components } from '../../../api/generated'
+import type { Area, AreaListResponse } from '../../api/areas'
+import { ACTIVITY_FILTERS } from '../../api/assets'
+import type { Schemas } from '../../api/schemas'
 import { loadAreas, saveAreas } from '../areas-store'
 import { apiUrl } from '../url'
 import { failure, isOneOf } from './responses'
 
-type SetAreaOwnerRequest = components['schemas']['SetAreaOwnerRequest']
+type SetAreaOwnerRequest = Schemas['SetAreaOwnerRequest']
 
 export const areasHandlers = [
   http.get(apiUrl('/areas'), ({ request }) => {

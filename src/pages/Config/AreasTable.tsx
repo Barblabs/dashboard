@@ -5,10 +5,11 @@ import { ACTIVITY_FILTERS, type ActivityFilter } from '../../api/assets'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { requestErrorText } from '../../i18n/errors'
+import { useDateFormat } from '../../i18n/format'
 import { AreaOwnerDialog } from './AreaOwnerDialog'
 import { FilterSelect } from './FilterSelect'
 import { pick } from './filters'
-import { CELL, HEADER_CELL, MESSAGE, useDateFormat } from './table'
+import { CELL, HEADER_CELL, MESSAGE } from './table'
 
 const DEFAULT_ACTIVITY: ActivityFilter = 'true'
 

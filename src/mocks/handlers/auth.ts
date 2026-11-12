@@ -1,10 +1,8 @@
 import { http, HttpResponse } from 'msw'
-import type { components } from '../../../api/generated'
-import { storedMockRole } from '../../../auth/mockTokens'
-import type { Role } from '../../../auth/store'
+import type { MeResponse } from '../../api/me'
+import { storedMockRole } from '../../auth/mockTokens'
+import type { Role } from '../../auth/store'
 import { apiUrl } from '../url'
-
-type MeResponse = components['schemas']['MeResponse']
 
 const MOCK_USERS: Record<Role, MeResponse> = {
   platform_admin: {

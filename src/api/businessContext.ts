@@ -2,9 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { AssetsPage } from './assets'
 import { api } from './client'
 import { connectionScopeKey } from './cmdb'
-import type { components } from './generated'
-
-type Schemas = components['schemas']
+import type { Known, Override, Schemas } from './schemas'
 
 export type Sector = Schemas['ProfileFields']['sectors'][number]
 export type OrganizationType = Schemas['ProfileFields']['organization_type']
@@ -102,82 +100,61 @@ export const DOWNTIMES = codes<Exclude<Downtime, ''>>({
   under_1h: true, '1h_4h': true, '4h_24h': true, '1d_3d': true, '3d_7d': true, over_7d: true,
 })
 
-export interface CriticalService {
-  name: string
-  description: string
-  /** How badly losing it hurts. */
-  impact: Impact
-  /** How long it can be down before the harm is unacceptable. */
-  max_downtime: Downtime
-  /** Names of the Assets that run it, as the CMDB writes them. */
-  assets: string[]
-}
+export type CriticalService = Known<Schemas['CriticalServiceField']>
 
 /** The `business_context/1` document. Blank text, a blank code or an empty list is "not stated". */
 export interface BusinessContextFields {
-  profile: {
-    summary: string
-    mission: string
-    vision: string
-    sectors: Sector[]
-    organization_type: OrganizationType
-    employees: EmployeeRange
-    annual_revenue: RevenueRange
-  }
-  geography: {
-    /** ISO 3166-1 alpha-2. */
-    headquarters: string
-    countries: string[]
-  }
-  operations: {
-    critical_services: CriticalService[]
-    data_categories: DataCategory[]
-    regulations: Regulation[]
-    environments: Environment[]
-  }
-  footprint: {
-    domains: string[]
-    brands: string[]
-    technologies: string[]
-    third_parties: string[]
-  }
-  risk: {
-    appetite: RiskAppetite
-    concerns: Concern[]
-    past_incidents: string
-    constraints: string
-    notes: string
+  profile: Known<Schemas['ProfileFields']>
+  geography: Known<Schemas['GeographyFields']>
+  operations: Override<
+    Known<Schemas['OperationsFields']>,
+    { critical_services: CriticalService[] }
+  >
+  footprint: Known<Schemas['FootprintFields']>
+  risk: Known<Schemas['RiskFields']>
+}
+
+export function emptyFields(): BusinessContextFields {
+  return {
+    profile: {
+      summary: '',
+      mission: '',
+      vision: '',
+      sectors: [],
+      organization_type: '',
+      employees: '',
+      annual_revenue: '',
+    },
+    geography: { headquarters: '', countries: [] },
+    operations: { critical_services: [], data_categories: [], regulations: [], environments: [] },
+    footprint: { domains: [], brands: [], technologies: [], third_parties: [] },
+    risk: { appetite: '', concerns: [], past_incidents: '', constraints: '', notes: '' },
   }
 }
 
-export interface BusinessContext {
-  /** 0 until a Customer Admin saves one; a save sends back the version it read. */
-  version: number
-  saved_at: string | null
-  saved_by: string | null
-  context: BusinessContextFields
-  /** Paths such as `profile.sectors`: what the Agents need most. */
-  key_fields: string[]
-  gaps: string[]
+/** Whether a field's value says anything: non-blank text, a code, or a non-empty list. */
+export function isStatedValue(value: unknown): boolean {
+  if (Array.isArray(value)) return value.length > 0
+  return typeof value === 'string' && value.trim() !== ''
 }
 
-export interface Draft {
-  context: BusinessContextFields
-  gaps: string[]
+/** Whether the field at a path such as `profile.sectors` says anything. */
+export function isStated(fields: BusinessContextFields, path: string): boolean {
+  const [section, field] = path.split('.') as [keyof BusinessContextFields, string]
+  return isStatedValue((fields[section] as Record<string, unknown> | undefined)?.[field])
 }
 
-export interface DraftFile {
-  name: string
-  media_type: string
-  /** The file's bytes in base64. */
-  data: string
-}
+export type BusinessContext = Override<
+  Schemas['BusinessContextResponse'],
+  { context: BusinessContextFields }
+>
+
+export type Draft = Override<Schemas['DraftResponse'], { context: BusinessContextFields }>
+
+export type DraftFile = Known<Schemas['DraftFile']>
 
 /** Pasted text, files or both; the agent reads them together. */
-export interface DraftSource {
-  text?: string
-  files?: DraftFile[]
-}
+export type DraftSource = Override<Known<Schemas['DraftBusinessContextRequest']>, { files?: DraftFile[] }>
 
 /** Mirrors the backend's limits, so the form flags them before a save is refused. */
 export const LIMITS = {
@@ -198,7 +175,6 @@ export function useBusinessContextQuery() {
   return useQuery({
     queryKey: BUSINESS_CONTEXT_KEY,
     queryFn: () => api.get<BusinessContext>('/business-context'),
-    retry: false,
   })
 }
 
@@ -270,6 +246,5 @@ export function useAssetNamesQuery() {
     queryKey: [...connectionScopeKey, 'asset-names'],
     queryFn: () => api.get<AssetsPage>(`/assets?limit=${ASSET_SUGGESTIONS}&active=true`),
     select: (page) => page.assets.map((a) => a.name),
-    retry: false,
   })
 }

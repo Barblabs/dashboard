@@ -1,7 +1,7 @@
 import { http } from 'msw'
 import { setupServer } from 'msw/node'
-import { handlers } from './mocks/handlers'
-import { apiUrl } from './mocks/url'
+import { handlers } from '../mocks/handlers'
+import { apiUrl } from '../mocks/url'
 
 export const server = setupServer(...handlers)
 

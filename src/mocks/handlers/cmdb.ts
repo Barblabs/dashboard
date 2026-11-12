@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import type { CmdbLogin, CmdbSource, CmdbSourceRequest } from '../../../api/cmdb'
+import type { CmdbLogin, CmdbSource, CmdbSourceRequest } from '../../api/cmdb'
 import { clearSource, loadSource, saveSource } from '../store'
 import { apiUrl } from '../url'
 import { failure } from './responses'

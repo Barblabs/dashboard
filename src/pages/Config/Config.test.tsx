@@ -3,7 +3,7 @@ import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { i18n } from '../../i18n'
 import type { AuthUser } from '../../auth/store'
-import { apiUrl } from '../../test/mocks/url'
+import { apiUrl } from '../../mocks/url'
 import { renderApp, seedSource } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
 

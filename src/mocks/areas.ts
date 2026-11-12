@@ -1,4 +1,4 @@
-import type { Area } from '../../api/areas'
+import type { Area } from '../api/areas'
 import { SOURCE_ID } from './assets'
 
 // Ids and names match the `area` of the asset fixtures.

@@ -1,7 +1,5 @@
-import type { BusinessContext, BusinessContextFields } from '../../api/businessContext'
-import { emptyFields } from '../../pages/BusinessContext/model'
-
-const STORAGE_KEY = 'barbattack_mock_business_context'
+import { emptyFields, type BusinessContext, type BusinessContextFields } from '../api/businessContext'
+import { localStore } from './localStore'
 
 export const KEY_FIELDS = [
   'profile.summary',
@@ -20,14 +18,10 @@ export function unsaved(): BusinessContext {
   return { version: 0, saved_at: null, saved_by: null, context: emptyFields(), key_fields: KEY_FIELDS, gaps: KEY_FIELDS }
 }
 
-export function loadBusinessContext(): BusinessContext {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  return raw ? (JSON.parse(raw) as BusinessContext) : unsaved()
-}
-
-export function saveBusinessContext(context: BusinessContext) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(context))
-}
+export const { load: loadBusinessContext, save: saveBusinessContext } = localStore(
+  'barbattack_mock_business_context',
+  unsaved(),
+)
 
 /** What the Drafter answers in mock mode, whatever the document. */
 export const MOCK_DRAFT: BusinessContextFields = {

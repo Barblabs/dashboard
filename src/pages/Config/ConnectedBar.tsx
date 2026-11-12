@@ -1,24 +1,16 @@
 import { useState } from 'react'
-import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { useDisconnectMutation, useSyncMutation, type CmdbSource } from '../../api/cmdb'
 import { errorCode } from '../../api/client'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { requestErrorText } from '../../i18n/errors'
+import { useRelativeTime } from '../../i18n/format'
 
 interface Props {
   source: CmdbSource
   onEdit: () => void
   readOnly?: boolean
-}
-
-function formatRelative(iso: string, t: TFunction, language: string): string {
-  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
-  if (minutes < 1) return t('config.connected.lessThanAMinute')
-  const format = new Intl.RelativeTimeFormat(language, { style: 'short' })
-  if (minutes < 60) return format.format(-minutes, 'minute')
-  return format.format(-Math.floor(minutes / 60), 'hour')
 }
 
 const DETAIL = 'overflow-hidden text-[0.8125rem] text-ellipsis whitespace-nowrap'
@@ -31,15 +23,15 @@ const SUCCESS_STRIP = `${STRIP} border-nav-active-bg/15 bg-nav-active-bg/6`
 const CONFIRM_STRIP = `${STRIP} border-border-panel bg-panel`
 
 export function ConnectedBar({ source, onEdit, readOnly = false }: Props) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const relativeTime = useRelativeTime()
   const syncMutation = useSyncMutation()
   const disconnectMutation = useDisconnectMutation()
   const [showConfirm, setShowConfirm] = useState(false)
 
-  const language = i18n.resolvedLanguage ?? i18n.language
   const isSyncing = syncMutation.isPending
   const lastSync = source.last_sync
-    ? formatRelative(source.last_sync, t, language)
+    ? relativeTime(source.last_sync)
     : t('config.connected.never')
 
   const requestFailureText = syncMutation.isError
@@ -49,7 +41,7 @@ export function ConnectedBar({ source, onEdit, readOnly = false }: Props) {
   const recordedFailureText =
     recordedFailure &&
     t('config.connected.lastSyncFailed', {
-      time: formatRelative(recordedFailure.at, t, language),
+      time: relativeTime(recordedFailure.at),
       error: recordedFailure.error,
     })
   const syncFailure = isSyncing ? null : (requestFailureText ?? recordedFailureText)

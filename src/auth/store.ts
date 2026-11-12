@@ -1,13 +1,9 @@
 import { create } from 'zustand'
+import type { MeResponse } from '../api/me'
 
-export type Role = 'platform_admin' | 'customer_admin' | 'viewer'
-
-export interface AuthUser {
-  id: string
-  email: string
-  role: Role
-  customer: { id: string; name: string } | null
-}
+/** Who the backend says the tokens belong to. */
+export type AuthUser = MeResponse
+export type Role = AuthUser['role']
 
 /*
  * The lifecycle of a session, one state at a time:

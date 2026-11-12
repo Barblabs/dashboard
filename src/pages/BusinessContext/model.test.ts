@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { canonicalDomain, emptyFields, isStated, mergeDraft } from './model'
+import { emptyFields } from '../../api/businessContext'
+import { canonicalDomain, mergeDraft } from './model'
 
 describe('mergeDraft', () => {
   it('fills what is empty and keeps what the user wrote', () => {
@@ -64,18 +65,6 @@ describe('mergeDraft', () => {
     mergeDraft(current, draft)
 
     expect(current.footprint.brands).toEqual([])
-  })
-})
-
-describe('isStated', () => {
-  it('counts non-blank text and non-empty lists', () => {
-    const fields = emptyFields()
-    fields.profile.summary = '   '
-    fields.geography.countries = ['MX']
-
-    expect(isStated(fields, 'profile.summary')).toBe(false)
-    expect(isStated(fields, 'geography.countries')).toBe(true)
-    expect(isStated(fields, 'risk.appetite')).toBe(false)
   })
 })
 

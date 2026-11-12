@@ -4,15 +4,17 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { useCustomersQuery, type CustomerResponse } from '../../api/customers'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
+import { useDateFormat, useLocale } from '../../i18n/format'
 
 function getMonthlyData(customers: CustomerResponse[], locale: string, now: Date) {
+  const monthLabel = new Intl.DateTimeFormat(locale, { month: 'short' })
   const months: { label: string; count: number }[] = []
   for (let i = 5; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const prefix = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
     const count = customers.filter((c) => c.created_at.startsWith(prefix)).length
     months.push({
-      label: date.toLocaleDateString(locale, { month: 'short' }),
+      label: monthLabel.format(date),
       count,
     })
   }
@@ -35,9 +37,10 @@ function StatCard({ label, value }: { label: string; value: number }) {
 }
 
 export function AdminDashboardPage() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const customersQuery = useCustomersQuery()
-  const locale = i18n.resolvedLanguage ?? i18n.language
+  const locale = useLocale()
+  const formatDate = useDateFormat('numeric')
 
   const { customers, active, deactivated, newThisMonth, chartData, recent } = useMemo(
     () => {
@@ -146,7 +149,7 @@ export function AdminDashboardPage() {
                 <span className="font-body text-[0.9375rem] text-navy">{c.name}</span>
                 <div className="flex items-center gap-3">
                   <span className="font-body text-[0.8125rem] text-gray">
-                    {new Date(c.created_at).toLocaleDateString(locale)}
+                    {formatDate(c.created_at)}
                   </span>
                   <Badge variant={c.deactivated_at ? 'muted' : 'outline'}>
                     {c.deactivated_at

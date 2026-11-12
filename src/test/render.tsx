@@ -7,9 +7,9 @@ import type { CmdbSource } from '../api/cmdb'
 import type { CustomerResponse } from '../api/customers'
 import type { UserResponse } from '../api/users'
 import { setMockRole } from '../auth/mockTokens'
-import { mockSource, saveSource } from './mocks/store'
-import { saveCustomers } from './mocks/customers-store'
-import { saveUsers } from './mocks/users-store'
+import { mockSource, saveSource } from '../mocks/store'
+import { saveCustomers } from '../mocks/customers-store'
+import { saveUsers } from '../mocks/users-store'
 
 const DEFAULT_TEST_USER: AuthUser = {
   id: 'test-user-id',

@@ -2,10 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { ActivityFilter } from './assets'
 import { api } from './client'
 import { connectionScopeKey } from './cmdb'
-import type { components } from './generated'
+import { replaceById } from './listCache'
+import type { Schemas } from './schemas'
 
-export type Area = components['schemas']['AreaResponse']
-export type AreaListResponse = components['schemas']['AreaListResponse']
+export type Area = Schemas['AreaResponse']
+export type AreaListResponse = Schemas['AreaListResponse']
 
 // Areas are imported by the connected CMDB, so a sync refetches them and a disconnect drops them.
 const areasKey = [...connectionScopeKey, 'areas'] as const
@@ -14,7 +15,6 @@ export function useAreasQuery(active: ActivityFilter) {
   return useQuery({
     queryKey: [...areasKey, active],
     queryFn: () => api.get<AreaListResponse>(`/areas?active=${active}`),
-    retry: false,
   })
 }
 
@@ -24,12 +24,6 @@ export function useSetAreaOwnerMutation() {
     mutationFn: ({ id, email }: { id: number; email: string | null }) =>
       api.put<Area>(`/areas/${id}/owner`, { email }),
     // Every cached filter variant may list the area, so each one gets the updated row.
-    onSuccess: (updated) => {
-      queryClient.setQueriesData<AreaListResponse>(
-        { queryKey: areasKey },
-        (prev) =>
-          prev ? { areas: prev.areas.map((a) => (a.id === updated.id ? updated : a)) } : prev,
-      )
-    },
+    onSuccess: (updated) => replaceById(queryClient, areasKey, 'areas', updated),
   })
 }
