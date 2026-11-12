@@ -4,7 +4,7 @@ import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { DraftSource } from '../../api/businessContext'
 import type { AuthUser } from '../../auth/store'
-import { loadBusinessContext, MOCK_DRAFT, saveBusinessContext, unsaved } from '../../mocks/business-context-store'
+import { businessContextStore, MOCK_DRAFT, unsaved } from '../../mocks/business-context-store'
 import { apiUrl } from '../../mocks/url'
 import { renderApp } from '../../test/render'
 import { server } from '../../test/server'
@@ -35,7 +35,7 @@ function seedSaved(summary: string, version = 1) {
   stored.saved_at = '2026-11-01T12:00:00Z'
   stored.saved_by = 'admin@test.example'
   stored.context.profile.summary = summary
-  saveBusinessContext(stored)
+  businessContextStore.save(stored)
 }
 
 describe('Business context', () => {
@@ -93,7 +93,7 @@ describe('Business context', () => {
     await user.click(save)
 
     expect(await screen.findByText(/Saved/)).toBeInTheDocument()
-    const stored = loadBusinessContext()
+    const stored = businessContextStore.load()
     expect(stored.version).toBe(1)
     expect(stored.context.profile).toMatchObject({ summary: 'We sell shoes online.', sectors: ['e-commerce'], employees: '50_249' })
     expect(stored.context.geography).toEqual({ headquarters: 'MX', countries: ['MX'] })
@@ -125,7 +125,7 @@ describe('Business context', () => {
 
     expect(await screen.findByText('Give the service a name.')).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: /Operations/ })).toHaveAttribute('aria-selected', 'true')
-    expect(loadBusinessContext().version).toBe(0)
+    expect(businessContextStore.load().version).toBe(0)
   })
 
   it('reads several documents together and places what they say in each section', async () => {
@@ -158,7 +158,7 @@ describe('Business context', () => {
     expect(screen.getByText('Financial services')).toBeInTheDocument()
     await user.click(screen.getByRole('tab', { name: /Operations/ }))
     expect(screen.getByDisplayValue('Pagos en línea')).toBeInTheDocument()
-    expect(loadBusinessContext().version).toBe(0)
+    expect(businessContextStore.load().version).toBe(0)
   })
 
   it('fills the form from documents without replacing what was typed', async () => {
@@ -175,7 +175,7 @@ describe('Business context', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }))
 
     await screen.findByText(/Saved/)
-    const saved = loadBusinessContext().context
+    const saved = businessContextStore.load().context
     expect(saved.profile.summary).toBe('Our own words.')
     expect(saved.operations.regulations).toEqual(MOCK_DRAFT.operations.regulations)
     expect(saved.operations.critical_services).toEqual(MOCK_DRAFT.operations.critical_services)

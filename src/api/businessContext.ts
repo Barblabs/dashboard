@@ -132,16 +132,26 @@ export function emptyFields(): BusinessContextFields {
   }
 }
 
+export type Section = keyof BusinessContextFields
+
+/** A field of the document as the backend names it in `key_fields` and `gaps`, such as `profile.sectors`. */
+export type FieldPath = {
+  [S in Section]: `${S}.${keyof BusinessContextFields[S] & string}`
+}[Section]
+
+export function valueAt(fields: BusinessContextFields, path: FieldPath): unknown {
+  const [section, field] = path.split('.') as [Section, string]
+  return (fields[section] as Record<string, unknown>)[field]
+}
+
 /** Whether a field's value says anything: non-blank text, a code, or a non-empty list. */
 export function isStatedValue(value: unknown): boolean {
   if (Array.isArray(value)) return value.length > 0
   return typeof value === 'string' && value.trim() !== ''
 }
 
-/** Whether the field at a path such as `profile.sectors` says anything. */
-export function isStated(fields: BusinessContextFields, path: string): boolean {
-  const [section, field] = path.split('.') as [keyof BusinessContextFields, string]
-  return isStatedValue((fields[section] as Record<string, unknown> | undefined)?.[field])
+export function isStated(fields: BusinessContextFields, path: FieldPath): boolean {
+  return isStatedValue(valueAt(fields, path))
 }
 
 export type BusinessContext = Override<

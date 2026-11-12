@@ -19,8 +19,7 @@ async function verifyStoredTokens(): Promise<Verification> {
   const store = useAuthStore.getState()
   try {
     if ((await tokens.currentAccessToken()) === null) return reject()
-    const me = await fetchMe()
-    store.establishSession({ id: me.id, email: me.email, role: me.role, customer: me.customer })
+    store.establishSession(await fetchMe())
     return 'settled'
   } catch (error) {
     switch (authOutcomeOf(error)) {

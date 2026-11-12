@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import type { AuthUser } from '../../auth/store'
 import { i18n } from '../../i18n'
 import { mockAreas } from '../../mocks/areas'
-import { saveAreas } from '../../mocks/areas-store'
+import { areasStore } from '../../mocks/areas-store'
 import { apiUrl } from '../../mocks/url'
 import { renderApp, seedSource } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
@@ -101,13 +101,13 @@ describe('Areas', () => {
   })
 
   it('says when the CMDB has no areas, apart from a filter matching none', async () => {
-    saveAreas(mockAreas.filter((area) => !area.active))
+    areasStore.save(mockAreas.filter((area) => !area.active))
     const user = await renderConnected()
     await user.click(screen.getByRole('tab', { name: 'Areas' }))
 
     expect(await screen.findByText('The CMDB has no areas yet.')).toBeInTheDocument()
 
-    saveAreas([])
+    areasStore.save([])
     await user.selectOptions(screen.getByRole('combobox', { name: 'Status' }), 'Inactive')
 
     expect(await screen.findByText('No areas match this filter.')).toBeInTheDocument()
@@ -149,7 +149,7 @@ describe('Areas', () => {
     await openAreas(user)
     expect(screen.queryByRole('row', { name: /Security/ })).not.toBeInTheDocument()
 
-    saveAreas([
+    areasStore.save([
       ...mockAreas,
       { ...mockAreas[0], id: 4, record_id: 'ORG-004', name: 'Security', owner_email: null },
     ])

@@ -18,4 +18,4 @@ export const MOCK_USERS: UserResponse[] = [
   },
 ]
 
-export const { load: loadUsers, save: saveUsers } = localStore('barbattack_mock_users', MOCK_USERS)
+export const usersStore = localStore('barbattack_mock_users', MOCK_USERS)

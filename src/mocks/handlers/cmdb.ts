@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import type { CmdbLogin, CmdbSource, CmdbSourceRequest } from '../../api/cmdb'
-import { clearSource, loadSource, saveSource } from '../store'
+import { sourceStore } from '../cmdb-store'
 import { apiUrl } from '../url'
 import { failure } from './responses'
 
@@ -19,7 +19,7 @@ function rejectAdminWithoutRestProfile({ user }: CmdbLogin) {
 
 export const cmdbHandlers = [
   http.get(apiUrl('/cmdb/source'), async () => {
-    return HttpResponse.json(loadSource())
+    return HttpResponse.json(sourceStore.load())
   }),
 
   http.post(apiUrl('/cmdb/source/test'), async ({ request }) => {
@@ -30,7 +30,7 @@ export const cmdbHandlers = [
 
   http.post(apiUrl('/cmdb/source'), async ({ request }) => {
     const { provider, url, user, password } = (await request.json()) as CmdbSourceRequest
-    if (loadSource()) {
+    if (sourceStore.load()) {
       return failure(409, 'already_connected', 'a CMDB source is already connected')
     }
     const rejected = rejectAdminWithoutRestProfile({ url, user, password })
@@ -42,26 +42,26 @@ export const cmdbHandlers = [
       last_sync: new Date().toISOString(),
       last_sync_failure: null,
     }
-    saveSource(source)
+    sourceStore.save(source)
     return HttpResponse.json(source)
   }),
 
   http.put(apiUrl('/cmdb/source'), async ({ request }) => {
     const login = (await request.json()) as CmdbLogin
-    const current = loadSource()
+    const current = sourceStore.load()
     if (!current) return notConnected()
     const rejected = rejectAdminWithoutRestProfile(login)
     if (rejected) return failure(422, rejected.code, rejected.error)
     const source: CmdbSource = { ...current, url: login.url, user: login.user }
-    saveSource(source)
+    sourceStore.save(source)
     return HttpResponse.json(source)
   }),
 
   http.post(apiUrl('/cmdb/source/sync'), async () => {
-    const source = loadSource()
+    const source = sourceStore.load()
     if (!source) return notConnected()
     const last_sync = new Date().toISOString()
-    saveSource({ ...source, last_sync, last_sync_failure: null })
+    sourceStore.save({ ...source, last_sync, last_sync_failure: null })
     return HttpResponse.json({
       last_sync,
       created: 0,
@@ -73,8 +73,8 @@ export const cmdbHandlers = [
   }),
 
   http.delete(apiUrl('/cmdb/source'), async () => {
-    if (!loadSource()) return notConnected()
-    clearSource()
+    if (!sourceStore.load()) return notConnected()
+    sourceStore.clear()
     return new HttpResponse(null, { status: 204 })
   }),
 ]

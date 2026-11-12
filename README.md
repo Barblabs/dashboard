@@ -118,7 +118,8 @@ en inglés, salvo las pruebas de cambio de idioma.
   `src/mocks/`. Para sobrescribir un handler en una prueba, arma la URL
   con `apiUrl()` de `src/mocks/url.ts`.
 - Cada recurso mock se guarda en `localStorage` con `localStore()` de
-  `src/mocks/localStore.ts`; la conexión CMDB, en `src/mocks/store.ts`.
+  `src/mocks/localStore.ts`, en un `*-store.ts` por recurso (la conexión CMDB,
+  en `src/mocks/cmdb-store.ts`).
   `seedSource()` y `renderApp()` de `src/test/render.tsx` preparan el estado y
   montan la app.
 - El usuario `admin` hace fallar la prueba de conexión con el código

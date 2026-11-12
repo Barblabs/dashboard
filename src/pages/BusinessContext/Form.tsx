@@ -27,8 +27,10 @@ import {
   SECTORS,
   useAssetNamesQuery,
   type BusinessContext,
+  valueAt,
   type BusinessContextFields,
   type Draft,
+  type Section,
 } from '../../api/businessContext'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -38,7 +40,6 @@ import { canonicalDomain, mergeDraft } from './model'
 import { businessContextSchema, type ValidationKey } from './schema'
 
 type Fields = BusinessContextFields
-type Section = keyof Fields
 
 const SECTIONS: Section[] = ['profile', 'geography', 'operations', 'footprint', 'risk']
 
@@ -528,9 +529,9 @@ export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSa
   function applyDraft(draft: Draft) {
     const merge = mergeDraft(form.getValues(), draft.context)
     for (const path of merge.filled) {
-      const [part, key] = path.split('.') as [Section, string]
-      const value = (merge.fields[part] as Record<string, unknown>)[key]
-      form.setValue(path as FieldPathByValue<Fields, string>, value as string, { shouldDirty: true })
+      form.setValue(path as FieldPathByValue<Fields, string>, valueAt(merge.fields, path) as string, {
+        shouldDirty: true,
+      })
     }
     setFilled((prev) => new Set([...prev, ...merge.filled]))
     setApplied(merge.filled.length)

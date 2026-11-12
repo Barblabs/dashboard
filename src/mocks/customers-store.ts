@@ -22,7 +22,4 @@ export const MOCK_CUSTOMERS: CustomerResponse[] = [
   },
 ]
 
-export const { load: loadCustomers, save: saveCustomers } = localStore(
-  'barbattack_mock_customers',
-  MOCK_CUSTOMERS,
-)
+export const customersStore = localStore('barbattack_mock_customers', MOCK_CUSTOMERS)

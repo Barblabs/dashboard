@@ -2,9 +2,9 @@ import {
   isStatedValue,
   type BusinessContextFields,
   type CriticalService,
+  type FieldPath,
+  type Section,
 } from '../../api/businessContext'
-
-type Section = keyof BusinessContextFields
 
 function sameEntry(a: string, b: string) {
   return a.trim().toLowerCase() === b.trim().toLowerCase()
@@ -36,8 +36,8 @@ function mergeServices(current: CriticalService[], extra: CriticalService[]): Cr
 
 export interface Merge {
   fields: BusinessContextFields
-  /** Paths, such as `profile.sectors`, that the draft added something to. */
-  filled: string[]
+  /** The fields the draft added something to. */
+  filled: FieldPath[]
 }
 
 /*
@@ -46,7 +46,7 @@ export interface Merge {
  */
 export function mergeDraft(current: BusinessContextFields, draft: BusinessContextFields): Merge {
   const fields = structuredClone(current)
-  const filled: string[] = []
+  const filled: FieldPath[] = []
   for (const section of Object.keys(fields) as Section[]) {
     const target = fields[section] as Record<string, unknown>
     const source = draft[section] as Record<string, unknown>
@@ -63,7 +63,7 @@ export function mergeDraft(current: BusinessContextFields, draft: BusinessContex
       }
       if (JSON.stringify(after) !== JSON.stringify(before)) {
         target[key] = after
-        filled.push(`${section}.${key}`)
+        filled.push(`${section}.${key}` as FieldPath)
       }
     }
   }

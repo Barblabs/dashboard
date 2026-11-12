@@ -8,8 +8,4 @@ export const mockSource: Omit<CmdbSource, 'last_sync'> = {
   last_sync_failure: null,
 }
 
-export const {
-  load: loadSource,
-  save: saveSource,
-  clear: clearSource,
-} = localStore<CmdbSource | null>('barbattack_cmdb_source', null)
+export const sourceStore = localStore<CmdbSource | null>('barbattack_cmdb_source', null)
