@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { apiUrl } from '../../mocks/url'
@@ -80,6 +80,22 @@ describe('Users', () => {
       'A user with this email already exists.',
     )
     expect(screen.getByRole('heading', { name: 'Invite user' })).toBeInTheDocument()
+  })
+
+  it('reopening the invite dialog after a failed invite shows it clean', async () => {
+    const user = await renderUsers()
+
+    await user.click(screen.getByRole('button', { name: 'Invite user' }))
+    await user.type(screen.getByLabelText('Email'), ADMIN.email)
+    await user.click(screen.getByRole('button', { name: 'Send invitation' }))
+    await screen.findByRole('alert')
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: 'Invite user' }))
+
+    expect(screen.getByLabelText('Email')).toHaveValue('')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('changes a user role via the edit modal and the badge updates', async () => {

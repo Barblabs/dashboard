@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -17,6 +17,7 @@ import { QueryBoundary } from '../../components/QueryBoundary'
 import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
+import { ConfirmDialog, DialogLayout, TargetModal } from '../../components/ui/Dialog'
 import { Fab } from '../../components/ui/Fab'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
@@ -25,6 +26,7 @@ import { Message } from '../../components/ui/Message'
 import { Modal } from '../../components/ui/Modal'
 import { SearchField } from '../../components/ui/SearchField'
 import { Select } from '../../components/ui/Select'
+import { useDialogTarget } from '../../components/ui/useDialogTarget'
 import { requestErrorText } from '../../i18n/errors'
 
 const ROLE_LABEL: Record<CustomerRole, 'users.role.customer_admin' | 'users.role.viewer'> = {
@@ -32,7 +34,7 @@ const ROLE_LABEL: Record<CustomerRole, 'users.role.customer_admin' | 'users.role
   viewer: 'users.role.viewer',
 }
 
-// ── Invite modal ────────────────────────────────────────────────────────────
+// ── Invite dialog ───────────────────────────────────────────────────────────
 
 const inviteSchema = z.object({
   email: z.string().trim().min(1, 'users.invite.email.required').email('users.invite.email.invalid'),
@@ -40,213 +42,134 @@ const inviteSchema = z.object({
 })
 type InviteFields = z.infer<typeof inviteSchema>
 
-function InviteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function InviteBody({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation()
-  const titleId = useId()
   const invite = useInviteUserMutation()
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<InviteFields>({
     resolver: zodResolver(inviteSchema),
     defaultValues: { email: '', role: 'viewer' },
   })
 
-  const handleClose = () => {
-    reset()
-    invite.reset()
-    onClose()
-  }
-
-  const onSubmit = handleSubmit((data) => invite.mutate(data, { onSuccess: handleClose }))
-
-  const errorText = invite.isError
-    ? requestErrorText(invite.error, t, { fallback: 'users.invite.failed' })
-    : null
+  const onSubmit = handleSubmit((data) => invite.mutate(data, { onSuccess: onClose }))
 
   return (
-    <Modal open={open} onClose={handleClose} labelledBy={titleId}>
-      <div className="flex flex-col gap-5 p-6">
-        <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-          {t('users.invite.title')}
-        </h2>
-
-        <div className="flex flex-col gap-4">
-          <Field
-            label={t('users.invite.email.label')}
-            error={
-              errors.email?.message
-                ? t(errors.email.message as 'users.invite.email.required')
-                : undefined
-            }
-          >
-            <Input
-              type="email"
-              placeholder="nombre@empresa.com"
-              autoComplete="off"
-              disabled={invite.isPending}
-              {...register('email')}
-            />
-          </Field>
-
-          <Field label={t('users.invite.role.label')}>
-            <Select
-              disabled={invite.isPending}
-              {...register('role')}
-            >
-              <option value="viewer">{t(ROLE_LABEL['viewer'])}</option>
-              <option value="customer_admin">{t(ROLE_LABEL['customer_admin'])}</option>
-            </Select>
-          </Field>
-
-          <Alert tone="info">{t('users.invite.tempPasswordNotice')}</Alert>
-        </div>
-
-        {errorText && (
-          <Alert tone="error">{errorText}</Alert>
-        )}
-
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" size="sm" onClick={handleClose}>
+    <DialogLayout
+      title={t('users.invite.title')}
+      error={invite.isError ? requestErrorText(invite.error, t, { fallback: 'users.invite.failed' }) : null}
+      actions={
+        <>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('users.invite.cancel')}
           </Button>
           <Button loading={invite.isPending} size="sm" onClick={onSubmit}>
             {invite.isPending ? t('users.invite.submitting') : t('users.invite.submit')}
           </Button>
-        </div>
-      </div>
-    </Modal>
-  )
-}
-
-// ── Change-role modal ────────────────────────────────────────────────────────
-
-function ChangeRoleModal({
-  user,
-  open,
-  onClose,
-}: {
-  user: UserResponse | null
-  open: boolean
-  onClose: () => void
-}) {
-  const { t } = useTranslation()
-  const titleId = useId()
-  const changeRole = useChangeRoleMutation()
-  const [selectedRole, setSelectedRole] = useState<CustomerRole>(user?.role ?? 'viewer')
-
-  const handleClose = () => {
-    changeRole.reset()
-    onClose()
-  }
-
-  const errorText = changeRole.isError
-    ? requestErrorText(changeRole.error, t, { fallback: 'users.actions.roleChangeFailed' })
-    : null
-
-  return (
-    <Modal open={open} onClose={handleClose} labelledBy={titleId}>
-      <div className="flex flex-col gap-5 p-6">
-        <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-          {t('users.changeRole.title')}
-        </h2>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <Field
+          label={t('users.invite.email.label')}
+          error={
+            errors.email?.message
+              ? t(errors.email.message as 'users.invite.email.required')
+              : undefined
+          }
+        >
+          <Input
+            type="email"
+            placeholder="nombre@empresa.com"
+            autoComplete="off"
+            disabled={invite.isPending}
+            {...register('email')}
+          />
+        </Field>
 
         <Field label={t('users.invite.role.label')}>
           <Select
-            value={selectedRole}
-            disabled={changeRole.isPending}
-            onChange={(e) => {
-              changeRole.reset()
-              setSelectedRole(e.target.value as CustomerRole)
-            }}
+            disabled={invite.isPending}
+            {...register('role')}
           >
             <option value="viewer">{t(ROLE_LABEL['viewer'])}</option>
             <option value="customer_admin">{t(ROLE_LABEL['customer_admin'])}</option>
           </Select>
         </Field>
 
-        {errorText && (
-          <Alert tone="error">{errorText}</Alert>
-        )}
+        <Alert tone="info">{t('users.invite.tempPasswordNotice')}</Alert>
+      </div>
+    </DialogLayout>
+  )
+}
 
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" size="sm" onClick={handleClose}>
+// ── Change-role dialog ───────────────────────────────────────────────────────
+
+function ChangeRoleBody({ user, onClose }: { user: UserResponse; onClose: () => void }) {
+  const { t } = useTranslation()
+  const changeRole = useChangeRoleMutation()
+  const [selectedRole, setSelectedRole] = useState<CustomerRole>(user.role)
+
+  return (
+    <DialogLayout
+      title={t('users.changeRole.title')}
+      error={
+        changeRole.isError
+          ? requestErrorText(changeRole.error, t, { fallback: 'users.actions.roleChangeFailed' })
+          : null
+      }
+      actions={
+        <>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('users.confirm.cancel')}
           </Button>
           <Button
             loading={changeRole.isPending}
             size="sm"
-            onClick={() => {
-              if (!user) return
-              changeRole.mutate({ id: user.id, role: selectedRole }, { onSuccess: handleClose })
-            }}
+            onClick={() => changeRole.mutate({ id: user.id, role: selectedRole }, { onSuccess: onClose })}
           >
             {t('users.changeRole.save')}
           </Button>
-        </div>
-      </div>
-    </Modal>
+        </>
+      }
+    >
+      <Field label={t('users.invite.role.label')}>
+        <Select
+          value={selectedRole}
+          disabled={changeRole.isPending}
+          onChange={(e) => {
+            changeRole.reset()
+            setSelectedRole(e.target.value as CustomerRole)
+          }}
+        >
+          <option value="viewer">{t(ROLE_LABEL['viewer'])}</option>
+          <option value="customer_admin">{t(ROLE_LABEL['customer_admin'])}</option>
+        </Select>
+      </Field>
+    </DialogLayout>
   )
 }
 
-// ── Disable-user modal ───────────────────────────────────────────────────────
+// ── Disable-user dialog ──────────────────────────────────────────────────────
 
-function DisableModal({
-  user,
-  open,
-  onClose,
-}: {
-  user: UserResponse | null
-  open: boolean
-  onClose: () => void
-}) {
+function DisableBody({ user, onClose }: { user: UserResponse; onClose: () => void }) {
   const { t } = useTranslation()
-  const titleId = useId()
   const disable = useDisableUserMutation()
 
-  const handleClose = () => {
-    disable.reset()
-    onClose()
-  }
-
-  const errorText = disable.isError
-    ? requestErrorText(disable.error, t, { fallback: 'users.actions.disableFailed' })
-    : null
-
   return (
-    <Modal open={open} onClose={handleClose} labelledBy={titleId}>
-      <div className="flex flex-col gap-5 p-6">
-        <h2 id={titleId} className="font-title text-[1.25rem] leading-tight text-navy">
-          {t('users.disable.title')}
-        </h2>
-
-        <p className="font-body text-[0.9375rem] text-navy">{t('users.confirm.text')}</p>
-
-        {errorText && (
-          <Alert tone="error">{errorText}</Alert>
-        )}
-
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" size="sm" onClick={handleClose}>
-            {t('users.confirm.cancel')}
-          </Button>
-          <Button
-            variant="danger"
-            loading={disable.isPending}
-            size="sm"
-            onClick={() => {
-              if (!user) return
-              disable.mutate(user.id, { onSuccess: handleClose })
-            }}
-          >
-            {t('users.confirm.confirm')}
-          </Button>
-        </div>
-      </div>
-    </Modal>
+    <ConfirmDialog
+      title={t('users.disable.title')}
+      text={t('users.confirm.text')}
+      cancelLabel={t('users.confirm.cancel')}
+      confirmLabel={t('users.confirm.confirm')}
+      pending={disable.isPending}
+      error={disable.isError ? requestErrorText(disable.error, t, { fallback: 'users.actions.disableFailed' }) : null}
+      onConfirm={() => disable.mutate(user.id, { onSuccess: onClose })}
+      onCancel={onClose}
+    />
   )
 }
 
@@ -363,29 +286,26 @@ export function UsersPage() {
   const { t } = useTranslation()
   const usersQuery = useUsersQuery()
   const [inviteOpen, setInviteOpen] = useState(false)
-  const [roleTarget, setRoleTarget] = useState<UserResponse | null>(null)
-  const [disableTarget, setDisableTarget] = useState<UserResponse | null>(null)
+  const roleDialog = useDialogTarget<UserResponse>()
+  const disableDialog = useDialogTarget<UserResponse>()
 
   return (
     <Page title={t('users.title')}>
       <QueryBoundary query={usersQuery} keys={KEYS}>
-        {({ users }) => <UserTable users={users} onEditRole={setRoleTarget} onDisable={setDisableTarget} />}
+        {({ users }) => <UserTable users={users} onEditRole={roleDialog.show} onDisable={disableDialog.show} />}
       </QueryBoundary>
 
       <Fab label={t('users.invite.button')} onClick={() => setInviteOpen(true)} />
 
-      <InviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
-      <ChangeRoleModal
-        key={roleTarget?.id ?? ''}
-        user={roleTarget}
-        open={roleTarget !== null}
-        onClose={() => setRoleTarget(null)}
-      />
-      <DisableModal
-        user={disableTarget}
-        open={disableTarget !== null}
-        onClose={() => setDisableTarget(null)}
-      />
+      <Modal open={inviteOpen} onClose={() => setInviteOpen(false)}>
+        <InviteBody onClose={() => setInviteOpen(false)} />
+      </Modal>
+      <TargetModal dialog={roleDialog}>
+        {(user) => <ChangeRoleBody user={user} onClose={roleDialog.close} />}
+      </TargetModal>
+      <TargetModal dialog={disableDialog}>
+        {(user) => <DisableBody user={user} onClose={disableDialog.close} />}
+      </TargetModal>
     </Page>
   )
 }
