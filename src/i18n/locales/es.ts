@@ -557,17 +557,6 @@ export const es: Translations = {
         previous: 'Anterior',
         next: 'Siguiente',
       },
-      columns: {
-        asset: 'Activo',
-        type: 'Tipo',
-        os: 'Sistema operativo',
-        criticality: 'Criticidad',
-        exposure: 'Exposición',
-        owner: 'Dueño',
-        area: 'Área',
-        status: 'Estado',
-        details: 'Detalle',
-      },
       kind: {
         server: 'Servidor',
         virtual_machine: 'Máquina virtual',
@@ -597,13 +586,13 @@ export const es: Translations = {
       owner: {
         declared: 'Declarado',
       },
-      details: {
-        show: 'Mostrar detalle de {{name}}',
-        hide: 'Ocultar detalle de {{name}}',
-        description: 'Descripción',
+      record: {
+        criticality: 'Criticidad',
+        exposure: 'Exposición',
+        owner: 'Dueño',
+        area: 'Área',
         hardware: 'Hardware',
         noHardware: 'Sin hardware registrado',
-        exposure: 'Exposición',
         retired: 'Retirado en la CMDB',
         yes: 'Sí',
         no: 'No',
@@ -611,6 +600,17 @@ export const es: Translations = {
         noSoftware: 'Sin componentes de software registrados',
         unidentified: 'No identificado',
         unidentifiedHelp: 'Sin Producto asociado: no se pueden verificar amenazas contra él.',
+      },
+      inspector: {
+        moveHint: '↑ ↓ para moverte',
+        noArea: 'Sin área',
+        unidentifiedCount_one: '{{count}} de {{total}} no identificado',
+        unidentifiedCount_other: '{{count}} de {{total}} no identificados',
+        gaps: {
+          unknownExposure: 'Exposición desconocida',
+          unidentified_one: '{{count}} componente no identificado',
+          unidentified_other: '{{count}} componentes no identificados',
+        },
       },
     },
     exposure: {

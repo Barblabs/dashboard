@@ -555,17 +555,6 @@ export const en = {
         previous: 'Previous',
         next: 'Next',
       },
-      columns: {
-        asset: 'Asset',
-        type: 'Type',
-        os: 'Operating system',
-        criticality: 'Criticality',
-        exposure: 'Exposure',
-        owner: 'Owner',
-        area: 'Area',
-        status: 'Status',
-        details: 'Details',
-      },
       kind: {
         server: 'Server',
         virtual_machine: 'Virtual Machine',
@@ -595,13 +584,13 @@ export const en = {
       owner: {
         declared: 'Declared',
       },
-      details: {
-        show: 'Show details of {{name}}',
-        hide: 'Hide details of {{name}}',
-        description: 'Description',
+      record: {
+        criticality: 'Criticality',
+        exposure: 'Exposure',
+        owner: 'Owner',
+        area: 'Area',
         hardware: 'Hardware',
         noHardware: 'No hardware recorded',
-        exposure: 'Exposure',
         retired: 'Retired in the CMDB',
         yes: 'Yes',
         no: 'No',
@@ -609,6 +598,17 @@ export const en = {
         noSoftware: 'No Software Components recorded',
         unidentified: 'Unidentified',
         unidentifiedHelp: 'Not matched to a Product: threats cannot be checked against it.',
+      },
+      inspector: {
+        moveHint: '↑ ↓ to move',
+        noArea: 'No Area',
+        unidentifiedCount_one: '{{count}} of {{total}} unidentified',
+        unidentifiedCount_other: '{{count}} of {{total}} unidentified',
+        gaps: {
+          unknownExposure: 'Unknown Exposure',
+          unidentified_one: '{{count}} Unidentified Component',
+          unidentified_other: '{{count}} Unidentified Components',
+        },
       },
     },
     exposure: {
