@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSourceQuery, type CmdbSource } from '../../api/cmdb'
-import { useCurrentUser } from '../../auth/store'
+import { useCanEdit } from '../../auth/permissions'
 import { Page } from '../../components/Page'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { ConfigStepPanel } from './ConfigStepPanel'
@@ -26,7 +26,7 @@ const NEW_CONNECTION = { url: '', user: '' }
 export function ConfigPage() {
   const { t } = useTranslation()
   const sourceQuery = useSourceQuery()
-  const readOnly = useCurrentUser()?.role === 'viewer'
+  const readOnly = !useCanEdit()
 
   return (
     <Page title={t('config.header.title')} subtitle={t('config.header.subtitle')}>

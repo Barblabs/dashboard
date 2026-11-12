@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useBusinessContextQuery, useSaveBusinessContextMutation } from '../../api/businessContext'
-import { useCurrentUser } from '../../auth/store'
+import { useCanEdit } from '../../auth/permissions'
 import { Page } from '../../components/Page'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Button } from '../../components/ui/Button'
@@ -17,7 +17,7 @@ export function BusinessContextPage() {
   const { t } = useTranslation()
   const query = useBusinessContextQuery()
   const save = useSaveBusinessContextMutation()
-  const readOnly = useCurrentUser()?.role !== 'customer_admin'
+  const readOnly = !useCanEdit()
   const [startedEditing, setStartedEditing] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
 
