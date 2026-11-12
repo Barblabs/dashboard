@@ -42,7 +42,7 @@ function AssetOption({ asset, selected, onSelect }: { asset: Asset; selected: bo
         <span className="truncate text-[0.875rem] font-medium text-navy">{asset.name}</span>
         <span className="truncate text-[0.75rem] text-gray">
           {t(`config.inventory.kind.${asset.kind}`)} ·{' '}
-          {asset.area?.name ?? t('config.inventory.inspector.noArea')}
+          {asset.area?.name ?? t('config.inventory.noArea')}
         </span>
       </div>
       <div className="flex items-center gap-2">

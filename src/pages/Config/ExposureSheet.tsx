@@ -239,7 +239,7 @@ function AssetHeading({ asset }: { asset: Asset }) {
   const facts = [
     t(`config.inventory.kind.${asset.kind}`),
     osLabel(asset),
-    asset.area?.name ?? t('config.exposure.sheet.noArea'),
+    asset.area?.name ?? t('config.inventory.noArea'),
     t('config.exposure.sheet.criticality', {
       criticality: t(`config.inventory.criticality.${asset.criticality ?? 'unknown'}`),
     }),

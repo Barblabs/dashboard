@@ -536,6 +536,7 @@ export const en = {
       networkError: 'Could not reach the server to load the inventory.',
       total_one: '{{count}} asset',
       total_other: '{{count}} assets',
+      noArea: 'No Area',
       filters: {
         label: 'Filter assets',
         active: 'Status',
@@ -601,7 +602,6 @@ export const en = {
       },
       inspector: {
         moveHint: '↑ ↓ to move',
-        noArea: 'No Area',
         unidentifiedCount_one: '{{count}} of {{total}} unidentified',
         unidentifiedCount_other: '{{count}} of {{total}} unidentified',
         gaps: {
@@ -631,7 +631,6 @@ export const en = {
         queueTitle: 'Answer Unknown Exposures',
         singleTitle: 'Exposure',
         position: '{{index}} of {{total}}',
-        noArea: 'No Area',
         criticality: '{{criticality}} Criticality',
         declared: 'Declared',
         declaredBy: '{{value}}, declared by {{user}} on {{date}}.',

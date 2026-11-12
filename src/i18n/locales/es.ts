@@ -538,6 +538,7 @@ export const es: Translations = {
       networkError: 'No se pudo contactar al servidor para cargar el inventario.',
       total_one: '{{count}} activo',
       total_other: '{{count}} activos',
+      noArea: 'Sin área',
       filters: {
         label: 'Filtrar activos',
         active: 'Estado',
@@ -603,7 +604,6 @@ export const es: Translations = {
       },
       inspector: {
         moveHint: '↑ ↓ para moverte',
-        noArea: 'Sin área',
         unidentifiedCount_one: '{{count}} de {{total}} no identificado',
         unidentifiedCount_other: '{{count}} de {{total}} no identificados',
         gaps: {
@@ -633,7 +633,6 @@ export const es: Translations = {
         queueTitle: 'Responder Exposiciones desconocidas',
         singleTitle: 'Exposición',
         position: '{{index}} de {{total}}',
-        noArea: 'Sin área',
         criticality: 'Criticidad {{criticality}}',
         declared: 'Declarada',
         declaredBy: '{{value}}, declarada por {{user}} el {{date}}.',
