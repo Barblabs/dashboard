@@ -4,6 +4,7 @@ import { signOut } from '../auth/signOut'
 import { useCurrentUser, type Role } from '../auth/store'
 import { chooseLanguage, LANGUAGES } from '../i18n'
 import { useLocale } from '../i18n/format'
+import { Wordmark } from './Wordmark'
 
 type NavId =
   | 'findings'
@@ -53,10 +54,7 @@ export function Sidebar() {
         <div className="flex items-center gap-3">
           <img src="/castle-logo.svg" alt="" className="size-10 shrink-0" aria-hidden="true" />
           <div className="flex flex-col gap-0.5">
-            <span className="font-title text-[1.1875rem] leading-[1.2] whitespace-nowrap">
-              <span className="text-white">BARB</span>
-              <span className="text-cyan">ATTACK</span>
-            </span>
+            <Wordmark />
             {user?.role === 'platform_admin' && (
               <span className="font-body text-[0.75rem] font-semibold uppercase tracking-wider text-nav-text-dim">
                 {t('sidebar.superAdmin')}

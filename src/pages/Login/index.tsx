@@ -10,6 +10,7 @@ import { setMockRole } from '../../auth/mockTokens'
 import { returnToOf } from '../../auth/returnTo'
 import { completeSignIn } from '../../auth/session'
 import { useAuthStore, useCurrentUser, type Role } from '../../auth/store'
+import { Wordmark } from '../../components/Wordmark'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -63,10 +64,7 @@ function LoginLayout({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col gap-7">
           <div className="flex items-center gap-4">
             <img src="/castle-logo.svg" alt="" className="size-16 shrink-0" aria-hidden="true" />
-            <span className="font-title text-[2rem] leading-[1.2] whitespace-nowrap">
-              <span className="text-white">BARB</span>
-              <span className="text-cyan">ATTACK</span>
-            </span>
+            <Wordmark size="lg" />
           </div>
           <p className="font-title text-[2.125rem] leading-[1.2] text-white">
             {t('login.form.tagline')}
@@ -265,10 +263,7 @@ function MockSignIn() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-panel px-8">
       <div className="flex flex-col items-center gap-2">
-        <span className="font-title text-[2rem] leading-none">
-          <span className="text-navy">BARB</span>
-          <span className="text-cyan">ATTACK</span>
-        </span>
+        <Wordmark size="lg" background="light" />
         <p className="font-body text-[0.9375rem] text-gray">{t('login.mock.subtitle')}</p>
       </div>
       <div className="flex w-full max-w-xs flex-col gap-3">
