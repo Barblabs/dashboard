@@ -1,36 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Asset, AssetsPage, Exposure } from './assets'
+import type { Asset, Exposure } from './assets'
 import { api, ApiError } from './client'
 import { connectionScopeKey } from './cmdb'
-import { ASSETS_KEY } from './inventory'
+import { allAssetPages, ASSETS_KEY } from './inventory'
 import { listCache } from './listCache'
 import { PRIORITIZATIONS_KEY } from './prioritizations'
 import type { Known, Schemas } from './schemas'
 
 type DeclareExposureRequest = Known<Schemas['DeclareExposureRequest']>
 
-// The backend's maximum page size: whole-inventory reads take as few requests as possible.
-const MAX_PAGE_SIZE = 200
-
 // Beside the inventory pages rather than under their key: it holds a list of Assets, not a page.
 const UNKNOWN_EXPOSURE_KEY = [...connectionScopeKey, 'unknown-exposure'] as const
 
 const inventoryPages = listCache<Asset>(ASSETS_KEY, 'assets')
 
-async function* assetPages(filters: Record<string, string>): AsyncGenerator<Asset[]> {
-  let cursor: string | null = null
-  do {
-    const params = new URLSearchParams({ ...filters, limit: String(MAX_PAGE_SIZE) })
-    if (cursor) params.set('cursor', cursor)
-    const page: AssetsPage = await api.get<AssetsPage>(`/assets?${params}`)
-    yield page.assets
-    cursor = page.next_cursor
-  } while (cursor !== null)
-}
-
 async function fetchUnknownExposure(): Promise<Asset[]> {
   const unknown: Asset[] = []
-  for await (const assets of assetPages({ active: 'true' })) {
+  for await (const assets of allAssetPages({ active: 'true' })) {
     unknown.push(...assets.filter((asset) => asset.exposure.value === null))
   }
   return unknown
@@ -46,7 +32,7 @@ export function useUnknownExposureQuery() {
 
 // There is no `GET /assets/{id}`: the Asset is looked up among those of its Kind, Active or not.
 async function fetchAsset(asset: Asset): Promise<Asset | null> {
-  for await (const assets of assetPages({ active: 'all', kind: asset.kind })) {
+  for await (const assets of allAssetPages({ active: 'all', kind: asset.kind })) {
     const found = assets.find((candidate) => candidate.id === asset.id)
     if (found) return found
   }
