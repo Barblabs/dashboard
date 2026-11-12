@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { LIMITS } from '../../../api/businessContext'
-import { MultiSelectField, SelectField, TextAreaField } from '../fields'
+import { MultiSelectField, SelectField, TextField } from '../fields'
 import { ROW } from './layout'
 
 export function Risk() {
@@ -16,24 +16,27 @@ export function Risk() {
         />
         <MultiSelectField name="risk.concerns" vocab="concerns" label={t('businessContext.fields.concerns')} />
       </div>
-      <TextAreaField
+      <TextField
         name="risk.past_incidents"
         label={t('businessContext.fields.pastIncidents.label')}
         placeholder={t('businessContext.fields.pastIncidents.placeholder')}
         max={LIMITS.narrative}
+        rows={3}
       />
       <div className={ROW}>
-        <TextAreaField
+        <TextField
           name="risk.constraints"
           label={t('businessContext.fields.constraints.label')}
           placeholder={t('businessContext.fields.constraints.placeholder')}
           max={LIMITS.narrative}
+          rows={3}
         />
-        <TextAreaField
+        <TextField
           name="risk.notes"
           label={t('businessContext.fields.notes.label')}
           placeholder={t('businessContext.fields.notes.placeholder')}
           max={LIMITS.narrative}
+          rows={3}
         />
       </div>
     </>

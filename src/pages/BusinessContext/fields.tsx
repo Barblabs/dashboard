@@ -20,78 +20,51 @@ interface TextProps {
   placeholder?: string
   max: number
   hideLabel?: boolean
+  /** Several lines of text in a textarea; without it, one line in an input. */
+  rows?: number
+  className?: string
 }
 
-function useTextField(name: TextProps['name'], max: number) {
-  const { field, fieldState } = useController<Fields, TextProps['name']>({ name })
-  const errorText = useErrorText()
+export function TextField({ name, label, placeholder, max, hideLabel, rows, className = '' }: TextProps) {
+  const id = useId()
   const meta = useMeta(name)
+  const errorText = useErrorText()
+  const { field, fieldState } = useController<Fields, TextProps['name']>({ name })
+  const error = errorText(fieldState.error?.message, max)
   const length = [...field.value].length
-  const near = length > max * 0.9 && !meta.readOnly
-  return {
-    id: useId(),
-    field,
-    meta,
-    error: errorText(fieldState.error?.message, max),
-    invalid: Boolean(fieldState.error) || length > max,
-    counter: near ? (
-      <span className={`font-mono text-[0.6875rem] ${length > max ? 'text-critical' : 'text-gray'}`}>
-        {length} / {max}
-      </span>
-    ) : null,
+  const control = {
+    id,
+    ...field,
+    placeholder,
+    'aria-invalid': Boolean(fieldState.error) || length > max,
+    'aria-describedby': error ? `${id}-error` : undefined,
   }
-}
-
-export function TextAreaField({ name, label, placeholder, max, hideLabel, rows = 3 }: TextProps & { rows?: number }) {
-  const { id, field, meta, error, invalid, counter } = useTextField(name, max)
   return (
     <Shell
       id={id}
       label={label}
       error={error}
-      aside={counter}
+      aside={
+        length > max * 0.9 &&
+        !meta.readOnly && (
+          <span className={`font-mono text-[0.6875rem] ${length > max ? 'text-critical' : 'text-gray'}`}>
+            {length} / {max}
+          </span>
+        )
+      }
       hideLabel={hideLabel}
       {...meta}
     >
       {meta.readOnly ? (
         <Shown value={field.value} />
-      ) : (
+      ) : rows ? (
         <textarea
-          id={id}
           rows={rows}
-          {...field}
-          placeholder={placeholder}
-          aria-invalid={invalid}
-          aria-describedby={error ? `${id}-error` : undefined}
-          className={`${FIELD_SURFACE} resize-y px-3 py-2.5 text-[0.9375rem] leading-[1.5] focus:border-navy aria-invalid:border-critical`}
+          {...control}
+          className={`${FIELD_SURFACE} resize-y px-3 py-2.5 text-[0.9375rem] leading-[1.5] focus:border-navy aria-invalid:border-critical ${className}`}
         />
-      )}
-    </Shell>
-  )
-}
-
-export function TextField({ name, label, placeholder, max, hideLabel, className }: TextProps & { className?: string }) {
-  const { id, field, meta, error, invalid, counter } = useTextField(name, max)
-  return (
-    <Shell
-      id={id}
-      label={label}
-      error={error}
-      aside={counter}
-      hideLabel={hideLabel}
-      {...meta}
-    >
-      {meta.readOnly ? (
-        <Shown value={field.value} />
       ) : (
-        <Input
-          id={id}
-          {...field}
-          placeholder={placeholder}
-          aria-invalid={invalid}
-          aria-describedby={error ? `${id}-error` : undefined}
-          className={className}
-        />
+        <Input {...control} className={className} />
       )}
     </Shell>
   )
