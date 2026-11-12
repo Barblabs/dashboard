@@ -121,3 +121,5 @@ export function useExposureMutation({
     },
   })
 }
+
+export type ExposureMutation = ReturnType<typeof useExposureMutation>

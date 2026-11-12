@@ -2,7 +2,12 @@ import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EXPOSURES, type Asset, type Exposure } from '../../api/assets'
 import { errorCode } from '../../api/client'
-import { useExposureMutation, type ExposureChange, type ExposureSaved } from '../../api/exposure'
+import {
+  useExposureMutation,
+  type ExposureChange,
+  type ExposureMutation,
+  type ExposureSaved,
+} from '../../api/exposure'
 import { useCanEdit } from '../../auth/permissions'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
@@ -104,27 +109,28 @@ interface AssetStepProps {
   onDone: (answered: boolean) => void
 }
 
+function LockedReason({ children }: { children: string }) {
+  return <p className="font-body text-[0.8125rem] leading-[1.4] text-gray">{children}</p>
+}
+
 // The mutation lives here, above both views, so a 409 can turn the form into the locked view.
 function AssetStep({ asset, queue, onDone }: AssetStepProps) {
   const { t } = useTranslation()
   const canEdit = useCanEdit()
   const change = useExposureMutation({ onSaved: useSavedToast(queue) })
 
-  // A 409 means the Asset turned Inactive meanwhile: it is now as read-only as any Inactive one.
-  const turnedInactive = errorCode(change.error) === 'asset_inactive'
-  const lockedReason = !canEdit
-    ? t('config.exposure.sheet.viewerReason')
-    : !asset.active || turnedInactive
-      ? t('config.exposure.sheet.inactiveReason')
-      : null
-
-  if (lockedReason) {
-    // The error replaces the reason: the User must learn their save didn't happen.
-    const notice = turnedInactive ? (
+  // A 409 means the Asset turned Inactive meanwhile. Its error replaces the reason the step is
+  // locked: the User must learn their save didn't happen. A Viewer never sends, so never sees it.
+  const notice =
+    errorCode(change.error) === 'asset_inactive' ? (
       <Alert tone="error">{t('config.exposure.sheet.turnedInactive')}</Alert>
-    ) : (
-      <p className="font-body text-[0.8125rem] leading-[1.4] text-gray">{lockedReason}</p>
-    )
+    ) : !canEdit ? (
+      <LockedReason>{t('config.exposure.sheet.viewerReason')}</LockedReason>
+    ) : !asset.active ? (
+      <LockedReason>{t('config.exposure.sheet.inactiveReason')}</LockedReason>
+    ) : null
+
+  if (notice) {
     return (
       <StepLayout
         asset={asset}
@@ -144,7 +150,7 @@ function AssetStep({ asset, queue, onDone }: AssetStepProps) {
 }
 
 interface DeclareStepProps extends AssetStepProps {
-  change: ReturnType<typeof useExposureMutation>
+  change: ExposureMutation
 }
 
 function DeclareStep({ asset, queue, change, onDone }: DeclareStepProps) {
