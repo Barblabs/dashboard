@@ -116,7 +116,7 @@ export function AssetInspector({ assets, busy, pager, onOpenExposure }: AssetIns
           aria-activedescendant={selectedId}
           aria-busy={busy || undefined}
           onKeyDown={onKeyDown}
-          className={`relative max-h-[22rem] min-h-0 flex-1 overflow-y-auto lg:max-h-none outline-none transition-opacity duration-150 focus-visible:shadow-[inset_0_0_0_2px_var(--color-navy)] ${busy ? 'opacity-60' : ''}`}
+          className={`relative max-h-[22rem] min-h-0 flex-1 overflow-y-auto outline-none transition-opacity duration-150 focus-visible:shadow-[inset_0_0_0_2px_var(--color-navy)] lg:max-h-none ${busy ? 'opacity-60' : ''}`}
         >
           {assets.map((asset) => (
             <AssetOption
