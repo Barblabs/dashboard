@@ -3,6 +3,7 @@ import type { Asset, AssetsPage, Exposure } from './assets'
 import { api, ApiError } from './client'
 import { connectionScopeKey } from './cmdb'
 import { ASSETS_KEY } from './inventory'
+import { listCache } from './listCache'
 import { PRIORITIZATIONS_KEY } from './prioritizations'
 import type { Known, Schemas } from './schemas'
 
@@ -13,6 +14,8 @@ const MAX_PAGE_SIZE = 200
 
 // Beside the inventory pages rather than under their key: it holds a list of Assets, not a page.
 const UNKNOWN_EXPOSURE_KEY = [...connectionScopeKey, 'unknown-exposure'] as const
+
+const inventoryPages = listCache<Asset>(ASSETS_KEY, 'assets')
 
 async function* assetPages(filters: Record<string, string>): AsyncGenerator<Asset[]> {
   let cursor: string | null = null
@@ -105,13 +108,22 @@ export function useExposureMutation({
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: sendChange,
-    onSuccess: onSaved,
-    // Even a failure may follow a change made elsewhere, and a change rescores the Findings.
-    onSettled: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: ASSETS_KEY }),
-        queryClient.invalidateQueries({ queryKey: UNKNOWN_EXPOSURE_KEY }),
-        queryClient.invalidateQueries({ queryKey: PRIORITIZATIONS_KEY }),
-      ]),
+    // The response is the Asset as saved: the table and the count show it without waiting.
+    onSuccess: (saved, change) => {
+      inventoryPages.replace(queryClient, saved.asset)
+      queryClient.setQueryData<Asset[]>(UNKNOWN_EXPOSURE_KEY, (unknown) =>
+        unknown?.filter((asset) => asset.id !== saved.asset.id || saved.asset.exposure.value === null),
+      )
+      onSaved(saved, change)
+    },
+    /*
+     * Still refetched after any outcome, without holding the mutation: a failure may follow a
+     * change made elsewhere, and a change rescores the Findings.
+     */
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: ASSETS_KEY })
+      void queryClient.invalidateQueries({ queryKey: UNKNOWN_EXPOSURE_KEY })
+      void queryClient.invalidateQueries({ queryKey: PRIORITIZATIONS_KEY })
+    },
   })
 }
