@@ -49,36 +49,34 @@ export interface Codes {
 export type Vocab = keyof Codes
 
 interface Vocabulary<T extends string> {
+  /** In the order the UI lists them. */
   codes: readonly T[]
-  namer: (t: TFunction<'translation'>, language: string) => (code: T) => string
-  /** Listed alphabetically in the UI's language rather than in the backend's order. */
-  byName?: boolean
+  labelOf: (code: T) => string
 }
 
-// A mapped type, so indexing it with a generic `Vocab` keeps the codes and the namer paired.
-const VOCABS: { [V in Vocab]: Vocabulary<Codes[V]> } = {
-  sectors: { codes: SECTORS, namer: (t) => (c) => t(`businessContext.vocab.sectors.${c}`) },
-  organizationTypes: { codes: ORGANIZATION_TYPES, namer: (t) => (c) => t(`businessContext.vocab.organizationTypes.${c}`) },
-  employees: { codes: EMPLOYEE_RANGES, namer: (t) => (c) => t(`businessContext.vocab.employees.${c}`) },
-  revenue: { codes: REVENUE_RANGES, namer: (t) => (c) => t(`businessContext.vocab.revenue.${c}`) },
-  dataCategories: { codes: DATA_CATEGORIES, namer: (t) => (c) => t(`businessContext.vocab.dataCategories.${c}`) },
-  regulations: { codes: REGULATIONS, namer: (t) => (c) => t(`businessContext.vocab.regulations.${c}`) },
-  environments: { codes: ENVIRONMENTS, namer: (t) => (c) => t(`businessContext.vocab.environments.${c}`) },
-  concerns: { codes: CONCERNS, namer: (t) => (c) => t(`businessContext.vocab.concerns.${c}`) },
-  appetite: { codes: RISK_APPETITES, namer: (t) => (c) => t(`businessContext.vocab.appetite.${c}`) },
-  impact: { codes: IMPACTS, namer: (t) => (c) => t(`businessContext.vocab.impact.${c}`) },
-  downtime: { codes: DOWNTIMES, namer: (t) => (c) => t(`businessContext.vocab.downtime.${c}`) },
-  countries: { codes: COUNTRIES, namer: (_, language) => countryNamer(language), byName: true },
+// A mapped type, so indexing it with a generic `Vocab` keeps the codes and the names paired.
+const VOCABS: { [V in Vocab]: (t: TFunction<'translation'>, language: string) => Vocabulary<Codes[V]> } = {
+  sectors: (t) => ({ codes: SECTORS, labelOf: (c) => t(`businessContext.vocab.sectors.${c}`) }),
+  organizationTypes: (t) => ({ codes: ORGANIZATION_TYPES, labelOf: (c) => t(`businessContext.vocab.organizationTypes.${c}`) }),
+  employees: (t) => ({ codes: EMPLOYEE_RANGES, labelOf: (c) => t(`businessContext.vocab.employees.${c}`) }),
+  revenue: (t) => ({ codes: REVENUE_RANGES, labelOf: (c) => t(`businessContext.vocab.revenue.${c}`) }),
+  dataCategories: (t) => ({ codes: DATA_CATEGORIES, labelOf: (c) => t(`businessContext.vocab.dataCategories.${c}`) }),
+  regulations: (t) => ({ codes: REGULATIONS, labelOf: (c) => t(`businessContext.vocab.regulations.${c}`) }),
+  environments: (t) => ({ codes: ENVIRONMENTS, labelOf: (c) => t(`businessContext.vocab.environments.${c}`) }),
+  concerns: (t) => ({ codes: CONCERNS, labelOf: (c) => t(`businessContext.vocab.concerns.${c}`) }),
+  appetite: (t) => ({ codes: RISK_APPETITES, labelOf: (c) => t(`businessContext.vocab.appetite.${c}`) }),
+  impact: (t) => ({ codes: IMPACTS, labelOf: (c) => t(`businessContext.vocab.impact.${c}`) }),
+  downtime: (t) => ({ codes: DOWNTIMES, labelOf: (c) => t(`businessContext.vocab.downtime.${c}`) }),
+  // Alphabetical in the UI's language: nobody looks for a country in code order.
+  countries: (_, language) => {
+    const labelOf = countryNamer(language)
+    return { codes: COUNTRIES.toSorted((a, b) => labelOf(a).localeCompare(labelOf(b), language)), labelOf }
+  },
 }
 
-/** A vocabulary's codes in the order the UI lists them, and the name of each in the UI's language. */
-export function useVocab<V extends Vocab>(vocab: V): { codes: readonly Codes[V][]; labelOf: (code: Codes[V]) => string } {
+/** A vocabulary's codes as the UI lists them, and the name of each in the UI's language. */
+export function useVocab<V extends Vocab>(vocab: V): Vocabulary<Codes[V]> {
   const { t } = useTranslation()
   const language = useLocale()
-  return useMemo(() => {
-    const { codes, namer, byName }: Vocabulary<Codes[V]> = VOCABS[vocab]
-    const labelOf = namer(t, language)
-    const ordered = byName ? codes.toSorted((a, b) => labelOf(a).localeCompare(labelOf(b), language)) : codes
-    return { codes: ordered, labelOf }
-  }, [vocab, t, language])
+  return useMemo(() => VOCABS[vocab](t, language), [vocab, t, language])
 }
