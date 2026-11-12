@@ -17,10 +17,12 @@ import { QueryBoundary } from '../../components/QueryBoundary'
 import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
+import { Fab } from '../../components/ui/Fab'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
-import { BanIcon, PencilIcon, PlusIcon, SearchIcon } from '../../components/ui/icons'
+import { BanIcon, PencilIcon } from '../../components/ui/icons'
 import { Modal } from '../../components/ui/Modal'
+import { SearchField } from '../../components/ui/SearchField'
 import { Select } from '../../components/ui/Select'
 import { requestErrorText } from '../../i18n/errors'
 
@@ -277,26 +279,7 @@ function UserTable({
 
   return (
     <>
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <span
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray"
-            aria-hidden="true"
-          >
-            <SearchIcon />
-          </span>
-          <input
-            type="search"
-            placeholder={t('users.search.placeholder')}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-md border border-border-panel bg-white py-2.5 pl-9 pr-3 font-body text-[0.9375rem] text-navy outline-none transition-[border-color] duration-150 ease-[ease] focus:border-navy focus-ring"
-          />
-        </div>
-        {counter && (
-          <p className="shrink-0 font-body text-[0.875rem] text-gray">{counter}</p>
-        )}
-      </div>
+      <SearchField label={t('users.search.placeholder')} value={search} onChange={setSearch} counter={counter} />
 
       {filtered.length === 0 ? (
         <p className="py-12 text-center font-body text-[0.875rem] text-gray">
@@ -391,15 +374,7 @@ export function UsersPage() {
         {({ users }) => <UserTable users={users} onEditRole={setRoleTarget} onDisable={setDisableTarget} />}
       </QueryBoundary>
 
-      {/* FAB */}
-      <button
-        type="button"
-        aria-label={t('users.invite.button')}
-        className="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-navy text-white shadow-lg transition-transform hover:scale-105 focus-ring"
-        onClick={() => setInviteOpen(true)}
-      >
-        <PlusIcon />
-      </button>
+      <Fab label={t('users.invite.button')} onClick={() => setInviteOpen(true)} />
 
       <InviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
       <ChangeRoleModal
