@@ -9,6 +9,7 @@ import { Message } from '../../components/ui/Message'
 import { useDialogTarget } from '../../components/ui/useDialogTarget'
 import { AssetFilterBar } from './AssetFilterBar'
 import { AssetInspector } from './AssetInspector'
+import { AssetPager } from './AssetPager'
 import { ExposureSheet, type ExposureSheetTarget } from './ExposureSheet'
 
 const KEYS = {
@@ -54,6 +55,9 @@ export function TechStackTable() {
   const { t } = useTranslation()
   const { query, filtered, navigating, filters, filterBy, pager } = useInventory()
   const exposureSheet = useDialogTarget<ExposureSheetTarget>()
+  // The Inspector carries the pager in its list; without it (an empty or failed page) the pager
+  // stands on its own, so a later page always offers the way back.
+  const inspecting = (query.data?.assets.length ?? 0) > 0
 
   return (
     <section>
@@ -88,6 +92,12 @@ export function TechStackTable() {
           )
         }
       </QueryBoundary>
+
+      {pager && !inspecting && (
+        <div className="flex justify-end px-6 py-4">
+          <AssetPager pager={pager} />
+        </div>
+      )}
 
       <ExposureSheet dialog={exposureSheet} />
     </section>

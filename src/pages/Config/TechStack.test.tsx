@@ -301,6 +301,32 @@ describe('Tech stack', () => {
     expect(queries[queries.length - 1]).toEqual({ limit: '50', active: 'true', criticality: 'high' })
   })
 
+  it('a later page that fails or comes back empty still offers the way back', async () => {
+    let page2: 'failing' | 'empty' = 'failing'
+    serveTwoPages()
+    server.use(
+      http.get(apiUrl('/assets'), ({ request }) => {
+        if (new URL(request.url).searchParams.get('cursor') !== 'page-2') return undefined
+        return page2 === 'failing'
+          ? HttpResponse.json({ code: 'internal_error', error: 'boom' }, { status: 500 })
+          : HttpResponse.json(page([], null, 2))
+      }),
+    )
+    const user = await renderInventory()
+
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    expect(await screen.findByRole('alert', {}, { timeout: 1000 })).toBeInTheDocument()
+    expect(screen.getByText('Page 2')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Previous' }))
+    expect(await screen.findByRole('option', { name: /prod-api-01/ })).toBeInTheDocument()
+
+    page2 = 'empty'
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    expect(await screen.findByText('There are no assets in the inventory.')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Previous' }))
+    expect(await screen.findByRole('option', { name: /prod-api-01/ })).toBeInTheDocument()
+  })
+
   it('a filter that leaves the selected asset out selects the first match', async () => {
     const user = await renderInventory()
     await user.click(option('core-switch-01'))
