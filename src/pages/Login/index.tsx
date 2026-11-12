@@ -15,19 +15,11 @@ import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { MOCK_MODE } from '../../mockMode'
+import { homePath } from '../../routes'
 
 // ── Mock roles (VITE_USE_MOCK=true) ─────────────────────────────────────────
 
-interface MockRoleOption {
-  role: Role
-  labelKey: 'login.mock.platformAdmin' | 'login.mock.customerAdmin' | 'login.mock.viewer'
-}
-
-const MOCK_ROLES: MockRoleOption[] = [
-  { role: 'platform_admin', labelKey: 'login.mock.platformAdmin' },
-  { role: 'customer_admin', labelKey: 'login.mock.customerAdmin' },
-  { role: 'viewer', labelKey: 'login.mock.viewer' },
-]
+const MOCK_ROLES: readonly Role[] = ['platform_admin', 'customer_admin', 'viewer']
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -47,10 +39,6 @@ function cognitoErrorKey(err: unknown): LoginErrorKey {
     }
   }
   return 'login.errors.network'
-}
-
-function destForRole(role: Role): string {
-  return role === 'platform_admin' ? '/tenants' : '/config'
 }
 
 // ── Shared layout wrapper ────────────────────────────────────────────────────
@@ -273,14 +261,14 @@ function MockSignIn() {
         {serverError && (
           <Alert tone="error">{serverError}</Alert>
         )}
-        {MOCK_ROLES.map(({ role, labelKey }) => (
+        {MOCK_ROLES.map((role) => (
           <Button
             key={role}
             variant="secondary"
             className="w-full justify-start"
             onClick={() => { void signInAs(role) }}
           >
-            {t(labelKey)}
+            {t(`login.mock.role.${role}`)}
           </Button>
         ))}
       </div>
@@ -305,7 +293,7 @@ export function LoginPage() {
   const [step, setStep] = useState<Step>({ kind: 'credentials' })
 
   if (deactivated) return <Navigate to="/deactivated" replace />
-  if (user) return <Navigate to={returnTo ?? destForRole(user.role)} replace />
+  if (user) return <Navigate to={returnTo ?? homePath(user.role)} replace />
   if (MOCK_MODE) return <MockSignIn />
 
   return (

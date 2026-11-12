@@ -18,6 +18,20 @@ const DEFAULT_TEST_USER: AuthUser = {
   customer: { id: 'test-customer-id', name: 'Test Org' },
 }
 
+export const VIEWER: AuthUser = {
+  id: 'viewer-id',
+  email: 'viewer@test.example',
+  role: 'viewer',
+  customer: { id: 'test-customer-id', name: 'Test Org' },
+}
+
+export const PLATFORM_ADMIN: AuthUser = {
+  id: 'platform-admin-id',
+  email: 'superadmin@barbattack.example',
+  role: 'platform_admin',
+  customer: null,
+}
+
 /*
  * jsdom keeps the URL between tests: every render opens the given path explicitly.
  * Starts signed in as a customer_admin by default so protected routes render at once;

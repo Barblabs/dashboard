@@ -35,9 +35,11 @@ export const es: Translations = {
     mock: {
       title: 'Modo de prueba',
       subtitle: 'Elige un rol para entrar sin Cognito.',
-      platformAdmin: 'Super Admin (platform_admin)',
-      customerAdmin: 'Administrador (customer_admin)',
-      viewer: 'Lector (viewer)',
+      role: {
+        platform_admin: 'Super Admin (platform_admin)',
+        customer_admin: 'Administrador (customer_admin)',
+        viewer: 'Lector (viewer)',
+      },
     },
     real: {
       comingSoon: 'Inicio de sesión con Cognito próximamente. Usa VITE_USE_MOCK=true para desarrollo.',

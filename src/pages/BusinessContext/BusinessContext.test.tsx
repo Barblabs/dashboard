@@ -6,15 +6,8 @@ import type { DraftSource } from '../../api/businessContext'
 import type { AuthUser } from '../../auth/store'
 import { businessContextStore, MOCK_DRAFT, unsaved } from '../../mocks/business-context-store'
 import { apiUrl } from '../../mocks/url'
-import { renderApp } from '../../test/render'
+import { renderApp, VIEWER } from '../../test/render'
 import { server } from '../../test/server'
-
-const VIEWER: AuthUser = {
-  id: 'viewer-id',
-  email: 'viewer@test.example',
-  role: 'viewer',
-  customer: { id: 'test-customer-id', name: 'Test Org' },
-}
 
 async function renderPage(user?: AuthUser) {
   const ui = renderApp('/business-context', user)

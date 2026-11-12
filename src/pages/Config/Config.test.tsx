@@ -2,17 +2,9 @@ import { cleanup, screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { i18n } from '../../i18n'
-import type { AuthUser } from '../../auth/store'
 import { apiUrl } from '../../mocks/url'
-import { renderApp, seedSource } from '../../test/render'
+import { renderApp, seedSource, VIEWER } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
-
-const VIEWER: AuthUser = {
-  id: 'viewer-id',
-  email: 'viewer@test.example',
-  role: 'viewer',
-  customer: { id: 'test-customer-id', name: 'Test Org' },
-}
 
 type User = ReturnType<typeof renderApp>
 

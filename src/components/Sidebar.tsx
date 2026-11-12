@@ -1,47 +1,17 @@
 import { useTranslation } from 'react-i18next'
 import { NavLink, useNavigate } from 'react-router'
 import { signOut } from '../auth/signOut'
-import { useCurrentUser, type Role } from '../auth/store'
+import { useCurrentUser } from '../auth/store'
 import { chooseLanguage, LANGUAGES } from '../i18n'
 import { useLocale } from '../i18n/format'
+import { pagePath, pagesFor } from '../routes'
 import { Wordmark } from './Wordmark'
-
-type NavId =
-  | 'findings'
-  | 'config'
-  | 'business-context'
-  | 'notifications'
-  | 'users'
-  | 'tenants'
-  | 'admin-dashboard'
-
-const NAV_BY_ROLE: Record<Role, readonly NavId[]> = {
-  platform_admin: ['tenants', 'admin-dashboard'],
-  customer_admin: ['findings', 'config', 'business-context', 'notifications', 'users'],
-  viewer: ['findings', 'config', 'business-context', 'notifications'],
-}
-
-const NAV_KEY: Record<NavId, `sidebar.nav.${NavId}`> = {
-  findings: 'sidebar.nav.findings',
-  config: 'sidebar.nav.config',
-  'business-context': 'sidebar.nav.business-context',
-  notifications: 'sidebar.nav.notifications',
-  users: 'sidebar.nav.users',
-  tenants: 'sidebar.nav.tenants',
-  'admin-dashboard': 'sidebar.nav.admin-dashboard',
-}
-
-const ROLE_KEY: Record<Role, 'sidebar.user.role.platform_admin' | 'sidebar.user.role.customer_admin' | 'sidebar.user.role.viewer'> = {
-  platform_admin: 'sidebar.user.role.platform_admin',
-  customer_admin: 'sidebar.user.role.customer_admin',
-  viewer: 'sidebar.user.role.viewer',
-}
 
 export function Sidebar() {
   const { t } = useTranslation()
   const user = useCurrentUser()
   const navigate = useNavigate()
-  const navItems = user ? NAV_BY_ROLE[user.role] : []
+  const pages = user ? pagesFor(user.role) : []
 
   function handleSignOut() {
     signOut()
@@ -64,10 +34,10 @@ export function Sidebar() {
         </div>
 
         <nav className="flex flex-col gap-1">
-          {navItems.map((id) => (
+          {pages.map(({ id }) => (
             <NavLink
               key={id}
-              to={`/${id}`}
+              to={pagePath(id)}
               className={({ isActive }) =>
                 `flex h-11 items-center gap-3 rounded-md px-3 font-body text-[0.9375rem] transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan ${
                   isActive ? 'bg-nav-active-bg font-semibold text-white' : 'font-medium text-nav-text'
@@ -79,7 +49,7 @@ export function Sidebar() {
                   <span
                     className={`h-5 w-1 shrink-0 rounded-xs ${isActive ? 'bg-cyan' : 'bg-transparent'}`}
                   />
-                  {t(NAV_KEY[id])}
+                  {t(`sidebar.nav.${id}`)}
                 </>
               )}
             </NavLink>
@@ -96,7 +66,7 @@ export function Sidebar() {
                 {user.email}
               </p>
               <p className="font-body text-[0.8125rem] leading-[1.4] text-nav-text-dim">
-                {t(ROLE_KEY[user.role])}
+                {t(`sidebar.user.role.${user.role}`)}
               </p>
             </div>
             <button
