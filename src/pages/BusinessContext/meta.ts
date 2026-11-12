@@ -1,9 +1,18 @@
 import { createContext, useContext } from 'react'
+import type { Path, PathValue } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import type { BusinessContextFields } from '../../api/businessContext'
 import type { ValidationKey } from './schema'
 
 export type Fields = BusinessContextFields
+
+/*
+ * The fields whose value is exactly `V`. react-hook-form's `FieldPathByValue` only checks
+ * assignability, which lets a free-text field bind to a field of codes.
+ */
+export type FieldPathOf<V> = {
+  [K in Path<Fields>]: [PathValue<Fields, K>] extends [V] ? ([V] extends [PathValue<Fields, K>] ? K : never) : never
+}[Path<Fields>]
 
 export interface FormMeta {
   /** The fields a draft filled that are not saved yet. */

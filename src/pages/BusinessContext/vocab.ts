@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import {
   CONCERNS,
+  COUNTRIES,
   DATA_CATEGORIES,
   DOWNTIMES,
   EMPLOYEE_RANGES,
@@ -14,6 +15,7 @@ import {
   RISK_APPETITES,
   SECTORS,
   type Concern,
+  type CountryCode,
   type DataCategory,
   type Downtime,
   type EmployeeRange,
@@ -26,9 +28,9 @@ import {
   type Sector,
 } from '../../api/businessContext'
 import { useLocale } from '../../i18n/format'
-import { COUNTRIES, countryNamer } from './model'
+import { countryNamer } from './model'
 
-/** The codes of each vocabulary a field picks from. Codes are ISO 3166-1 alpha-2 for countries. */
+/** The codes of each vocabulary a field picks from. */
 export interface Codes {
   sectors: Sector
   organizationTypes: Exclude<OrganizationType, ''>
@@ -41,7 +43,7 @@ export interface Codes {
   appetite: Exclude<RiskAppetite, ''>
   impact: Exclude<Impact, ''>
   downtime: Exclude<Downtime, ''>
-  countries: string
+  countries: CountryCode
 }
 
 export type Vocab = keyof Codes

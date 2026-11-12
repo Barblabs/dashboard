@@ -16,7 +16,7 @@ export const businessContextHandlers = [
     if (version !== current.version) {
       return failure(409, 'business_context_stale', 'the business context changed since it was read')
     }
-    const hq = context.geography.headquarters.toUpperCase()
+    const hq = context.geography.headquarters
     const countries = context.geography.countries
     const normalized = {
       ...context,

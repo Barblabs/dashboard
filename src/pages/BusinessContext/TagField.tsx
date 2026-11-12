@@ -1,13 +1,13 @@
 import { useId, useState } from 'react'
-import { useController, type FieldPathByValue } from 'react-hook-form'
+import { useController } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { LIMITS } from '../../api/businessContext'
 import { CloseIcon } from '../../components/ui/icons'
 import { Shell, Shown } from './FieldShell'
-import { useMeta, type Fields } from './meta'
+import { useMeta, type FieldPathOf, type Fields } from './meta'
 
 interface TagProps {
-  name: FieldPathByValue<Fields, string[]>
+  name: FieldPathOf<string[]>
   label: string
   placeholder?: string
   hideLabel?: boolean
@@ -22,10 +22,9 @@ export function TagField({ name, label, placeholder, hideLabel, suggestions, can
   const id = useId()
   const listId = useId()
   const meta = useMeta(name)
-  const { field } = useController<Fields, TagProps['name']>({ name })
-  // The paths include the vocabulary fields, whose arrays narrow `includes` to their codes.
-  const value: readonly string[] = field.value
-  const onChange = field.onChange
+  const {
+    field: { value, onChange },
+  } = useController<Fields, TagProps['name']>({ name })
   const [draft, setDraft] = useState('')
   const [error, setError] = useState<string | null>(null)
 

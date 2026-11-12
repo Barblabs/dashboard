@@ -1,12 +1,12 @@
 import { useId, useMemo } from 'react'
-import { useController, type FieldPathByValue } from 'react-hook-form'
+import { useController } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { FIELD_SURFACE } from '../../components/ui/fieldSurface'
 import { Input } from '../../components/ui/Input'
 import { MultiSelect, type Option } from '../../components/ui/MultiSelect'
 import { Select } from '../../components/ui/Select'
 import { Shell, Shown } from './FieldShell'
-import { useErrorText, useMeta, type Fields } from './meta'
+import { useErrorText, useMeta, type FieldPathOf, type Fields } from './meta'
 import { useVocab, type Codes, type Vocab } from './vocab'
 
 /*
@@ -15,7 +15,7 @@ import { useVocab, type Codes, type Vocab } from './vocab'
  */
 
 interface TextProps {
-  name: FieldPathByValue<Fields, string>
+  name: FieldPathOf<string>
   label: string
   placeholder?: string
   max: number
@@ -101,8 +101,8 @@ export function TextField({ name, label, placeholder, max, hideLabel, className 
  * Pairs a field with the vocabulary of its codes, so `tsc` refuses a field shown with another
  * field's options. A union rather than a generic, so the body sees the field's concrete values.
  */
-type OneOf = { [V in Vocab]: { vocab: V; name: FieldPathByValue<Fields, Codes[V] | ''> } }[Vocab]
-type SomeOf = { [V in Vocab]: { vocab: V; name: FieldPathByValue<Fields, Codes[V][]> } }[Vocab]
+type OneOf = { [V in Vocab]: { vocab: V; name: FieldPathOf<Codes[V] | ''> } }[Vocab]
+type SomeOf = { [V in Vocab]: { vocab: V; name: FieldPathOf<Codes[V][]> } }[Vocab]
 
 type SelectProps = OneOf & {
   label: string

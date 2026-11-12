@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import {
   CONCERNS,
+  COUNTRIES,
   DATA_CATEGORIES,
   EMPLOYEE_RANGES,
   ENVIRONMENTS,
@@ -26,11 +27,11 @@ export type ValidationKey = typeof TOO_LONG | typeof TOO_MANY | typeof SERVICE_N
 const text = (max: number) => z.string().refine((s) => [...s.trim()].length <= max, TOO_LONG)
 const entries = z.array(z.string()).max(LIMITS.entries, TOO_MANY)
 
-function oneOf<T extends string>(codes: T[]) {
+function oneOf<T extends string>(codes: readonly T[]) {
   return z.array(z.enum(codes as [T, ...T[]]))
 }
 
-function optional<T extends string>(codes: T[]) {
+function optional<T extends string>(codes: readonly T[]) {
   return z.enum(['', ...codes] as ['' | T, ...('' | T)[]])
 }
 
@@ -53,8 +54,8 @@ export const businessContextSchema = z.object({
     annual_revenue: optional(REVENUE_RANGES),
   }),
   geography: z.object({
-    headquarters: z.string(),
-    countries: entries,
+    headquarters: optional(COUNTRIES),
+    countries: oneOf(COUNTRIES).max(LIMITS.entries, TOO_MANY),
   }),
   operations: z.object({
     critical_services: z
