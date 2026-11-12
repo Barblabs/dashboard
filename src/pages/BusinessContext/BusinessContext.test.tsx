@@ -199,6 +199,23 @@ describe('Business context', () => {
     expect(screen.queryByDisplayValue('Pagos en línea')).not.toBeInTheDocument()
   })
 
+  it('keeps showing what stops a save after importing a draft', async () => {
+    const user = await fillByHand()
+    await user.click(screen.getByRole('tab', { name: /Operations/ }))
+    await user.click(screen.getByRole('button', { name: /Add critical service/ }))
+    await user.type(screen.getByRole('textbox', { name: 'Service' }), ' ')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    await screen.findByText('Give the service a name.')
+
+    await user.click(screen.getByRole('button', { name: 'Import documents' }))
+    const dialog = await screen.findByRole('dialog')
+    await user.type(within(dialog).getByLabelText('Or paste text'), 'ACME')
+    await user.click(within(dialog).getByRole('button', { name: 'Generate draft' }))
+    await screen.findByText(/fields were filled from your documents/)
+
+    expect(screen.getByText('Give the service a name.')).toBeInTheDocument()
+  })
+
   it('keeps the import dialog open while the agent drafts, so the draft is not lost', async () => {
     const user = await renderPage()
     let answer!: () => void

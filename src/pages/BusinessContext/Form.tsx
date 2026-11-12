@@ -63,8 +63,17 @@ export function BusinessContextForm({
 
   function applyDraft(draft: Draft) {
     const merge = mergeDraft(form.getValues(), draft.context)
-    // Keeping the defaults leaves them at the stored version, so the form reads dirty and Discard goes back to it.
-    form.reset(merge.fields, { keepDefaultValues: true })
+    /*
+     * Keeping the defaults leaves them at the stored version, so the form reads dirty and Discard
+     * goes back to it. A draft only fills empty fields, so what stopped a save still stands.
+     */
+    form.reset(merge.fields, {
+      keepDefaultValues: true,
+      keepErrors: true,
+      keepIsSubmitted: true,
+      keepSubmitCount: true,
+      keepTouched: true,
+    })
     setFilled((prev) => new Set([...prev, ...merge.filled]))
     setApplied(merge.filled.length)
     onStart()
