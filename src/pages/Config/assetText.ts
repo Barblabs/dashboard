@@ -2,7 +2,7 @@ import type { TFunction } from 'i18next'
 import type { Asset, Exposure } from '../../api/assets'
 import { EMPTY } from '../../i18n/format'
 
-export function versioned(name: string, version: string) {
+function versioned(name: string, version: string) {
   return version ? `${name} ${version}` : name
 }
 
