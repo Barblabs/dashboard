@@ -11,6 +11,7 @@ import {
   useRenameCustomerMutation,
   type CustomerResponse,
 } from '../../api/customers'
+import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
@@ -79,9 +80,7 @@ function RenameModal({
         </Field>
 
         {errorText && (
-          <p role="alert" className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical">
-            {errorText}
-          </p>
+          <Alert tone="error">{errorText}</Alert>
         )}
 
         <div className="flex justify-end gap-2">
@@ -131,9 +130,7 @@ function DeactivateModal({
         <p className="font-body text-[0.9375rem] text-navy">{t('tenants.deactivate.body')}</p>
 
         {errorText && (
-          <p role="alert" className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical">
-            {errorText}
-          </p>
+          <Alert tone="error">{errorText}</Alert>
         )}
 
         <div className="flex justify-end gap-2">
@@ -270,16 +267,12 @@ function CreateModal({ open, onClose }: { open: boolean; onClose: () => void }) 
               />
             </Field>
 
-            <p className="rounded-md border border-border-panel bg-panel px-4 py-3 font-body text-[0.8125rem] text-gray">
-              {t('tenants.create.step2.notice')}
-            </p>
+            <Alert tone="info">{t('tenants.create.step2.notice')}</Alert>
           </div>
         )}
 
         {errorText && (
-          <p role="alert" className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical">
-            {errorText}
-          </p>
+          <Alert tone="error">{errorText}</Alert>
         )}
 
         <div className="flex justify-end gap-2">

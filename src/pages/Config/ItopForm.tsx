@@ -9,6 +9,7 @@ import {
   useUpdateLoginMutation,
   type CmdbLogin,
 } from '../../api/cmdb'
+import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
@@ -57,10 +58,6 @@ const COPY = {
     saving: 'config.form.actions.saving',
   },
 } as const satisfies Record<ItopFormMode, Record<string, ParseKeys>>
-
-const RESULT = 'animate-fade-in rounded-md px-4 py-3 font-body text-[0.875rem] leading-[1.4]'
-const RESULT_OK = `${RESULT} border border-nav-active-bg bg-nav-active-bg/6 text-nav-active-bg`
-const RESULT_ERROR = `${RESULT} border border-critical bg-critical/5 text-critical`
 
 export function ItopForm({
   mode,
@@ -195,12 +192,9 @@ export function ItopForm({
       </div>
 
       {result && (
-        <div
-          role={result.ok ? 'status' : 'alert'}
-          className={result.ok ? RESULT_OK : RESULT_ERROR}
-        >
+        <Alert tone={result.ok ? 'success' : 'error'} className="animate-fade-in">
           <span aria-hidden="true">{result.ok ? '✓' : '✗'}</span> {result.text}
-        </div>
+        </Alert>
       )}
 
       <div className="flex flex-wrap gap-3">

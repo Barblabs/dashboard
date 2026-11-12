@@ -7,6 +7,7 @@ import {
   useDraftBusinessContextMutation,
   type Draft,
 } from '../../api/businessContext'
+import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { CloseIcon } from '../../components/ui/icons'
 import { Modal } from '../../components/ui/Modal'
@@ -178,12 +179,7 @@ export function ImportDialog({
         )}
 
         {errorText && (
-          <p
-            role="alert"
-            className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
-          >
-            {errorText}
-          </p>
+          <Alert tone="error">{errorText}</Alert>
         )}
 
         <div className="flex justify-end gap-2">

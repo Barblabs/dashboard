@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useCustomersQuery, type CustomerResponse } from '../../api/customers'
+import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { useDateFormat, useLocale } from '../../i18n/format'
@@ -164,9 +165,7 @@ export function AdminDashboardPage() {
       </section>
 
       {/* Platform-admin notice */}
-      <p className="rounded-xl border border-border-panel bg-panel px-6 py-4 font-body text-[0.8125rem] text-gray">
-        {t('adminDashboard.notice')}
-      </p>
+      <Alert tone="info">{t('adminDashboard.notice')}</Alert>
     </main>
   )
 }

@@ -12,6 +12,7 @@ import {
   type CustomerRole,
   type UserResponse,
 } from '../../api/users'
+import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
@@ -96,18 +97,11 @@ function InviteModal({ open, onClose }: { open: boolean; onClose: () => void }) 
             </select>
           </Field>
 
-          <p className="rounded-md border border-border-panel bg-panel px-4 py-3 font-body text-[0.8125rem] text-gray">
-            {t('users.invite.tempPasswordNotice')}
-          </p>
+          <Alert tone="info">{t('users.invite.tempPasswordNotice')}</Alert>
         </div>
 
         {errorText && (
-          <p
-            role="alert"
-            className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
-          >
-            {errorText}
-          </p>
+          <Alert tone="error">{errorText}</Alert>
         )}
 
         <div className="flex justify-end gap-2">
@@ -171,12 +165,7 @@ function ChangeRoleModal({
         </Field>
 
         {errorText && (
-          <p
-            role="alert"
-            className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
-          >
-            {errorText}
-          </p>
+          <Alert tone="error">{errorText}</Alert>
         )}
 
         <div className="flex justify-end gap-2">
@@ -233,12 +222,7 @@ function DisableModal({
         <p className="font-body text-[0.9375rem] text-navy">{t('users.confirm.text')}</p>
 
         {errorText && (
-          <p
-            role="alert"
-            className="rounded-md border border-critical bg-critical/5 px-4 py-3 font-body text-[0.875rem] text-critical"
-          >
-            {errorText}
-          </p>
+          <Alert tone="error">{errorText}</Alert>
         )}
 
         <div className="flex justify-end gap-2">

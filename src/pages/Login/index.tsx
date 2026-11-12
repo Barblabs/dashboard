@@ -10,6 +10,7 @@ import { setMockRole } from '../../auth/mockTokens'
 import { returnToOf } from '../../auth/returnTo'
 import { completeSignIn } from '../../auth/session'
 import { useAuthStore, useCurrentUser, type Role } from '../../auth/store'
+import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { MOCK_MODE } from '../../mockMode'
@@ -139,9 +140,7 @@ function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
       </div>
 
       {serverError && (
-        <p role="alert" className="rounded-md bg-critical/10 px-3.5 py-2.5 font-body text-[0.875rem] text-critical">
-          {serverError}
-        </p>
+        <Alert tone="error">{serverError}</Alert>
       )}
 
       <div className="flex flex-col gap-1.5">
@@ -174,9 +173,7 @@ function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
         {isSubmitting ? t('login.form.submitting') : t('login.form.submit')}
       </Button>
 
-      <p className="rounded-md bg-panel px-3.5 py-3 font-body text-[0.8125rem] leading-[1.4] text-navy">
-        {t('login.form.notice')}
-      </p>
+      <Alert tone="info">{t('login.form.notice')}</Alert>
     </form>
   )
 }
@@ -226,9 +223,7 @@ function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
       </div>
 
       {serverError && (
-        <p role="alert" className="rounded-md bg-critical/10 px-3.5 py-2.5 font-body text-[0.875rem] text-critical">
-          {serverError}
-        </p>
+        <Alert tone="error">{serverError}</Alert>
       )}
 
       <div className="flex flex-col gap-1.5">
@@ -281,9 +276,7 @@ function MockSignIn() {
           {t('login.mock.title')}
         </h1>
         {serverError && (
-          <p role="alert" className="rounded-md bg-critical/10 px-3.5 py-2.5 font-body text-[0.875rem] text-critical">
-            {serverError}
-          </p>
+          <Alert tone="error">{serverError}</Alert>
         )}
         {MOCK_ROLES.map(({ role, labelKey }) => (
           <Button
