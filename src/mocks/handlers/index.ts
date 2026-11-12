@@ -4,6 +4,7 @@ import { authHandlers } from './auth'
 import { businessContextHandlers } from './businessContext'
 import { cmdbHandlers } from './cmdb'
 import { customersHandlers } from './customers'
+import { prioritizationsHandlers } from './prioritizations'
 import { usersHandlers } from './users'
 
 export const handlers = [
@@ -14,4 +15,5 @@ export const handlers = [
   ...usersHandlers,
   ...customersHandlers,
   ...businessContextHandlers,
+  ...prioritizationsHandlers,
 ]

@@ -9,7 +9,7 @@ import { useDateFormat } from '../../i18n/format'
 import { AreaOwnerDialog } from './AreaOwnerDialog'
 import { FilterSelect } from './FilterSelect'
 import { pick } from './filters'
-import { CELL, HEADER_CELL } from './table'
+import { CELL, HEADER_CELL } from '../../components/ui/table'
 import { Message } from '../../components/ui/Message'
 
 const DEFAULT_ACTIVITY: ActivityFilter = 'true'

@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react'
 
-export type BadgeVariant = 'outline' | 'muted' | 'solid' | 'caps'
+export type BadgeVariant = 'outline' | 'muted' | 'solid' | 'caps' | 'critical'
 
 type BadgeProps = ComponentProps<'span'> & {
   variant?: BadgeVariant
@@ -12,6 +12,7 @@ const VARIANTS: Record<BadgeVariant, string> = {
   solid:
     'inline-flex shrink-0 items-center gap-1.5 bg-navy px-2.5 py-1 text-[0.8125rem] font-semibold text-white',
   caps: 'inline-block shrink-0 border border-muted-bg px-2.5 py-1 text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase',
+  critical: 'inline-block border border-critical px-2.5 py-[3px] text-[0.75rem] font-medium text-critical',
 }
 
 export function Badge({ variant = 'outline', className = '', ...props }: BadgeProps) {
