@@ -15,7 +15,10 @@ interface PageRoute {
   roles: readonly Role[]
 }
 
+// Typed as Role[] so `as const` below keeps each page's id literal but not its roles.
 const CUSTOMER_ROLES: readonly Role[] = ['customer_admin', 'viewer']
+const CUSTOMER_ADMIN: readonly Role[] = ['customer_admin']
+const PLATFORM_ADMIN: readonly Role[] = ['platform_admin']
 
 /*
  * Every page behind the sidebar and who may open it. The router guards each one with its
@@ -26,12 +29,12 @@ export const PAGES = [
   { id: 'config', Page: ConfigPage, roles: CUSTOMER_ROLES },
   { id: 'business-context', Page: BusinessContextPage, roles: CUSTOMER_ROLES },
   { id: 'notifications', Page: NotificationsPage, roles: CUSTOMER_ROLES },
-  { id: 'users', Page: UsersPage, roles: ['customer_admin'] },
-  { id: 'tenants', Page: TenantsPage, roles: ['platform_admin'] },
-  { id: 'admin-dashboard', Page: AdminDashboardPage, roles: ['platform_admin'] },
+  { id: 'users', Page: UsersPage, roles: CUSTOMER_ADMIN },
+  { id: 'tenants', Page: TenantsPage, roles: PLATFORM_ADMIN },
+  { id: 'admin-dashboard', Page: AdminDashboardPage, roles: PLATFORM_ADMIN },
 ] as const satisfies readonly PageRoute[]
 
-export type PageId = (typeof PAGES)[number]['id']
+type PageId = (typeof PAGES)[number]['id']
 
 const HOME: Record<Role, PageId> = {
   platform_admin: 'tenants',
@@ -40,7 +43,7 @@ const HOME: Record<Role, PageId> = {
 }
 
 export function pagesFor(role: Role) {
-  return PAGES.filter((page: PageRoute) => page.roles.includes(role))
+  return PAGES.filter((page) => page.roles.includes(role))
 }
 
 /** Where the role lands when no page was asked for. */
