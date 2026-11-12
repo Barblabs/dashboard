@@ -43,9 +43,9 @@ describe('Tech stack', () => {
     const row = await screen.findByRole('row', { name: /prod-api-01/ })
     expect(screen.getByText('7 assets')).toBeInTheDocument()
     expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual([
-      'Asset', 'Type', 'Operating system', 'Criticality', 'Owner', 'Area', 'Status', 'Details',
+      'Asset', 'Type', 'Operating system', 'Criticality', 'Exposure', 'Owner', 'Area', 'Status', 'Details',
     ])
-    expect(row).toHaveTextContent('prod-api-01SRV-001ServerUbuntu 22.04Highdevops@example.comInfrastructureActive')
+    expect(row).toHaveTextContent('prod-api-01SRV-001ServerUbuntu 22.04HighInternet-facing·iTopdevops@example.comInfrastructureActive')
     expect(screen.getByRole('row', { name: /analytics-worker-03/ })).toHaveTextContent(
       'Virtual Machine',
     )
@@ -78,7 +78,7 @@ describe('Tech stack', () => {
     const row = await screen.findByRole('row', { name: /prod-api-01/ })
     expect(screen.getByRole('heading', { name: 'Stack tecnológico' })).toBeInTheDocument()
     expect(screen.getByText('7 activos')).toBeInTheDocument()
-    expect(row).toHaveTextContent('prod-api-01SRV-001ServidorUbuntu 22.04Altadevops@example.comInfrastructureActivo')
+    expect(row).toHaveTextContent('prod-api-01SRV-001ServidorUbuntu 22.04AltaExpuesto a internet·iTopdevops@example.comInfrastructureActivo')
   })
 
   it('the inactive filter reaches assets no longer monitored and says since when', async () => {
