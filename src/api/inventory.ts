@@ -19,9 +19,11 @@ function assetsPath(filters: AssetFilters, cursor: string | null) {
 }
 
 // The inventory comes from the connected CMDB, so it is dropped on disconnect.
+export const ASSETS_KEY = [...connectionScopeKey, 'assets'] as const
+
 function assetsQuery(filters: AssetFilters, cursor: string | null) {
   return queryOptions({
-    queryKey: [...connectionScopeKey, 'assets', filters, cursor],
+    queryKey: [...ASSETS_KEY, filters, cursor],
     queryFn: () => api.get<AssetsPage>(assetsPath(filters, cursor)),
     // Keeps the current page on screen while the next one loads, instead of flashing "Loading".
     placeholderData: keepPreviousData,

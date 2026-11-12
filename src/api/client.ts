@@ -103,5 +103,5 @@ export const api = {
   post: <T>(url: string, body?: unknown) => apiClient.post<T>(url, body).then((r) => r.data),
   put: <T>(url: string, body?: unknown) => apiClient.put<T>(url, body).then((r) => r.data),
   patch: <T>(url: string, body?: unknown) => apiClient.patch<T>(url, body).then((r) => r.data),
-  delete: (url: string) => apiClient.delete(url).then(() => undefined),
+  delete: <T = void>(url: string) => apiClient.delete<T>(url).then((r) => r.data),
 }
