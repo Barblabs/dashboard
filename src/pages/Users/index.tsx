@@ -29,17 +29,12 @@ import { Select } from '../../components/ui/Select'
 import { useDialogTarget } from '../../components/ui/useDialogTarget'
 import { requestErrorText } from '../../i18n/errors'
 
-const ROLE_LABEL: Record<CustomerRole, 'users.role.customer_admin' | 'users.role.viewer'> = {
-  customer_admin: 'users.role.customer_admin',
-  viewer: 'users.role.viewer',
-}
-
 function RoleOptions() {
   const { t } = useTranslation()
   return (
     <>
-      <option value="viewer">{t(ROLE_LABEL.viewer)}</option>
-      <option value="customer_admin">{t(ROLE_LABEL.customer_admin)}</option>
+      <option value="viewer">{t('users.role.viewer')}</option>
+      <option value="customer_admin">{t('users.role.customer_admin')}</option>
     </>
   )
 }
@@ -239,7 +234,7 @@ function UserTable({
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={user.role === 'customer_admin' ? 'solid' : 'outline'}>
-                        {t(ROLE_LABEL[user.role])}
+                        {t(`users.role.${user.role}`)}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-right">

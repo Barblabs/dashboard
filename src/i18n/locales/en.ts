@@ -33,9 +33,11 @@ export const en = {
     mock: {
       title: 'Test mode',
       subtitle: 'Choose a role to sign in without Cognito.',
-      platformAdmin: 'Super Admin (platform_admin)',
-      customerAdmin: 'Admin (customer_admin)',
-      viewer: 'Viewer (viewer)',
+      role: {
+        platform_admin: 'Super Admin (platform_admin)',
+        customer_admin: 'Admin (customer_admin)',
+        viewer: 'Viewer (viewer)',
+      },
     },
     real: {
       comingSoon: 'Cognito sign-in coming soon. Use VITE_USE_MOCK=true for development.',

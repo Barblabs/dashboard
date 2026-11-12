@@ -1,17 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { NavLink, useNavigate } from 'react-router'
 import { signOut } from '../auth/signOut'
-import { useCurrentUser, type Role } from '../auth/store'
+import { useCurrentUser } from '../auth/store'
 import { chooseLanguage, LANGUAGES } from '../i18n'
 import { useLocale } from '../i18n/format'
 import { pagesFor } from '../routes'
 import { Wordmark } from './Wordmark'
-
-const ROLE_KEY: Record<Role, 'sidebar.user.role.platform_admin' | 'sidebar.user.role.customer_admin' | 'sidebar.user.role.viewer'> = {
-  platform_admin: 'sidebar.user.role.platform_admin',
-  customer_admin: 'sidebar.user.role.customer_admin',
-  viewer: 'sidebar.user.role.viewer',
-}
 
 export function Sidebar() {
   const { t } = useTranslation()
@@ -72,7 +66,7 @@ export function Sidebar() {
                 {user.email}
               </p>
               <p className="font-body text-[0.8125rem] leading-[1.4] text-nav-text-dim">
-                {t(ROLE_KEY[user.role])}
+                {t(`sidebar.user.role.${user.role}`)}
               </p>
             </div>
             <button
