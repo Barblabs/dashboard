@@ -47,7 +47,6 @@ function LoginLayout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation()
   return (
     <div className="flex min-h-screen">
-      {/* Left brand panel */}
       <div className="flex w-[560px] shrink-0 flex-col justify-between bg-navy px-14 pb-12 pt-14">
         <div className="flex flex-col gap-7">
           <div className="flex items-center gap-4">
@@ -66,7 +65,6 @@ function LoginLayout({ children }: { children: React.ReactNode }) {
         </p>
       </div>
 
-      {/* Right access panel */}
       <div className="flex flex-1 items-center justify-center bg-panel p-10">
         {children}
       </div>

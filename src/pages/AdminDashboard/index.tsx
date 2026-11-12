@@ -75,7 +75,6 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
 
   return (
     <>
-      {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label={t('adminDashboard.stats.total')} value={customers.length} />
         <StatCard label={t('adminDashboard.stats.active')} value={active} />
@@ -83,7 +82,6 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
         <StatCard label={t('adminDashboard.stats.newThisMonth')} value={newThisMonth} />
       </div>
 
-      {/* Bar chart */}
       <section className="rounded-xl border border-border-panel bg-white p-6">
         <h2 className="mb-4 font-title text-[1rem] font-black text-navy">
           {t('adminDashboard.chart.title')}
@@ -119,7 +117,6 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
         </div>
       </section>
 
-      {/* Recent organizations */}
       <section className="rounded-xl border border-border-panel bg-white">
         <div className="border-b border-border-panel px-6 py-4">
           <h2 className="font-title text-[1rem] font-black text-navy">
@@ -152,7 +149,6 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
         )}
       </section>
 
-      {/* Platform-admin notice */}
       <Alert tone="info">{t('adminDashboard.notice')}</Alert>
     </>
   )

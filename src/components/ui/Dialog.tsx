@@ -60,7 +60,6 @@ interface ConfirmDialogProps {
   onCancel: () => void
 }
 
-/** A destructive action the user confirms or cancels. */
 export function ConfirmDialog({
   title,
   text,

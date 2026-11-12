@@ -254,12 +254,10 @@ function CustomerCard({
       className={`flex flex-col gap-4 rounded-xl border border-border-panel p-5 ${isDeactivated ? 'bg-panel opacity-75' : 'bg-white'}`}
     >
       <div className="flex items-start justify-between gap-2">
-        {/* Initial avatar */}
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-navy font-title text-lg font-black text-cyan">
           {initial}
         </div>
 
-        {/* Action buttons */}
         <div className="flex items-center gap-0.5">
           <button
             type="button"
@@ -292,7 +290,6 @@ function CustomerCard({
         </div>
       </div>
 
-      {/* Name */}
       <div>
         <h3 className="font-title text-[1rem] font-black leading-snug text-navy">
           {customer.name}
@@ -304,7 +301,6 @@ function CustomerCard({
         </p>
       </div>
 
-      {/* Status */}
       <div className="flex items-center gap-2">
         <span
           className={`h-2 w-2 shrink-0 rounded-full ${isDeactivated ? 'bg-muted-bg' : 'bg-cyan'}`}

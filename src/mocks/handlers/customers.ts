@@ -10,7 +10,7 @@ export const customersHandlers = [
   }),
 
   http.post(apiUrl('/customers'), async ({ request }) => {
-    const { name, admin_email } = (await request.json()) as { name: string; admin_email: string }
+    const { name } = (await request.json()) as { name: string }
     const customers = customersStore.load()
     if (customers.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
       return failure(409, 'customer_name_taken', 'a customer with this name already exists')
@@ -21,8 +21,6 @@ export const customersHandlers = [
       created_at: new Date().toISOString(),
       deactivated_at: null,
     }
-    // Invite the admin_email: in real backend this sends an email; here we just ignore it.
-    void admin_email
     customersStore.save([...customers, created])
     return HttpResponse.json(created, { status: 201 })
   }),

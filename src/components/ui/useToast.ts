@@ -10,7 +10,6 @@ const TONES: Record<ToastTone, { priority: 'low' | 'high'; timeout: number }> = 
   warning: { priority: 'high', timeout: 10000 },
 }
 
-/** Shows a toast in the `ToastProvider` above. */
 export function useToast() {
   const { add } = Toast.useToastManager()
   const show = useCallback(

@@ -8,7 +8,6 @@ import type { Schemas } from './schemas'
 export type Area = Schemas['AreaResponse']
 export type AreaListResponse = Schemas['AreaListResponse']
 
-// Areas are imported by the connected CMDB, so a sync refetches them and a disconnect drops them.
 const areasKey = [...connectionScopeKey, 'areas'] as const
 const areasList = listCache<Area>(areasKey, 'areas')
 

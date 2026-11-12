@@ -36,7 +36,6 @@ function mergeServices(current: CriticalService[], extra: CriticalService[]): Cr
 
 export interface Merge {
   fields: BusinessContextFields
-  /** The fields the draft added something to. */
   filled: FieldPath[]
 }
 
