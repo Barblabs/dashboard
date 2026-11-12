@@ -105,8 +105,8 @@ export function AssetInspector({ assets, busy, pager, onOpenExposure }: AssetIns
   }
 
   return (
-    <div className="grid grid-cols-1 lg:h-[min(46rem,calc(100vh-14rem))] lg:min-h-[28rem] lg:grid-cols-[minmax(17rem,24rem)_minmax(0,1fr)]">
-      <div className="flex max-h-[22rem] min-h-0 flex-col border-b border-border-panel lg:max-h-none lg:border-r lg:border-b-0">
+    <div className="grid grid-cols-1 lg:h-[min(46rem,calc(100vh-14rem))] lg:min-h-[28rem] lg:grid-cols-[minmax(17rem,24rem)_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]">
+      <div className="flex min-h-0 flex-col border-b border-border-panel lg:border-r lg:border-b-0">
         <ul
           ref={listRef}
           role="listbox"
@@ -115,7 +115,7 @@ export function AssetInspector({ assets, busy, pager, onOpenExposure }: AssetIns
           aria-activedescendant={selectedId}
           aria-busy={busy || undefined}
           onKeyDown={onKeyDown}
-          className={`relative min-h-0 flex-1 overflow-y-auto outline-none transition-opacity duration-150 focus-visible:shadow-[inset_0_0_0_2px_var(--color-navy)] ${busy ? 'opacity-60' : ''}`}
+          className={`relative max-h-[22rem] min-h-0 flex-1 overflow-y-auto lg:max-h-none outline-none transition-opacity duration-150 focus-visible:shadow-[inset_0_0_0_2px_var(--color-navy)] ${busy ? 'opacity-60' : ''}`}
         >
           {assets.map((asset) => (
             <AssetOption
