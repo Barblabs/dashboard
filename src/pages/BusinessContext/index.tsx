@@ -1,17 +1,28 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { errorCode } from '../../api/client'
-import { useBusinessContextQuery, useSaveBusinessContextMutation } from '../../api/businessContext'
+import {
+  useBusinessContextQuery,
+  useSaveBusinessContextMutation,
+  type BusinessContext,
+} from '../../api/businessContext'
 import { useCurrentUser } from '../../auth/store'
 import { Page } from '../../components/Page'
+import { QueryBoundary } from '../../components/QueryBoundary'
 import { Button } from '../../components/ui/Button'
 import { requestErrorText } from '../../i18n/errors'
 import { BusinessContextForm } from './Form'
 
+const KEYS = {
+  loading: 'businessContext.loading',
+  failed: 'businessContext.loadFailed',
+  network: 'businessContext.networkError',
+  retry: 'businessContext.retry',
+} as const
+
 export function BusinessContextPage() {
   const { t } = useTranslation()
   const query = useBusinessContextQuery()
-  const save = useSaveBusinessContextMutation()
   const readOnly = useCurrentUser()?.role !== 'customer_admin'
   const [startedEditing, setStartedEditing] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
@@ -19,7 +30,7 @@ export function BusinessContextPage() {
   // A saved context has been started by definition; an empty one waits for an import or a manual start.
   const started = (query.data?.version ?? 0) > 0 || startedEditing
 
-  const page = (children: ReactNode) => (
+  return (
     <Page
       title={t('businessContext.header.title')}
       subtitle={t('businessContext.header.subtitle')}
@@ -32,27 +43,38 @@ export function BusinessContextPage() {
         )
       }
     >
-      {children}
+      <QueryBoundary query={query} keys={KEYS}>
+        {(stored) => (
+          <SavedForm
+            stored={stored}
+            reload={() => void query.refetch()}
+            readOnly={readOnly}
+            started={started}
+            onStart={() => setStartedEditing(true)}
+            importOpen={importOpen}
+            onImportOpenChange={setImportOpen}
+          />
+        )}
+      </QueryBoundary>
     </Page>
   )
+}
 
-  if (query.isPending) {
-    return page(
-      <p className="py-12 text-center font-body text-[0.875rem] text-gray">{t('businessContext.loading')}</p>,
-    )
-  }
-  if (query.isError) {
-    return page(
-      <div className="flex flex-col items-center gap-4 py-12">
-        <p className="font-body text-[0.875rem] text-critical">{t('businessContext.loadFailed')}</p>
-        <Button variant="secondary" size="sm" onClick={() => void query.refetch()}>
-          {t('businessContext.retry')}
-        </Button>
-      </div>,
-    )
-  }
+interface SavedFormProps {
+  stored: BusinessContext
+  reload: () => void
+  readOnly: boolean
+  started: boolean
+  onStart: () => void
+  importOpen: boolean
+  onImportOpenChange: (open: boolean) => void
+}
 
-  const stored = query.data
+// Ties the form to the save request and reports how the latest save went.
+function SavedForm({ stored, reload, ...formProps }: SavedFormProps) {
+  const { t } = useTranslation()
+  const save = useSaveBusinessContextMutation()
+
   const stale = errorCode(save.error) === 'business_context_stale'
   const saveStatus = save.isError ? (
     <div role="alert" className="flex flex-wrap items-center gap-3 font-body text-[0.8125rem] text-critical">
@@ -63,7 +85,7 @@ export function BusinessContextPage() {
           size="sm"
           onClick={() => {
             save.reset()
-            void query.refetch()
+            reload()
           }}
         >
           {t('businessContext.save.reload')}
@@ -76,19 +98,15 @@ export function BusinessContextPage() {
     </p>
   ) : null
 
-  return page(
+  return (
     // A new version is a fresh form: what was typed is either saved or deliberately reloaded.
     <BusinessContextForm
       key={stored.version}
       stored={stored}
-      readOnly={readOnly}
       saving={save.isPending}
       saveStatus={saveStatus}
       onSave={(context) => save.mutate({ version: stored.version, context })}
-      started={started}
-      onStart={() => setStartedEditing(true)}
-      importOpen={importOpen}
-      onImportOpenChange={setImportOpen}
-    />,
+      {...formProps}
+    />
   )
 }

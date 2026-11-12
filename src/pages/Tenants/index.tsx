@@ -12,6 +12,7 @@ import {
   type CustomerResponse,
 } from '../../api/customers'
 import { Page } from '../../components/Page'
+import { QueryBoundary } from '../../components/QueryBoundary'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
@@ -397,20 +398,21 @@ function CustomerCard({
   )
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── Customer grid ─────────────────────────────────────────────────────────────
 
-export function TenantsPage() {
+function CustomerGrid({
+  customers,
+  onRename,
+  onDeactivate,
+}: {
+  customers: CustomerResponse[]
+  onRename: (customer: CustomerResponse) => void
+  onDeactivate: (customer: CustomerResponse) => void
+}) {
   const { t } = useTranslation()
-  const customersQuery = useCustomersQuery()
   const [search, setSearch] = useState('')
-  const [createOpen, setCreateOpen] = useState(false)
-  const [renameTarget, setRenameTarget] = useState<CustomerResponse | null>(null)
-  const [deactivateTarget, setDeactivateTarget] = useState<CustomerResponse | null>(null)
 
-  const customers = customersQuery.data?.customers ?? []
-  const filtered = customers.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()),
-  )
+  const filtered = customers.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
   const deactivatedCount = customers.filter((c) => c.deactivated_at !== null).length
 
   const counter =
@@ -420,55 +422,66 @@ export function TenantsPage() {
       : ''
 
   return (
-    <Page title={t('tenants.title')}>
-
-      {customersQuery.isPending ? (
-        <p className="py-12 text-center font-body text-[0.875rem] text-gray">{t('tenants.loading')}</p>
-      ) : customersQuery.isError ? (
-        <div className="flex flex-col items-center gap-4 py-12">
-          <p className="font-body text-[0.875rem] text-critical">{t('tenants.loadFailed')}</p>
-          <Button variant="secondary" size="sm" onClick={() => void customersQuery.refetch()}>
-            {t('tenants.retry')}
-          </Button>
+    <>
+      {/* Search + counter */}
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray" aria-hidden="true">
+            <SearchIcon />
+          </span>
+          <input
+            type="search"
+            placeholder={t('tenants.search.placeholder')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-md border border-border-panel bg-white py-2.5 pl-9 pr-3 font-body text-[0.9375rem] text-navy outline-none transition-[border-color] duration-150 ease-[ease] focus:border-navy focus-ring"
+          />
         </div>
-      ) : (
-        <>
-          {/* Search + counter */}
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray" aria-hidden="true">
-                <SearchIcon />
-              </span>
-              <input
-                type="search"
-                placeholder={t('tenants.search.placeholder')}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-md border border-border-panel bg-white py-2.5 pl-9 pr-3 font-body text-[0.9375rem] text-navy outline-none transition-[border-color] duration-150 ease-[ease] focus:border-navy focus-ring"
-              />
-            </div>
-            {counter && (
-              <p className="shrink-0 font-body text-[0.875rem] text-gray">{counter}</p>
-            )}
-          </div>
+        {counter && <p className="shrink-0 font-body text-[0.875rem] text-gray">{counter}</p>}
+      </div>
 
-          {filtered.length === 0 ? (
-            <p className="py-12 text-center font-body text-[0.875rem] text-gray">{t('tenants.empty')}</p>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((customer) => (
-                <CustomerCard
-                  key={customer.id}
-                  customer={customer}
-                  onRename={() => setRenameTarget(customer)}
-                  onDeactivate={() => setDeactivateTarget(customer)}
-                  onReactivate={() => {/* cache update handled inside CustomerCard */}}
-                />
-              ))}
-            </div>
-          )}
-        </>
+      {filtered.length === 0 ? (
+        <p className="py-12 text-center font-body text-[0.875rem] text-gray">{t('tenants.empty')}</p>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((customer) => (
+            <CustomerCard
+              key={customer.id}
+              customer={customer}
+              onRename={() => onRename(customer)}
+              onDeactivate={() => onDeactivate(customer)}
+              onReactivate={() => {/* cache update handled inside CustomerCard */}}
+            />
+          ))}
+        </div>
       )}
+    </>
+  )
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+const KEYS = {
+  loading: 'tenants.loading',
+  failed: 'tenants.loadFailed',
+  network: 'tenants.networkError',
+  retry: 'tenants.retry',
+} as const
+
+export function TenantsPage() {
+  const { t } = useTranslation()
+  const customersQuery = useCustomersQuery()
+  const [createOpen, setCreateOpen] = useState(false)
+  const [renameTarget, setRenameTarget] = useState<CustomerResponse | null>(null)
+  const [deactivateTarget, setDeactivateTarget] = useState<CustomerResponse | null>(null)
+
+  return (
+    <Page title={t('tenants.title')}>
+      <QueryBoundary query={customersQuery} keys={KEYS}>
+        {({ customers }) => (
+          <CustomerGrid customers={customers} onRename={setRenameTarget} onDeactivate={setDeactivateTarget} />
+        )}
+      </QueryBoundary>
 
       {/* FAB */}
       <button

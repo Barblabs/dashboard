@@ -145,6 +145,6 @@ describe('Tenants', () => {
     server.use(http.get(apiUrl('/customers'), () => HttpResponse.error()))
     renderApp('/tenants', PLATFORM_ADMIN)
 
-    expect(await screen.findByText('Could not load organizations.')).toBeInTheDocument()
+    expect(await screen.findByText('Could not reach the server to load the organizations.')).toBeInTheDocument()
   })
 })

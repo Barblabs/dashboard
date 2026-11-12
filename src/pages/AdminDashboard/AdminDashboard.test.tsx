@@ -70,6 +70,6 @@ describe('AdminDashboard', () => {
     server.use(http.get(apiUrl('/customers'), () => HttpResponse.error()))
     renderApp('/admin-dashboard', PLATFORM_ADMIN)
 
-    expect(await screen.findByText('Could not load dashboard data.')).toBeInTheDocument()
+    expect(await screen.findByText('Could not reach the server to load the dashboard.')).toBeInTheDocument()
   })
 })

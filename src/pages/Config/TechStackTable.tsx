@@ -1,48 +1,47 @@
 import { useTranslation } from 'react-i18next'
 import { useInventory } from '../../api/inventory'
+import { QueryBoundary } from '../../components/QueryBoundary'
 import { Button } from '../../components/ui/Button'
-import { requestErrorText } from '../../i18n/errors'
 import { AssetFilterBar } from './AssetFilterBar'
 import { AssetsTable } from './AssetsTable'
 import { MESSAGE } from './table'
 
+const KEYS = {
+  loading: 'config.inventory.loading',
+  failed: 'config.inventory.loadFailed',
+  network: 'config.inventory.networkError',
+  retry: 'config.inventory.retry',
+} as const
+
 export function TechStackTable() {
   const { t } = useTranslation()
-  const { status, filters, filterBy, pager } = useInventory()
+  const { query, filtered, navigating, filters, filterBy, pager } = useInventory()
 
   return (
     <section>
       <div className="flex flex-col gap-4 border-b border-border-panel px-6 pt-5 pb-4">
         <div className="flex items-baseline gap-3">
           <h2 className="font-title text-[1rem] text-navy">{t('config.inventory.title')}</h2>
-          {status.state === 'ready' && (
+          {query.data && (
             <span className="font-body text-[0.8125rem] text-gray">
-              {t('config.inventory.total', { count: status.total })}
+              {t('config.inventory.total', { count: query.data.total })}
             </span>
           )}
         </div>
         <AssetFilterBar filters={filters} onChange={filterBy} />
       </div>
 
-      {status.state === 'loading' ? (
-        <div className={MESSAGE}>{t('config.inventory.loading')}</div>
-      ) : status.state === 'failed' ? (
-        <div role="alert" className={`${MESSAGE} flex flex-col items-center gap-3`}>
-          {requestErrorText(status.error, t, {
-            fallback: 'config.inventory.loadFailed',
-            network: 'config.inventory.networkError',
-          })}
-          <Button variant="secondary" size="sm" onClick={status.retry}>
-            {t('config.inventory.retry')}
-          </Button>
-        </div>
-      ) : status.assets.length === 0 ? (
-        <div className={MESSAGE}>
-          {status.filtered ? t('config.inventory.noMatches') : t('config.inventory.empty')}
-        </div>
-      ) : (
-        <AssetsTable assets={status.assets} busy={status.navigating} />
-      )}
+      <QueryBoundary query={query} keys={KEYS}>
+        {({ assets }) =>
+          assets.length === 0 ? (
+            <div className={MESSAGE}>
+              {filtered ? t('config.inventory.noMatches') : t('config.inventory.empty')}
+            </div>
+          ) : (
+            <AssetsTable assets={assets} busy={navigating} />
+          )
+        }
+      </QueryBoundary>
 
       {pager && (
         <nav

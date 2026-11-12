@@ -91,6 +91,7 @@ export const en = {
     title: 'Users',
     loading: 'Loading users…',
     loadFailed: 'Could not load users.',
+    networkError: 'Could not reach the server to load the users.',
     empty: 'No users yet.',
     retry: 'Retry',
     you: 'You',
@@ -155,6 +156,7 @@ export const en = {
     title: 'Organizations',
     loading: 'Loading organizations…',
     loadFailed: 'Could not load organizations.',
+    networkError: 'Could not reach the server to load the organizations.',
     empty: 'No organizations yet.',
     retry: 'Retry',
     search: { placeholder: 'Search by name…' },
@@ -219,6 +221,7 @@ export const en = {
     title: 'Dashboard',
     loading: 'Loading…',
     loadFailed: 'Could not load dashboard data.',
+    networkError: 'Could not reach the server to load the dashboard.',
     retry: 'Retry',
     stats: {
       total: 'Organizations',
@@ -253,6 +256,7 @@ export const en = {
   config: {
     loading: 'Loading configuration…',
     loadFailed: 'Could not load the CMDB connection.',
+    networkError: 'Could not reach the server to load the CMDB connection.',
     retry: 'Retry',
     header: {
       title: 'Configuration',
@@ -505,6 +509,7 @@ export const en = {
     },
     loading: 'Loading the business context…',
     loadFailed: "Couldn't load the business context.",
+    networkError: 'Could not reach the server to load the business context.',
     retry: 'Retry',
     previous: 'Previous',
     next: 'Next',

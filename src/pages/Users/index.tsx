@@ -13,6 +13,7 @@ import {
   type UserResponse,
 } from '../../api/users'
 import { Page } from '../../components/Page'
+import { QueryBoundary } from '../../components/QueryBoundary'
 import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -247,21 +248,23 @@ function DisableModal({
   )
 }
 
-// ── Page ─────────────────────────────────────────────────────────────────────
+// ── User table ───────────────────────────────────────────────────────────────
 
-export function UsersPage() {
+const TH = 'px-4 py-3 font-body text-[0.75rem] font-semibold uppercase tracking-wider text-gray text-left'
+
+function UserTable({
+  users,
+  onEditRole,
+  onDisable,
+}: {
+  users: UserResponse[]
+  onEditRole: (user: UserResponse) => void
+  onDisable: (user: UserResponse) => void
+}) {
   const { t } = useTranslation()
   const currentUser = useCurrentUser()
-  const usersQuery = useUsersQuery()
   const [search, setSearch] = useState('')
-  const [inviteOpen, setInviteOpen] = useState(false)
-  const [roleTarget, setRoleTarget] = useState<UserResponse | null>(null)
-  const [disableTarget, setDisableTarget] = useState<UserResponse | null>(null)
 
-  const TH =
-    'px-4 py-3 font-body text-[0.75rem] font-semibold uppercase tracking-wider text-gray text-left'
-
-  const users = usersQuery.data?.users ?? []
   const disabledCount = users.filter((u) => u.disabled_at !== null).length
   const counter =
     users.length > 0
@@ -271,114 +274,123 @@ export function UsersPage() {
           : '')
       : ''
 
-  const filtered = users.filter((u) =>
-    u.email.toLowerCase().includes(search.toLowerCase()),
+  const filtered = users.filter((u) => u.email.toLowerCase().includes(search.toLowerCase()))
+
+  return (
+    <>
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1">
+          <span
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray"
+            aria-hidden="true"
+          >
+            <SearchIcon />
+          </span>
+          <input
+            type="search"
+            placeholder={t('users.search.placeholder')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-md border border-border-panel bg-white py-2.5 pl-9 pr-3 font-body text-[0.9375rem] text-navy outline-none transition-[border-color] duration-150 ease-[ease] focus:border-navy focus-ring"
+          />
+        </div>
+        {counter && (
+          <p className="shrink-0 font-body text-[0.875rem] text-gray">{counter}</p>
+        )}
+      </div>
+
+      {filtered.length === 0 ? (
+        <p className="py-12 text-center font-body text-[0.875rem] text-gray">
+          {t('users.empty')}
+        </p>
+      ) : (
+        <div className="overflow-hidden rounded-lg border border-border-panel">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-border-panel bg-panel">
+                <th className={TH}>{t('users.columns.email')}</th>
+                <th className={TH}>{t('users.columns.role')}</th>
+                <th className={TH} />
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {filtered.map((user) => {
+                const isDisabled = user.disabled_at !== null
+                const isSelf = user.email === currentUser?.email
+                return (
+                  <tr
+                    key={user.id}
+                    className={`border-b border-border-panel last:border-0 ${isDisabled ? 'opacity-50' : ''}`}
+                  >
+                    <td className="px-4 py-3 font-body text-[0.875rem] text-navy">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span>{user.email}</span>
+                        {isSelf && <Badge variant="caps">{t('users.you')}</Badge>}
+                        {isDisabled && (
+                          <Badge variant="muted">{t('users.status.disabled')}</Badge>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge variant={user.role === 'customer_admin' ? 'solid' : 'outline'}>
+                        {t(ROLE_LABEL[user.role])}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {!isDisabled && (
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            type="button"
+                            aria-label={t('users.actions.editRole')}
+                            className="rounded-md p-1.5 text-gray transition-colors hover:bg-panel hover:text-navy focus-ring"
+                            onClick={() => onEditRole(user)}
+                          >
+                            <PencilIcon />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={t('users.actions.disable')}
+                            disabled={isSelf}
+                            className="rounded-md p-1.5 text-critical transition-colors hover:bg-critical/10 focus-ring disabled:cursor-not-allowed disabled:opacity-30"
+                            onClick={() => onDisable(user)}
+                          >
+                            <BanIcon />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
   )
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+const KEYS = {
+  loading: 'users.loading',
+  failed: 'users.loadFailed',
+  network: 'users.networkError',
+  retry: 'users.retry',
+} as const
+
+export function UsersPage() {
+  const { t } = useTranslation()
+  const usersQuery = useUsersQuery()
+  const [inviteOpen, setInviteOpen] = useState(false)
+  const [roleTarget, setRoleTarget] = useState<UserResponse | null>(null)
+  const [disableTarget, setDisableTarget] = useState<UserResponse | null>(null)
 
   return (
     <Page title={t('users.title')}>
-
-      {usersQuery.isPending ? (
-        <p className="py-12 text-center font-body text-[0.875rem] text-gray">{t('users.loading')}</p>
-      ) : usersQuery.isError ? (
-        <div className="flex flex-col items-center gap-4 py-12">
-          <p className="font-body text-[0.875rem] text-critical">{t('users.loadFailed')}</p>
-          <Button variant="secondary" size="sm" onClick={() => void usersQuery.refetch()}>
-            {t('users.retry')}
-          </Button>
-        </div>
-      ) : (
-        <>
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <span
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray"
-                aria-hidden="true"
-              >
-                <SearchIcon />
-              </span>
-              <input
-                type="search"
-                placeholder={t('users.search.placeholder')}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-md border border-border-panel bg-white py-2.5 pl-9 pr-3 font-body text-[0.9375rem] text-navy outline-none transition-[border-color] duration-150 ease-[ease] focus:border-navy focus-ring"
-              />
-            </div>
-            {counter && (
-              <p className="shrink-0 font-body text-[0.875rem] text-gray">{counter}</p>
-            )}
-          </div>
-
-          {filtered.length === 0 ? (
-            <p className="py-12 text-center font-body text-[0.875rem] text-gray">
-              {t('users.empty')}
-            </p>
-          ) : (
-            <div className="overflow-hidden rounded-lg border border-border-panel">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b border-border-panel bg-panel">
-                    <th className={TH}>{t('users.columns.email')}</th>
-                    <th className={TH}>{t('users.columns.role')}</th>
-                    <th className={TH} />
-                  </tr>
-                </thead>
-                <tbody className="bg-white">
-                  {filtered.map((user) => {
-                    const isDisabled = user.disabled_at !== null
-                    const isSelf = user.email === currentUser?.email
-                    return (
-                      <tr
-                        key={user.id}
-                        className={`border-b border-border-panel last:border-0 ${isDisabled ? 'opacity-50' : ''}`}
-                      >
-                        <td className="px-4 py-3 font-body text-[0.875rem] text-navy">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span>{user.email}</span>
-                            {isSelf && <Badge variant="caps">{t('users.you')}</Badge>}
-                            {isDisabled && (
-                              <Badge variant="muted">{t('users.status.disabled')}</Badge>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <Badge variant={user.role === 'customer_admin' ? 'solid' : 'outline'}>
-                            {t(ROLE_LABEL[user.role])}
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          {!isDisabled && (
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                type="button"
-                                aria-label={t('users.actions.editRole')}
-                                className="rounded-md p-1.5 text-gray transition-colors hover:bg-panel hover:text-navy focus-ring"
-                                onClick={() => setRoleTarget(user)}
-                              >
-                                <PencilIcon />
-                              </button>
-                              <button
-                                type="button"
-                                aria-label={t('users.actions.disable')}
-                                disabled={isSelf}
-                                className="rounded-md p-1.5 text-critical transition-colors hover:bg-critical/10 focus-ring disabled:cursor-not-allowed disabled:opacity-30"
-                                onClick={() => setDisableTarget(user)}
-                              >
-                                <BanIcon />
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </>
-      )}
+      <QueryBoundary query={usersQuery} keys={KEYS}>
+        {({ users }) => <UserTable users={users} onEditRole={setRoleTarget} onDisable={setDisableTarget} />}
+      </QueryBoundary>
 
       {/* FAB */}
       <button

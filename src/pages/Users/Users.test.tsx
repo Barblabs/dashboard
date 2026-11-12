@@ -150,6 +150,6 @@ describe('Users', () => {
     server.use(http.get(apiUrl('/users'), () => HttpResponse.error()))
     renderApp('/users')
 
-    expect(await screen.findByText('Could not load users.')).toBeInTheDocument()
+    expect(await screen.findByText('Could not reach the server to load the users.')).toBeInTheDocument()
   })
 })

@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useCustomersQuery, type CustomerResponse } from '../../api/customers'
 import { Page } from '../../components/Page'
+import { QueryBoundary } from '../../components/QueryBoundary'
 import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
-import { Button } from '../../components/ui/Button'
 import { useDateFormat, useLocale } from '../../i18n/format'
 
 function getMonthlyData(customers: CustomerResponse[], locale: string, now: Date) {
@@ -38,51 +38,44 @@ function StatCard({ label, value }: { label: string; value: number }) {
   )
 }
 
+const KEYS = {
+  loading: 'adminDashboard.loading',
+  failed: 'adminDashboard.loadFailed',
+  network: 'adminDashboard.networkError',
+  retry: 'adminDashboard.retry',
+} as const
+
 export function AdminDashboardPage() {
   const { t } = useTranslation()
   const customersQuery = useCustomersQuery()
-  const locale = useLocale()
-  const formatDate = useDateFormat('numeric')
-
-  const { customers, active, deactivated, newThisMonth, chartData, recent } = useMemo(
-    () => {
-      const list = customersQuery.data?.customers ?? []
-      return {
-        customers: list,
-        active: list.filter((c) => c.deactivated_at === null).length,
-        deactivated: list.filter((c) => c.deactivated_at !== null).length,
-        newThisMonth: list.filter((c) => c.created_at.startsWith(THIS_MONTH)).length,
-        chartData: getMonthlyData(list, locale, TODAY),
-        recent: list.toSorted((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5),
-      }
-    },
-    [customersQuery.data, locale],
-  )
-
-  if (customersQuery.isPending) {
-    return (
-      <Page title={t('adminDashboard.title')}>
-        <p className="py-12 text-center font-body text-[0.875rem] text-gray">{t('adminDashboard.loading')}</p>
-      </Page>
-    )
-  }
-
-  if (customersQuery.isError) {
-    return (
-      <Page title={t('adminDashboard.title')}>
-        <div className="flex flex-col items-center gap-4 py-12">
-          <p className="font-body text-[0.875rem] text-critical">{t('adminDashboard.loadFailed')}</p>
-          <Button variant="secondary" size="sm" onClick={() => void customersQuery.refetch()}>
-            {t('adminDashboard.retry')}
-          </Button>
-        </div>
-      </Page>
-    )
-  }
 
   return (
     <Page title={t('adminDashboard.title')}>
+      <QueryBoundary query={customersQuery} keys={KEYS}>
+        {({ customers }) => <Dashboard customers={customers} />}
+      </QueryBoundary>
+    </Page>
+  )
+}
 
+function Dashboard({ customers }: { customers: CustomerResponse[] }) {
+  const { t } = useTranslation()
+  const locale = useLocale()
+  const formatDate = useDateFormat('numeric')
+
+  const { active, deactivated, newThisMonth, chartData, recent } = useMemo(
+    () => ({
+      active: customers.filter((c) => c.deactivated_at === null).length,
+      deactivated: customers.filter((c) => c.deactivated_at !== null).length,
+      newThisMonth: customers.filter((c) => c.created_at.startsWith(THIS_MONTH)).length,
+      chartData: getMonthlyData(customers, locale, TODAY),
+      recent: customers.toSorted((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5),
+    }),
+    [customers, locale],
+  )
+
+  return (
+    <>
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label={t('adminDashboard.stats.total')} value={customers.length} />
@@ -164,6 +157,6 @@ export function AdminDashboardPage() {
 
       {/* Platform-admin notice */}
       <Alert tone="info">{t('adminDashboard.notice')}</Alert>
-    </Page>
+    </>
   )
 }
