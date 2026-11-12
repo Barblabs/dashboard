@@ -188,13 +188,16 @@ function UserTable({
   const [search, setSearch] = useState('')
 
   const disabledCount = users.filter((u) => u.disabled_at !== null).length
+  const total = t('users.counter.total', { count: users.length })
   const counter =
-    users.length > 0
-      ? `${users.length} ${users.length === 1 ? t('users.counter.user') : t('users.counter.users')}` +
-        (disabledCount > 0
-          ? ` · ${disabledCount} ${disabledCount === 1 ? t('users.counter.disabled') : t('users.counter.disabledMany')}`
-          : '')
-      : ''
+    users.length === 0
+      ? ''
+      : disabledCount === 0
+        ? total
+        : t('users.counter.summary', {
+            total,
+            disabled: t('users.counter.disabled', { count: disabledCount }),
+          })
 
   const filtered = users.filter((u) => u.email.toLowerCase().includes(search.toLowerCase()))
 

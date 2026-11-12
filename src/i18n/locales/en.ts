@@ -101,10 +101,11 @@ export const en = {
     you: 'You',
     search: { placeholder: 'Search by email…' },
     counter: {
-      user: 'user',
-      users: 'users',
-      disabled: 'disabled',
-      disabledMany: 'disabled',
+      total_one: '{{count}} user',
+      total_other: '{{count}} users',
+      disabled_one: '{{count}} disabled',
+      disabled_other: '{{count}} disabled',
+      summary: '{{total}} · {{disabled}}',
     },
     invite: {
       button: 'Invite user',

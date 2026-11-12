@@ -103,10 +103,11 @@ export const es: Translations = {
     you: 'Tú',
     search: { placeholder: 'Buscar por correo…' },
     counter: {
-      user: 'usuario',
-      users: 'usuarios',
-      disabled: 'deshabilitado',
-      disabledMany: 'deshabilitados',
+      total_one: '{{count}} usuario',
+      total_other: '{{count}} usuarios',
+      disabled_one: '{{count}} deshabilitado',
+      disabled_other: '{{count}} deshabilitados',
+      summary: '{{total}} · {{disabled}}',
     },
     invite: {
       button: 'Invitar usuario',
