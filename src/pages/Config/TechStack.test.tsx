@@ -51,7 +51,7 @@ function gap(name: string) {
 
 // An option's name starts with the Asset's name, then its Kind, Area, gaps and Criticality.
 function startsWith(name: string) {
-  return new RegExp(`^${name} `)
+  return new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} `)
 }
 
 function expectSelected(name: string) {
@@ -89,7 +89,7 @@ describe('Tech stack', () => {
     expect(screen.getByText('7 assets')).toBeInTheDocument()
     const options = assetList().getAllByRole('option')
     expect(options).toHaveLength(ACTIVE.length)
-    options.forEach((element, index) => expect(element).toHaveAccessibleName(startsWith(ACTIVE[index]!)))
+    ACTIVE.forEach((name, index) => expect(options[index]).toHaveAccessibleName(startsWith(name)))
     expect(option('prod-api-01')).toHaveTextContent('prod-api-01 Server · Infrastructure High')
     expect(option('analytics-worker-03')).toHaveTextContent('Virtual Machine · Data Platform Medium')
     expect(option('core-switch-01')).toHaveTextContent('Network Device · No Area Low')
