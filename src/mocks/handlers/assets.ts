@@ -17,8 +17,8 @@ import { failure, isOneOf } from './responses'
 type DeclareExposureRequest = { exposure?: unknown }
 
 /*
- * Applies the rules barbackend checks before touching a Declaration, in its order: the role,
- * then the Asset. `change` returns the new Exposure, or a failure response to send instead.
+ * Applies the rules barbackend checks after the body, in its order: the role, then the Asset.
+ * `change` returns the new Exposure, or a failure response to send instead.
  */
 async function changeExposure(
   id: number,
@@ -63,10 +63,11 @@ export const assetsHandlers = [
 
   http.put(apiUrl('/assets/:id/exposure'), async ({ params, request }) => {
     const { exposure } = (await request.json()) as DeclareExposureRequest
+    // The backend validates the body against its schema before it looks at who is asking.
+    if (typeof exposure !== 'string' || !isOneOf(EXPOSURES, exposure)) {
+      return failure(400, 'invalid_request', 'exposure must be internet_facing or internal')
+    }
     return changeExposure(Number(params['id']), (asset) => {
-      if (typeof exposure !== 'string' || !isOneOf(EXPOSURES, exposure)) {
-        return failure(400, 'invalid_request', 'exposure must be internet_facing or internal')
-      }
       if (!asset.active) return failure(409, 'asset_inactive', 'asset is inactive')
       return {
         value: exposure,
