@@ -1,5 +1,4 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
-import { Tabs } from '@base-ui/react/tabs'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Controller,
@@ -35,6 +34,7 @@ import {
 import { Button } from '../../components/ui/Button'
 import { CloseIcon, UploadFileIcon } from '../../components/ui/icons'
 import { Input } from '../../components/ui/Input'
+import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { CountriesField, CountryField, MultiSelectField, SelectField, TagField, TextAreaField } from './controls'
 import { ImportDialog } from './ImportDialog'
 import { canonicalDomain, mergeDraft } from './model'
@@ -622,32 +622,27 @@ export function BusinessContextForm({
             onSubmit={(e) => void form.handleSubmit(onSave, showFirstError)(e)}
             className="flex flex-col rounded-xl border border-border-panel bg-white"
           >
-            <Tabs.Root value={section} onValueChange={(value) => setSection(value as Section)}>
-              <Tabs.List className="relative flex gap-1 overflow-x-auto border-b border-border-panel px-4">
+            <Tabs value={section} onValueChange={(value) => setSection(value as Section)}>
+              <TabList>
                 {SECTIONS.map((s, i) => (
-                  <Tabs.Tab
-                    key={s}
-                    value={s}
-                    className="group flex cursor-pointer items-center gap-2 px-3 py-4 font-body text-[0.9375rem] whitespace-nowrap text-gray outline-none transition-colors hover:text-navy focus-visible:text-navy data-active:font-semibold data-active:text-navy"
-                  >
+                  <Tab key={s} value={s}>
                     <span className="flex size-6 items-center justify-center rounded-full border border-muted-bg font-mono text-[0.75rem] group-data-active:border-navy group-data-active:bg-navy group-data-active:text-white">
                       {i + 1}
                     </span>
                     {t(`businessContext.sections.${s}.title`)}
-                  </Tabs.Tab>
+                  </Tab>
                 ))}
-                <Tabs.Indicator className="absolute bottom-[-1px] left-0 h-0.5 w-(--active-tab-width) translate-x-(--active-tab-left) bg-cyan transition-[translate,width] duration-200 ease-out" />
-              </Tabs.List>
+              </TabList>
               {SECTIONS.map((s) => {
                 const Content = CONTENT[s]
                 return (
-                  <Tabs.Panel key={s} value={s} className="flex flex-col gap-6 p-6 outline-none md:p-8">
+                  <TabPanel key={s} value={s} className="flex flex-col gap-6 p-6 md:p-8">
                     <p className="font-body text-[0.9375rem] text-gray">{t(`businessContext.sections.${s}.description`)}</p>
                     <Content />
-                  </Tabs.Panel>
+                  </TabPanel>
                 )
               })}
-            </Tabs.Root>
+            </Tabs>
 
             <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border-panel px-6 py-4">
               <div>
