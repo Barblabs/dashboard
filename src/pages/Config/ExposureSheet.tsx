@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Dialog } from '@base-ui/react/dialog'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EXPOSURES, type Asset, type Exposure } from '../../api/assets'
 import { errorCode } from '../../api/client'
@@ -28,7 +27,7 @@ export function ExposureSheet({ dialog }: { dialog: DialogTarget<ExposureSheetTa
   const target = dialog.target
   return (
     <Sheet open={dialog.open} onClose={dialog.close}>
-      {target?.mode === 'queue' && <Queue assets={target.assets} />}
+      {target?.mode === 'queue' && <Queue assets={target.assets} onClose={dialog.close} />}
       {target?.mode === 'single' && <Single asset={target.asset} onClose={dialog.close} />}
     </Sheet>
   )
@@ -44,7 +43,7 @@ function Single({ asset, onClose }: { asset: Asset; onClose: () => void }) {
   )
 }
 
-function Queue({ assets }: { assets: Asset[] }) {
+function Queue({ assets, onClose }: { assets: Asset[]; onClose: () => void }) {
   const { t } = useTranslation()
   const [index, setIndex] = useState(0)
   const [answered, setAnswered] = useState(0)
@@ -72,7 +71,7 @@ function Queue({ assets }: { assets: Asset[] }) {
         // Keyed by Asset, so each one starts from its own Declaration with no leftover error.
         <AssetStep key={asset.id} asset={asset} queue onDone={advance} />
       ) : (
-        <Summary answered={answered} total={total} />
+        <Summary answered={answered} total={total} onClose={onClose} />
       )}
     </>
   )
@@ -105,12 +104,11 @@ interface AssetStepProps {
   onDone: (answered: boolean) => void
 }
 
+// The mutation lives here, above both views, so a 409 can turn the form into the locked view.
 function AssetStep({ asset, queue, onDone }: AssetStepProps) {
   const { t } = useTranslation()
   const canEdit = useCanEdit()
   const change = useExposureMutation({ onSaved: useSavedToast(queue) })
-  const declared = asset.exposure.source === 'declared' ? asset.exposure.value : null
-  const [choice, setChoice] = useState<Exposure | null>(declared)
 
   // A 409 means the Asset turned Inactive meanwhile: it is now as read-only as any Inactive one.
   const turnedInactive = errorCode(change.error) === 'asset_inactive'
@@ -119,91 +117,113 @@ function AssetStep({ asset, queue, onDone }: AssetStepProps) {
     : !asset.active || turnedInactive
       ? t('config.exposure.sheet.inactiveReason')
       : null
-  const errorText =
-    change.error &&
-    t(turnedInactive ? 'config.exposure.sheet.turnedInactive' : 'config.exposure.sheet.saveFailed')
+
+  if (lockedReason) {
+    // The error replaces the reason: the User must learn their save didn't happen.
+    const notice = turnedInactive ? (
+      <Alert tone="error">{t('config.exposure.sheet.turnedInactive')}</Alert>
+    ) : (
+      <p className="font-body text-[0.8125rem] leading-[1.4] text-gray">{lockedReason}</p>
+    )
+    return (
+      <StepLayout
+        asset={asset}
+        footer={
+          queue && (
+            <Button variant="secondary" size="sm" onClick={() => onDone(false)}>
+              {t('config.exposure.sheet.next')}
+            </Button>
+          )
+        }
+      >
+        {notice}
+      </StepLayout>
+    )
+  }
+  return <DeclareStep asset={asset} queue={queue} change={change} onDone={onDone} />
+}
+
+interface DeclareStepProps extends AssetStepProps {
+  change: ReturnType<typeof useExposureMutation>
+}
+
+function DeclareStep({ asset, queue, change, onDone }: DeclareStepProps) {
+  const { t } = useTranslation()
+  const declared = asset.exposure.source === 'declared' ? asset.exposure.value : null
+  const [choice, setChoice] = useState<Exposure | null>(declared)
   const pending = change.isPending ? (change.variables.exposure === null ? 'clear' : 'declare') : null
 
   const save = (exposure: Exposure | null) =>
     change.mutate({ asset, exposure }, { onSuccess: () => onDone(true) })
 
   return (
+    <StepLayout
+      asset={asset}
+      footer={
+        <>
+          {declared && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mr-auto"
+              loading={pending === 'clear'}
+              disabled={pending === 'declare'}
+              onClick={() => save(null)}
+            >
+              {pending === 'clear'
+                ? t('config.exposure.sheet.clearing')
+                : t('config.exposure.sheet.useImported', { value: exposureLabel(t, asset.exposure.imported) })}
+            </Button>
+          )}
+          {queue && (
+            <Button variant="secondary" size="sm" disabled={pending !== null} onClick={() => onDone(false)}>
+              {t('config.exposure.sheet.skip')}
+            </Button>
+          )}
+          <Button
+            size="sm"
+            loading={pending === 'declare'}
+            disabled={choice === null || choice === declared || pending === 'clear'}
+            onClick={() => choice && save(choice)}
+          >
+            {pending === 'declare'
+              ? t('config.exposure.sheet.declaring')
+              : t(queue ? 'config.exposure.sheet.declareAndNext' : 'config.exposure.sheet.declare')}
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-3">
+        <ExposureChoice
+          name={`exposure-${asset.id}`}
+          value={choice}
+          disabled={pending !== null}
+          onChange={(value) => {
+            setChoice(value)
+            change.reset()
+          }}
+        />
+        {choice === 'internal' && declared !== 'internal' && (
+          <Alert tone="info" className="animate-fade-in">
+            {t('config.exposure.sheet.internalWarning')}
+          </Alert>
+        )}
+        {change.error && <Alert tone="error">{t('config.exposure.sheet.saveFailed')}</Alert>}
+      </div>
+    </StepLayout>
+  )
+}
+
+/** The Asset and where its Exposure comes from, then the step's own content and footer. */
+function StepLayout({ asset, footer, children }: { asset: Asset; footer: ReactNode; children: ReactNode }) {
+  return (
     <div className="flex min-h-0 flex-1 animate-fade-in flex-col">
       <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-5">
         <AssetHeading asset={asset} />
         <Provenance asset={asset} />
-
-        {lockedReason ? (
-          // The error replaces the reason: the User must learn their save didn't happen.
-          errorText ? (
-            <Alert tone="error">{errorText}</Alert>
-          ) : (
-            <p className="font-body text-[0.8125rem] leading-[1.4] text-gray">{lockedReason}</p>
-          )
-        ) : (
-          <div className="flex flex-col gap-3">
-            <ExposureChoice
-              name={`exposure-${asset.id}`}
-              value={choice}
-              disabled={pending !== null}
-              onChange={(value) => {
-                setChoice(value)
-                change.reset()
-              }}
-            />
-            {choice === 'internal' && declared !== 'internal' && (
-              <Alert tone="info" className="animate-fade-in">
-                {t('config.exposure.sheet.internalWarning')}
-              </Alert>
-            )}
-            {errorText && <Alert tone="error">{errorText}</Alert>}
-          </div>
-        )}
+        {children}
       </div>
-
-      {lockedReason
-        ? queue && (
-            <div className={FOOTER}>
-              <Button variant="secondary" size="sm" onClick={() => onDone(false)}>
-                {t('config.exposure.sheet.next')}
-              </Button>
-            </div>
-          )
-        : (
-            <div className={FOOTER}>
-              {declared && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="mr-auto"
-                  loading={pending === 'clear'}
-                  disabled={pending === 'declare'}
-                  onClick={() => save(null)}
-                >
-                  {pending === 'clear'
-                    ? t('config.exposure.sheet.clearing')
-                    : t('config.exposure.sheet.useImported', {
-                        value: exposureLabel(t, asset.exposure.imported),
-                      })}
-                </Button>
-              )}
-              {queue && (
-                <Button variant="secondary" size="sm" disabled={pending !== null} onClick={() => onDone(false)}>
-                  {t('config.exposure.sheet.skip')}
-                </Button>
-              )}
-              <Button
-                size="sm"
-                loading={pending === 'declare'}
-                disabled={choice === null || choice === declared || pending === 'clear'}
-                onClick={() => choice && save(choice)}
-              >
-                {pending === 'declare'
-                  ? t('config.exposure.sheet.declaring')
-                  : t(queue ? 'config.exposure.sheet.declareAndNext' : 'config.exposure.sheet.declare')}
-              </Button>
-            </div>
-          )}
+      {footer && <div className={FOOTER}>{footer}</div>}
     </div>
   )
 }
@@ -315,7 +335,7 @@ function ExposureChoice({ name, value, onChange, disabled }: ExposureChoiceProps
   )
 }
 
-function Summary({ answered, total }: { answered: number; total: number }) {
+function Summary({ answered, total, onClose }: { answered: number; total: number; onClose: () => void }) {
   const { t } = useTranslation()
   return (
     <div className="flex flex-1 animate-fade-in flex-col items-start gap-4 px-6 py-8">
@@ -331,7 +351,9 @@ function Summary({ answered, total }: { answered: number; total: number }) {
           {answered < total && ` ${t('config.exposure.sheet.skipped')}`}
         </p>
       </div>
-      <Dialog.Close render={<Button size="sm" />}>{t('config.exposure.sheet.done')}</Dialog.Close>
+      <Button size="sm" onClick={onClose}>
+        {t('config.exposure.sheet.done')}
+      </Button>
     </div>
   )
 }
