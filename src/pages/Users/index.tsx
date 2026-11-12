@@ -15,7 +15,7 @@ import {
 import { Page } from '../../components/Page'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Alert } from '../../components/ui/Alert'
-import { Badge } from '../../components/ui/Badge'
+import { Badge, type BadgeVariant } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { ConfirmDialog, DialogLayout, TargetModal } from '../../components/ui/Dialog'
 import { Fab } from '../../components/ui/Fab'
@@ -189,6 +189,19 @@ function DisableBody({ user, onClose }: { user: UserResponse; onClose: () => voi
 
 // ── User table ───────────────────────────────────────────────────────────────
 
+type UserStatus = 'disabled' | 'pending' | 'active'
+
+// Disabled wins: a disabled User cannot sign in whether or not their invitation went out.
+function userStatus(user: UserResponse): UserStatus {
+  if (user.disabled_at !== null) return 'disabled'
+  return user.pending ? 'pending' : 'active'
+}
+
+const STATUS_BADGE: Record<Exclude<UserStatus, 'active'>, BadgeVariant> = {
+  disabled: 'muted',
+  pending: 'warning',
+}
+
 const TH = 'px-4 py-3 font-body text-[0.75rem] font-semibold uppercase tracking-wider text-gray text-left'
 
 function UserTable({
@@ -204,7 +217,7 @@ function UserTable({
   const currentUser = useCurrentUser()
   const [search, setSearch] = useState('')
 
-  const disabledCount = users.filter((u) => u.disabled_at !== null).length
+  const disabledCount = users.filter((u) => userStatus(u) === 'disabled').length
   function counterText(): string | undefined {
     if (users.length === 0) return undefined
     const total = t('users.counter.total', { count: users.length })
@@ -235,7 +248,8 @@ function UserTable({
             </thead>
             <tbody className="bg-white">
               {filtered.map((user) => {
-                const isDisabled = user.disabled_at !== null
+                const status = userStatus(user)
+                const isDisabled = status === 'disabled'
                 const isSelf = user.email === currentUser?.email
                 return (
                   <tr
@@ -247,10 +261,8 @@ function UserTable({
                         {/* An email has no break points: without this it widens the table and pushes the actions out of view. */}
                         <span className="min-w-0 wrap-anywhere">{user.email}</span>
                         {isSelf && <Badge variant="caps">{t('users.you')}</Badge>}
-                        {isDisabled ? (
-                          <Badge variant="muted">{t('users.status.disabled')}</Badge>
-                        ) : (
-                          user.pending && <Badge variant="warning">{t('users.status.pending')}</Badge>
+                        {status !== 'active' && (
+                          <Badge variant={STATUS_BADGE[status]}>{t(`users.status.${status}`)}</Badge>
                         )}
                       </div>
                     </td>
