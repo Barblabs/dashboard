@@ -26,7 +26,7 @@ describe('Findings', () => {
   it('shows the newest order in groups, the first to attend first', async () => {
     await renderFindings()
 
-    const groups = screen.getAllByRole('region')
+    const groups = within(screen.getByRole('main')).getAllByRole('region')
     expect(groups.map((g) => within(g).getByRole('heading').textContent)).toEqual([
       'Explotadas por ransomware en el servidor web expuesto',
       'Explotada por ransomware, en un activo interno de laboratorio',

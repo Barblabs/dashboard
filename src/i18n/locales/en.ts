@@ -1,6 +1,8 @@
 export const en = {
   common: {
     retry: 'Retry',
+    close: 'Close',
+    toastRegion: 'Notifications',
   },
   sidebar: {
     superAdmin: 'Super Admin',

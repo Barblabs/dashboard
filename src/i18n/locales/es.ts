@@ -3,6 +3,8 @@ import type { Translations } from './en'
 export const es: Translations = {
   common: {
     retry: 'Reintentar',
+    close: 'Cerrar',
+    toastRegion: 'Notificaciones',
   },
   sidebar: {
     superAdmin: 'Super Admin',
