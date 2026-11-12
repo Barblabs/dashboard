@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Asset, AssetsPage, Exposure } from './assets'
 import { api, ApiError } from './client'
+import { connectionScopeKey } from './cmdb'
 import { ASSETS_KEY } from './inventory'
 import { PRIORITIZATIONS_KEY } from './prioritizations'
 import type { Known, Schemas } from './schemas'
@@ -10,8 +11,8 @@ type DeclareExposureRequest = Known<Schemas['DeclareExposureRequest']>
 // The backend's maximum page size: whole-inventory reads take as few requests as possible.
 const MAX_PAGE_SIZE = 200
 
-// Under the assets key, so whatever refreshes the inventory refreshes the count with it.
-const UNKNOWN_EXPOSURE_KEY = [...ASSETS_KEY, 'unknown-exposure'] as const
+// Beside the inventory pages rather than under their key: it holds a list of Assets, not a page.
+const UNKNOWN_EXPOSURE_KEY = [...connectionScopeKey, 'unknown-exposure'] as const
 
 async function* assetPages(filters: Record<string, string>): AsyncGenerator<Asset[]> {
   let cursor: string | null = null
@@ -109,6 +110,7 @@ export function useExposureMutation({
     onSettled: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ASSETS_KEY }),
+        queryClient.invalidateQueries({ queryKey: UNKNOWN_EXPOSURE_KEY }),
         queryClient.invalidateQueries({ queryKey: PRIORITIZATIONS_KEY }),
       ]),
   })
