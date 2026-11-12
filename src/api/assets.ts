@@ -61,3 +61,8 @@ export interface AssetFilters {
 export function assetKey(asset: Pick<Asset, 'source_id' | 'record_id'>) {
   return `${asset.source_id}/${asset.record_id}`
 }
+
+/** Software Components not matched to a Product: threats can't be checked against them. */
+export function unidentifiedCount(asset: Pick<Asset, 'software'>) {
+  return asset.software.filter((component) => component.product === null).length
+}
