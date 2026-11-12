@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import type { UseQueryResult } from '@tanstack/react-query'
 import type { ParseKeys } from 'i18next'
 import { useTranslation } from 'react-i18next'
+import type { Loadable } from '../api/loadable'
 import { requestErrorText } from '../i18n/errors'
 import { Button } from './ui/Button'
 import { Message } from './ui/Message'
@@ -14,7 +14,7 @@ interface Keys {
 }
 
 interface Props<T> {
-  query: Pick<UseQueryResult<T>, 'data' | 'error' | 'refetch'>
+  query: Loadable<T>
   keys: Keys
   children: (data: T) => ReactNode
 }
