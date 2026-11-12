@@ -14,46 +14,10 @@ import {
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
+import { PencilIcon, PowerOffIcon, RestoreIcon, PlusIcon, SearchIcon } from '../../components/ui/icons'
 import { Modal } from '../../components/ui/Modal'
 import { requestErrorText } from '../../i18n/errors'
 import { useDateFormat } from '../../i18n/format'
-
-function PencilIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path
-        d="M9.917 1.75a1.65 1.65 0 0 1 2.333 2.333L4.083 12.25 1.167 12.833l.583-2.916L9.917 1.75z"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function PowerOffIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M5.5 3.5A6 6 0 1 0 10.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M8 1.5v5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function RestoreIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M2.5 8A5.5 5.5 0 1 1 4 12"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <path d="M2.5 12.5V8H7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
 
 // ── Rename modal ──────────────────────────────────────────────────────────────
 
@@ -484,10 +448,7 @@ export function TenantsPage() {
           <div className="flex items-center gap-4">
             <div className="relative flex-1">
               <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <circle cx="6.5" cy="6.5" r="4.25" stroke="currentColor" strokeWidth="1.4" />
-                  <path d="m11 11 2.5 2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                </svg>
+                <SearchIcon />
               </span>
               <input
                 type="search"
@@ -527,9 +488,7 @@ export function TenantsPage() {
         className="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-navy text-white shadow-lg transition-transform hover:scale-105 focus-ring"
         onClick={() => setCreateOpen(true)}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+        <PlusIcon />
       </button>
 
       <CreateModal open={createOpen} onClose={() => setCreateOpen(false)} />

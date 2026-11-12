@@ -1,6 +1,7 @@
 import { useId, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MultiSelect, type Option } from '../../components/ui/MultiSelect'
+import { CloseIcon } from '../../components/ui/icons'
 import { LIMITS } from '../../api/businessContext'
 import { useLocale } from '../../i18n/format'
 import { COUNTRIES, countryNamer } from './model'
@@ -290,9 +291,7 @@ export function TagField({ label, placeholder, value, onChange, suggestions, can
                 onClick={() => onChange(value.filter((v) => v !== entry))}
                 className="flex size-4 cursor-pointer items-center justify-center rounded-xs text-gray hover:bg-border-panel hover:text-navy focus-ring"
               >
-                <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                  <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
+                <CloseIcon />
               </button>
             </span>
           ))}

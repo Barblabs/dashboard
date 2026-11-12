@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { ChevronDownIcon } from '../../components/ui/icons'
 
 // The native arrow can't be positioned, so it is hidden and drawn as an icon with its own inset.
 const SELECT =
@@ -22,20 +23,7 @@ export function FilterSelect({
         <select className={SELECT} value={value} onChange={(event) => onChange(event.target.value)}>
           {children}
         </select>
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 12 12"
-          className="pointer-events-none absolute top-1/2 right-3 size-3 -translate-y-1/2 text-gray"
-        >
-          <path
-            d="M3 4.5 6 7.5 9 4.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-3 size-3 -translate-y-1/2 text-gray" />
       </span>
     </label>
   )

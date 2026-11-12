@@ -33,6 +33,7 @@ import {
   type Section,
 } from '../../api/businessContext'
 import { Button } from '../../components/ui/Button'
+import { CloseIcon, UploadFileIcon } from '../../components/ui/icons'
 import { Input } from '../../components/ui/Input'
 import { CountriesField, CountryField, MultiSelectField, SelectField, TagField, TextAreaField } from './controls'
 import { ImportDialog } from './ImportDialog'
@@ -349,9 +350,7 @@ function CriticalServices() {
               onClick={() => remove(index)}
               className="mt-2.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-gray hover:bg-panel hover:text-critical focus-ring"
             >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
+              <CloseIcon size={12} />
             </button>
           </div>
         ),
@@ -579,10 +578,7 @@ export function BusinessContextForm({ stored, readOnly, saving, saveStatus, onSa
             className="flex flex-col items-center gap-5 rounded-xl border border-border-panel bg-white px-6 py-14 text-center"
           >
             <span className="flex size-12 items-center justify-center rounded-full bg-cyan/15 text-nav-active-bg" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-                <path d="M14 3v5h5M12 18v-6M9 15l3-3 3 3" />
-              </svg>
+              <UploadFileIcon />
             </span>
             <div className="flex max-w-[34rem] flex-col gap-2">
               <h2 id="bc-start-title" className="font-title text-[1.375rem] leading-tight text-navy">

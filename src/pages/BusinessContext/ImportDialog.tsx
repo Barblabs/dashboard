@@ -8,6 +8,7 @@ import {
   type Draft,
 } from '../../api/businessContext'
 import { Button } from '../../components/ui/Button'
+import { CloseIcon } from '../../components/ui/icons'
 import { Modal } from '../../components/ui/Modal'
 import { requestErrorText } from '../../i18n/errors'
 
@@ -142,9 +143,7 @@ export function ImportDialog({
                       onClick={() => setFiles(files.filter((f) => f !== file))}
                       className="flex size-6 cursor-pointer items-center justify-center rounded-md text-gray hover:bg-panel hover:text-critical focus-ring"
                     >
-                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                        <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
+                      <CloseIcon />
                     </button>
                   </span>
                 </li>
