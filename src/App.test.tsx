@@ -1,5 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+import type { AuthUser } from './auth/store'
 import { renderApp } from './test/render'
 
 function nav() {
@@ -45,6 +46,53 @@ describe('Navigation', () => {
 
   it('shows the forbidden page', () => {
     renderApp('/forbidden')
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
+  })
+})
+
+const PLATFORM_ADMIN: AuthUser = {
+  id: 'platform-admin-id',
+  email: 'superadmin@test.example',
+  role: 'platform_admin',
+  customer: null,
+}
+
+const VIEWER: AuthUser = {
+  id: 'viewer-id',
+  email: 'viewer@test.example',
+  role: 'viewer',
+  customer: { id: 'test-customer-id', name: 'Test Org' },
+}
+
+function navLinks() {
+  return nav().getAllByRole('link').map((link) => link.textContent)
+}
+
+describe('Pages by role', () => {
+  it('shows a Customer Admin every customer page, in order', () => {
+    renderApp('/findings')
+
+    expect(navLinks()).toEqual(['Findings', 'Configuration', 'Business context', 'Notifications', 'Users'])
+  })
+
+  it('shows a Viewer the customer pages without Users, and denies it', () => {
+    renderApp('/users', VIEWER)
+
+    expect(navLinks()).toEqual(['Findings', 'Configuration', 'Business context', 'Notifications'])
+    expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
+  })
+
+  it('opens the tenants for a Platform Admin and shows only its pages', async () => {
+    renderApp('/', PLATFORM_ADMIN)
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Organizations' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/tenants')
+    expect(navLinks()).toEqual(['Tenants', 'Dashboard'])
+  })
+
+  it('denies a Platform Admin the customer pages', () => {
+    renderApp('/config', PLATFORM_ADMIN)
 
     expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
   })

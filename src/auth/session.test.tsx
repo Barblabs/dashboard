@@ -120,6 +120,15 @@ describe('Returning after signing in', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
   })
 
+  it("opens a Platform Admin's home when no page was asked for", async () => {
+    const user = renderApp('/login', null)
+
+    await user.click(await screen.findByRole('button', { name: 'Super Admin (platform_admin)' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Organizations' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/tenants')
+  })
+
   it('denies a page the role cannot see', async () => {
     const user = renderApp('/users', null)
 
