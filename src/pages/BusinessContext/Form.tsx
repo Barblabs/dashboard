@@ -333,7 +333,7 @@ function CriticalServices() {
               <SelectAt
                 name={`operations.critical_services.${index}.impact`}
                 label={t('businessContext.fields.criticalServices.impact')}
-                emptyLabel={`${t('businessContext.fields.criticalServices.impact')}…`}
+                emptyLabel={t('businessContext.fields.criticalServices.impactPlaceholder')}
                 options={IMPACTS}
                 labelOf={(c) => t(`businessContext.vocab.impact.${c}`)}
                 hideLabel
@@ -341,7 +341,7 @@ function CriticalServices() {
               <SelectAt
                 name={`operations.critical_services.${index}.max_downtime`}
                 label={t('businessContext.fields.criticalServices.maxDowntime')}
-                emptyLabel={`${t('businessContext.fields.criticalServices.maxDowntime')}…`}
+                emptyLabel={t('businessContext.fields.criticalServices.maxDowntimePlaceholder')}
                 options={DOWNTIMES}
                 labelOf={(c) => t(`businessContext.vocab.downtime.${c}`)}
                 hideLabel
