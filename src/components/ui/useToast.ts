@@ -1,17 +1,21 @@
 import { useCallback } from 'react'
 import { Toast } from '@base-ui/react/toast'
-import type { ToastTone } from './Toast'
+
+// The tone reaches the toast as its `type`, which `Toast` styles through `data-type`.
+export type ToastTone = 'success' | 'warning'
 
 // A warning reports something that did not happen yet: it is announced urgently and stays longer.
-const PRIORITY: Record<ToastTone, 'low' | 'high'> = { success: 'low', warning: 'high' }
-const TIMEOUT: Record<ToastTone, number> = { success: 5000, warning: 10000 }
+const TONES: Record<ToastTone, { priority: 'low' | 'high'; timeout: number }> = {
+  success: { priority: 'low', timeout: 5000 },
+  warning: { priority: 'high', timeout: 10000 },
+}
 
 /** Shows a toast in the `ToastProvider` above. */
 export function useToast() {
   const { add } = Toast.useToastManager()
   const show = useCallback(
     ({ tone, text }: { tone: ToastTone; text: string }) => {
-      add({ type: tone, description: text, priority: PRIORITY[tone], timeout: TIMEOUT[tone] })
+      add({ type: tone, description: text, ...TONES[tone] })
     },
     [add],
   )
