@@ -8,6 +8,7 @@ export const MOCK_USERS: UserResponse[] = [
     role: 'customer_admin',
     created_at: '2026-01-01T00:00:00Z',
     disabled_at: null,
+    pending: false,
   },
   {
     id: 'user-viewer-1',
@@ -15,6 +16,15 @@ export const MOCK_USERS: UserResponse[] = [
     role: 'viewer',
     created_at: '2026-02-01T00:00:00Z',
     disabled_at: null,
+    pending: false,
+  },
+  {
+    id: 'user-pending-1',
+    email: 'invited@acme.example',
+    role: 'viewer',
+    created_at: '2026-03-01T00:00:00Z',
+    disabled_at: null,
+    pending: true,
   },
 ]
 

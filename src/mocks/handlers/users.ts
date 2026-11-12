@@ -28,6 +28,7 @@ export const usersHandlers = [
       role,
       created_at: new Date().toISOString(),
       disabled_at: null,
+      pending: false,
     }
     usersStore.save([...users, user])
     return HttpResponse.json(user, { status: 201 })

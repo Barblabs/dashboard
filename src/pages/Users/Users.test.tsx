@@ -25,7 +25,7 @@ describe('Users', () => {
     const viewerRow = screen.getByText(VIEWER.email).closest('tr')!
     expect(within(adminRow).getByText('Admin')).toBeInTheDocument()
     expect(within(viewerRow).getByText('Viewer')).toBeInTheDocument()
-    expect(screen.getByText(/2 users/)).toBeInTheDocument()
+    expect(screen.getByText(/3 users/)).toBeInTheDocument()
   })
 
   it('shows a counter for a single user in the singular', async () => {
