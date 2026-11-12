@@ -199,6 +199,18 @@ describe('Business context', () => {
     expect(screen.queryByDisplayValue('Pagos en línea')).not.toBeInTheDocument()
   })
 
+  it('moves focus to the field that stops a save in the open section', async () => {
+    const user = await fillByHand()
+    await user.click(screen.getByRole('tab', { name: /Operations/ }))
+    await user.click(screen.getByRole('button', { name: /Add critical service/ }))
+    await user.type(screen.getByRole('textbox', { name: 'Service' }), ' ')
+
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    await screen.findByText('Give the service a name.')
+    expect(screen.getByRole('textbox', { name: 'Service' })).toHaveFocus()
+  })
+
   it('keeps showing what stops a save after importing a draft', async () => {
     const user = await fillByHand()
     await user.click(screen.getByRole('tab', { name: /Operations/ }))
