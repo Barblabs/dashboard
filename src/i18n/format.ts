@@ -21,7 +21,6 @@ const DATE_STYLES = {
 
 export type DateStyle = keyof typeof DATE_STYLES
 
-/** Formats an ISO date in the UI's language. */
 export function useDateFormat(style: DateStyle = 'medium'): (iso: string) => string {
   const locale = useLocale()
   return useMemo(() => {

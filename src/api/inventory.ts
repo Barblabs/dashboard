@@ -32,7 +32,6 @@ export async function* allAssetPages(filters: Partial<AssetFilters>): AsyncGener
   } while (cursor !== null)
 }
 
-// The inventory comes from the connected CMDB, so it is dropped on disconnect.
 export const ASSETS_KEY = [...connectionScopeKey, 'assets'] as const
 
 function assetsQuery(filters: AssetFilters, cursor: string | null) {

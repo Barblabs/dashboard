@@ -29,7 +29,6 @@ import {
 } from '../../api/businessContext'
 import { useLocale } from '../../i18n/format'
 
-/** The codes of each vocabulary a field picks from. */
 export interface Codes {
   sectors: Sector
   organizationTypes: Exclude<OrganizationType, ''>

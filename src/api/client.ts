@@ -16,7 +16,6 @@ export type ApiFailure =
 /** The body of a failure the backend explains: a stable code and a readable message. */
 export type BackendFailure = Schemas['CodedError']
 
-// Every request failure surfaces as an ApiError.
 export class ApiError extends Error {
   readonly failure: ApiFailure
 
@@ -97,7 +96,6 @@ apiClient.interceptors.response.use(undefined, (error: unknown) => {
   return Promise.reject(failure)
 })
 
-// Callers only ever need the response body.
 export const api = {
   get: <T>(url: string) => apiClient.get<T>(url).then((r) => r.data),
   post: <T>(url: string, body?: unknown) => apiClient.post<T>(url, body).then((r) => r.data),

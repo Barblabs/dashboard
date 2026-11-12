@@ -16,7 +16,6 @@ const ownerSchema = z.object({ email: z.email('config.areas.owner.invalidEmail')
 
 type OwnerFields = z.infer<typeof ownerSchema>
 
-/** Sets or removes the owner of the area the dialog targets. */
 export function AreaOwnerDialog({ dialog }: { dialog: DialogTarget<Area> }) {
   return <TargetModal dialog={dialog}>{(area) => <AreaOwnerBody area={area} onClose={dialog.close} />}</TargetModal>
 }

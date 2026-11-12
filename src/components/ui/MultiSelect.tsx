@@ -13,7 +13,6 @@ interface MultiSelectProps {
   value: string[]
   onChange: (value: string[]) => void
   placeholder?: string
-  /** Shown when the typed filter matches nothing. */
   emptyText: string
   removeLabel: (label: string) => string
 }
