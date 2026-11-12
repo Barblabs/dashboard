@@ -197,6 +197,8 @@ export function useSaveBusinessContextMutation() {
   })
 }
 
+export type SaveBusinessContext = ReturnType<typeof useSaveBusinessContextMutation>
+
 // Browsers often send no type for Markdown or CSV, so the extension decides.
 const DRAFT_MEDIA_TYPES: Record<string, string> = {
   pdf: 'application/pdf',
