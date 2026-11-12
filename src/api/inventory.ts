@@ -13,7 +13,7 @@ const ASSETS_PAGE_SIZE = 50
 const MAX_ASSETS_PAGE_SIZE = 200
 
 // The backend rejects a cursor sent with other filters, so every page request repeats them.
-function assetsPath(filters: AssetFilters, cursor: string | null, limit = ASSETS_PAGE_SIZE) {
+function assetsPath(filters: AssetFilters, cursor: string | null, limit: number) {
   const params = new URLSearchParams({ limit: String(limit), active: filters.active })
   if (filters.kind) params.set('kind', filters.kind)
   if (filters.criticality) params.set('criticality', filters.criticality)
@@ -38,7 +38,7 @@ export const ASSETS_KEY = [...connectionScopeKey, 'assets'] as const
 function assetsQuery(filters: AssetFilters, cursor: string | null) {
   return queryOptions({
     queryKey: [...ASSETS_KEY, filters, cursor],
-    queryFn: () => api.get<AssetsPage>(assetsPath(filters, cursor)),
+    queryFn: () => api.get<AssetsPage>(assetsPath(filters, cursor, ASSETS_PAGE_SIZE)),
     // Keeps the current page on screen while the next one loads, instead of flashing "Loading".
     placeholderData: keepPreviousData,
   })
