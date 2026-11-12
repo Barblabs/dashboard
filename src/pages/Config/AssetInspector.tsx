@@ -66,6 +66,7 @@ const KEY_MOVES: Record<string, (index: number, last: number) => number> = {
 }
 
 interface AssetInspectorProps {
+  /** Never empty: the caller shows its empty and no-match messages instead. */
   assets: Asset[]
   busy: boolean
   pager: Pager | null
@@ -85,14 +86,14 @@ export function AssetInspector({ assets, busy, pager, onOpenExposure }: AssetIns
     0,
   )
   const selected = assets[selectedIndex]
-  const selectedId = selected && optionId(selected)
+  const selectedId = optionId(selected)
   // The fallback is stored, so paging back to a page that holds the old selection doesn't revive it.
-  if (selected && assetKey(selected) !== selectedKey) setSelectedKey(assetKey(selected))
+  if (assetKey(selected) !== selectedKey) setSelectedKey(assetKey(selected))
 
   // The list is `relative` so each option's offsetTop is measured from it.
   useEffect(() => {
     const list = listRef.current
-    const option = selectedId ? document.getElementById(selectedId) : null
+    const option = document.getElementById(selectedId)
     if (list && option) list.scrollTop = revealInList(list, option)
   }, [selectedId])
 
@@ -100,8 +101,7 @@ export function AssetInspector({ assets, busy, pager, onOpenExposure }: AssetIns
     const move = KEY_MOVES[event.key]
     if (!move) return
     event.preventDefault()
-    const target = assets[move(selectedIndex, assets.length - 1)]
-    if (target) setSelectedKey(assetKey(target))
+    setSelectedKey(assetKey(assets[move(selectedIndex, assets.length - 1)]))
   }
 
   return (
@@ -136,7 +136,7 @@ export function AssetInspector({ assets, busy, pager, onOpenExposure }: AssetIns
       </div>
       {/* Keyed so each record opens at its top, not at the previous one's scroll position. */}
       <div key={selectedId} className="min-h-0 lg:overflow-y-auto">
-        {selected && <AssetRecord asset={selected} onOpenExposure={onOpenExposure} />}
+        <AssetRecord asset={selected} onOpenExposure={onOpenExposure} />
       </div>
     </div>
   )
