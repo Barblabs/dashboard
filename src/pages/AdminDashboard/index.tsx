@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useCustomersQuery, type CustomerResponse } from '../../api/customers'
@@ -8,12 +8,16 @@ import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
 import { useDateFormat, useLocale } from '../../i18n/format'
 
+function monthPrefix(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
 function getMonthlyData(customers: CustomerResponse[], locale: string, now: Date) {
   const monthLabel = new Intl.DateTimeFormat(locale, { month: 'short' })
   const months: { label: string; count: number }[] = []
   for (let i = 5; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    const prefix = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    const prefix = monthPrefix(date)
     const count = customers.filter((c) => c.created_at.startsWith(prefix)).length
     months.push({
       label: monthLabel.format(date),
@@ -23,17 +27,13 @@ function getMonthlyData(customers: CustomerResponse[], locale: string, now: Date
   return months
 }
 
-// Computed once at module load. For a "this month" stat the page is remounted before the month turns.
-const TODAY = new Date()
-const THIS_MONTH = TODAY.toISOString().slice(0, 7)
-
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex flex-col gap-1 rounded-xl border border-border-panel bg-white p-5">
-      <span className="font-body text-[0.8125rem] font-semibold uppercase tracking-wider text-gray">
+      <dt className="font-body text-[0.8125rem] font-semibold uppercase tracking-wider text-gray">
         {label}
-      </span>
-      <span className="font-title text-[2rem] font-black leading-none text-navy">{value}</span>
+      </dt>
+      <dd className="font-title text-[2rem] font-black leading-none text-navy">{value}</dd>
     </div>
   )
 }
@@ -62,25 +62,22 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
   const locale = useLocale()
   const formatDate = useDateFormat('numeric')
 
-  const { active, deactivated, newThisMonth, chartData, recent } = useMemo(
-    () => ({
-      active: customers.filter((c) => c.deactivated_at === null).length,
-      deactivated: customers.filter((c) => c.deactivated_at !== null).length,
-      newThisMonth: customers.filter((c) => c.created_at.startsWith(THIS_MONTH)).length,
-      chartData: getMonthlyData(customers, locale, TODAY),
-      recent: customers.toSorted((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5),
-    }),
-    [customers, locale],
-  )
+  const [now] = useState(() => new Date())
+  const thisMonth = monthPrefix(now)
+  const active = customers.filter((c) => c.deactivated_at === null).length
+  const deactivated = customers.length - active
+  const newThisMonth = customers.filter((c) => c.created_at.startsWith(thisMonth)).length
+  const chartData = getMonthlyData(customers, locale, now)
+  const recent = customers.toSorted((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5)
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label={t('adminDashboard.stats.total')} value={customers.length} />
         <StatCard label={t('adminDashboard.stats.active')} value={active} />
         <StatCard label={t('adminDashboard.stats.deactivated')} value={deactivated} />
         <StatCard label={t('adminDashboard.stats.newThisMonth')} value={newThisMonth} />
-      </div>
+      </dl>
 
       <section className="rounded-xl border border-border-panel bg-white p-6">
         <h2 className="mb-4 font-title text-[1rem] font-black text-navy">

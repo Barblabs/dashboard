@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiUrl } from '../../mocks/url'
 import { PLATFORM_ADMIN, renderApp } from '../../test/render'
 import { server } from '../../test/server'
@@ -18,28 +18,39 @@ vi.mock('recharts', () => ({
   Tooltip: () => null,
 }))
 
-// MOCK_CUSTOMERS: Acme (Sep), Beta (Oct), Gamma (Nov, deactivated)
-// Today = 2026-11-03 → total=3, active=2, deactivated=1, newThisMonth=1 (Gamma)
-
 async function renderDashboard() {
   const user = renderApp('/admin-dashboard', PLATFORM_ADMIN)
-  await screen.findByText(MOCK_CUSTOMERS[2]!.name) // Gamma appears in recent list
+  await screen.findByText(MOCK_CUSTOMERS[2]!.name)
   return user
 }
 
+function stat(label: string) {
+  const card = screen.getByText(label, { selector: 'dt' }).parentElement!
+  return within(card).getByRole('definition').textContent
+}
+
 describe('AdminDashboard', () => {
-  it('shows stat cards with correct numbers', async () => {
+  // Only Date is faked: the app's timers and promises keep running for real.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-11-15T12:00:00Z'))
+  })
+  afterEach(() => vi.useRealTimers())
+
+  it('counts the organizations by status and those created this month', async () => {
     await renderDashboard()
 
-    // Stat card labels (some also appear in recent badges, so use getAllBy)
-    expect(screen.getAllByText('Active').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Deactivated').length).toBeGreaterThan(0)
+    expect(stat('Organizations')).toBe('3')
+    expect(stat('Active')).toBe('2')
+    expect(stat('Deactivated')).toBe('1')
+    expect(stat('New this month')).toBe('1')
+  })
 
-    // Stat values are standalone digit strings — dates in the recent list contain slashes
-    const numbers = screen.getAllByText(/^\d+$/).map((el) => Number(el.textContent))
-    expect(numbers).toContain(3) // total
-    expect(numbers).toContain(2) // active
-    expect(numbers).toContain(1) // deactivated (also newThisMonth = 1)
+  it('counts this month from when the page opened, not from when the app loaded', async () => {
+    vi.setSystemTime(new Date('2026-12-15T12:00:00Z'))
+    await renderDashboard()
+
+    expect(stat('New this month')).toBe('0')
   })
 
   it('shows the recent organizations list', async () => {
