@@ -5,7 +5,7 @@ interface ShellProps {
   id: string
   label: string
   error?: string
-  /** Shown at the label's right, such as a character count near the limit. */
+  /** Such as a character count near the limit: at the label's right, or under the field when the label is hidden. */
   aside?: ReactNode
   /** Filled from a document and not saved yet. */
   suggested?: boolean
@@ -35,7 +35,6 @@ export function Shell({ id, label, error, aside, suggested, readOnly, hideLabel,
         </div>
       )}
       {children}
-      {/* Without a visible label row, the aside goes under the field so it still shows. */}
       {hideLabel && aside && <div className="self-end">{aside}</div>}
       {error && (
         <p id={`${id}-error`} className="font-body text-[0.75rem] text-critical">

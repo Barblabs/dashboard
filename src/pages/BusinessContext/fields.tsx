@@ -11,8 +11,8 @@ import { useErrorText, useMeta, type FieldPathOf } from './meta'
 import { useVocab, type Codes, type Vocab } from './vocab'
 
 /*
- * Each field binds itself to the form by `name`: it reads and writes the value, shows the
- * schema's error, and takes whether it is suggested or read-only from the form's meta.
+ * Fields bind themselves by `name` so a section only says which field goes where; how a value,
+ * its error and its suggested or read-only state reach the screen is decided once, here.
  */
 
 interface TextProps {
