@@ -82,20 +82,20 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
     )
   }
 
-  const errorText =
-    problem ?? (draft.isError ? requestErrorText(draft.error, t, { fallback: 'businessContext.import.failed' }) : null)
+  const errorText = problem ?? requestErrorText(draft.error, t, { fallback: 'businessContext.import.failed' })
 
   return (
     <DialogLayout
       title={t('businessContext.import.title')}
       description={t('businessContext.import.subtitle')}
       error={errorText}
+      onSubmit={submit}
       actions={
         <>
           <Button variant="secondary" size="sm" disabled={draft.isPending} onClick={onClose}>
             {t('businessContext.import.cancel')}
           </Button>
-          <Button size="sm" loading={draft.isPending} onClick={submit}>
+          <Button type="submit" size="sm" loading={draft.isPending}>
             {draft.isPending ? t('businessContext.import.submitting') : t('businessContext.import.submit')}
           </Button>
         </>

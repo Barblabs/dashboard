@@ -49,12 +49,26 @@ export function translatedOrBackendMessage(
   return error || t(fallback)
 }
 
+/** Passing a query or mutation's `error`, null until it fails, yields null until then. */
 export function requestErrorText(
   error: Error,
   t: TFunction<'translation'>,
   keys: RequestErrorKeys,
+  values?: MessageValues,
+): string
+export function requestErrorText(
+  error: Error | null,
+  t: TFunction<'translation'>,
+  keys: RequestErrorKeys,
+  values?: MessageValues,
+): string | null
+export function requestErrorText(
+  error: Error | null,
+  t: TFunction<'translation'>,
+  keys: RequestErrorKeys,
   values: MessageValues = {},
-): string {
+): string | null {
+  if (!error) return null
   if (error instanceof ApiError && error.failure.kind === 'network') {
     return t(keys.network ?? keys.fallback)
   }

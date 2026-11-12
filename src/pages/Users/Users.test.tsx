@@ -69,6 +69,15 @@ describe('Users', () => {
     expect(screen.queryByRole('heading', { name: 'Invite user' })).not.toBeInTheDocument()
   })
 
+  it('pressing Enter in the email field sends the invitation', async () => {
+    const user = await renderUsers()
+
+    await user.click(screen.getByRole('button', { name: 'Invite user' }))
+    await user.type(screen.getByLabelText('Email'), 'new@acme.example{Enter}')
+
+    expect(await screen.findByText('new@acme.example')).toBeInTheDocument()
+  })
+
   it('invite fails with email_taken and shows the error', async () => {
     const user = await renderUsers()
 

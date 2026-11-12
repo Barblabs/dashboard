@@ -1,4 +1,4 @@
-import type { FormEvent, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import { Alert } from './Alert'
 import { Button } from './Button'
@@ -16,17 +16,22 @@ interface DialogLayoutProps {
   /** Shown above the title, e.g. a step indicator. */
   eyebrow?: ReactNode
   error?: string | null
+  /** Its primary button is `type="submit"`, so Enter in a field triggers it too. */
   actions: ReactNode
-  /** Makes the dialog a form, so Enter in a field submits it. */
-  onSubmit?: (event: FormEvent<HTMLFormElement>) => void
+  onSubmit: () => void
   children?: ReactNode
 }
 
-const LAYOUT = 'flex flex-col gap-5 p-6'
-
 export function DialogLayout({ title, description, eyebrow, error, actions, onSubmit, children }: DialogLayoutProps) {
-  const content = (
-    <>
+  return (
+    <form
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault()
+        onSubmit()
+      }}
+      className="flex flex-col gap-5 p-6"
+    >
       {eyebrow}
       <div className="flex flex-col gap-1.5">
         {/* Dialog.Title and Dialog.Description name and describe the popup on their own. */}
@@ -40,15 +45,7 @@ export function DialogLayout({ title, description, eyebrow, error, actions, onSu
       {children}
       {error && <Alert tone="error">{error}</Alert>}
       <div className="flex flex-wrap items-center justify-end gap-2">{actions}</div>
-    </>
-  )
-
-  return onSubmit ? (
-    <form noValidate onSubmit={onSubmit} className={LAYOUT}>
-      {content}
     </form>
-  ) : (
-    <div className={LAYOUT}>{content}</div>
   )
 }
 
@@ -78,12 +75,13 @@ export function ConfirmDialog({
     <DialogLayout
       title={title}
       error={error}
+      onSubmit={onConfirm}
       actions={
         <>
           <Button variant="secondary" size="sm" onClick={onCancel}>
             {cancelLabel}
           </Button>
-          <Button variant="danger" size="sm" loading={pending} onClick={onConfirm}>
+          <Button type="submit" variant="danger" size="sm" loading={pending}>
             {confirmLabel}
           </Button>
         </>

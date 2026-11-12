@@ -54,13 +54,14 @@ function RenameBody({ customer, onClose }: { customer: CustomerResponse; onClose
   return (
     <DialogLayout
       title={t('tenants.rename.title')}
-      error={rename.isError ? requestErrorText(rename.error, t, { fallback: 'tenants.rename.failed' }) : null}
+      error={requestErrorText(rename.error, t, { fallback: 'tenants.rename.failed' })}
+      onSubmit={onSubmit}
       actions={
         <>
           <Button variant="secondary" size="sm" onClick={onClose}>
             {t('tenants.rename.cancel')}
           </Button>
-          <Button loading={rename.isPending} size="sm" onClick={onSubmit}>
+          <Button type="submit" loading={rename.isPending} size="sm">
             {t('tenants.rename.save')}
           </Button>
         </>
@@ -89,11 +90,7 @@ function DeactivateBody({ customer, onClose }: { customer: CustomerResponse; onC
       cancelLabel={t('tenants.deactivate.cancel')}
       confirmLabel={t('tenants.deactivate.confirm')}
       pending={deactivate.isPending}
-      error={
-        deactivate.isError
-          ? requestErrorText(deactivate.error, t, { fallback: 'tenants.deactivate.failed' })
-          : null
-      }
+      error={requestErrorText(deactivate.error, t, { fallback: 'tenants.deactivate.failed' })}
       onConfirm={() => deactivate.mutate(customer.id, { onSuccess: onClose })}
       onCancel={onClose}
     />
@@ -150,17 +147,14 @@ function CreateBody({ onClose }: { onClose: () => void }) {
     setCurrent({ number: 1 })
   }
 
-  const errorText = create.isError
-    ? requestErrorText(create.error, t, { fallback: 'tenants.create.failed' })
-    : null
-
   if (current.number === 1) {
     return (
       <DialogLayout
         eyebrow={<StepIndicator step={1} />}
         title={t('tenants.create.step1.title')}
+        onSubmit={handleNext}
         actions={
-          <Button size="sm" onClick={handleNext}>
+          <Button type="submit" size="sm">
             {t('tenants.create.step1.next')}
           </Button>
         }
@@ -192,13 +186,14 @@ function CreateBody({ onClose }: { onClose: () => void }) {
     <DialogLayout
       eyebrow={<StepIndicator step={2} />}
       title={t('tenants.create.step2.title')}
-      error={errorText}
+      error={requestErrorText(create.error, t, { fallback: 'tenants.create.failed' })}
+      onSubmit={handleSubmit}
       actions={
         <>
           <Button variant="secondary" size="sm" onClick={handleBack}>
             {t('tenants.create.step2.back')}
           </Button>
-          <Button loading={create.isPending} size="sm" onClick={handleSubmit}>
+          <Button type="submit" loading={create.isPending} size="sm">
             {create.isPending ? t('tenants.create.step2.submitting') : t('tenants.create.step2.submit')}
           </Button>
         </>
