@@ -34,6 +34,16 @@ const ROLE_LABEL: Record<CustomerRole, 'users.role.customer_admin' | 'users.role
   viewer: 'users.role.viewer',
 }
 
+function RoleOptions() {
+  const { t } = useTranslation()
+  return (
+    <>
+      <option value="viewer">{t(ROLE_LABEL.viewer)}</option>
+      <option value="customer_admin">{t(ROLE_LABEL.customer_admin)}</option>
+    </>
+  )
+}
+
 // ── Invite dialog ───────────────────────────────────────────────────────────
 
 const inviteSchema = z.object({
@@ -96,8 +106,7 @@ function InviteBody({ onClose }: { onClose: () => void }) {
             disabled={invite.isPending}
             {...register('role')}
           >
-            <option value="viewer">{t(ROLE_LABEL['viewer'])}</option>
-            <option value="customer_admin">{t(ROLE_LABEL['customer_admin'])}</option>
+            <RoleOptions />
           </Select>
         </Field>
 
@@ -139,8 +148,7 @@ function ChangeRoleBody({ user, onClose }: { user: UserResponse; onClose: () => 
             setSelectedRole(e.target.value as CustomerRole)
           }}
         >
-          <option value="viewer">{t(ROLE_LABEL['viewer'])}</option>
-          <option value="customer_admin">{t(ROLE_LABEL['customer_admin'])}</option>
+          <RoleOptions />
         </Select>
       </Field>
     </DialogLayout>
