@@ -1,18 +1,10 @@
 import { screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
-import type { AuthUser } from '../../auth/store'
 import { apiUrl } from '../../mocks/url'
-import { renderApp, seedCustomers } from '../../test/render'
+import { PLATFORM_ADMIN, renderApp, seedCustomers } from '../../test/render'
 import { server } from '../../test/server'
 import { MOCK_CUSTOMERS } from '../../mocks/customers-store'
-
-const PLATFORM_ADMIN: AuthUser = {
-  id: 'platform-admin-id',
-  email: 'superadmin@barbattack.example',
-  role: 'platform_admin',
-  customer: null,
-}
 
 const ORG_A = MOCK_CUSTOMERS[0]!
 const ORG_B = MOCK_CUSTOMERS[1]!

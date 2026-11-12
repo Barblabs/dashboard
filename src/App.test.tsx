@@ -1,7 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import type { AuthUser } from './auth/store'
-import { renderApp } from './test/render'
+import { PLATFORM_ADMIN, renderApp, VIEWER } from './test/render'
 
 function nav() {
   return within(screen.getByRole('navigation'))
@@ -50,20 +49,6 @@ describe('Navigation', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
   })
 })
-
-const PLATFORM_ADMIN: AuthUser = {
-  id: 'platform-admin-id',
-  email: 'superadmin@test.example',
-  role: 'platform_admin',
-  customer: null,
-}
-
-const VIEWER: AuthUser = {
-  id: 'viewer-id',
-  email: 'viewer@test.example',
-  role: 'viewer',
-  customer: { id: 'test-customer-id', name: 'Test Org' },
-}
 
 function navLinks() {
   return nav().getAllByRole('link').map((link) => link.textContent)
