@@ -241,6 +241,10 @@ export const en = {
     recent: {
       title: 'Recent organizations',
       empty: 'No organizations yet.',
+      status: {
+        active: 'Active',
+        deactivated: 'Deactivated',
+      },
     },
     notice:
       'As Platform Admin you can see names, creation dates and status only. Access to users, CMDB and assets belongs to each organization.',

@@ -53,6 +53,15 @@ describe('AdminDashboard', () => {
     expect(within(recentSection).getByText(MOCK_CUSTOMERS[2]!.name)).toBeInTheDocument()
   })
 
+  it('marks each recent organization with a one-word status', async () => {
+    await renderDashboard()
+
+    const recentSection = screen.getByText('Recent organizations').closest('section')!
+    const row = (name: string) => within(recentSection).getByText(name).closest('li')!
+    expect(within(row(MOCK_CUSTOMERS[0]!.name)).getByText('Active')).toBeInTheDocument()
+    expect(within(row(MOCK_CUSTOMERS[2]!.name)).getByText('Deactivated')).toBeInTheDocument()
+  })
+
   it('renders the bar chart container', async () => {
     await renderDashboard()
     expect(screen.getByTestId('bar-chart')).toBeInTheDocument()

@@ -243,6 +243,10 @@ export const es: Translations = {
     recent: {
       title: 'Organizaciones recientes',
       empty: 'Aún no hay organizaciones.',
+      status: {
+        active: 'Activa',
+        deactivated: 'Desactivada',
+      },
     },
     notice:
       'Como Platform Admin solo tienes visibilidad del nombre, fecha de alta y estado. El acceso a usuarios, CMDB y activos pertenece a cada organización.',

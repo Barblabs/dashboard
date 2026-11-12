@@ -144,8 +144,8 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
                   </span>
                   <Badge variant={c.deactivated_at ? 'muted' : 'outline'}>
                     {c.deactivated_at
-                      ? t('tenants.status.deactivated').split(' ·')[0]
-                      : t('tenants.status.active')}
+                      ? t('adminDashboard.recent.status.deactivated')
+                      : t('adminDashboard.recent.status.active')}
                   </Badge>
                 </div>
               </li>
