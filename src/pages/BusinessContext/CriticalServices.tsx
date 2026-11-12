@@ -97,11 +97,11 @@ export function CriticalServices() {
 function ShownService({ index }: { index: number }) {
   const { control } = useFormContext<BusinessContextFields>()
   const service = useWatch({ control, name: `operations.critical_services.${index}` })
-  const impact = useVocab('impact').labelOf
-  const downtime = useVocab('downtime').labelOf
+  const impactName = useVocab('impact').labelOf
+  const downtimeName = useVocab('downtime').labelOf
   const tolerance = [
-    service.impact && impact(service.impact),
-    service.max_downtime && downtime(service.max_downtime),
+    service.impact && impactName(service.impact),
+    service.max_downtime && downtimeName(service.max_downtime),
   ].filter(Boolean)
   return (
     <div className="flex flex-col gap-0.5">
