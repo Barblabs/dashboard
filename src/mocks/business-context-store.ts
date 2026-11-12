@@ -1,7 +1,12 @@
-import { emptyFields, type BusinessContext, type BusinessContextFields } from '../api/businessContext'
+import {
+  emptyFields,
+  type BusinessContext,
+  type BusinessContextFields,
+  type FieldPath,
+} from '../api/businessContext'
 import { localStore } from './localStore'
 
-export const KEY_FIELDS = [
+export const KEY_FIELDS: FieldPath[] = [
   'profile.summary',
   'profile.sectors',
   'profile.employees',
