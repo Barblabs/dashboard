@@ -1,6 +1,6 @@
 import { delay, http, HttpResponse } from 'msw'
 import { isStated, type BusinessContextFields, type DraftSource } from '../../api/businessContext'
-import { KEY_FIELDS, loadBusinessContext, MOCK_DRAFT, saveBusinessContext } from '../business-context-store'
+import { KEY_FIELDS, businessContextStore, MOCK_DRAFT } from '../business-context-store'
 import { apiUrl } from '../url'
 import { failure } from './responses'
 
@@ -8,11 +8,11 @@ const gaps = (context: BusinessContextFields) => KEY_FIELDS.filter((path) => !is
 
 // Like the backend: a save follows the version it read, and the headquarters is a country.
 export const businessContextHandlers = [
-  http.get(apiUrl('/business-context'), () => HttpResponse.json(loadBusinessContext())),
+  http.get(apiUrl('/business-context'), () => HttpResponse.json(businessContextStore.load())),
 
   http.put(apiUrl('/business-context'), async ({ request }) => {
     const { version, context } = (await request.json()) as { version: number; context: BusinessContextFields }
-    const current = loadBusinessContext()
+    const current = businessContextStore.load()
     if (version !== current.version) {
       return failure(409, 'business_context_stale', 'the business context changed since it was read')
     }
@@ -30,7 +30,7 @@ export const businessContextHandlers = [
       key_fields: KEY_FIELDS,
       gaps: gaps(normalized),
     }
-    saveBusinessContext(saved)
+    businessContextStore.save(saved)
     return HttpResponse.json(saved)
   }),
 

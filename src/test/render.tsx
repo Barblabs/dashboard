@@ -7,9 +7,9 @@ import type { CmdbSource } from '../api/cmdb'
 import type { CustomerResponse } from '../api/customers'
 import type { UserResponse } from '../api/users'
 import { setMockRole } from '../auth/mockTokens'
-import { mockSource, saveSource } from '../mocks/store'
-import { saveCustomers } from '../mocks/customers-store'
-import { saveUsers } from '../mocks/users-store'
+import { mockSource, sourceStore } from '../mocks/cmdb-store'
+import { customersStore } from '../mocks/customers-store'
+import { usersStore } from '../mocks/users-store'
 
 const DEFAULT_TEST_USER: AuthUser = {
   id: 'test-user-id',
@@ -35,13 +35,13 @@ export function renderApp(path = '/', user: AuthUser | null = DEFAULT_TEST_USER)
 }
 
 export function seedSource(overrides: Partial<CmdbSource> = {}) {
-  saveSource({ ...mockSource, last_sync: new Date().toISOString(), ...overrides })
+  sourceStore.save({ ...mockSource, last_sync: new Date().toISOString(), ...overrides })
 }
 
 export function seedUsers(users: UserResponse[]) {
-  saveUsers(users)
+  usersStore.save(users)
 }
 
 export function seedCustomers(customers: CustomerResponse[]) {
-  saveCustomers(customers)
+  customersStore.save(customers)
 }
