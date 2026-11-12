@@ -244,7 +244,8 @@ function UserTable({
                   >
                     <td className="px-4 py-3 font-body text-[0.875rem] text-navy">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span>{user.email}</span>
+                        {/* An email has no break points: without this it widens the table and pushes the actions out of view. */}
+                        <span className="min-w-0 wrap-anywhere">{user.email}</span>
                         {isSelf && <Badge variant="caps">{t('users.you')}</Badge>}
                         {isDisabled ? (
                           <Badge variant="muted">{t('users.status.disabled')}</Badge>

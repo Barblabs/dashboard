@@ -20,7 +20,7 @@ export const MOCK_USERS: UserResponse[] = [
   },
   {
     id: 'user-pending-1',
-    email: 'invited@acme.example',
+    email: 'bartholomew.fitzgerald@northwind-industries-holdings.example.com',
     role: 'viewer',
     created_at: '2026-03-01T00:00:00Z',
     disabled_at: null,
