@@ -143,9 +143,7 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
                     {formatDate(c.created_at)}
                   </span>
                   <Badge variant={c.deactivated_at ? 'muted' : 'outline'}>
-                    {c.deactivated_at
-                      ? t('adminDashboard.recent.status.deactivated')
-                      : t('adminDashboard.recent.status.active')}
+                    {t(`adminDashboard.recent.status.${c.deactivated_at ? 'deactivated' : 'active'}`)}
                   </Badge>
                 </div>
               </li>
