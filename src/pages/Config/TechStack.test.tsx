@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Asset, AssetsPage } from '../../api/assets'
@@ -21,9 +21,13 @@ const ACTIVE = [
   'ledger-db',
 ]
 
-async function renderInventory() {
+function renderConnected() {
   seedSource()
-  const user = renderApp()
+  return renderApp()
+}
+
+async function renderInventory() {
+  const user = renderConnected()
   await screen.findByRole('option', { name: /prod-api-01/ })
   return user
 }
@@ -45,12 +49,13 @@ function gap(name: string) {
   return within(option(name)).queryByRole('img')
 }
 
-function optionName(element: HTMLElement) {
-  return element.querySelector('span')?.textContent
+// An option's name starts with the Asset's name, then its Kind, Area, gaps and Criticality.
+function startsWith(name: string) {
+  return new RegExp(`^${name} `)
 }
 
-function selectedName() {
-  return optionName(assetList().getByRole('option', { selected: true }))
+function expectSelected(name: string) {
+  expect(assetList().getByRole('option', { selected: true })).toHaveAccessibleName(startsWith(name))
 }
 
 /** The record pane, which shows one Asset at a time. */
@@ -70,7 +75,7 @@ function serveTwoPages() {
       const params = new URL(request.url).searchParams
       queries.push(Object.fromEntries(params))
       return HttpResponse.json(
-        params.get('cursor') === 'page-2' ? page([crmDb!], null) : page([prodApi!, analyticsWorker!], 'page-2'),
+        params.get('cursor') === 'page-2' ? page([crmDb], null) : page([prodApi, analyticsWorker], 'page-2'),
       )
     }),
   )
@@ -82,10 +87,12 @@ describe('Tech stack', () => {
     await renderInventory()
 
     expect(screen.getByText('7 assets')).toBeInTheDocument()
-    expect(assetList().getAllByRole('option').map(optionName)).toEqual(ACTIVE)
-    expect(option('prod-api-01')).toHaveTextContent('prod-api-01Server · InfrastructureHigh')
-    expect(option('analytics-worker-03')).toHaveTextContent('Virtual Machine · Data PlatformMedium')
-    expect(option('core-switch-01')).toHaveTextContent('Network Device · No AreaLow')
+    const options = assetList().getAllByRole('option')
+    expect(options).toHaveLength(ACTIVE.length)
+    options.forEach((element, index) => expect(element).toHaveAccessibleName(startsWith(ACTIVE[index]!)))
+    expect(option('prod-api-01')).toHaveTextContent('prod-api-01 Server · Infrastructure High')
+    expect(option('analytics-worker-03')).toHaveTextContent('Virtual Machine · Data Platform Medium')
+    expect(option('core-switch-01')).toHaveTextContent('Network Device · No Area Low')
     expect(screen.queryByRole('option', { name: /erp-app-02/ })).not.toBeInTheDocument()
   })
 
@@ -120,7 +127,7 @@ describe('Tech stack', () => {
       'nginx 1.24.0ApplicationF5 nginx',
       'internal-billing-agentApplicationUnidentified',
     ])
-    expect(within(components[2]!).getByText('Unidentified')).toHaveAttribute(
+    expect(within(components[2]).getByText('Unidentified')).toHaveAttribute(
       'title',
       'Not matched to a Product: threats cannot be checked against it.',
     )
@@ -152,35 +159,40 @@ describe('Tech stack', () => {
     expect(screen.getByRole('listbox')).toHaveFocus()
 
     await user.keyboard('{ArrowDown}')
-    expect(selectedName()).toBe('core-switch-01')
+    expectSelected('core-switch-01')
   })
 
   it('arrows, Home and End move the selection, and the record follows', async () => {
     const user = await renderInventory()
-    screen.getByRole('listbox').focus()
+    const listbox = screen.getByRole('listbox')
+    listbox.focus()
 
+    // The keys move the selection, not the page: their default scroll is prevented.
+    expect(fireEvent.keyDown(listbox, { key: 'End' })).toBe(false)
+    expect(fireEvent.keyDown(listbox, { key: 'Home' })).toBe(false)
+    expect(fireEvent.keyDown(listbox, { key: 'Tab' })).toBe(true)
     await user.keyboard('{ArrowDown}')
-    expect(selectedName()).toBe('analytics-worker-03')
+    expectSelected('analytics-worker-03')
     expect(screen.getByRole('article', { name: 'analytics-worker-03' })).toBeInTheDocument()
 
     await user.keyboard('{ArrowUp}{ArrowUp}')
-    expect(selectedName()).toBe('prod-api-01')
+    expectSelected('prod-api-01')
 
     await user.keyboard('{End}')
-    expect(selectedName()).toBe('ledger-db')
+    expectSelected('ledger-db')
     await user.keyboard('{ArrowDown}')
-    expect(selectedName()).toBe('ledger-db')
+    expectSelected('ledger-db')
     expect(screen.getByRole('article', { name: 'ledger-db' })).toBeInTheDocument()
 
     await user.keyboard('{Home}')
-    expect(selectedName()).toBe('prod-api-01')
+    expectSelected('prod-api-01')
     expect(screen.getByRole('article', { name: 'prod-api-01' })).toBeInTheDocument()
   })
 
   it('flags the assets with Unknown Exposure or Unidentified Components, and only those', async () => {
-    const unidentified = prodApi!.software[2]!
+    const unidentified = prodApi.software[2]
     const both: Asset = {
-      ...prodApi!,
+      ...prodApi,
       record_id: 'SRV-009',
       name: 'legacy-billing',
       exposure: importedExposure(null),
@@ -188,7 +200,7 @@ describe('Tech stack', () => {
     }
     server.use(
       http.get(apiUrl('/assets'), () =>
-        HttpResponse.json(page([prodApi!, analyticsWorker!, crmDb!, both], null, 4)),
+        HttpResponse.json(page([prodApi, analyticsWorker, crmDb, both], null, 4)),
       ),
     )
     await renderInventory()
@@ -202,15 +214,14 @@ describe('Tech stack', () => {
   it('shows the inventory in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
-    seedSource()
-    renderApp()
+    renderConnected()
 
     expect(await screen.findByText('Cargando inventario…')).toBeInTheDocument()
     await screen.findByRole('option', { name: /prod-api-01/ })
     expect(screen.getByRole('heading', { name: 'Stack tecnológico' })).toBeInTheDocument()
     expect(screen.getByText('7 activos')).toBeInTheDocument()
     expect(screen.getByText('↑ ↓ para moverte')).toBeInTheDocument()
-    expect(option('prod-api-01')).toHaveTextContent('prod-api-01Servidor · InfrastructureAlta')
+    expect(option('prod-api-01')).toHaveTextContent('prod-api-01 Servidor · Infrastructure Alta')
     expect(option('prod-api-01')).toHaveAccessibleName(/1 componente no identificado/)
     expect(option('core-switch-01')).toHaveTextContent('Dispositivo de red · Sin área')
     const details = within(screen.getByRole('article', { name: 'prod-api-01' }))
@@ -261,7 +272,7 @@ describe('Tech stack', () => {
 
     await user.click(screen.getByRole('button', { name: 'Previous' }))
     await screen.findByRole('option', { name: /prod-api-01/ })
-    expect(selectedName()).toBe('prod-api-01')
+    expectSelected('prod-api-01')
     expect(screen.getByRole('article', { name: 'prod-api-01' })).toBeInTheDocument()
   })
 
@@ -336,7 +347,7 @@ describe('Tech stack', () => {
     await waitFor(() =>
       expect(screen.queryByRole('option', { name: /core-switch-01/ })).not.toBeInTheDocument(),
     )
-    expect(selectedName()).toBe('prod-api-01')
+    expectSelected('prod-api-01')
     expect(screen.getByRole('article', { name: 'prod-api-01' })).toBeInTheDocument()
   })
 
@@ -345,7 +356,7 @@ describe('Tech stack', () => {
       http.get(apiUrl('/assets'), ({ request }) =>
         new URL(request.url).searchParams.has('cursor')
           ? HttpResponse.json({ code: 'invalid_request', error: 'cursor does not match' }, { status: 400 })
-          : HttpResponse.json(page([prodApi!], 'stale')),
+          : HttpResponse.json(page([prodApi], 'stale')),
       ),
     )
     const user = await renderInventory()
@@ -368,14 +379,13 @@ describe('Tech stack', () => {
         if (kind === 'server') {
           await serversHeld
           serversAnswered = true
-          return HttpResponse.json(page([prodApi!], null, 1))
+          return HttpResponse.json(page([prodApi], null, 1))
         }
-        if (kind === 'virtual_machine') return HttpResponse.json(page([analyticsWorker!], null, 1))
-        return HttpResponse.json(page([crmDb!], null, 1))
+        if (kind === 'virtual_machine') return HttpResponse.json(page([analyticsWorker], null, 1))
+        return HttpResponse.json(page([crmDb], null, 1))
       }),
     )
-    seedSource()
-    const user = renderApp()
+    const user = renderConnected()
     await screen.findByRole('option', { name: /crm-db-primary/ })
 
     await user.selectOptions(screen.getByLabelText('Type'), 'Server')
@@ -392,8 +402,7 @@ describe('Tech stack', () => {
 
   it('shows the empty state when the inventory has no assets', async () => {
     server.use(http.get(apiUrl('/assets'), () => HttpResponse.json(page([], null, 0))))
-    seedSource()
-    renderApp()
+    renderConnected()
 
     expect(await screen.findByText('There are no assets in the inventory.')).toBeInTheDocument()
     expect(screen.getByText('0 assets')).toBeInTheDocument()
@@ -416,11 +425,10 @@ describe('Tech stack', () => {
       http.get(apiUrl('/assets'), () =>
         failing
           ? HttpResponse.json({ code: 'internal_error', error: 'boom' }, { status: 500 })
-          : HttpResponse.json(page([prodApi!], null, 1)),
+          : HttpResponse.json(page([prodApi], null, 1)),
       ),
     )
-    seedSource()
-    const user = renderApp()
+    const user = renderConnected()
 
     const alert = await screen.findByRole('alert', {}, { timeout: 1000 })
     expect(alert).toHaveTextContent('The server had an internal error. Try again.')
@@ -433,8 +441,7 @@ describe('Tech stack', () => {
 
   it('says the server is unreachable when the inventory request gets no answer', async () => {
     server.use(http.get(apiUrl('/assets'), () => HttpResponse.error()))
-    seedSource()
-    renderApp()
+    renderConnected()
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Could not reach the server to load the inventory.',

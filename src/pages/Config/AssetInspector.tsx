@@ -38,15 +38,16 @@ function AssetOption({ asset, selected, onSelect }: { asset: Asset; selected: bo
       onClick={onSelect}
       className={`grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border-row px-5 py-2.5 ${selected ? 'bg-row-hover shadow-[inset_2px_0_0_var(--color-navy)]' : 'hover:bg-row-hover/60'} ${asset.active ? '' : 'opacity-55'}`}
     >
+      {/* The spaces between the parts keep the option's name readable; flex and grid don't render them. */}
       <div className="flex min-w-0 flex-col">
-        <span className="truncate text-[0.875rem] font-medium text-navy">{asset.name}</span>
+        <span className="truncate text-[0.875rem] font-medium text-navy">{asset.name}</span>{' '}
         <span className="truncate text-[0.75rem] text-gray">
           {t(`config.inventory.kind.${asset.kind}`)} ·{' '}
           {asset.area?.name ?? t('config.inventory.noArea')}
         </span>
-      </div>
+      </div>{' '}
       <div className="flex items-center gap-2">
-        <GapDot asset={asset} />
+        <GapDot asset={asset} />{' '}
         <span className="inline-flex w-[4.5rem] items-center gap-1.5 text-[0.75rem] text-gray">
           <span
             className={`size-2 shrink-0 rounded-full ${asset.criticality ? CRITICALITY_DOT[asset.criticality] : 'border border-muted-bg'}`}
