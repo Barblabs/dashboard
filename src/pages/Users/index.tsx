@@ -60,7 +60,7 @@ function InviteBody({ onClose }: { onClose: () => void }) {
   return (
     <DialogLayout
       title={t('users.invite.title')}
-      error={invite.isError ? requestErrorText(invite.error, t, { fallback: 'users.invite.failed' }) : null}
+      error={requestErrorText(invite.error, t, { fallback: 'users.invite.failed' })}
       actions={
         <>
           <Button variant="secondary" size="sm" onClick={onClose}>
@@ -116,11 +116,7 @@ function ChangeRoleBody({ user, onClose }: { user: UserResponse; onClose: () => 
   return (
     <DialogLayout
       title={t('users.changeRole.title')}
-      error={
-        changeRole.isError
-          ? requestErrorText(changeRole.error, t, { fallback: 'users.actions.roleChangeFailed' })
-          : null
-      }
+      error={requestErrorText(changeRole.error, t, { fallback: 'users.actions.roleChangeFailed' })}
       actions={
         <>
           <Button variant="secondary" size="sm" onClick={onClose}>
@@ -166,7 +162,7 @@ function DisableBody({ user, onClose }: { user: UserResponse; onClose: () => voi
       cancelLabel={t('users.confirm.cancel')}
       confirmLabel={t('users.confirm.confirm')}
       pending={disable.isPending}
-      error={disable.isError ? requestErrorText(disable.error, t, { fallback: 'users.actions.disableFailed' }) : null}
+      error={requestErrorText(disable.error, t, { fallback: 'users.actions.disableFailed' })}
       onConfirm={() => disable.mutate(user.id, { onSuccess: onClose })}
       onCancel={onClose}
     />

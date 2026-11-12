@@ -34,9 +34,7 @@ export function ConnectedBar({ source, onEdit, readOnly = false }: Props) {
     ? relativeTime(source.last_sync)
     : t('config.connected.never')
 
-  const requestFailureText = syncMutation.isError
-    ? requestErrorText(syncMutation.error, t, { fallback: 'config.errors.syncFailed' })
-    : null
+  const requestFailureText = requestErrorText(syncMutation.error, t, { fallback: 'config.errors.syncFailed' })
   const recordedFailure = source.last_sync_failure
   const recordedFailureText =
     recordedFailure &&

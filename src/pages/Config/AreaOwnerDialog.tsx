@@ -46,11 +46,7 @@ function AreaOwnerBody({ area, onClose }: { area: Area; onClose: () => void }) {
     <DialogLayout
       title={t('config.areas.owner.title', { area: area.name })}
       description={t('config.areas.owner.description')}
-      error={
-        setOwner.isError
-          ? requestErrorText(setOwner.error, t, { fallback: 'config.areas.owner.saveFailed' })
-          : null
-      }
+      error={requestErrorText(setOwner.error, t, { fallback: 'config.areas.owner.saveFailed' })}
       onSubmit={(event) => void onSubmit(event)}
       actions={
         <>
