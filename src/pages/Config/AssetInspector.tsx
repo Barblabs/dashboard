@@ -130,7 +130,8 @@ export function AssetInspector({ assets, busy, pager, onOpenExposure }: AssetIns
           {pager && <AssetPager pager={pager} />}
         </div>
       </div>
-      <div className="min-h-0 lg:overflow-y-auto">
+      {/* Keyed so each record opens at its top, not at the previous one's scroll position. */}
+      <div key={selectedId} className="min-h-0 lg:overflow-y-auto">
         {selected && <AssetRecord asset={selected} onOpenExposure={onOpenExposure} />}
       </div>
     </div>
