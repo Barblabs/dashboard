@@ -70,11 +70,6 @@ export function mergeDraft(current: BusinessContextFields, draft: BusinessContex
   return { fields, filled }
 }
 
-export function countryNamer(language: string): (code: string) => string {
-  const names = new Intl.DisplayNames([language], { type: 'region', fallback: 'code' })
-  return (code) => names.of(code) ?? code
-}
-
 const DOMAIN = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/
 
 /** The host of a domain or URL as the backend stores it, or `null` when it is none. */

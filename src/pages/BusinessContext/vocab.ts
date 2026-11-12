@@ -28,7 +28,6 @@ import {
   type Sector,
 } from '../../api/businessContext'
 import { useLocale } from '../../i18n/format'
-import { countryNamer } from './model'
 
 /** The codes of each vocabulary a field picks from. */
 export interface Codes {
@@ -69,7 +68,8 @@ const VOCABS: { [V in Vocab]: (t: TFunction<'translation'>, language: string) =>
   downtime: (t) => ({ codes: DOWNTIMES, labelOf: (c) => t(`businessContext.vocab.downtime.${c}`) }),
   // Alphabetical in the UI's language: nobody looks for a country in code order.
   countries: (_, language) => {
-    const labelOf = countryNamer(language)
+    const names = new Intl.DisplayNames([language], { type: 'region', fallback: 'code' })
+    const labelOf = (code: CountryCode) => names.of(code) ?? code
     return { codes: COUNTRIES.toSorted((a, b) => labelOf(a).localeCompare(labelOf(b), language)), labelOf }
   },
 }
