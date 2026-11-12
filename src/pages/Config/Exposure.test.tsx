@@ -154,6 +154,7 @@ describe('Exposure', () => {
     await waitFor(() =>
       expect(exposureCell('ledger-db')).toHaveAccessibleName('Exposure of ledger-db: Unknown, from iTop'),
     )
+    expect(await screen.findByText('5 Active Assets have Unknown Exposure.')).toBeInTheDocument()
   })
 
   it('a Viewer sees where an Exposure comes from, with no way to declare it', async () => {

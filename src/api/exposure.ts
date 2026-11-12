@@ -14,10 +14,15 @@ const UNKNOWN_EXPOSURE_KEY = [...connectionScopeKey, 'unknown-exposure'] as cons
 
 const inventoryPages = listCache<Asset>(ASSETS_KEY, 'assets')
 
+// What the banner counts and the queue walks through.
+function hasUnknownExposure(asset: Asset): boolean {
+  return asset.active && asset.exposure.value === null
+}
+
 async function fetchUnknownExposure(): Promise<Asset[]> {
   const unknown: Asset[] = []
   for await (const assets of allAssetPages({ active: 'true' })) {
-    unknown.push(...assets.filter((asset) => asset.exposure.value === null))
+    unknown.push(...assets.filter(hasUnknownExposure))
   }
   return unknown
 }
@@ -97,9 +102,12 @@ export function useExposureMutation({
     // The response is the Asset as saved: the table and the count show it without waiting.
     onSuccess: (saved, change) => {
       inventoryPages.replace(queryClient, saved.asset)
-      queryClient.setQueryData<Asset[]>(UNKNOWN_EXPOSURE_KEY, (unknown) =>
-        unknown?.filter((asset) => asset.id !== saved.asset.id || saved.asset.exposure.value === null),
-      )
+      // Clearing a Declaration can make an Asset Unknown, so the saved one may join the count.
+      queryClient.setQueryData<Asset[]>(UNKNOWN_EXPOSURE_KEY, (unknown) => {
+        if (!unknown) return unknown
+        const others = unknown.filter((asset) => asset.id !== saved.asset.id)
+        return hasUnknownExposure(saved.asset) ? [...others, saved.asset] : others
+      })
       onSaved(saved, change)
     },
     /*
