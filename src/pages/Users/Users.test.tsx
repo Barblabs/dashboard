@@ -63,6 +63,31 @@ describe('Users', () => {
     expect(screen.getAllByRole('button', { name: 'Disable' })).toHaveLength(2)
   })
 
+  it('marks a user whose invitation has not been sent yet as pending', async () => {
+    const pending = { ...VIEWER, id: 'user-pending', email: 'invited@acme.example', pending: true }
+    seedUsers([ADMIN, VIEWER, pending])
+    await renderUsers()
+
+    const pendingRow = screen.getByText(pending.email).closest('tr')!
+    expect(within(pendingRow).getByText('Invitation pending')).toBeInTheDocument()
+    expect(screen.getAllByText('Invitation pending')).toHaveLength(1)
+  })
+
+  it('shows a user who is both disabled and pending as disabled only', async () => {
+    const both = {
+      ...VIEWER,
+      id: 'user-both',
+      email: 'gone@acme.example',
+      disabled_at: '2026-06-01T00:00:00Z',
+      pending: true,
+    }
+    seedUsers([ADMIN, both])
+    await renderUsers()
+
+    expect(screen.getByText('Disabled')).toBeInTheDocument()
+    expect(screen.queryByText('Invitation pending')).not.toBeInTheDocument()
+  })
+
   it('invites a new user and they appear in the list', async () => {
     const user = await renderUsers()
 

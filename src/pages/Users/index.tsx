@@ -229,8 +229,10 @@ function UserTable({
                       <div className="flex flex-wrap items-center gap-2">
                         <span>{user.email}</span>
                         {isSelf && <Badge variant="caps">{t('users.you')}</Badge>}
-                        {isDisabled && (
+                        {isDisabled ? (
                           <Badge variant="muted">{t('users.status.disabled')}</Badge>
+                        ) : (
+                          user.pending && <Badge variant="warning">{t('users.status.pending')}</Badge>
                         )}
                       </div>
                     </td>

@@ -301,6 +301,7 @@ export const es: Translations = {
     },
     status: {
       disabled: 'Deshabilitado',
+      pending: 'Invitación pendiente',
     },
     actions: {
       editRole: 'Editar rol',

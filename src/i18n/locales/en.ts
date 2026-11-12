@@ -299,6 +299,7 @@ export const en = {
     },
     status: {
       disabled: 'Disabled',
+      pending: 'Invitation pending',
     },
     actions: {
       editRole: 'Edit role',
