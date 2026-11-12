@@ -2,7 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Asset, AssetsPage } from '../../api/assets'
-import { mockAssets } from '../../mocks/assets'
+import { importedExposure, mockAssets } from '../../mocks/assets'
 import { assetsStore } from '../../mocks/assets-store'
 import { failure } from '../../mocks/handlers/responses'
 import { apiUrl } from '../../mocks/url'
@@ -54,6 +54,13 @@ function declareInStore(name: string, exposure: 'internet_facing' | 'internal') 
           }
         : a,
     ),
+  )
+}
+
+/** Changes the stored Asset the way clearing its Declaration would. */
+function clearInStore(name: string) {
+  assetsStore.save(
+    assetsStore.load().map((a) => (a.name === name ? { ...a, exposure: importedExposure(a.exposure.imported) } : a)),
   )
 }
 
@@ -259,15 +266,7 @@ describe('Exposure', () => {
   it('a server error after clearing committed says the Asset is back to iTop, with its Findings pending', async () => {
     server.use(
       http.delete(apiUrl('/assets/:id/exposure'), () => {
-        assetsStore.save(
-          assetsStore
-            .load()
-            .map((a) =>
-              a.name === 'ledger-db'
-                ? { ...a, exposure: { ...a.exposure, value: null, source: 'imported', declared_by: null, declared_at: null } }
-                : a,
-            ),
-        )
+        clearInStore('ledger-db')
         return failure(500, 'internal_error', 'rescore failed')
       }),
     )
