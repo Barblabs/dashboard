@@ -12,6 +12,8 @@ const WIDTH = {
   sm: 'w-[min(32rem,calc(100vw-2rem))]',
   md: 'w-[min(36rem,calc(100vw-2rem))]',
   lg: 'w-[min(40rem,calc(100vw-2rem))]',
+  // A whole record to read rather than a form: it scrolls within the viewport.
+  xl: 'w-[min(60rem,calc(100vw-2rem))] max-h-[calc(100vh-4rem)] overflow-y-auto',
 }
 
 export type ModalWidth = keyof typeof WIDTH

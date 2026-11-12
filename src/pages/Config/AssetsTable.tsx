@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { assetKey, type Asset } from '../../api/assets'
 import { Badge } from '../../components/ui/Badge'
 import { EMPTY, useDateFormat } from '../../i18n/format'
-import { CELL, HEADER_CELL } from './table'
+import { CELL, HEADER_CELL } from '../../components/ui/table'
 
 const MONO = 'font-mono text-[0.8125rem]'
 const DETAIL_LABEL = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase'

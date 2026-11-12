@@ -329,7 +329,7 @@ export interface paths {
         };
         /**
          * List the Prioritizations of the Customer's open Findings, newest first
-         * @description The Findings pipeline creates them; the newest is the order to follow.
+         * @description The Prioritizer creates one each time it places new or changed Findings in the order that stands; the newest is the order to follow.
          */
         get: operations["list-prioritizations"];
         put?: never;
@@ -368,7 +368,7 @@ export interface paths {
         put?: never;
         /**
          * Record what a User says about a Finding of a Prioritization
-         * @description It changes no Score and no order.
+         * @description It changes no Score. should_be_earlier and should_be_later have the Prioritizer place the Finding again, with the note, in its next round.
          */
         post: operations["record-prioritization-feedback"];
         delete?: never;
@@ -463,12 +463,21 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         ActionPlanResponse: {
+            /** @description MITRE's Mitigations of the ATT&CK Techniques the Cartógrafo inferred, against the exploitation first */
+            attack_mitigations: components["schemas"]["PlanMitigationResponse"][];
             fixed_version: string | null;
             mitigation: string | null;
             sources: string[];
             steps: string[];
             summary: string;
             verification: string;
+        };
+        AdvisoryResponse: {
+            description: string;
+            feed: string;
+            /** @description YYYY-MM-DD */
+            published: string;
+            title: string;
         };
         AnalistaAnswer: {
             conversation_id: string;
@@ -582,6 +591,11 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        ContextEvidenceResponse: {
+            /** @description RFC 6901 pointer into the business_context/1 document of the version the Prioritizer read */
+            path: string;
+            value: string;
+        };
         CreateCustomerRequest: {
             /**
              * Format: email
@@ -612,6 +626,14 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        CriticalServiceResponse: {
+            description: string;
+            /** @description Blank when the Customer has not stated it */
+            impact: string;
+            /** @description Blank when the Customer has not stated it */
+            max_downtime: string;
+            name: string;
+        };
         CustomerListResponse: {
             customers: components["schemas"]["CustomerResponse"][];
         };
@@ -622,6 +644,14 @@ export interface components {
             deactivated_at: string | null;
             id: string;
             name: string;
+        };
+        CvssResponse: {
+            /** Format: double */
+            base_score: number;
+            /** @description Primary is NVD's; Secondary the numbering authority's */
+            type: string;
+            vector: string;
+            version: string;
         };
         DraftBusinessContextRequest: {
             files?: components["schemas"]["DraftFile"][];
@@ -643,6 +673,13 @@ export interface components {
             context: components["schemas"]["BusinessContextFields"];
             /** @description The key fields the document did not state */
             gaps: string[];
+        };
+        EpssResponse: {
+            /** Format: double */
+            percentile: number;
+            /** Format: double */
+            probability: number;
+            score_date: string;
         };
         EvidenceResponse: {
             finding_id: string;
@@ -666,18 +703,57 @@ export interface components {
             verdict: string;
             via_analista: boolean;
         };
+        FindingAssetResponse: {
+            /** @description The Critical Services of the Business Context that name the Asset */
+            critical_services: components["schemas"]["CriticalServiceResponse"][];
+            /** @enum {string} */
+            criticality: "high" | "medium" | "low" | "unknown";
+            /** @enum {string} */
+            exposure: "internet_facing" | "internal" | "unknown";
+            kind: string;
+            name: string;
+        };
+        FindingDetailsResponse: {
+            /** @description Vendor bulletins that name the Vulnerability, newest first */
+            advisories: components["schemas"]["AdvisoryResponse"][];
+            asset: components["schemas"]["FindingAssetResponse"];
+            /** @description operating_system or application, blank when the Asset no longer runs the component */
+            component_role: string;
+            cvss: components["schemas"]["CvssResponse"][];
+            description: string;
+            epss: components["schemas"]["EpssResponse"] | null;
+            kev: components["schemas"]["KevResponse"] | null;
+            labeling: components["schemas"]["LabelingResponse"];
+            /** @description NVD's references of the CVE */
+            references: string[];
+            score_details: components["schemas"]["ScoreResponse"];
+            /** @description ATT&CK Techniques the Cartógrafo inferred from the Vulnerability's text: an inference, not MITRE's word */
+            techniques: components["schemas"]["TechniqueResponse"][];
+            /** @description Feeds that could not be read, which is not the same as not listing the CVE: kev, epss or nvd */
+            unavailable_feeds: string[];
+        };
         FindingResponse: {
             asset_name: string;
+            /**
+             * Format: date-time
+             * @description When the Finding was closed, null while it is open. A closed Finding leaves the order the next Prioritization starts from.
+             */
+            closed_at: string | null;
             component: string;
             cve_id: string;
-            /** @description What the Agents read, to show as evidence. Its shape is not a contract. */
-            dossier: unknown;
+            /** @description What the Agents read of the Finding when it was placed. Its text comes from Feeds, the CMDB and the Customer: render it as plain text. */
+            details: components["schemas"]["FindingDetailsResponse"];
             finding_id: string;
             /**
              * Format: int64
              * @description Position of its Priority Group
              */
             group: number;
+            /**
+             * Format: date-time
+             * @description When the round that last placed it read it: later than the created_at of previous_id when this one placed it
+             */
+            placed_at: string;
             /** Format: double */
             score: number;
             /**
@@ -721,6 +797,20 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        KevResponse: {
+            date_added: string;
+            due_date: string;
+            known_ransomware_campaign_use: string;
+            required_action: string;
+        };
+        LabelingResponse: {
+            model: string;
+            /**
+             * @description Only labeled has Techniques; the others say nothing of how it is attacked
+             * @enum {string}
+             */
+            outcome: "labeled" | "none" | "failed" | "not_tried";
+        };
         LoginRequest: {
             password: string;
             url: string;
@@ -739,6 +829,12 @@ export interface components {
             /** @enum {string} */
             role: "platform_admin" | "customer_admin" | "viewer";
         };
+        MitigationResponse: {
+            /** @description MITRE's advice for this Technique */
+            advice: string;
+            attack_id: string;
+            name: string;
+        };
         OperationsFields: {
             /** @description Up to 25 */
             critical_services: components["schemas"]["CriticalServiceField"][];
@@ -751,6 +847,13 @@ export interface components {
         OwnerResponse: {
             email: string;
             source: string;
+        };
+        PlanMitigationResponse: {
+            /** @description ATT&CK id of the Mitigation, such as M1051 */
+            mitigation_id: string;
+            step: string;
+            /** @description ATT&CK id of the Technique it mitigates */
+            technique_id: string;
         };
         PlanRequestBody: {
             finding_id: string;
@@ -767,16 +870,24 @@ export interface components {
             prioritizations: components["schemas"]["PrioritizationSummaryResponse"][];
         };
         PrioritizationResponse: {
+            /**
+             * Format: int64
+             * @description The version of the Business Context the Prioritizer read, null when the Customer had stated none
+             */
+            business_context_version: number | null;
             /** Format: date-time */
             created_at: string;
+            /** @description What Users said about its Findings, whichever Prioritization they said it on */
             feedback: components["schemas"]["FeedbackResponse"][];
             findings: components["schemas"]["FindingResponse"][];
             /** @description In the order to attend them */
             groups: components["schemas"]["PriorityGroupResponse"][];
             id: string;
             model: string;
-            /** @description The newest Action Plan of each Finding that has one */
+            /** @description The newest Action Plan of each Finding that has one, whichever Prioritization it was asked from */
             plans: components["schemas"]["PlanResponse"][];
+            /** @description The Prioritization this one was built from, null for the Customer's first */
+            previous_id: string | null;
             prompt_id: string;
         };
         PrioritizationSummaryResponse: {
@@ -795,6 +906,8 @@ export interface components {
             id: string;
         };
         PriorityGroupResponse: {
+            /** @description What the reason relies on from the Business Context */
+            context_evidence: components["schemas"]["ContextEvidenceResponse"][];
             evidence: components["schemas"]["EvidenceResponse"][];
             /** @description Findings attended at the same time */
             finding_ids: string[];
@@ -862,6 +975,38 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        ScoreResponse: {
+            /**
+             * Format: double
+             * @description CVSS base score over 10
+             */
+            alpha: number;
+            /**
+             * Format: double
+             * @description EPSS probability
+             */
+            beta: number;
+            /** Format: double */
+            criticality_multiplier: number;
+            /** @description Inputs a default replaced: the Score is estimated, not measured */
+            data_gaps: string[];
+            /** Format: double */
+            exposure_multiplier: number;
+            /**
+             * Format: double
+             * @description 1 when KEV lists the CVE
+             */
+            gamma: number;
+            /** Format: int64 */
+            scoring_model: number;
+            /** Format: double */
+            value: number;
+            /**
+             * Format: double
+             * @description The Vulnerability's score before the Asset's multipliers
+             */
+            vulnerability: number;
+        };
         SetAreaOwnerRequest: {
             /**
              * Format: email
@@ -895,6 +1040,19 @@ export interface components {
             skipped: number;
             /** Format: int64 */
             updated: number;
+        };
+        TechniqueResponse: {
+            attack_id: string;
+            /** @description The quote of the Vulnerability's text that supports the label */
+            evidence: string;
+            /** @description The revoked ATT&CK id the Cartógrafo gave, when the catalog replaced it; blank otherwise */
+            labeled_as: string;
+            mitigations: components["schemas"]["MitigationResponse"][];
+            name: string;
+            rationale: string;
+            /** @enum {string} */
+            role: "exploitation" | "primary_impact" | "secondary_impact";
+            tactics: string[];
         };
         TestResponse: {
             code?: string;
