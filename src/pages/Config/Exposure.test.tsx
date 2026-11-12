@@ -233,6 +233,56 @@ describe('Exposure', () => {
     await waitFor(() => expect(sheetOpen()).toBe(false))
   })
 
+  it('the queue still warns when a saved answer could not rescore its Findings', async () => {
+    server.use(
+      http.put(apiUrl('/assets/:id/exposure'), () => {
+        declareInStore(UNKNOWN[0]!, 'internal')
+        return failure(500, 'internal_error', 'rescore failed')
+      }),
+    )
+    const user = await renderTechStack()
+
+    await user.click(await screen.findByRole('button', { name: 'Answer them' }))
+    const sheet = within(await screen.findByRole('dialog', { name: 'Answer Unknown Exposures' }))
+    await user.click(sheet.getByRole('radio', { name: /Internal/ }))
+    await user.click(sheet.getByRole('button', { name: 'Declare and next' }))
+
+    expect(await sheet.findByText('2 of 4')).toBeInTheDocument()
+    expect(
+      toasts().getByText(
+        "Declared analytics-worker-03 Internal, but its Findings couldn't be rescored. Their Scores update at the next Sync.",
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('a server error after clearing committed says the Asset is back to iTop, with its Findings pending', async () => {
+    server.use(
+      http.delete(apiUrl('/assets/:id/exposure'), () => {
+        assetsStore.save(
+          assetsStore
+            .load()
+            .map((a) =>
+              a.name === 'ledger-db'
+                ? { ...a, exposure: { ...a.exposure, value: null, source: 'imported', declared_by: null, declared_at: null } }
+                : a,
+            ),
+        )
+        return failure(500, 'internal_error', 'rescore failed')
+      }),
+    )
+    const user = await renderTechStack()
+
+    await user.click(exposureCell('ledger-db'))
+    const sheet = within(await screen.findByRole('dialog', { name: 'Exposure' }))
+    await user.click(sheet.getByRole('button', { name: "Use iTop's (Unknown)" }))
+
+    expect(
+      await toasts().findByText(
+        "ledger-db is back to iTop's Exposure (Unknown), but its Findings couldn't be rescored. Their Scores update at the next Sync.",
+      ),
+    ).toBeInTheDocument()
+  })
+
   it('a server error that saved nothing keeps the choice and asks to try again', async () => {
     server.use(http.put(apiUrl('/assets/:id/exposure'), () => failure(500, 'internal_error', 'database down')))
     const user = await renderTechStack()
