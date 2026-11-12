@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
-import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { EXPOSURES, type Asset, type Exposure } from '../../api/assets'
 import { errorCode } from '../../api/client'
@@ -13,7 +12,7 @@ import { Sheet, SheetHeader } from '../../components/ui/Sheet'
 import type { DialogTarget } from '../../components/ui/useDialogTarget'
 import { useToast } from '../../components/ui/useToast'
 import { useDateFormat } from '../../i18n/format'
-import { osLabel } from './assetText'
+import { exposureLabel, osLabel } from './assetText'
 
 /**
  * One Asset opened from its cell, or the queue of Active Assets with Unknown Exposure as they
@@ -23,10 +22,6 @@ export type ExposureSheetTarget = { mode: 'single'; asset: Asset } | { mode: 'qu
 
 const EASE = 'ease-[cubic-bezier(0.23,1,0.32,1)]'
 const FOOTER = 'flex flex-wrap items-center justify-end gap-2 border-t border-border-panel px-6 py-4'
-
-function exposureLabel(t: TFunction<'translation'>, value: Exposure | null) {
-  return t(`config.inventory.exposure.${value ?? 'unknown'}`)
-}
 
 /** Lets the User see where an Asset's Exposure comes from and, as a Customer Admin, declare it. */
 export function ExposureSheet({ dialog }: { dialog: DialogTarget<ExposureSheetTarget> }) {

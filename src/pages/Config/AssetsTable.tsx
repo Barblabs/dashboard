@@ -4,7 +4,7 @@ import { assetKey, type Asset } from '../../api/assets'
 import { Badge } from '../../components/ui/Badge'
 import { EMPTY, useDateFormat } from '../../i18n/format'
 import { CELL, HEADER_CELL } from '../../components/ui/table'
-import { osLabel, versioned } from './assetText'
+import { exposureLabel, osLabel, versioned } from './assetText'
 
 const MONO = 'font-mono text-[0.8125rem]'
 const DETAIL_LABEL = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase'
@@ -32,7 +32,7 @@ function AssetStatus({ asset }: { asset: Asset }) {
 function ExposureCell({ asset, onOpen }: { asset: Asset; onOpen: (asset: Asset) => void }) {
   const { t } = useTranslation()
   const { value, source } = asset.exposure
-  const valueText = t(`config.inventory.exposure.${value ?? 'unknown'}`)
+  const valueText = exposureLabel(t, value)
   return (
     <button
       type="button"
@@ -75,7 +75,7 @@ function AssetDetails({ asset }: { asset: Asset }) {
         </div>
         <div className="flex flex-col gap-1">
           <dt className={DETAIL_LABEL}>{t('config.inventory.details.exposure')}</dt>
-          <dd>{t(`config.inventory.exposure.${asset.exposure.value ?? 'unknown'}`)}</dd>
+          <dd>{exposureLabel(t, asset.exposure.value)}</dd>
         </div>
         <div className="flex flex-col gap-1">
           <dt className={DETAIL_LABEL}>{t('config.inventory.details.retired')}</dt>
