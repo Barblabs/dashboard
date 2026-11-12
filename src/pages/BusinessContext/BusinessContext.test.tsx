@@ -176,6 +176,29 @@ describe('Business context', () => {
     expect(saved.operations.critical_services).toEqual(MOCK_DRAFT.operations.critical_services)
   })
 
+  it('lets an imported draft be saved or discarded back to what was saved', async () => {
+    seedSaved('We sell shoes online.')
+    const user = await renderPage()
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: 'Import documents' }))
+    const dialog = await screen.findByRole('dialog')
+    await user.type(within(dialog).getByLabelText('Or paste text'), 'ACME')
+    await user.click(within(dialog).getByRole('button', { name: 'Generate draft' }))
+    await screen.findByText(/fields were filled from your documents/)
+
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled()
+    expect(screen.getByText('Financial services')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Discard changes' }))
+
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled()
+    expect(screen.getByLabelText('What does your organization do?')).toHaveValue('We sell shoes online.')
+    expect(screen.queryByText('Financial services')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('tab', { name: /Operations/ }))
+    expect(screen.queryByDisplayValue('Pagos en línea')).not.toBeInTheDocument()
+  })
+
   it('keeps the import dialog open while the agent drafts, so the draft is not lost', async () => {
     const user = await renderPage()
     let answer!: () => void
