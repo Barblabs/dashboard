@@ -17,7 +17,7 @@ export const MOCK_CUSTOMERS: CustomerResponse[] = [
   {
     id: 'customer-3',
     name: 'Gamma Inc',
-    created_at: '2026-11-01T00:00:00Z',
+    created_at: '2026-11-01T12:00:00Z',
     deactivated_at: '2026-11-02T00:00:00Z',
   },
 ]

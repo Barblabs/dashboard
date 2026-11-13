@@ -245,6 +245,26 @@ describe('Business context', () => {
     expect(screen.getByText('Give the service a name.')).toBeInTheDocument()
   })
 
+  it('says why a list a draft grew past the limit stops a save', async () => {
+    const stored = unsaved()
+    stored.version = 1
+    stored.context.footprint.domains = Array.from({ length: 49 }, (_, i) => `site${i}.example`)
+    businessContextStore.save(stored)
+    const user = await renderPage()
+
+    await user.click(screen.getByRole('button', { name: 'Import documents' }))
+    const dialog = await screen.findByRole('dialog')
+    await user.type(within(dialog).getByLabelText('Or paste text'), 'ACME')
+    await user.click(within(dialog).getByRole('button', { name: 'Generate draft' }))
+    await screen.findByText(/fields were filled from your documents/)
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(await screen.findByText('Up to 50 entries.')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /Digital footprint/ })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByLabelText('Domains')).toBeInvalid()
+    expect(businessContextStore.load().version).toBe(1)
+  })
+
   it('keeps the import dialog open while the agent drafts, so the draft is not lost', async () => {
     const user = await renderPage()
     let answer!: () => void

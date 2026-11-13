@@ -41,9 +41,6 @@ export const en = {
         viewer: 'Viewer (viewer)',
       },
     },
-    real: {
-      comingSoon: 'Cognito sign-in coming soon. Use VITE_USE_MOCK=true for development.',
-    },
     form: {
       tagline: 'The vulnerabilities that actually affect your stack, prioritized.',
       subtitle: 'Business-Aware Risk-Based Analysis of Threats, Tailored Alerts & Countermeasure Knowledge.',
@@ -265,6 +262,7 @@ export const en = {
     loadFailed: 'Could not load users.',
     networkError: 'Could not reach the server to load the users.',
     empty: 'No users yet.',
+    noMatches: 'No user matches the search.',
     you: 'You',
     search: { placeholder: 'Search by email…' },
     counter: {
@@ -334,6 +332,7 @@ export const en = {
     loadFailed: 'Could not load organizations.',
     networkError: 'Could not reach the server to load the organizations.',
     empty: 'No organizations yet.',
+    noMatches: 'No organization matches the search.',
     search: { placeholder: 'Search by name…' },
     counter: {
       total_one: '{{count}} organization',

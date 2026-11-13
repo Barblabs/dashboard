@@ -53,7 +53,7 @@ export function UserTable({
       <SearchField label={t('users.search.placeholder')} value={search} onChange={setSearch} counter={counterText()} />
 
       {filtered.length === 0 ? (
-        <Message>{t('users.empty')}</Message>
+        <Message>{users.length === 0 ? t('users.empty') : t('users.noMatches')}</Message>
       ) : (
         <div className="overflow-hidden rounded-lg border border-border-panel">
           <table className="w-full border-collapse">
@@ -95,7 +95,7 @@ export function UserTable({
                           <button
                             type="button"
                             aria-label={t('users.actions.editRole')}
-                            className="rounded-md p-1.5 text-gray transition-colors hover:bg-panel hover:text-navy focus-ring"
+                            className="cursor-pointer rounded-md p-1.5 text-gray transition-colors hover:bg-panel hover:text-navy focus-ring"
                             onClick={() => onEditRole(user)}
                           >
                             <PencilIcon />
@@ -104,7 +104,7 @@ export function UserTable({
                             type="button"
                             aria-label={t('users.actions.disable')}
                             disabled={isSelf}
-                            className="rounded-md p-1.5 text-critical transition-colors hover:bg-critical/10 focus-ring disabled:cursor-not-allowed disabled:opacity-30"
+                            className="cursor-pointer rounded-md p-1.5 text-critical transition-colors hover:bg-critical/10 focus-ring disabled:cursor-not-allowed disabled:opacity-30"
                             onClick={() => onDisable(user)}
                           >
                             <BanIcon />

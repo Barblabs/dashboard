@@ -8,8 +8,10 @@ import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
 import { useDateFormat, useLocale } from '../../i18n/format'
 
-function monthPrefix(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+// In the viewer's time zone: an organization created on the 1st at 01:00 UTC is still last month in Mexico.
+function sameMonth(iso: string, month: Date) {
+  const date = new Date(iso)
+  return date.getFullYear() === month.getFullYear() && date.getMonth() === month.getMonth()
 }
 
 function getMonthlyData(customers: CustomerResponse[], locale: string, now: Date) {
@@ -17,8 +19,7 @@ function getMonthlyData(customers: CustomerResponse[], locale: string, now: Date
   const months: { label: string; count: number }[] = []
   for (let i = 5; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    const prefix = monthPrefix(date)
-    const count = customers.filter((c) => c.created_at.startsWith(prefix)).length
+    const count = customers.filter((c) => sameMonth(c.created_at, date)).length
     months.push({
       label: monthLabel.format(date),
       count,
@@ -33,7 +34,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
       <dt className="font-body text-[0.8125rem] font-semibold uppercase tracking-wider text-gray">
         {label}
       </dt>
-      <dd className="font-title text-[2rem] font-black leading-none text-navy">{value}</dd>
+      <dd className="font-title text-[2rem] leading-none text-navy">{value}</dd>
     </div>
   )
 }
@@ -63,10 +64,9 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
   const formatDate = useDateFormat('numeric')
 
   const [now] = useState(() => new Date())
-  const thisMonth = monthPrefix(now)
   const active = customers.filter((c) => c.deactivated_at === null).length
   const deactivated = customers.length - active
-  const newThisMonth = customers.filter((c) => c.created_at.startsWith(thisMonth)).length
+  const newThisMonth = customers.filter((c) => sameMonth(c.created_at, now)).length
   const chartData = getMonthlyData(customers, locale, now)
   const recent = customers.toSorted((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5)
 
@@ -80,7 +80,7 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
       </dl>
 
       <section className="rounded-xl border border-border-panel bg-white p-6">
-        <h2 className="mb-4 font-title text-[1rem] font-black text-navy">
+        <h2 className="mb-4 font-title text-[1rem] text-navy">
           {t('adminDashboard.chart.title')}
         </h2>
         <div className="h-56">
@@ -116,7 +116,7 @@ function Dashboard({ customers }: { customers: CustomerResponse[] }) {
 
       <section className="rounded-xl border border-border-panel bg-white">
         <div className="border-b border-border-panel px-6 py-4">
-          <h2 className="font-title text-[1rem] font-black text-navy">
+          <h2 className="font-title text-[1rem] text-navy">
             {t('adminDashboard.recent.title')}
           </h2>
         </div>

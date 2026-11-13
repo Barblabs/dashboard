@@ -2,9 +2,9 @@ import type { ParseKeys, TFunction } from 'i18next'
 import { ApiError, errorCode, type BackendFailure } from '../api/client'
 
 /*
- * Stable failure codes from barbackend's /cmdb API, whether they arrive in
- * a result body or an HTTP error. A Map, not an object literal: a code like
- * "constructor" must not hit the prototype.
+ * Stable failure codes from barbackend, whether they arrive in a result body or an
+ * HTTP error. A Map, not an object literal: a code like "constructor" must not hit
+ * the prototype.
  */
 const CODE_KEYS = new Map<string, ParseKeys>([
   ['unreachable', 'config.errors.unreachable'],

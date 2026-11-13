@@ -1,7 +1,8 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Wordmark } from '../../components/Wordmark'
 
-export function LoginLayout({ children }: { children: React.ReactNode }) {
+export function LoginLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
   return (
     <div className="flex min-h-screen">

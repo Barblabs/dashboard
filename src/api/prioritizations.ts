@@ -14,9 +14,6 @@ export const VERDICTS = [
 ] as const satisfies readonly Schemas['FeedbackRequestBody']['verdict'][]
 export type Verdict = (typeof VERDICTS)[number]
 
-/** The verdicts that have the Prioritizer place the Finding again in its next round. */
-export const ORDER_VERDICTS: readonly Verdict[] = ['should_be_earlier', 'should_be_later']
-
 export type TechniqueRole = 'exploitation' | 'primary_impact' | 'secondary_impact'
 
 /** The inputs a Scoring Model replaced with a default, which make a Score estimated. */
@@ -40,7 +37,7 @@ export type Finding = Override<Schemas['FindingResponse'], { details: FindingDet
 export type PriorityGroup = Schemas['PriorityGroupResponse']
 export type ActionPlan = Schemas['PlanResponse']
 export type Feedback = Override<Schemas['FeedbackResponse'], { verdict: Verdict }>
-export type PrioritizationSummary = Schemas['PrioritizationSummaryResponse']
+type PrioritizationList = Schemas['PrioritizationListResponse']
 export type Prioritization = Override<
   Schemas['PrioritizationResponse'],
   { findings: Finding[]; plans: ActionPlan[]; feedback: Feedback[] }
@@ -60,9 +57,7 @@ export const PRIORITIZATIONS_KEY = [...connectionScopeKey, 'prioritizations'] as
 const CURRENT_KEY = [...PRIORITIZATIONS_KEY, 'current'] as const
 
 async function fetchCurrentOrder(): Promise<CurrentOrder | null> {
-  const { prioritizations } = await api.get<{ prioritizations: PrioritizationSummary[] }>(
-    '/prioritizations?limit=2',
-  )
+  const { prioritizations } = await api.get<PrioritizationList>('/prioritizations?limit=2')
   const [newest, previous] = prioritizations
   if (!newest) return null
   const prioritization = await api.get<Prioritization>(`/prioritizations/${newest.id}`)
