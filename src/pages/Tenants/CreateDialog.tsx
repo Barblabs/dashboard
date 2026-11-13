@@ -14,7 +14,7 @@ import { requestErrorText } from '../../i18n/errors'
 import { nameSchema, type NameFields } from './customerName'
 
 const emailSchema = z.object({
-  admin_email: z.string().trim().min(1, 'tenants.create.step2.required').email('tenants.create.step2.invalid'),
+  admin_email: z.string().trim().min(1, 'tenants.create.step2.required').pipe(z.email('tenants.create.step2.invalid')),
 })
 type EmailFields = z.infer<typeof emailSchema>
 

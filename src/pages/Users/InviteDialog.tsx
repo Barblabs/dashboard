@@ -15,7 +15,7 @@ import { requestErrorText } from '../../i18n/errors'
 import { RoleOptions } from './RoleOptions'
 
 const inviteSchema = z.object({
-  email: z.string().trim().min(1, 'users.invite.email.required').email('users.invite.email.invalid'),
+  email: z.string().trim().min(1, 'users.invite.email.required').pipe(z.email('users.invite.email.invalid')),
   role: z.enum(['customer_admin', 'viewer']),
 })
 type InviteFields = z.infer<typeof inviteSchema>

@@ -15,7 +15,7 @@ function ToastList() {
       <Toast.Description className="min-w-0 flex-1 font-body text-[0.875rem] leading-[1.4] break-words text-navy" />
       <Toast.Close
         aria-label={t('common.close')}
-        className="shrink-0 rounded-sm p-1 text-gray transition-colors hover:text-navy focus-ring"
+        className="shrink-0 cursor-pointer rounded-sm p-1 text-gray transition-colors hover:text-navy focus-ring"
       >
         <CloseIcon />
       </Toast.Close>
