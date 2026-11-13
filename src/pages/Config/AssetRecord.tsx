@@ -132,6 +132,16 @@ export function AssetRecord({ asset, onOpenExposure }: { asset: Asset; onOpenExp
         <Fact label={t('config.inventory.record.exposure')}>
           <ExposureButton asset={asset} onOpen={onOpenExposure} />
         </Fact>
+        <Fact label={t('config.inventory.record.lifecycleStage')}>
+          {asset.retired ? (
+            // A retired Asset has no Lifecycle Stage: it isn't Unknown, there is none.
+            <span className="text-gray">{EMPTY}</span>
+          ) : (
+            <Badge variant={asset.lifecycle_stage ? 'outline' : 'muted'}>
+              {t(`config.inventory.lifecycleStage.${asset.lifecycle_stage ?? 'unknown'}`)}
+            </Badge>
+          )}
+        </Fact>
         <Fact label={t('config.inventory.record.owner')}>
           {asset.owner ? (
             <span className="inline-flex flex-wrap items-center gap-2">

@@ -110,6 +110,7 @@ describe('Tech stack', () => {
     expect(details.getByText('Main production API server')).toBeInTheDocument()
     expect(fact('Criticality')).toHaveTextContent(/^High$/)
     expect(fact('Exposure')).toHaveTextContent('Internet-facing·iTop')
+    expect(fact('Lifecycle Stage')).toHaveTextContent(/^Production$/)
     expect(fact('Owner')).toHaveTextContent(/^devops@example\.com$/)
     expect(fact('Area')).toHaveTextContent(/^Infrastructure$/)
     expect(fact('Hardware')).toHaveTextContent(/^Dell PowerEdge R640$/)
@@ -144,11 +145,13 @@ describe('Tech stack', () => {
     expect(fact('Owner')).toHaveTextContent(/^data-eng@example\.comDeclared$/)
     expect(fact('Hardware')).toHaveTextContent(/^No hardware recorded$/)
     expect(fact('Exposure')).toHaveTextContent('Unknown·iTop')
+    expect(fact('Lifecycle Stage')).toHaveTextContent(/^Implementation$/)
     expect(within(record()).queryByText(/unidentified/)).not.toBeInTheDocument()
 
     await user.click(option('core-switch-01'))
     expect(fact('Owner')).toHaveTextContent(/^-$/)
     expect(fact('Area')).toHaveTextContent(/^-$/)
+    expect(fact('Lifecycle Stage')).toHaveTextContent(/^Unknown$/)
     expect(within(record()).getByText('No Software Components recorded')).toBeInTheDocument()
   })
 
@@ -227,6 +230,7 @@ describe('Tech stack', () => {
     const details = within(screen.getByRole('article', { name: 'prod-api-01' }))
     expect(details.getByText('SRV-001').parentElement).toHaveTextContent(/^Servidor·SRV-001·Activo$/)
     expect(fact('Exposición')).toHaveTextContent('Expuesto a internet·iTop')
+    expect(fact('Ciclo de vida')).toHaveTextContent(/^Producción$/)
     expect(fact('Retirado en la CMDB')).toHaveTextContent(/^No$/)
     expect(details.getByText('1 de 3 no identificado')).toBeInTheDocument()
     expect(details.getByText('No identificado')).toBeInTheDocument()
@@ -243,6 +247,8 @@ describe('Tech stack', () => {
     const details = within(screen.getByRole('article', { name: 'erp-app-02' }))
     expect(details.getByText('Inactive since Sep 1, 2026')).toBeInTheDocument()
     expect(fact('Retired in the CMDB')).toHaveTextContent(/^Yes$/)
+    // A retired Asset has no Lifecycle Stage at all, so it isn't shown as Unknown.
+    expect(fact('Lifecycle Stage')).toHaveTextContent(/^-$/)
   })
 
   it('pages forward and back repeating the filters on every request', async () => {
