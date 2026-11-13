@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { LIMITS, type BusinessContextFields } from '../../api/businessContext'
 import { CloseIcon } from '../../components/ui/icons'
 import { Shell, Shown } from './FieldShell'
-import { useMeta, type FieldPathOf } from './meta'
+import { useErrorText, useMeta, type FieldPathOf } from './meta'
 
 interface TagProps {
   name: FieldPathOf<string[]>
@@ -22,11 +22,16 @@ export function TagField({ name, label, placeholder, hideLabel, suggestions, can
   const id = useId()
   const listId = useId()
   const meta = useMeta(name)
+  const errorText = useErrorText()
   const {
     field: { value, onChange },
+    fieldState,
   } = useController<BusinessContextFields, TagProps['name']>({ name })
   const [draft, setDraft] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [entryError, setError] = useState<string | null>(null)
+  // What was just typed comes first; otherwise the schema's word on the whole list, such as a
+  // draft that grew it past the limit.
+  const error = entryError ?? errorText(fieldState.error?.message, LIMITS.entries) ?? null
 
   function add(raw: string) {
     const next = [...value]
