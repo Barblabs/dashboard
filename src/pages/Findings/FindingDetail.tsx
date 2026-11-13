@@ -1,7 +1,15 @@
 import type { ReactNode } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import { useTranslation } from 'react-i18next'
-import type { CurrentOrder, Finding, FindingDetails, Technique } from '../../api/prioritizations'
+import {
+  currentAsset,
+  currentScoreDetails,
+  scoreMoved,
+  type CurrentOrder,
+  type Finding,
+  type FindingDetails,
+  type Technique,
+} from '../../api/prioritizations'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { EMPTY, useDateFormat } from '../../i18n/format'
@@ -143,7 +151,8 @@ const FACTS = 'grid grid-cols-[repeat(auto-fit,minmax(170px,1fr))] gap-4'
 
 function ScoreDetails({ finding }: { finding: Finding }) {
   const { t } = useTranslation()
-  const score = finding.details.score_details
+  // The Score as it is now; the rank, like the order, is the snapshot's.
+  const score = currentScoreDetails(finding)
   const factors = [
     ['alpha', score.alpha],
     ['beta', score.beta],
@@ -162,6 +171,7 @@ function ScoreDetails({ finding }: { finding: Finding }) {
           {t('findings.detail.score.rank', { rank: finding.score_rank })}
         </span>
       </p>
+      {scoreMoved(finding) && <p className="text-[0.8125rem] text-gray">{t('findings.detail.score.moved')}</p>}
       <dl className={FACTS}>
         {factors.map(([name, value]) => (
           <Fact key={name} label={t(`findings.detail.score.factors.${name}`)}>
@@ -256,7 +266,8 @@ function Vulnerability({ details }: { details: FindingDetails }) {
 
 function AssetDetails({ finding }: { finding: Finding }) {
   const { t } = useTranslation()
-  const { asset, component_role } = finding.details
+  const { component_role } = finding.details
+  const asset = currentAsset(finding)
 
   return (
     <div className="flex flex-col gap-4">
