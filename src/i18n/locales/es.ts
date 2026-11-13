@@ -149,6 +149,7 @@ export const es: Translations = {
       },
       score: {
         rank: 'Solo por Score sería el #{{rank}}.',
+        moved: 'Score actualizado; el orden se recalcula cuando el cambio es ≥ 0.1',
         factors: {
           alpha: 'CVSS',
           beta: 'EPSS',
@@ -156,6 +157,7 @@ export const es: Translations = {
           vulnerability: 'Vulnerabilidad',
           criticality: 'Multiplicador de criticidad',
           exposure: 'Multiplicador de exposición',
+          lifecycle: 'Multiplicador de ciclo de vida',
         },
         estimated: 'Estimado: faltaban datos y se usó un valor por omisión.',
         measured: 'Medido: no faltó ningún dato.',
@@ -165,6 +167,7 @@ export const es: Translations = {
           kev_stale: 'KEV no se pudo leer',
           criticality_unknown: 'Criticidad desconocida',
           exposure_undeclared: 'Exposición desconocida',
+          lifecycle_unknown: 'Ciclo de vida desconocido',
         },
       },
       vulnerability: {
@@ -192,6 +195,7 @@ export const es: Translations = {
         kind: 'Tipo',
         criticality: 'Criticidad',
         exposure: 'Exposición',
+        lifecycleStage: 'Ciclo de vida',
         criticalServices: 'Servicios críticos que corre',
         noCriticalServices: 'No corre ninguno de los servicios críticos de tu contexto empresarial.',
       },
@@ -574,6 +578,12 @@ export const es: Translations = {
         internal: 'Interno',
         unknown: 'Desconocida',
       },
+      lifecycleStage: {
+        production: 'Producción',
+        implementation: 'Implementación',
+        stock: 'En stock',
+        unknown: 'Desconocida',
+      },
       role: {
         operating_system: 'Sistema operativo',
         application: 'Aplicación',
@@ -589,6 +599,7 @@ export const es: Translations = {
       record: {
         criticality: 'Criticidad',
         exposure: 'Exposición',
+        lifecycleStage: 'Ciclo de vida',
         owner: 'Dueño',
         area: 'Área',
         hardware: 'Hardware',

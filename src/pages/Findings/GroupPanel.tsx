@@ -1,5 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import { placedByNewest, type CurrentOrder, type Finding, type PriorityGroup } from '../../api/prioritizations'
+import {
+  currentScore,
+  placedByNewest,
+  scoreMoved,
+  type CurrentOrder,
+  type Finding,
+  type PriorityGroup,
+} from '../../api/prioritizations'
 import { Badge } from '../../components/ui/Badge'
 import { Panel, PanelTitle } from '../../components/ui/Panel'
 import { CELL, HEADER_CELL } from '../../components/ui/table'
@@ -82,7 +89,19 @@ function FindingRow({ order, finding, onOpen }: { order: CurrentOrder; finding: 
       <td className={`${CELL} ${MONO}`}>
         {finding.component} {finding.version}
       </td>
-      <td className={`${CELL} ${MONO}`}>{finding.score}</td>
+      <td className={`${CELL} ${MONO}`}>
+        {currentScore(finding)}
+        {scoreMoved(finding) && (
+          <span
+            role="img"
+            aria-label={t('findings.detail.score.moved')}
+            title={t('findings.detail.score.moved')}
+            className="ml-1.5 text-gray"
+          >
+            ↻
+          </span>
+        )}
+      </td>
       <td className={`${CELL} ${MONO} text-gray`}>#{finding.score_rank}</td>
       <td className={CELL}>
         <FindingBadges order={order} finding={finding} />

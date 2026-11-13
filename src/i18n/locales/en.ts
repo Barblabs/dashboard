@@ -147,6 +147,7 @@ export const en = {
       },
       score: {
         rank: 'By Score alone it would be #{{rank}}.',
+        moved: 'Score updated; the order is recalculated when the change is ≥ 0.1',
         factors: {
           alpha: 'CVSS',
           beta: 'EPSS',
@@ -154,6 +155,7 @@ export const en = {
           vulnerability: 'Vulnerability',
           criticality: 'Criticality multiplier',
           exposure: 'Exposure multiplier',
+          lifecycle: 'Lifecycle multiplier',
         },
         estimated: 'Estimated: some inputs were missing and took a default.',
         measured: 'Measured: no input was missing.',
@@ -163,6 +165,7 @@ export const en = {
           kev_stale: 'KEV could not be read',
           criticality_unknown: 'Criticality unknown',
           exposure_undeclared: 'Exposure unknown',
+          lifecycle_unknown: 'Lifecycle Stage unknown',
         },
       },
       vulnerability: {
@@ -190,6 +193,7 @@ export const en = {
         kind: 'Type',
         criticality: 'Criticality',
         exposure: 'Exposure',
+        lifecycleStage: 'Lifecycle Stage',
         criticalServices: 'Critical services it runs',
         noCriticalServices: 'It runs none of the critical services in your business context.',
       },
@@ -572,6 +576,12 @@ export const en = {
         internal: 'Internal',
         unknown: 'Unknown',
       },
+      lifecycleStage: {
+        production: 'Production',
+        implementation: 'Implementation',
+        stock: 'In stock',
+        unknown: 'Unknown',
+      },
       role: {
         operating_system: 'Operating System',
         application: 'Application',
@@ -587,6 +597,7 @@ export const en = {
       record: {
         criticality: 'Criticality',
         exposure: 'Exposure',
+        lifecycleStage: 'Lifecycle Stage',
         owner: 'Owner',
         area: 'Area',
         hardware: 'Hardware',

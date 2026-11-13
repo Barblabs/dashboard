@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { http } from 'msw'
 import { describe, expect, it } from 'vitest'
+import type { Finding } from '../../api/prioritizations'
 import { failure } from '../../mocks/handlers/responses'
 import { prioritizationsStore } from '../../mocks/prioritizations-store'
 import { apiUrl } from '../../mocks/url'
@@ -16,6 +17,15 @@ async function renderFindings(path = '/findings') {
 function rowOf(cve: string) {
   return screen.getByRole('button', { name: `Open ${cve}` }).closest('tr')!
 }
+
+/** Changes one Finding of the newest stored Prioritization, before the app reads it. */
+function storeFinding(cve: string, change: (finding: Finding) => Finding) {
+  const [newest, ...older] = prioritizationsStore.load()
+  const findings = newest!.findings.map((f) => (f.cve_id === cve ? change(f) : f))
+  prioritizationsStore.save([{ ...newest!, findings }, ...older])
+}
+
+const MOVED = 'Score updated; the order is recalculated when the change is ≥ 0.1'
 
 async function openFinding(user: ReturnType<typeof renderApp>, cve: string) {
   await user.click(screen.getByRole('button', { name: `Open ${cve}` }))
@@ -65,7 +75,68 @@ describe('Findings', () => {
     expect(within(dialog).getByText('Not in KEV')).toBeInTheDocument()
     expect(within(dialog).getByText(/Probability 0.9003/)).toBeInTheDocument()
     expect(within(dialog).getByText('By Score alone it would be #4.')).toBeInTheDocument()
+    expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Production$/)
+    expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^1$/)
+    expect(within(dialog).getByText('Measured: no input was missing.')).toBeInTheDocument()
     expect(within(dialog).getByText('No action plan yet. Luna writes one from what is known of this finding.')).toBeInTheDocument()
+  })
+
+  it('a finding on an asset of Unknown Lifecycle Stage says its Score is estimated', async () => {
+    storeFinding('CVE-2025-1094', (f) => ({
+      ...f,
+      current: {
+        asset: { ...f.current!.asset, lifecycle_stage: 'unknown' },
+        score_details: { ...f.current!.score_details, data_gaps: ['lifecycle_unknown'] },
+      },
+    }))
+    const user = await renderFindings()
+
+    const dialog = await openFinding(user, 'CVE-2025-1094')
+
+    expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Unknown$/)
+    expect(within(dialog).getByText('Estimated: some inputs were missing and took a default.')).toBeInTheDocument()
+    expect(within(dialog).getByText('Lifecycle Stage unknown')).toBeInTheDocument()
+  })
+
+  it('shows the Score as it is now, noting when it moved since the finding was placed', async () => {
+    const user = await renderFindings()
+
+    expect(within(rowOf('CVE-2024-23897')).getByText('0.1909')).toBeInTheDocument()
+    expect(within(rowOf('CVE-2024-23897')).getByRole('img', { name: MOVED })).toBeInTheDocument()
+    expect(within(rowOf('CVE-2025-1094')).queryByRole('img', { name: MOVED })).not.toBeInTheDocument()
+
+    const dialog = await openFinding(user, 'CVE-2024-23897')
+
+    expect(within(dialog).getByText('0.1909')).toBeInTheDocument()
+    expect(within(dialog).getByText(MOVED)).toBeInTheDocument()
+    expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Implementation$/)
+    expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^0.8$/)
+    // The order stays the snapshot's.
+    expect(within(dialog).getByText('By Score alone it would be #5.')).toBeInTheDocument()
+  })
+
+  it('a closed finding shows its Score and Asset as they were placed', async () => {
+    storeFinding('CVE-2024-23897', (f) => ({ ...f, closed_at: '2026-11-12T10:00:00Z', current: null }))
+    const user = await renderFindings()
+
+    expect(within(rowOf('CVE-2024-23897')).getByText('0.2386')).toBeInTheDocument()
+    const dialog = await openFinding(user, 'CVE-2024-23897')
+
+    expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Production$/)
+    expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^1$/)
+    expect(within(dialog).queryByText(MOVED)).not.toBeInTheDocument()
+  })
+
+  it('a multiplier of 0 is still shown', async () => {
+    storeFinding('CVE-2025-1094', (f) => ({
+      ...f,
+      current: { ...f.current!, score_details: { ...f.current!.score_details, lifecycle_multiplier: 0 } },
+    }))
+    const user = await renderFindings()
+
+    const dialog = await openFinding(user, 'CVE-2025-1094')
+
+    expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^0$/)
   })
 
   it('opens the finding a link names', async () => {

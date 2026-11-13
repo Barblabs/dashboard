@@ -17,23 +17,46 @@ export type Verdict = (typeof VERDICTS)[number]
 export type TechniqueRole = 'exploitation' | 'primary_impact' | 'secondary_impact'
 
 /** The inputs a Scoring Model replaced with a default, which make a Score estimated. */
-export type DataGap = 'cvss_estimated' | 'epss_pending' | 'kev_stale' | 'criticality_unknown' | 'exposure_undeclared'
+export type DataGap =
+  | 'cvss_estimated'
+  | 'epss_pending'
+  | 'kev_stale'
+  | 'criticality_unknown'
+  | 'exposure_undeclared'
+  | 'lifecycle_unknown'
 
 export type Technique = Override<Schemas['TechniqueResponse'], { role: TechniqueRole }>
 export type CriticalService = Override<Schemas['CriticalServiceResponse'], { impact: Impact; max_downtime: Downtime }>
+
+export type ScoreDetails = Override<Schemas['ScoreResponse'], { data_gaps: DataGap[] }>
+export type FindingAsset = Override<
+  Schemas['FindingAssetResponse'],
+  { kind: AssetKind; critical_services: CriticalService[] }
+>
 
 // The spec types these vocabularies as plain strings.
 export type FindingDetails = Override<
   Schemas['FindingDetailsResponse'],
   {
-    asset: Override<Schemas['FindingAssetResponse'], { kind: AssetKind; critical_services: CriticalService[] }>
+    asset: FindingAsset
     /** Blank when the Asset no longer runs the component. */
     component_role: SoftwareRole | ''
-    score_details: Override<Schemas['ScoreResponse'], { data_gaps: DataGap[] }>
+    score_details: ScoreDetails
     techniques: Technique[]
   }
 >
-export type Finding = Override<Schemas['FindingResponse'], { details: FindingDetails }>
+
+/** The Finding's Asset and Score as they are now. */
+export type FindingCurrent = Override<Schemas['CurrentResponse'], { score_details: ScoreDetails }>
+
+/**
+ * `details` and `score` are the snapshot from when the Finding was placed: they explain the
+ * order. `current` is how things stand now, `null` once the Finding is closed.
+ */
+export type Finding = Override<
+  Schemas['FindingResponse'],
+  { details: FindingDetails; current: FindingCurrent | null }
+>
 export type PriorityGroup = Schemas['PriorityGroupResponse']
 export type ActionPlan = Schemas['PlanResponse']
 export type Feedback = Override<Schemas['FeedbackResponse'], { verdict: Verdict }>
@@ -67,6 +90,28 @@ async function fetchCurrentOrder(): Promise<CurrentOrder | null> {
 /** `null` until the Prioritizer has ordered the Customer's Findings for the first time. */
 export function useCurrentOrderQuery() {
   return useQuery({ queryKey: CURRENT_KEY, queryFn: fetchCurrentOrder })
+}
+
+/** The Score as it is now, or as it was placed once the Finding is closed. */
+export function currentScore(finding: Finding): number {
+  return finding.current === null ? finding.score : finding.current.score_details.value
+}
+
+export function currentScoreDetails(finding: Finding): ScoreDetails {
+  return finding.current === null ? finding.details.score_details : finding.current.score_details
+}
+
+/** The snapshot's Asset with the attributes that weigh on the Score as they are now. */
+export function currentAsset(finding: Finding): FindingAsset {
+  return finding.current === null ? finding.details.asset : { ...finding.details.asset, ...finding.current.asset }
+}
+
+/**
+ * Whether the Score moved since the Finding was placed. The order stays the snapshot's: the
+ * Finding is placed again only when its Score moves by 0.1 or more.
+ */
+export function scoreMoved(finding: Finding): boolean {
+  return finding.current !== null && finding.current.score_details.value !== finding.score
 }
 
 /** Whether the newest Prioritization is the one that placed the Finding. */

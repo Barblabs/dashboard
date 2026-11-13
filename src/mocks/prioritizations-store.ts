@@ -4,7 +4,8 @@ import { localStore } from './localStore'
 /*
  * Findings of the backend's docs/examples/findings.json, as GET /prioritizations/{id}
  * answers them. The newest Prioritization kept the order of the one before it and placed
- * CVE-2024-6387 in the third group.
+ * CVE-2024-6387 in the third group. lab-01 moved to Implementation after CVE-2024-23897 was
+ * placed: its current Score dropped by less than 0.1, so it keeps its place.
  */
 const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
   f1: {
@@ -18,6 +19,25 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
     "group": 3,
     "placed_at": "2026-11-10T08:58:00Z",
     "closed_at": null,
+    "current": {
+      "asset": {
+        "criticality": "high",
+        "exposure": "internal",
+        "lifecycle_stage": "production"
+      },
+      "score_details": {
+        "scoring_model": 1,
+        "value": 0.3079,
+        "alpha": 0.81,
+        "beta": 0.9003,
+        "gamma": 0,
+        "vulnerability": 0.5131,
+        "criticality_multiplier": 1,
+        "exposure_multiplier": 0.6,
+        "lifecycle_multiplier": 1,
+        "data_gaps": []
+      }
+    },
     "details": {
       "description": "Improper neutralization of quoting syntax in PostgreSQL libpq functions PQescapeLiteral(), PQescapeIdentifier(), PQescapeString(), and PQescapeStringConn() allows a database input provider to achieve SQL injection in certain usage patterns.  Specifically, SQL injection requires the application to use the function result to construct input to psql, the PostgreSQL interactive terminal.  Similarly, improper neutralization of quoting syntax in PostgreSQL command line utility programs allows a source of command line arguments to achieve SQL injection when client_encoding is BIG5 and server_encoding is one of EUC_TW or MULE_INTERNAL.  Versions before PostgreSQL 17.3, 16.7, 15.11, 14.16, and 13.19 are affected.",
       "asset": {
@@ -44,8 +64,8 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "gamma": 0,
         "vulnerability": 0.5131,
         "criticality_multiplier": 1,
-        "lifecycle_multiplier": 1,
         "exposure_multiplier": 0.6,
+        "lifecycle_multiplier": 1,
         "data_gaps": []
       },
       "kev": null,
@@ -106,6 +126,25 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
     "group": 3,
     "placed_at": "2026-11-11T08:58:00Z",
     "closed_at": null,
+    "current": {
+      "asset": {
+        "criticality": "high",
+        "exposure": "internal",
+        "lifecycle_stage": "production"
+      },
+      "score_details": {
+        "scoring_model": 1,
+        "value": 0.3249,
+        "alpha": 0.81,
+        "beta": 0.9951,
+        "gamma": 0,
+        "vulnerability": 0.5415,
+        "criticality_multiplier": 1,
+        "exposure_multiplier": 0.6,
+        "lifecycle_multiplier": 1,
+        "data_gaps": []
+      }
+    },
     "details": {
       "description": "A security regression (CVE-2006-5051) was discovered in OpenSSH's server (sshd). There is a race condition which can lead sshd to handle some signals in an unsafe manner. An unauthenticated, remote attacker may be able to trigger it by failing to authenticate within a set time period.",
       "asset": {
@@ -125,8 +164,8 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "gamma": 0,
         "vulnerability": 0.5415,
         "criticality_multiplier": 1,
-        "lifecycle_multiplier": 1,
         "exposure_multiplier": 0.6,
+        "lifecycle_multiplier": 1,
         "data_gaps": []
       },
       "kev": null,
@@ -174,6 +213,25 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
     "group": 1,
     "placed_at": "2026-11-10T08:58:00Z",
     "closed_at": null,
+    "current": {
+      "asset": {
+        "criticality": "medium",
+        "exposure": "internet_facing",
+        "lifecycle_stage": "production"
+      },
+      "score_details": {
+        "scoring_model": 1,
+        "value": 0.6958,
+        "alpha": 0.98,
+        "beta": 0.9999,
+        "gamma": 1,
+        "vulnerability": 0.994,
+        "criticality_multiplier": 0.7,
+        "exposure_multiplier": 1,
+        "lifecycle_multiplier": 1,
+        "data_gaps": []
+      }
+    },
     "details": {
       "description": "A flaw was found in a change made to path normalization in Apache HTTP Server 2.4.49. An attacker could use a path traversal attack to map URLs to files outside the directories configured by Alias-like directives. If files outside of these directories are not protected by the usual default configuration \"require all denied\", these requests can succeed. If CGI scripts are also enabled for these aliased pathes, this could allow for remote code execution. This issue is known to be exploited in the wild. This issue only affects Apache 2.4.49 and not earlier versions. The fix in Apache HTTP Server 2.4.50 was found to be incomplete, see CVE-2021-42013.",
       "asset": {
@@ -193,8 +251,8 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "gamma": 1,
         "vulnerability": 0.994,
         "criticality_multiplier": 0.7,
-        "lifecycle_multiplier": 1,
         "exposure_multiplier": 1,
+        "lifecycle_multiplier": 1,
         "data_gaps": []
       },
       "kev": {
@@ -253,6 +311,25 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
     "group": 1,
     "placed_at": "2026-11-10T08:58:00Z",
     "closed_at": null,
+    "current": {
+      "asset": {
+        "criticality": "medium",
+        "exposure": "internet_facing",
+        "lifecycle_stage": "production"
+      },
+      "score_details": {
+        "scoring_model": 1,
+        "value": 0.6957,
+        "alpha": 0.98,
+        "beta": 0.9996,
+        "gamma": 1,
+        "vulnerability": 0.9939,
+        "criticality_multiplier": 0.7,
+        "exposure_multiplier": 1,
+        "lifecycle_multiplier": 1,
+        "data_gaps": []
+      }
+    },
     "details": {
       "description": "It was found that the fix for CVE-2021-41773 in Apache HTTP Server 2.4.50 was insufficient. An attacker could use a path traversal attack to map URLs to files outside the directories configured by Alias-like directives. If files outside of these directories are not protected by the usual default configuration \"require all denied\", these requests can succeed. If CGI scripts are also enabled for these aliased pathes, this could allow for remote code execution. This issue only affects Apache 2.4.49 and Apache 2.4.50 and not earlier versions.",
       "asset": {
@@ -272,8 +349,8 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "gamma": 1,
         "vulnerability": 0.9939,
         "criticality_multiplier": 0.7,
-        "lifecycle_multiplier": 1,
         "exposure_multiplier": 1,
+        "lifecycle_multiplier": 1,
         "data_gaps": []
       },
       "kev": {
@@ -332,6 +409,25 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
     "group": 2,
     "placed_at": "2026-11-10T08:58:00Z",
     "closed_at": null,
+    "current": {
+      "asset": {
+        "criticality": "low",
+        "exposure": "internal",
+        "lifecycle_stage": "implementation"
+      },
+      "score_details": {
+        "scoring_model": 2,
+        "value": 0.1909,
+        "alpha": 0.98,
+        "beta": 1,
+        "gamma": 1,
+        "vulnerability": 0.994,
+        "criticality_multiplier": 0.4,
+        "exposure_multiplier": 0.6,
+        "lifecycle_multiplier": 0.8,
+        "data_gaps": []
+      }
+    },
     "details": {
       "description": "Jenkins 2.441 and earlier, LTS 2.426.2 and earlier does not disable a feature of its CLI command parser that replaces an '@' character followed by a file path in an argument with the file's contents, allowing unauthenticated attackers to read arbitrary files on the Jenkins controller file system.",
       "asset": {
@@ -351,8 +447,8 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "gamma": 1,
         "vulnerability": 0.994,
         "criticality_multiplier": 0.4,
-        "lifecycle_multiplier": 1,
         "exposure_multiplier": 0.6,
+        "lifecycle_multiplier": 1,
         "data_gaps": []
       },
       "kev": {

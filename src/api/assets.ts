@@ -36,7 +36,8 @@ export type AreaRef = Schemas['AreaRefResponse']
 
 /*
  * The spec types the vocabularies as plain strings. `retired` is what the CMDB reports,
- * independent of whether the Asset is still monitored (`active`).
+ * independent of whether the Asset is still monitored (`active`). A retired Asset has no
+ * `lifecycle_stage`; otherwise `null` means the CMDB Source doesn't give it.
  */
 export type Asset = Override<
   Schemas['AssetResponse'],
