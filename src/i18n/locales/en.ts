@@ -536,6 +536,7 @@ export const en = {
       networkError: 'Could not reach the server to load the inventory.',
       total_one: '{{count}} asset',
       total_other: '{{count}} assets',
+      noArea: 'No Area',
       filters: {
         label: 'Filter assets',
         active: 'Status',
@@ -554,17 +555,6 @@ export const en = {
         page: 'Page {{page}}',
         previous: 'Previous',
         next: 'Next',
-      },
-      columns: {
-        asset: 'Asset',
-        type: 'Type',
-        os: 'Operating system',
-        criticality: 'Criticality',
-        exposure: 'Exposure',
-        owner: 'Owner',
-        area: 'Area',
-        status: 'Status',
-        details: 'Details',
       },
       kind: {
         server: 'Server',
@@ -595,13 +585,13 @@ export const en = {
       owner: {
         declared: 'Declared',
       },
-      details: {
-        show: 'Show details of {{name}}',
-        hide: 'Hide details of {{name}}',
-        description: 'Description',
+      record: {
+        criticality: 'Criticality',
+        exposure: 'Exposure',
+        owner: 'Owner',
+        area: 'Area',
         hardware: 'Hardware',
         noHardware: 'No hardware recorded',
-        exposure: 'Exposure',
         retired: 'Retired in the CMDB',
         yes: 'Yes',
         no: 'No',
@@ -609,6 +599,16 @@ export const en = {
         noSoftware: 'No Software Components recorded',
         unidentified: 'Unidentified',
         unidentifiedHelp: 'Not matched to a Product: threats cannot be checked against it.',
+      },
+      inspector: {
+        moveHint: '↑ ↓ to move',
+        unidentifiedCount_one: '{{count}} of {{total}} unidentified',
+        unidentifiedCount_other: '{{count}} of {{total}} unidentified',
+        gaps: {
+          unknownExposure: 'Unknown Exposure',
+          unidentified_one: '{{count}} Unidentified Component',
+          unidentified_other: '{{count}} Unidentified Components',
+        },
       },
     },
     exposure: {
@@ -631,7 +631,6 @@ export const en = {
         queueTitle: 'Answer Unknown Exposures',
         singleTitle: 'Exposure',
         position: '{{index}} of {{total}}',
-        noArea: 'No Area',
         criticality: '{{criticality}} Criticality',
         declared: 'Declared',
         declaredBy: '{{value}}, declared by {{user}} on {{date}}.',
@@ -661,7 +660,7 @@ export const en = {
         turnedInactive: "This Asset just turned Inactive, so its Exposure can't be declared.",
         answered: '{{answered}} of {{total}} answered',
         rescored: 'Their open Findings were rescored, so the Findings list may have reordered.',
-        skipped: 'The ones you skipped still show Unknown in the table.',
+        skipped: 'The ones you skipped still show Unknown in the inventory.',
         done: 'Done',
       },
       toast: {

@@ -538,6 +538,7 @@ export const es: Translations = {
       networkError: 'No se pudo contactar al servidor para cargar el inventario.',
       total_one: '{{count}} activo',
       total_other: '{{count}} activos',
+      noArea: 'Sin área',
       filters: {
         label: 'Filtrar activos',
         active: 'Estado',
@@ -556,17 +557,6 @@ export const es: Translations = {
         page: 'Página {{page}}',
         previous: 'Anterior',
         next: 'Siguiente',
-      },
-      columns: {
-        asset: 'Activo',
-        type: 'Tipo',
-        os: 'Sistema operativo',
-        criticality: 'Criticidad',
-        exposure: 'Exposición',
-        owner: 'Dueño',
-        area: 'Área',
-        status: 'Estado',
-        details: 'Detalle',
       },
       kind: {
         server: 'Servidor',
@@ -597,13 +587,13 @@ export const es: Translations = {
       owner: {
         declared: 'Declarado',
       },
-      details: {
-        show: 'Mostrar detalle de {{name}}',
-        hide: 'Ocultar detalle de {{name}}',
-        description: 'Descripción',
+      record: {
+        criticality: 'Criticidad',
+        exposure: 'Exposición',
+        owner: 'Dueño',
+        area: 'Área',
         hardware: 'Hardware',
         noHardware: 'Sin hardware registrado',
-        exposure: 'Exposición',
         retired: 'Retirado en la CMDB',
         yes: 'Sí',
         no: 'No',
@@ -611,6 +601,16 @@ export const es: Translations = {
         noSoftware: 'Sin componentes de software registrados',
         unidentified: 'No identificado',
         unidentifiedHelp: 'Sin Producto asociado: no se pueden verificar amenazas contra él.',
+      },
+      inspector: {
+        moveHint: '↑ ↓ para moverte',
+        unidentifiedCount_one: '{{count}} de {{total}} no identificado',
+        unidentifiedCount_other: '{{count}} de {{total}} no identificados',
+        gaps: {
+          unknownExposure: 'Exposición desconocida',
+          unidentified_one: '{{count}} componente no identificado',
+          unidentified_other: '{{count}} componentes no identificados',
+        },
       },
     },
     exposure: {
@@ -633,7 +633,6 @@ export const es: Translations = {
         queueTitle: 'Responder Exposiciones desconocidas',
         singleTitle: 'Exposición',
         position: '{{index}} de {{total}}',
-        noArea: 'Sin área',
         criticality: 'Criticidad {{criticality}}',
         declared: 'Declarada',
         declaredBy: '{{value}}, declarada por {{user}} el {{date}}.',
@@ -663,7 +662,7 @@ export const es: Translations = {
         turnedInactive: 'Este activo acaba de quedar inactivo, así que su Exposición no se puede declarar.',
         answered: '{{answered}} de {{total}} respondidos',
         rescored: 'Sus hallazgos abiertos se recalcularon, así que la lista de hallazgos puede haber cambiado de orden.',
-        skipped: 'Los que saltaste siguen como desconocidos en la tabla.',
+        skipped: 'Los que saltaste siguen como desconocidos en el inventario.',
         done: 'Listo',
       },
       toast: {

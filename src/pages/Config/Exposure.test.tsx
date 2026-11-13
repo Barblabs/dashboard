@@ -21,12 +21,22 @@ function seeded(name: string): Asset {
 async function renderTechStack(user = renderApp) {
   seedSource()
   const session = user()
-  await screen.findByRole('row', { name: /prod-api-01/ })
+  await screen.findByRole('option', { name: /prod-api-01/ })
   return session
 }
 
-function exposureCell(name: string) {
-  return screen.getByRole('button', { name: new RegExp(`^Exposure of ${name}:`) })
+type User = Awaited<ReturnType<typeof renderTechStack>>
+
+/** The Exposure button of the Asset on screen; only the selected Asset's record shows one. */
+function exposureButton(name: string) {
+  return within(screen.getByRole('article', { name })).getByRole('button', {
+    name: new RegExp(`^Exposure of ${name}:`),
+  })
+}
+
+async function openExposure(user: User, name: string) {
+  await user.click(screen.getByRole('option', { name: new RegExp(name) }))
+  await user.click(exposureButton(name))
 }
 
 function sheetOpen() {
@@ -108,7 +118,7 @@ describe('Exposure', () => {
     await user.click(sheet.getByRole('button', { name: 'Skip' }))
 
     expect(await sheet.findByText('1 of 4 answered')).toBeInTheDocument()
-    expect(sheet.getByText(/The ones you skipped still show Unknown in the table\./)).toBeInTheDocument()
+    expect(sheet.getByText(/The ones you skipped still show Unknown in the inventory\./)).toBeInTheDocument()
     // Each answer is confirmed by the progress and the summary, not by a toast.
     expect(toasts().queryByText(/Declared/)).not.toBeInTheDocument()
     expect(await screen.findByText('3 Active Assets have Unknown Exposure.')).toBeInTheDocument()
@@ -117,10 +127,10 @@ describe('Exposure', () => {
     await waitFor(() => expect(sheetOpen()).toBe(false))
   })
 
-  it('a Customer Admin declares one Asset from its cell, without toggling the row', async () => {
+  it('a Customer Admin declares one Asset from its record, which stays selected', async () => {
     const user = await renderTechStack()
 
-    await user.click(exposureCell('core-switch-01'))
+    await openExposure(user, 'core-switch-01')
     const sheet = within(await screen.findByRole('dialog', { name: 'Exposure' }))
     expect(sheet.getByText("Unknown: its iTop Location isn't one barbattack reads.")).toBeInTheDocument()
     expect(sheet.getByRole('button', { name: 'Declare' })).toBeDisabled()
@@ -133,13 +143,10 @@ describe('Exposure', () => {
       await toasts().findByText('Declared core-switch-01 Internal. Its open Findings were rescored.'),
     ).toBeInTheDocument()
     await waitFor(() => expect(sheetOpen()).toBe(false))
-    expect(exposureCell('core-switch-01')).toHaveAccessibleName('Exposure of core-switch-01: Internal, declared')
-    expect(screen.getByRole('button', { name: 'Show details of core-switch-01' })).toHaveAttribute(
-      'aria-expanded',
-      'false',
-    )
+    expect(exposureButton('core-switch-01')).toHaveAccessibleName('Exposure of core-switch-01: Internal, declared')
+    expect(screen.getByRole('option', { name: /core-switch-01/ })).toHaveAttribute('aria-selected', 'true')
 
-    await user.click(exposureCell('core-switch-01'))
+    await user.click(exposureButton('core-switch-01'))
     const reopened = within(await screen.findByRole('dialog', { name: 'Exposure' }))
     expect(reopened.getByText(/^Internal, declared by admin@barbattack\.example on /)).toBeInTheDocument()
   })
@@ -147,7 +154,7 @@ describe('Exposure', () => {
   it("going back to iTop's Exposure clears the Declaration, Unknown included", async () => {
     const user = await renderTechStack()
 
-    await user.click(exposureCell('ledger-db'))
+    await openExposure(user, 'ledger-db')
     const sheet = within(await screen.findByRole('dialog', { name: 'Exposure' }))
     expect(sheet.getByText('Internal, declared by admin@barbattack.example on Nov 3, 2026.')).toBeInTheDocument()
     expect(sheet.getByRole('radio', { name: /Internal/ })).toBeChecked()
@@ -159,7 +166,7 @@ describe('Exposure', () => {
       await toasts().findByText("ledger-db is back to iTop's Exposure (Unknown). Its open Findings were rescored."),
     ).toBeInTheDocument()
     await waitFor(() =>
-      expect(exposureCell('ledger-db')).toHaveAccessibleName('Exposure of ledger-db: Unknown, from iTop'),
+      expect(exposureButton('ledger-db')).toHaveAccessibleName('Exposure of ledger-db: Unknown, from iTop'),
     )
     expect(await screen.findByText('5 Active Assets have Unknown Exposure.')).toBeInTheDocument()
   })
@@ -170,7 +177,7 @@ describe('Exposure', () => {
     expect(await screen.findByText('4 Active Assets have Unknown Exposure.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Answer them' })).not.toBeInTheDocument()
 
-    await user.click(exposureCell('ledger-db'))
+    await openExposure(user, 'ledger-db')
     const sheet = within(await screen.findByRole('dialog', { name: 'Exposure' }))
     expect(sheet.getByText(/^Internal, declared by /)).toBeInTheDocument()
     expect(sheet.getByText('Only a Customer Admin can declare an Exposure.')).toBeInTheDocument()
@@ -213,7 +220,7 @@ describe('Exposure', () => {
     expect(sheet.queryByRole('radio')).not.toBeInTheDocument()
     expect(sheet.queryByRole('button', { name: 'Skip' })).not.toBeInTheDocument()
     // The inventory refetched: the Asset left the Active list.
-    await waitFor(() => expect(screen.queryByRole('row', { name: /analytics-worker-03/ })).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByRole('option', { name: /analytics-worker-03/ })).not.toBeInTheDocument())
 
     await user.click(sheet.getByRole('button', { name: 'Next' }))
     expect(await sheet.findByText('2 of 4')).toBeInTheDocument()
@@ -228,7 +235,7 @@ describe('Exposure', () => {
     )
     const user = await renderTechStack()
 
-    await user.click(exposureCell('analytics-worker-03'))
+    await openExposure(user, 'analytics-worker-03')
     const sheet = within(await screen.findByRole('dialog', { name: 'Exposure' }))
     await user.click(sheet.getByRole('radio', { name: /Internet-facing/ }))
     await user.click(sheet.getByRole('button', { name: 'Declare' }))
@@ -272,7 +279,7 @@ describe('Exposure', () => {
     )
     const user = await renderTechStack()
 
-    await user.click(exposureCell('ledger-db'))
+    await openExposure(user, 'ledger-db')
     const sheet = within(await screen.findByRole('dialog', { name: 'Exposure' }))
     await user.click(sheet.getByRole('button', { name: "Use iTop's (Unknown)" }))
 
@@ -287,7 +294,7 @@ describe('Exposure', () => {
     server.use(http.put(apiUrl('/assets/:id/exposure'), () => failure(500, 'internal_error', 'database down')))
     const user = await renderTechStack()
 
-    await user.click(exposureCell('analytics-worker-03'))
+    await openExposure(user, 'analytics-worker-03')
     const sheet = within(await screen.findByRole('dialog', { name: 'Exposure' }))
     await user.click(sheet.getByRole('radio', { name: /Internet-facing/ }))
     await user.click(sheet.getByRole('button', { name: 'Declare' }))

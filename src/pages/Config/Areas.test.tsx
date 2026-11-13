@@ -65,7 +65,7 @@ describe('Areas', () => {
     const user = await renderConnected()
 
     expect(screen.getByRole('tab', { name: 'Tech stack' })).toHaveAttribute('aria-selected', 'true')
-    expect(await screen.findByRole('row', { name: /prod-api-01/ })).toBeInTheDocument()
+    expect(await screen.findByRole('option', { name: /prod-api-01/ })).toBeInTheDocument()
     expect(queries).toEqual([])
 
     await openAreas(user)
@@ -161,7 +161,7 @@ describe('Areas', () => {
 
   it('switching tabs keeps the tech stack filters', async () => {
     const user = await renderConnected()
-    await screen.findByRole('row', { name: /prod-api-01/ })
+    await screen.findByRole('option', { name: /prod-api-01/ })
     await user.selectOptions(screen.getByRole('combobox', { name: 'Type' }), 'Server')
     await screen.findByText('2 assets')
 
