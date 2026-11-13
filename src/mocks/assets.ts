@@ -43,6 +43,7 @@ export const mockAssets: Asset[] = [
     retired: false,
     active: true,
     inactive_since: null,
+    lifecycle_stage: 'production',
   },
   {
     id: 2,
@@ -73,6 +74,7 @@ export const mockAssets: Asset[] = [
     retired: false,
     active: true,
     inactive_since: null,
+    lifecycle_stage: 'production',
   },
   {
     id: 3,
@@ -103,6 +105,7 @@ export const mockAssets: Asset[] = [
     retired: false,
     active: true,
     inactive_since: null,
+    lifecycle_stage: 'production',
   },
   {
     id: 4,
@@ -120,6 +123,7 @@ export const mockAssets: Asset[] = [
     retired: false,
     active: true,
     inactive_since: null,
+    lifecycle_stage: 'production',
   },
   {
     id: 5,
@@ -150,6 +154,7 @@ export const mockAssets: Asset[] = [
     retired: true,
     active: false,
     inactive_since: '2026-09-01T12:00:00Z',
+    lifecycle_stage: 'production',
   },
   {
     id: 6,
@@ -174,6 +179,7 @@ export const mockAssets: Asset[] = [
     retired: false,
     active: true,
     inactive_since: null,
+    lifecycle_stage: 'production',
   },
   {
     id: 7,
@@ -198,6 +204,7 @@ export const mockAssets: Asset[] = [
     retired: false,
     active: true,
     inactive_since: null,
+    lifecycle_stage: 'production',
   },
   {
     id: 8,
@@ -228,5 +235,6 @@ export const mockAssets: Asset[] = [
     retired: false,
     active: true,
     inactive_since: null,
+    lifecycle_stage: 'production',
   },
 ]

@@ -10,6 +10,13 @@ import { setMockRole } from '../auth/mockTokens'
 import { mockSource, sourceStore } from '../mocks/cmdb-store'
 import { customersStore } from '../mocks/customers-store'
 import { usersStore } from '../mocks/users-store'
+import {
+  mockDeliveryOne,
+  mockInstallationActive,
+  slackDeliveriesStore,
+  slackInstallationStore,
+} from '../mocks/slack-store'
+import type { SlackFailedDelivery, SlackInstallation } from '../api/slack'
 
 const DEFAULT_TEST_USER: AuthUser = {
   id: 'test-user-id',
@@ -54,6 +61,14 @@ export function seedSource(overrides: Partial<CmdbSource> = {}) {
 
 export function seedUsers(users: UserResponse[]) {
   usersStore.save(users)
+}
+
+export function seedSlackInstallation(installation: SlackInstallation | null = mockInstallationActive) {
+  slackInstallationStore.save(installation)
+}
+
+export function seedSlackDeliveries(rows: SlackFailedDelivery[] = [mockDeliveryOne]) {
+  slackDeliveriesStore.save(rows)
 }
 
 export function seedCustomers(customers: CustomerResponse[]) {
