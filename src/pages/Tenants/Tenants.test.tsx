@@ -57,6 +57,15 @@ describe('Tenants', () => {
     expect(screen.queryByText(ORG_C.name)).not.toBeInTheDocument()
   })
 
+  it('tells a search that matches nothing apart from having no organizations', async () => {
+    const user = await renderTenants()
+
+    await user.type(screen.getByPlaceholderText('Search by name…'), 'Zeta')
+
+    expect(screen.getByText('No organization matches the search.')).toBeInTheDocument()
+    expect(screen.queryByText('No organizations yet.')).not.toBeInTheDocument()
+  })
+
   it('creates a new organization via two-step modal', async () => {
     const user = await renderTenants()
 
@@ -146,6 +155,19 @@ describe('Tenants', () => {
     await user.click(within(acmeCard).getByRole('button', { name: 'Reactivate' }))
 
     expect(await within(acmeCard).findByRole('button', { name: 'Deactivate' })).toBeInTheDocument()
+  })
+
+  it('says so on the card when reactivating fails', async () => {
+    seedCustomers([{ ...ORG_A, deactivated_at: '2026-10-01T00:00:00Z' }, ORG_B])
+    server.use(http.post(apiUrl('/customers/:id/reactivate'), () => HttpResponse.json({}, { status: 500 })))
+    const user = await renderTenants()
+
+    const cards = screen.getAllByTestId('customer-card')
+    const acmeCard = cards.find((c) => within(c).queryByText(ORG_A.name))!
+    await user.click(within(acmeCard).getByRole('button', { name: 'Reactivate' }))
+
+    expect(await within(acmeCard).findByRole('alert')).toHaveTextContent('Could not reactivate the organization.')
+    expect(within(acmeCard).getByRole('button', { name: 'Reactivate' })).toBeInTheDocument()
   })
 
   it('shows a network error when the organization list cannot be loaded', async () => {

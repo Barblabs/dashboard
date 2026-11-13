@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useReactivateCustomerMutation, type CustomerResponse } from '../../api/customers'
+import { Alert } from '../../components/ui/Alert'
 import { PencilIcon, PowerOffIcon, RestoreIcon } from '../../components/ui/icons'
 import { Message } from '../../components/ui/Message'
 import { SearchField } from '../../components/ui/SearchField'
+import { requestErrorText } from '../../i18n/errors'
 import { useDateFormat } from '../../i18n/format'
 
 function CustomerCard({
@@ -21,6 +23,7 @@ function CustomerCard({
   const initial = customer.name[0]?.toUpperCase() ?? '?'
 
   const reactivate = useReactivateCustomerMutation()
+  const reactivateError = requestErrorText(reactivate.error, t, { fallback: 'tenants.reactivate.failed' })
 
   return (
     <div
@@ -28,7 +31,7 @@ function CustomerCard({
       className={`flex flex-col gap-4 rounded-xl border border-border-panel p-5 ${isDeactivated ? 'bg-panel opacity-75' : 'bg-white'}`}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-navy font-title text-lg font-black text-cyan">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-navy font-title text-lg text-cyan">
           {initial}
         </div>
 
@@ -36,7 +39,7 @@ function CustomerCard({
           <button
             type="button"
             aria-label={t('tenants.actions.rename')}
-            className="rounded-md p-1.5 text-gray transition-colors hover:bg-panel hover:text-navy focus-ring"
+            className="cursor-pointer rounded-md p-1.5 text-gray transition-colors hover:bg-panel hover:text-navy focus-ring"
             onClick={onRename}
           >
             <PencilIcon />
@@ -46,7 +49,7 @@ function CustomerCard({
               type="button"
               aria-label={t('tenants.actions.reactivate')}
               disabled={reactivate.isPending}
-              className="rounded-md p-1.5 text-navy transition-colors hover:bg-panel focus-ring disabled:opacity-30"
+              className="cursor-pointer rounded-md p-1.5 text-navy transition-colors hover:bg-panel focus-ring disabled:cursor-not-allowed disabled:opacity-30"
               onClick={() => reactivate.mutate(customer.id)}
             >
               <RestoreIcon />
@@ -55,7 +58,7 @@ function CustomerCard({
             <button
               type="button"
               aria-label={t('tenants.actions.deactivate')}
-              className="rounded-md p-1.5 text-critical transition-colors hover:bg-critical/10 focus-ring"
+              className="cursor-pointer rounded-md p-1.5 text-critical transition-colors hover:bg-critical/10 focus-ring"
               onClick={onDeactivate}
             >
               <PowerOffIcon />
@@ -65,7 +68,7 @@ function CustomerCard({
       </div>
 
       <div>
-        <h3 className="font-title text-[1rem] font-black leading-snug text-navy">
+        <h3 className="font-title text-[1rem] leading-snug text-navy">
           {customer.name}
         </h3>
         <p className="mt-0.5 font-body text-[0.8125rem] text-gray">
@@ -83,6 +86,8 @@ function CustomerCard({
           {isDeactivated ? t('tenants.status.deactivated') : t('tenants.status.active')}
         </span>
       </div>
+
+      {reactivateError && <Alert tone="error">{reactivateError}</Alert>}
     </div>
   )
 }
@@ -117,7 +122,7 @@ export function CustomerGrid({
       <SearchField label={t('tenants.search.placeholder')} value={search} onChange={setSearch} counter={counterText()} />
 
       {filtered.length === 0 ? (
-        <Message>{t('tenants.empty')}</Message>
+        <Message>{customers.length === 0 ? t('tenants.empty') : t('tenants.noMatches')}</Message>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((customer) => (

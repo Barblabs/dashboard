@@ -49,6 +49,15 @@ describe('Users', () => {
     expect(screen.getByText('1 user')).toBeInTheDocument()
   })
 
+  it('tells a search that matches nothing apart from having no users', async () => {
+    const user = await renderUsers()
+
+    await user.type(screen.getByPlaceholderText('Search by email…'), 'nobody@')
+
+    expect(screen.getByText('No user matches the search.')).toBeInTheDocument()
+    expect(screen.queryByText('No users yet.')).not.toBeInTheDocument()
+  })
+
   it('shows the counter with disabled count when applicable', async () => {
     const disabled = {
       ...VIEWER,
@@ -190,7 +199,7 @@ describe('Users', () => {
     const viewerRow = screen.getByText(VIEWER.email).closest('tr')!
     await user.click(within(viewerRow).getByRole('button', { name: 'Edit role' }))
 
-    await user.selectOptions(screen.getByRole('combobox'), 'Admin')
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Role' }), 'Admin')
     await user.click(screen.getByRole('button', { name: 'Save' }))
 
     expect(await within(viewerRow).findByText('Admin')).toBeInTheDocument()
@@ -203,7 +212,7 @@ describe('Users', () => {
     const adminRow = screen.getByText(ADMIN.email).closest('tr')!
     await user.click(within(adminRow).getByRole('button', { name: 'Edit role' }))
 
-    await user.selectOptions(screen.getByRole('combobox'), 'Viewer')
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Role' }), 'Viewer')
     await user.click(screen.getByRole('button', { name: 'Save' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(

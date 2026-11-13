@@ -43,9 +43,6 @@ export const es: Translations = {
         viewer: 'Lector (viewer)',
       },
     },
-    real: {
-      comingSoon: 'Inicio de sesión con Cognito próximamente. Usa VITE_USE_MOCK=true para desarrollo.',
-    },
     form: {
       tagline: 'Las vulnerabilidades que sí afectan a tu stack, priorizadas.',
       subtitle: 'Business-Aware Risk-Based Analysis of Threats, Tailored Alerts & Countermeasure Knowledge.',
@@ -267,6 +264,7 @@ export const es: Translations = {
     loadFailed: 'No se pudo cargar la lista de usuarios.',
     networkError: 'No se pudo contactar al servidor para cargar los usuarios.',
     empty: 'Aún no hay usuarios.',
+    noMatches: 'Ningún usuario coincide con la búsqueda.',
     you: 'Tú',
     search: { placeholder: 'Buscar por correo…' },
     counter: {
@@ -336,6 +334,7 @@ export const es: Translations = {
     loadFailed: 'No se pudo cargar la lista de organizaciones.',
     networkError: 'No se pudo contactar al servidor para cargar las organizaciones.',
     empty: 'Aún no hay organizaciones.',
+    noMatches: 'Ninguna organización coincide con la búsqueda.',
     search: { placeholder: 'Buscar por nombre…' },
     counter: {
       total_one: '{{count}} organización',
