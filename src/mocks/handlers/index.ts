@@ -5,6 +5,7 @@ import { businessContextHandlers } from './businessContext'
 import { cmdbHandlers } from './cmdb'
 import { customersHandlers } from './customers'
 import { prioritizationsHandlers } from './prioritizations'
+import { slackHandlers } from './slack'
 import { usersHandlers } from './users'
 
 export const handlers = [
@@ -16,4 +17,5 @@ export const handlers = [
   ...customersHandlers,
   ...businessContextHandlers,
   ...prioritizationsHandlers,
+  ...slackHandlers,
 ]

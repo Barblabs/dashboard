@@ -4,12 +4,14 @@ import { useSourceQuery, type CmdbSource } from '../../api/cmdb'
 import { useCanEdit } from '../../auth/permissions'
 import { Page } from '../../components/Page'
 import { QueryBoundary } from '../../components/QueryBoundary'
+import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { ConfigStepPanel } from './ConfigStepPanel'
 import { CmdbSelector } from './CmdbSelector'
 import { ItopForm } from './ItopForm'
 import { ConnectedBar } from './ConnectedBar'
 import { EditConnectionDialog } from './EditConnectionDialog'
 import { ConfigTabs } from './ConfigTabs'
+import { SlackPanel } from './SlackPanel'
 
 const KEYS = {
   loading: 'config.loading',
@@ -20,8 +22,9 @@ const KEYS = {
 const NEW_CONNECTION = { url: '', user: '' }
 
 /*
- * The source is only known once the backend has answered: until then the page cannot tell
- * "not connected" apart, so QueryBoundary keeps it from offering to connect.
+ * The page holds two halves: the CMDB connection flow (which carries its own nested
+ * tabs once connected) and Slack delivery setup. They are siblings because Slack does
+ * not depend on the CMDB, so it has to be reachable with no connection configured.
  */
 export function ConfigPage() {
   const { t } = useTranslation()
@@ -30,9 +33,20 @@ export function ConfigPage() {
 
   return (
     <Page title={t('config.header.title')} subtitle={t('config.header.subtitle')}>
-      <QueryBoundary query={sourceQuery} keys={KEYS}>
-        {(source) => <ConfigBody source={source} readOnly={readOnly} />}
-      </QueryBoundary>
+      <Tabs defaultValue="cmdb">
+        <TabList label={t('config.tabs.pageLabel')}>
+          <Tab value="cmdb">{t('config.tabs.cmdb')}</Tab>
+          <Tab value="slack">{t('config.tabs.slack')}</Tab>
+        </TabList>
+        <TabPanel value="cmdb">
+          <QueryBoundary query={sourceQuery} keys={KEYS}>
+            {(source) => <ConfigBody source={source} readOnly={readOnly} />}
+          </QueryBoundary>
+        </TabPanel>
+        <TabPanel value="slack">
+          <SlackPanel readOnly={readOnly} />
+        </TabPanel>
+      </Tabs>
     </Page>
   )
 }
