@@ -149,6 +149,7 @@ export const es: Translations = {
       },
       score: {
         rank: 'Solo por Score sería el #{{rank}}.',
+        moved: 'Score actualizado; el orden se recalcula cuando el cambio es ≥ 0.1',
         factors: {
           alpha: 'CVSS',
           beta: 'EPSS',

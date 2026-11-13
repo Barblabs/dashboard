@@ -147,6 +147,7 @@ export const en = {
       },
       score: {
         rank: 'By Score alone it would be #{{rank}}.',
+        moved: 'Score updated; the order is recalculated when the change is ≥ 0.1',
         factors: {
           alpha: 'CVSS',
           beta: 'EPSS',
