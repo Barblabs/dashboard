@@ -151,6 +151,7 @@ function ScoreDetails({ finding }: { finding: Finding }) {
     ['vulnerability', score.vulnerability],
     ['criticality', score.criticality_multiplier],
     ['exposure', score.exposure_multiplier],
+    ['lifecycle', score.lifecycle_multiplier],
   ] as const
 
   return (
@@ -266,6 +267,9 @@ function AssetDetails({ finding }: { finding: Finding }) {
         </Fact>
         <Fact label={t('findings.detail.asset.criticality')}>{t(`config.inventory.criticality.${asset.criticality}`)}</Fact>
         <Fact label={t('findings.detail.asset.exposure')}>{t(`config.inventory.exposure.${asset.exposure}`)}</Fact>
+        <Fact label={t('findings.detail.asset.lifecycleStage')}>
+          {t(`config.inventory.lifecycleStage.${asset.lifecycle_stage}`)}
+        </Fact>
         <Fact label={t('findings.detail.asset.component')}>
           <span className={MONO}>
             {finding.component} {finding.version}

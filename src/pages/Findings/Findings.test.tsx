@@ -65,7 +65,34 @@ describe('Findings', () => {
     expect(within(dialog).getByText('Not in KEV')).toBeInTheDocument()
     expect(within(dialog).getByText(/Probability 0.9003/)).toBeInTheDocument()
     expect(within(dialog).getByText('By Score alone it would be #4.')).toBeInTheDocument()
+    expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Production$/)
+    expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^1$/)
+    expect(within(dialog).getByText('Measured: no input was missing.')).toBeInTheDocument()
     expect(within(dialog).getByText('No action plan yet. Luna writes one from what is known of this finding.')).toBeInTheDocument()
+  })
+
+  it('a finding on an asset of Unknown Lifecycle Stage says its Score is estimated', async () => {
+    const [stored, ...older] = prioritizationsStore.load()
+    const findings = stored!.findings.map((f) =>
+      f.cve_id === 'CVE-2025-1094'
+        ? {
+            ...f,
+            details: {
+              ...f.details,
+              asset: { ...f.details.asset, lifecycle_stage: 'unknown' as const },
+              score_details: { ...f.details.score_details, data_gaps: ['lifecycle_unknown' as const] },
+            },
+          }
+        : f,
+    )
+    prioritizationsStore.save([{ ...stored!, findings }, ...older])
+    const user = await renderFindings()
+
+    const dialog = await openFinding(user, 'CVE-2025-1094')
+
+    expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Unknown$/)
+    expect(within(dialog).getByText('Estimated: some inputs were missing and took a default.')).toBeInTheDocument()
+    expect(within(dialog).getByText('Lifecycle Stage unknown')).toBeInTheDocument()
   })
 
   it('opens the finding a link names', async () => {
