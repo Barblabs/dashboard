@@ -17,7 +17,13 @@ export type Verdict = (typeof VERDICTS)[number]
 export type TechniqueRole = 'exploitation' | 'primary_impact' | 'secondary_impact'
 
 /** The inputs a Scoring Model replaced with a default, which make a Score estimated. */
-export type DataGap = 'cvss_estimated' | 'epss_pending' | 'kev_stale' | 'criticality_unknown' | 'exposure_undeclared'
+export type DataGap =
+  | 'cvss_estimated'
+  | 'epss_pending'
+  | 'kev_stale'
+  | 'criticality_unknown'
+  | 'exposure_undeclared'
+  | 'lifecycle_unknown'
 
 export type Technique = Override<Schemas['TechniqueResponse'], { role: TechniqueRole }>
 export type CriticalService = Override<Schemas['CriticalServiceResponse'], { impact: Impact; max_downtime: Downtime }>
