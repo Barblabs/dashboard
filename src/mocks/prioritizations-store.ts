@@ -25,6 +25,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "kind": "server",
         "criticality": "high",
         "exposure": "internal",
+        "lifecycle_stage": "production",
         "critical_services": [
           {
             "name": "Pagos en línea",
@@ -43,6 +44,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "gamma": 0,
         "vulnerability": 0.5131,
         "criticality_multiplier": 1,
+        "lifecycle_multiplier": 1,
         "exposure_multiplier": 0.6,
         "data_gaps": []
       },
@@ -111,6 +113,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "kind": "server",
         "criticality": "high",
         "exposure": "internal",
+        "lifecycle_stage": "production",
         "critical_services": []
       },
       "component_role": "operating_system",
@@ -122,6 +125,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "gamma": 0,
         "vulnerability": 0.5415,
         "criticality_multiplier": 1,
+        "lifecycle_multiplier": 1,
         "exposure_multiplier": 0.6,
         "data_gaps": []
       },
@@ -177,6 +181,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "kind": "server",
         "criticality": "medium",
         "exposure": "internet_facing",
+        "lifecycle_stage": "production",
         "critical_services": []
       },
       "component_role": "application",
@@ -188,6 +193,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "gamma": 1,
         "vulnerability": 0.994,
         "criticality_multiplier": 0.7,
+        "lifecycle_multiplier": 1,
         "exposure_multiplier": 1,
         "data_gaps": []
       },
@@ -254,6 +260,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "kind": "server",
         "criticality": "medium",
         "exposure": "internet_facing",
+        "lifecycle_stage": "production",
         "critical_services": []
       },
       "component_role": "application",
@@ -265,6 +272,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "gamma": 1,
         "vulnerability": 0.9939,
         "criticality_multiplier": 0.7,
+        "lifecycle_multiplier": 1,
         "exposure_multiplier": 1,
         "data_gaps": []
       },
@@ -331,6 +339,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "kind": "virtual_machine",
         "criticality": "low",
         "exposure": "internal",
+        "lifecycle_stage": "production",
         "critical_services": []
       },
       "component_role": "application",
@@ -342,6 +351,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "gamma": 1,
         "vulnerability": 0.994,
         "criticality_multiplier": 0.4,
+        "lifecycle_multiplier": 1,
         "exposure_multiplier": 0.6,
         "data_gaps": []
       },
