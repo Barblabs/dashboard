@@ -16,12 +16,15 @@ de activos del CMDB y los hallazgos de vulnerabilidades priorizados.
 | `i18next`, `react-i18next`, `i18next-browser-languagedetector` | Traducciones | Todo texto visible, con `useTranslation()` y `t('clave')`. Ver [Idiomas](#idiomas-i18n). |
 | `msw` | Backend falso de las pruebas y del modo mock | Handlers en `src/mocks/`, compartidos por las pruebas y el modo mock de desarrollo. Un endpoint nuevo del contrato se agrega ahí. Ver [Pruebas](#pruebas). |
 | `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom` | Pruebas | Ver [Pruebas](#pruebas). Interactuar con `user-event`, buscar por rol, label o texto, nunca por clases o estado interno. |
-| `react-router`, `zustand` | Ruteo y estado global de cliente | Instaladas pero todavía sin usar. `react-router` cuando la navegación entre Hallazgos, Configuración y Notificaciones sea real. `zustand` solo para estado de UI compartido entre ramas lejanas del árbol; el estado del servidor va en react-query y el estado local en `useState`. |
+| `react-router` | Ruteo | Las rutas viven en `src/routes.ts` (qué página ve cada rol) y `src/App.tsx` (guardas de sesión y de rol). Una página nueva se agrega a `PAGES`. |
+| `zustand` | Estado global de cliente | Hoy solo la sesión (`src/auth/store.ts`). Úsalo solo para estado de UI compartido entre ramas lejanas del árbol; el estado del servidor va en react-query y el estado local en `useState`. |
+| `amazon-cognito-identity-js` | Inicio de sesión | Solo dentro de `src/auth/cognito.ts`; el resto de la app pide tokens a `tokens` de `src/auth/tokenSource.ts`. |
+| `recharts` | Gráficas | La del panel de administración (`src/pages/AdminDashboard`). |
 
 ## Requisitos
 
-- Node.js 20+
-- npm 10+
+- Node.js 26 (la versión de `.nvmrc`, la misma que usa CI)
+- npm 11+
 
 ## Instalación
 
@@ -181,15 +184,18 @@ y `npm test`; si alguno falla, el commit no se crea.
 
 ```
 src/
-  api/            # cliente axios, ApiError, funciones del contrato y hooks de react-query
-  components/     # componentes compartidos (Sidebar, PlaceholderPage)
-    ui/           # primitivas sobre Base UI y Tailwind (Button, Field, Input, Badge)
-  i18n/           # configuración de i18next y recursos en/es
-  pages/          # páginas: Config, Findings, Notifications
+  api/            # cliente axios, ApiError, tipos del contrato (generated.ts) y hooks de react-query
+  auth/           # sesión, tokens de Cognito (o del modo mock) y permisos por rol
+  components/     # componentes compartidos (Page, Sidebar, QueryBoundary, StatusPage)
+    ui/           # primitivas sobre Base UI y Tailwind (Button, Field, Input, Select, Modal, Sheet…)
+  i18n/           # configuración de i18next, recursos en/es, formatos y mensajes de error
+  mocks/          # handlers de MSW y datos de ejemplo, compartidos por las pruebas y el modo mock
+  pages/          # una carpeta por página (Findings, Config, BusinessContext, Users, Tenants…)
   styles/         # globals.css: Tailwind y tokens del tema (colores, tipografía)
-  test/           # setup de Vitest, servidor MSW de Node, handlers y datos de ejemplo
+  test/           # setup de Vitest, servidor MSW de Node y helpers para montar la app
 docs/
-  contrato-assets.md   # contrato propuesto del endpoint GET /assets
+  contrato-cmdb.md     # endpoints /cmdb/ y una pregunta abierta sobre permisos
+  agents/              # convenciones para agentes (issues, etiquetas, glosario)
 ```
 
 ## Notas de desarrollo
