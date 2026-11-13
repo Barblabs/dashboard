@@ -796,6 +796,18 @@ export interface components {
             max_downtime: string;
             name: string;
         };
+        CurrentAssetResponse: {
+            /** @enum {string} */
+            criticality: "high" | "medium" | "low" | "unknown";
+            /** @enum {string} */
+            exposure: "internet_facing" | "internal" | "unknown";
+            /** @enum {string} */
+            lifecycle_stage: "production" | "implementation" | "stock" | "unknown";
+        };
+        CurrentResponse: {
+            asset: components["schemas"]["CurrentAssetResponse"];
+            score_details: components["schemas"]["ScoreResponse"];
+        };
         CustomerListResponse: {
             customers: components["schemas"]["CustomerResponse"][];
         };
@@ -931,6 +943,7 @@ export interface components {
              */
             closed_at: string | null;
             component: string;
+            current: components["schemas"]["CurrentResponse"] | null;
             cve_id: string;
             /** @description What the Agents read of the Finding when it was placed. Its text comes from Feeds, the CMDB and the Customer: render it as plain text. */
             details: components["schemas"]["FindingDetailsResponse"];
