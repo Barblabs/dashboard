@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiUrl } from '../../mocks/url'
-import { PLATFORM_ADMIN, renderApp } from '../../test/render'
+import { PLATFORM_ADMIN, renderApp, seedCustomers } from '../../test/render'
 import { server } from '../../test/server'
 import { MOCK_CUSTOMERS } from '../../mocks/customers-store'
 
@@ -51,6 +51,21 @@ describe('AdminDashboard', () => {
     await renderDashboard()
 
     expect(stat('New this month')).toBe('0')
+  })
+
+  it('counts by the month in the viewer’s time zone, not in UTC', async () => {
+    const zone = process.env.TZ
+    process.env.TZ = 'America/Mexico_City'
+    try {
+      // 02:00 UTC on November 1st is still October 31st in Mexico City.
+      seedCustomers([{ ...MOCK_CUSTOMERS[0]!, created_at: '2026-11-01T02:00:00Z' }])
+      renderApp('/admin-dashboard', PLATFORM_ADMIN)
+      await screen.findByText(MOCK_CUSTOMERS[0]!.name)
+
+      expect(stat('New this month')).toBe('0')
+    } finally {
+      process.env.TZ = zone
+    }
   })
 
   it('shows the recent organizations list', async () => {
