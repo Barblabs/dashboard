@@ -421,6 +421,134 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/slack/channels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the workspace's channels
+         * @description Lists the workspace's public channels and the private ones the app has been added to through conversations.list, following Slack's cursor pagination, so the admin picks the Security Team channel from a list.
+         */
+        get: operations["list-slack-channels"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/slack/deliveries/failed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the failed Slack messages
+         * @description Lists the Customer's rows the worker gave up on, with their target, attempts, failure code and last error. Every role of the Customer can read it.
+         */
+        get: operations["list-failed-slack-deliveries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/slack/deliveries/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retry the failed Slack messages
+         * @description Returns the Customer's failed rows to pending, resetting their attempts and error, except the ones whose payload is malformed and a retry cannot fix. Customer Admin only.
+         */
+        post: operations["retry-failed-slack-deliveries"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/slack/install/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start installing the Slack app
+         * @description Returns the Slack authorize URL for the portal's popup. The state is sealed and names the Customer, so the callback needs no token.
+         */
+        post: operations["start-slack-install"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/slack/installation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the Customer's Slack installation
+         * @description Returns the workspace, the Security Team channel and the state, or null when Slack is not connected or was disconnected. Every role of the Customer can read it.
+         */
+        get: operations["get-slack-installation"];
+        /**
+         * Set the Security Team channel
+         * @description Stores the id and name of the channel chosen from GET /slack/channels.
+         */
+        put: operations["set-slack-channel"];
+        post?: never;
+        /**
+         * Disconnect the Customer's Slack workspace
+         * @description Drops the bot token and removes the installation from the Customer's view. A later install returns it to active.
+         */
+        delete: operations["disconnect-slack"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/slack/installation/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Post a test message to the Security Team channel
+         * @description Posts synchronously and returns Slack's answer, so the admin sees whether the connection works right now. A Slack refusal is a 200 with ok false and Slack's error code.
+         */
+        post: operations["test-slack-installation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users": {
         parameters: {
             query?: never;
@@ -559,6 +687,11 @@ export interface components {
             /** Format: date-time */
             inactive_since: string | null;
             kind: string;
+            /**
+             * @description Null when the CMDB Source does not give it, and for a retired Asset
+             * @enum {string|null}
+             */
+            lifecycle_stage: "production" | "implementation" | "stock" | null;
             name: string;
             owner: components["schemas"]["OwnerResponse"] | null;
             record_id: string;
@@ -767,6 +900,8 @@ export interface components {
             /** @enum {string} */
             exposure: "internet_facing" | "internal" | "unknown";
             kind: string;
+            /** @enum {string} */
+            lifecycle_stage: "production" | "implementation" | "stock" | "unknown";
             name: string;
         };
         FindingDetailsResponse: {
@@ -1053,6 +1188,11 @@ export interface components {
              * @description 1 when KEV lists the CVE
              */
             gamma: number;
+            /**
+             * Format: double
+             * @description 1 in a Scoring Model without a lifecycle factor
+             */
+            lifecycle_multiplier: number;
             /** Format: int64 */
             scoring_model: number;
             /** Format: double */
@@ -1071,6 +1211,55 @@ export interface components {
             email: string | null;
         } & {
             [key: string]: unknown;
+        };
+        SlackChannelRequest: {
+            /** @description The channel's id from GET /slack/channels */
+            channel_id?: string;
+            /** @description The channel's name, shown by the portal */
+            channel_name?: string;
+        } & {
+            [key: string]: unknown;
+        };
+        SlackChannelResponse: {
+            id: string;
+            is_private: boolean;
+            name: string;
+        };
+        SlackChannelsResponse: {
+            channels: components["schemas"]["SlackChannelResponse"][];
+        };
+        SlackFailedDeliveriesResponse: {
+            deliveries: components["schemas"]["SlackFailedDeliveryResponse"][];
+        };
+        SlackFailedDeliveryResponse: {
+            /** Format: int32 */
+            attempts: number;
+            /** Format: date-time */
+            created_at: string;
+            failure_code?: string;
+            kind: string;
+            last_error?: string;
+            target: string;
+            target_kind: string;
+        };
+        SlackInstallationResponse: {
+            channel_id: string;
+            channel_name: string;
+            /** @enum {string} */
+            state: "active" | "needs re-authorisation" | "removed";
+            team_id: string;
+            team_name: string;
+        };
+        SlackRetryResponse: {
+            /** Format: int64 */
+            retried: number;
+        };
+        SlackStartResponse: {
+            authorize_url: string;
+        };
+        SlackTestResponse: {
+            error?: string;
+            ok: boolean;
         };
         SoftwareResponse: {
             name: string;
@@ -2855,6 +3044,465 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "list-slack-channels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlackChannelsResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "list-failed-slack-deliveries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlackFailedDeliveriesResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "retry-failed-slack-deliveries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlackRetryResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "start-slack-install": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlackStartResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-slack-installation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlackInstallationResponse"] | null;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "set-slack-channel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SlackChannelRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlackInstallationResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "disconnect-slack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "test-slack-installation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlackTestResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
