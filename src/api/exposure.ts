@@ -1,39 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Asset, Exposure } from './assets'
 import { api, ApiError } from './client'
-import { connectionScopeKey } from './cmdb'
-import { allAssetPages, ASSETS_KEY } from './inventory'
-import { listCache } from './listCache'
+import { allAssetPages } from './inventory'
 import { PRIORITIZATIONS_KEY } from './prioritizations'
+import { declarationSaved, declarationSettled, type DeclarationChange } from './declarations'
 import type { Known, Schemas } from './schemas'
 
 type DeclareExposureRequest = Known<Schemas['DeclareExposureRequest']>
-
-// Beside the inventory pages rather than under their key: it holds a list of Assets, not a page.
-const UNKNOWN_EXPOSURE_KEY = [...connectionScopeKey, 'unknown-exposure'] as const
-
-const inventoryPages = listCache<Asset>(ASSETS_KEY, 'assets')
-
-// What the banner counts and the queue walks through.
-function hasUnknownExposure(asset: Asset): boolean {
-  return asset.active && asset.exposure.value === null
-}
-
-async function fetchUnknownExposure(): Promise<Asset[]> {
-  const unknown: Asset[] = []
-  for await (const assets of allAssetPages({ active: 'true' })) {
-    unknown.push(...assets.filter(hasUnknownExposure))
-  }
-  return unknown
-}
-
-/**
- * Every Active Asset with Unknown Exposure, across the whole inventory: `GET /assets` cannot
- * filter by Exposure, so this pages through all of it, apart from the table's filters and page.
- */
-export function useUnknownExposureQuery() {
-  return useQuery({ queryKey: UNKNOWN_EXPOSURE_KEY, queryFn: fetchUnknownExposure })
-}
 
 // There is no `GET /assets/{id}`: the Asset is looked up among those of its Kind, Active or not.
 async function fetchAsset(asset: Asset): Promise<Asset | null> {
@@ -45,10 +18,7 @@ async function fetchAsset(asset: Asset): Promise<Asset | null> {
 }
 
 /** `null` clears the Declaration, falling back to the imported Exposure. */
-export interface ExposureChange {
-  asset: Asset
-  exposure: Exposure | null
-}
+export type ExposureChange = DeclarationChange<Exposure>
 
 export interface ExposureSaved {
   asset: Asset
@@ -56,22 +26,22 @@ export interface ExposureSaved {
   rescored: boolean
 }
 
-function shows(asset: Asset, exposure: Exposure | null): boolean {
-  return exposure === null
+function shows(asset: Asset, value: Exposure | null): boolean {
+  return value === null
     ? asset.exposure.source === 'imported'
-    : asset.exposure.source === 'declared' && asset.exposure.value === exposure
+    : asset.exposure.source === 'declared' && asset.exposure.value === value
 }
 
 function isServerError(error: unknown): boolean {
   return error instanceof ApiError && error.failure.kind === 'http' && error.failure.status >= 500
 }
 
-async function sendChange({ asset, exposure }: ExposureChange): Promise<ExposureSaved> {
+async function sendChange({ asset, value }: ExposureChange): Promise<ExposureSaved> {
   try {
     const saved =
-      exposure === null
+      value === null
         ? await api.delete<Asset>(`/assets/${asset.id}/exposure`)
-        : await api.put<Asset>(`/assets/${asset.id}/exposure`, { exposure } satisfies DeclareExposureRequest)
+        : await api.put<Asset>(`/assets/${asset.id}/exposure`, { exposure: value } satisfies DeclareExposureRequest)
     return { asset: saved, rescored: true }
   } catch (error) {
     /*
@@ -80,7 +50,7 @@ async function sendChange({ asset, exposure }: ExposureChange): Promise<Exposure
      */
     if (!isServerError(error)) throw error
     const current = await fetchAsset(asset).catch(() => null)
-    if (current && shows(current, exposure)) return { asset: current, rescored: false }
+    if (current && shows(current, value)) return { asset: current, rescored: false }
     throw error
   }
 }
@@ -99,27 +69,14 @@ export function useExposureMutation({
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: sendChange,
-    // The response is the Asset as saved: the table and the count show it without waiting.
     onSuccess: (saved, change) => {
-      inventoryPages.replace(queryClient, saved.asset)
-      // Clearing a Declaration can make an Asset Unknown, so the saved one may join the count.
-      queryClient.setQueryData<Asset[]>(UNKNOWN_EXPOSURE_KEY, (unknown) => {
-        if (!unknown) return unknown
-        const others = unknown.filter((asset) => asset.id !== saved.asset.id)
-        return hasUnknownExposure(saved.asset) ? [...others, saved.asset] : others
-      })
+      declarationSaved(queryClient, saved.asset)
       onSaved(saved, change)
     },
-    /*
-     * Still refetched after any outcome, without holding the mutation: a failure may follow a
-     * change made elsewhere, and a change rescores the Findings.
-     */
+    // Not awaited, so the mutation settles without waiting for the refetches; a change also rescores the Findings.
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: ASSETS_KEY })
-      void queryClient.invalidateQueries({ queryKey: UNKNOWN_EXPOSURE_KEY })
+      declarationSettled(queryClient)
       void queryClient.invalidateQueries({ queryKey: PRIORITIZATIONS_KEY })
     },
   })
 }
-
-export type ExposureMutation = ReturnType<typeof useExposureMutation>

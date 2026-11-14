@@ -4,10 +4,13 @@ import { unidentifiedCount, type Asset } from '../../api/assets'
 import { Badge } from '../../components/ui/Badge'
 import { CheckIcon } from '../../components/ui/icons'
 import { EMPTY, useDateFormat } from '../../i18n/format'
-import { exposureLabel } from './assetText'
+import { exposureLabel, informationClassificationLabel } from './assetText'
 
 const MONO = 'font-mono text-[0.8125rem]'
 const LABEL = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase'
+// The chrome of the facts that open the triage sheet; each adds its text color, border and background.
+const TRIAGE_BUTTON =
+  'focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-sm border px-2.5 py-[3px] font-body text-[0.75rem] font-medium whitespace-nowrap transition-[border-color] duration-150 ease-out hover:border-navy'
 
 function AssetStatus({ asset }: { asset: Asset }) {
   const { t } = useTranslation()
@@ -25,7 +28,7 @@ function AssetStatus({ asset }: { asset: Asset }) {
   )
 }
 
-/** The effective Exposure and where it comes from; opens the Exposure sheet for the Asset. */
+/** The effective Exposure and where it comes from; opens the triage sheet for the Asset. */
 function ExposureButton({ asset, onOpen }: { asset: Asset; onOpen: (asset: Asset) => void }) {
   const { t } = useTranslation()
   const { value, source } = asset.exposure
@@ -35,7 +38,7 @@ function ExposureButton({ asset, onOpen }: { asset: Asset; onOpen: (asset: Asset
       type="button"
       aria-label={t(`config.exposure.cellLabel.${source}`, { name: asset.name, value: valueText })}
       onClick={() => onOpen(asset)}
-      className={`focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-sm border px-2.5 py-[3px] font-body text-[0.75rem] font-medium whitespace-nowrap text-navy transition-[border-color] duration-150 ease-out hover:border-navy ${value ? 'border-border-panel bg-white' : 'border-high bg-high/10'}`}
+      className={`${TRIAGE_BUTTON} text-navy ${value ? 'border-border-panel bg-white' : 'border-high bg-high/10'}`}
     >
       {valueText}
       <span aria-hidden="true" className="text-gray">
@@ -44,6 +47,26 @@ function ExposureButton({ asset, onOpen }: { asset: Asset; onOpen: (asset: Asset
       <span className={source === 'declared' ? 'font-semibold text-nav-active-bg' : 'text-gray'}>
         {t(`config.exposure.source.${source}`)}
       </span>
+    </button>
+  )
+}
+
+/*
+ * Only ever declared, so there is no source to show. Unclassified is not a Data Gap (it is not
+ * scored), so it stays neutral where an Unknown Exposure is flagged.
+ */
+function InformationClassificationButton({ asset, onOpen }: { asset: Asset; onOpen: (asset: Asset) => void }) {
+  const { t } = useTranslation()
+  const { value } = asset.information_classification
+  const valueText = informationClassificationLabel(t, value)
+  return (
+    <button
+      type="button"
+      aria-label={t('config.informationClassification.cellLabel', { name: asset.name, value: valueText })}
+      onClick={() => onOpen(asset)}
+      className={`${TRIAGE_BUTTON} border-border-panel bg-white ${value ? 'text-navy' : 'text-gray'}`}
+    >
+      {valueText}
     </button>
   )
 }
@@ -106,7 +129,7 @@ function SoftwareComponents({ asset }: { asset: Asset }) {
   )
 }
 
-export function AssetRecord({ asset, onOpenExposure }: { asset: Asset; onOpenExposure: (asset: Asset) => void }) {
+export function AssetRecord({ asset, onOpenTriage }: { asset: Asset; onOpenTriage: (asset: Asset) => void }) {
   const { t } = useTranslation()
 
   return (
@@ -129,9 +152,6 @@ export function AssetRecord({ asset, onOpenExposure }: { asset: Asset; onOpenExp
             {t(`config.inventory.criticality.${asset.criticality ?? 'unknown'}`)}
           </Badge>
         </Fact>
-        <Fact label={t('config.inventory.record.exposure')}>
-          <ExposureButton asset={asset} onOpen={onOpenExposure} />
-        </Fact>
         <Fact label={t('config.inventory.record.lifecycleStage')}>
           {asset.retired ? (
             // A retired Asset has no Lifecycle Stage: it isn't Unknown, there is none.
@@ -141,6 +161,13 @@ export function AssetRecord({ asset, onOpenExposure }: { asset: Asset; onOpenExp
               {t(`config.inventory.lifecycleStage.${asset.lifecycle_stage ?? 'unknown'}`)}
             </Badge>
           )}
+        </Fact>
+        {/* Side by side: the two values the triage sheet declares. */}
+        <Fact label={t('config.inventory.record.exposure')}>
+          <ExposureButton asset={asset} onOpen={onOpenTriage} />
+        </Fact>
+        <Fact label={t('config.inventory.record.informationClassification')}>
+          <InformationClassificationButton asset={asset} onOpen={onOpenTriage} />
         </Fact>
         <Fact label={t('config.inventory.record.owner')}>
           {asset.owner ? (

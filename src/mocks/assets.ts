@@ -1,10 +1,22 @@
-import type { Asset, AssetExposure, Exposure } from '../api/assets'
+import type {
+  Asset,
+  AssetExposure,
+  AssetInformationClassification,
+  Exposure,
+  InformationClassification,
+} from '../api/assets'
 
 export const SOURCE_ID = '6f1c2a9e-4b7d-4e8a-9c3f-2d5b8e1a7c40'
 
 /** What the CMDB Source gives, with nothing declared over it. */
 export function importedExposure(value: Exposure | null): AssetExposure {
   return { value, source: 'imported', imported: value, declared_by: null, declared_at: null }
+}
+
+export const UNCLASSIFIED: AssetInformationClassification = { value: null, declared_by: null, declared_at: null }
+
+function classified(value: InformationClassification, declaredAt: string): AssetInformationClassification {
+  return { value, declared_by: 'admin@barbattack.example', declared_at: declaredAt }
 }
 
 export const mockAssets: Asset[] = [
@@ -39,6 +51,7 @@ export const mockAssets: Asset[] = [
     criticality: 'high',
     exposure: importedExposure('internet_facing'),
     owner: { email: 'devops@example.com', source: 'imported' },
+    information_classification: UNCLASSIFIED,
     area: { id: 1, name: 'Infrastructure' },
     lifecycle_stage: 'production',
     retired: false,
@@ -70,6 +83,7 @@ export const mockAssets: Asset[] = [
     criticality: 'medium',
     exposure: importedExposure(null),
     owner: { email: 'data-eng@example.com', source: 'declared' },
+    information_classification: UNCLASSIFIED,
     area: { id: 2, name: 'Data Platform' },
     lifecycle_stage: 'implementation',
     retired: false,
@@ -101,6 +115,7 @@ export const mockAssets: Asset[] = [
     criticality: 'high',
     exposure: importedExposure('internal'),
     owner: { email: 'crm-ops@example.com', source: 'imported' },
+    information_classification: classified('private', '2026-11-04T10:00:00Z'),
     area: { id: 1, name: 'Infrastructure' },
     lifecycle_stage: 'production',
     retired: false,
@@ -119,6 +134,7 @@ export const mockAssets: Asset[] = [
     criticality: 'low',
     exposure: importedExposure(null),
     owner: null,
+    information_classification: classified('public', '2026-11-05T09:30:00Z'),
     area: null,
     lifecycle_stage: null,
     retired: false,
@@ -150,6 +166,7 @@ export const mockAssets: Asset[] = [
     criticality: null,
     exposure: importedExposure(null),
     owner: null,
+    information_classification: UNCLASSIFIED,
     area: { id: 3, name: 'Legacy ERP' },
     lifecycle_stage: null,
     retired: true,
@@ -175,6 +192,7 @@ export const mockAssets: Asset[] = [
     criticality: 'high',
     exposure: importedExposure(null),
     owner: { email: 'payments@example.com', source: 'imported' },
+    information_classification: UNCLASSIFIED,
     area: { id: 1, name: 'Infrastructure' },
     lifecycle_stage: 'production',
     retired: false,
@@ -200,6 +218,7 @@ export const mockAssets: Asset[] = [
     criticality: 'low',
     exposure: importedExposure(null),
     owner: null,
+    information_classification: UNCLASSIFIED,
     area: { id: 2, name: 'Data Platform' },
     lifecycle_stage: 'stock',
     retired: false,
@@ -231,6 +250,7 @@ export const mockAssets: Asset[] = [
       declared_at: '2026-11-03T15:20:00Z',
     },
     owner: { email: 'finance-it@example.com', source: 'imported' },
+    information_classification: classified('confidential', '2026-11-03T15:25:00Z'),
     area: { id: 1, name: 'Infrastructure' },
     lifecycle_stage: 'production',
     retired: false,

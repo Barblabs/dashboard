@@ -110,6 +110,7 @@ describe('Tech stack', () => {
     expect(details.getByText('Main production API server')).toBeInTheDocument()
     expect(fact('Criticality')).toHaveTextContent(/^High$/)
     expect(fact('Exposure')).toHaveTextContent('Internet-facing·iTop')
+    expect(fact('Information Classification')).toHaveTextContent(/^Unclassified$/)
     expect(fact('Lifecycle Stage')).toHaveTextContent(/^Production$/)
     expect(fact('Owner')).toHaveTextContent(/^devops@example\.com$/)
     expect(fact('Area')).toHaveTextContent(/^Infrastructure$/)
@@ -149,6 +150,7 @@ describe('Tech stack', () => {
     expect(within(record()).queryByText(/unidentified/)).not.toBeInTheDocument()
 
     await user.click(option('core-switch-01'))
+    expect(fact('Information Classification')).toHaveTextContent(/^Public$/)
     expect(fact('Owner')).toHaveTextContent(/^-$/)
     expect(fact('Area')).toHaveTextContent(/^-$/)
     expect(fact('Lifecycle Stage')).toHaveTextContent(/^Unknown$/)
@@ -192,7 +194,7 @@ describe('Tech stack', () => {
     expect(screen.getByRole('article', { name: 'prod-api-01' })).toBeInTheDocument()
   })
 
-  it('flags the assets with Unknown Exposure or Unidentified Components, and only those', async () => {
+  it('flags the assets with Unknown Exposure, no Information Classification or Unidentified Components, and only those', async () => {
     const unidentified = prodApi.software[2]
     const both: Asset = {
       ...prodApi,
@@ -208,9 +210,9 @@ describe('Tech stack', () => {
     )
     await renderInventory()
 
-    expect(gap('prod-api-01')).toHaveAccessibleName('1 Unidentified Component')
-    expect(gap('analytics-worker-03')).toHaveAccessibleName('Unknown Exposure')
-    expect(gap('legacy-billing')).toHaveAccessibleName('Unknown Exposure · 2 Unidentified Components')
+    expect(gap('prod-api-01')).toHaveAccessibleName('Unclassified · 1 Unidentified Component')
+    expect(gap('analytics-worker-03')).toHaveAccessibleName('Unknown Exposure · Unclassified')
+    expect(gap('legacy-billing')).toHaveAccessibleName('Unknown Exposure · Unclassified · 2 Unidentified Components')
     expect(gap('crm-db-primary')).not.toBeInTheDocument()
   })
 

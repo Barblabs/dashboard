@@ -14,12 +14,13 @@ const CRITICALITY_DOT: Record<Criticality, string> = {
 
 const optionId = (asset: Asset) => `asset-${assetKey(asset)}`
 
-/** Flags the data gaps that keep threats from being checked against the Asset. */
+/** Flags what the Asset is missing: a value to triage, or Components threats can't be checked against. */
 function GapDot({ asset }: { asset: Asset }) {
   const { t } = useTranslation()
   const unidentified = unidentifiedCount(asset)
   const gaps = [
     asset.exposure.value === null && t('config.inventory.inspector.gaps.unknownExposure'),
+    asset.information_classification.value === null && t('config.inventory.inspector.gaps.unclassified'),
     unidentified > 0 && t('config.inventory.inspector.gaps.unidentified', { count: unidentified }),
   ].filter(Boolean)
   if (gaps.length === 0) return null
@@ -71,11 +72,11 @@ interface AssetInspectorProps {
   assets: Asset[]
   busy: boolean
   pager: Pager | null
-  onOpenExposure: (asset: Asset) => void
+  onOpenTriage: (asset: Asset) => void
 }
 
 /** A page of Assets to scan on the left, the selected one's full record on the right. */
-export function AssetInspector({ assets, busy, pager, onOpenExposure }: AssetInspectorProps) {
+export function AssetInspector({ assets, busy, pager, onOpenTriage }: AssetInspectorProps) {
   const { t } = useTranslation()
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const listRef = useRef<HTMLUListElement>(null)
@@ -137,7 +138,7 @@ export function AssetInspector({ assets, busy, pager, onOpenExposure }: AssetIns
       </div>
       {/* Keyed so each record opens at its top, not at the previous one's scroll position. */}
       <div key={selectedId} className="min-h-0 lg:overflow-y-auto">
-        <AssetRecord asset={selected} onOpenExposure={onOpenExposure} />
+        <AssetRecord asset={selected} onOpenTriage={onOpenTriage} />
       </div>
     </div>
   )

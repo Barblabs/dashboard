@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, queryOptions, useQuery, type QueryClient } from '@tanstack/react-query'
 import type { Asset, AssetFilters, AssetsPage } from './assets'
 import { api, errorCode } from './client'
 import { connectionScopeKey } from './cmdb'
+import { listCache } from './listCache'
 import type { Loadable } from './loadable'
 
 const DEFAULT_ASSET_FILTERS: AssetFilters = { active: 'true', kind: null, criticality: null }
@@ -32,7 +33,18 @@ export async function* allAssetPages(filters: Partial<AssetFilters>): AsyncGener
   } while (cursor !== null)
 }
 
-export const ASSETS_KEY = [...connectionScopeKey, 'assets'] as const
+const ASSETS_KEY = [...connectionScopeKey, 'assets'] as const
+
+const inventoryPages = listCache<Asset>(ASSETS_KEY, 'assets')
+
+/** Shows a changed Asset in the inventory pages that hold it, without waiting for their refetch. */
+export function showAssetInInventory(queryClient: QueryClient, asset: Asset) {
+  inventoryPages.replace(queryClient, asset)
+}
+
+export function invalidateInventory(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({ queryKey: ASSETS_KEY })
+}
 
 function assetsQuery(filters: AssetFilters, cursor: string | null) {
   return queryOptions({
