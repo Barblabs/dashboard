@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react'
 
-export type AlertTone = 'error' | 'success' | 'info'
+type AlertTone = 'error' | 'success' | 'info'
 
 const TONES: Record<AlertTone, string> = {
   error: 'border-critical bg-critical/5 text-[0.875rem] text-critical',

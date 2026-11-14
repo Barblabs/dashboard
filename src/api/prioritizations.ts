@@ -12,12 +12,12 @@ export const VERDICTS = [
   'should_be_earlier',
   'should_be_later',
 ] as const satisfies readonly Schemas['FeedbackRequestBody']['verdict'][]
-export type Verdict = (typeof VERDICTS)[number]
+type Verdict = (typeof VERDICTS)[number]
 
-export type TechniqueRole = 'exploitation' | 'primary_impact' | 'secondary_impact'
+type TechniqueRole = 'exploitation' | 'primary_impact' | 'secondary_impact'
 
 /** The inputs a Scoring Model replaced with a default, which make a Score estimated. */
-export type DataGap =
+type DataGap =
   | 'cvss_estimated'
   | 'epss_pending'
   | 'kev_stale'
@@ -26,7 +26,7 @@ export type DataGap =
   | 'lifecycle_unknown'
 
 export type Technique = Override<Schemas['TechniqueResponse'], { role: TechniqueRole }>
-export type CriticalService = Override<Schemas['CriticalServiceResponse'], { impact: Impact; max_downtime: Downtime }>
+type CriticalService = Override<Schemas['CriticalServiceResponse'], { impact: Impact; max_downtime: Downtime }>
 
 export type ScoreDetails = Override<Schemas['ScoreResponse'], { data_gaps: DataGap[] }>
 export type FindingAsset = Override<
@@ -47,7 +47,7 @@ export type FindingDetails = Override<
 >
 
 /** The Finding's Asset and Score as they are now. */
-export type FindingCurrent = Override<Schemas['CurrentResponse'], { score_details: ScoreDetails }>
+type FindingCurrent = Override<Schemas['CurrentResponse'], { score_details: ScoreDetails }>
 
 /**
  * `details` and `score` are the snapshot from when the Finding was placed: they explain the

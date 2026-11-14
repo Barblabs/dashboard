@@ -30,7 +30,7 @@ const credentialsSchema = z.object({
 
 type Credentials = z.infer<typeof credentialsSchema>
 
-export type ItopFormMode = 'connect' | 'update'
+type ItopFormMode = 'connect' | 'update'
 
 interface Props {
   mode: ItopFormMode

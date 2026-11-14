@@ -13,9 +13,9 @@ import type { Known, Schemas } from './schemas'
  * worker gave up on. Everything hangs off this root key, so disconnecting removes the
  * whole tree (mirrors `connectionScopeKey` in cmdb.ts).
  */
-export const SLACK_KEY = ['slack'] as const
+const SLACK_KEY = ['slack'] as const
 export const SLACK_INSTALLATION_KEY = [...SLACK_KEY, 'installation'] as const
-export const SLACK_CHANNELS_KEY = [...SLACK_KEY, 'channels'] as const
+const SLACK_CHANNELS_KEY = [...SLACK_KEY, 'channels'] as const
 export const SLACK_FAILED_KEY = [...SLACK_KEY, 'deliveries', 'failed'] as const
 
 export type SlackInstallation = Schemas['SlackInstallationResponse']

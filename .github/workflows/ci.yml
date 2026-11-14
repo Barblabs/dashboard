@@ -35,6 +35,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # Exports nothing imports: oxlint and tsc only see unused code inside one file.
+      - run: npm run knip
 
   test:
     runs-on: ubuntu-latest

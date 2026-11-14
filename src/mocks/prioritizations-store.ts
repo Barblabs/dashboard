@@ -561,7 +561,7 @@ const JENKINS_PLAN: ActionPlan = {
 
 const FIRST_ID = '9c1d2e3f-4a5b-4c6d-8e7f-0a1b2c3d4e01'
 
-export const MOCK_PRIORITIZATIONS: Prioritization[] = [
+const MOCK_PRIORITIZATIONS: Prioritization[] = [
   {
     id: '9c1d2e3f-4a5b-4c6d-8e7f-0a1b2c3d4e02',
     previous_id: FIRST_ID,

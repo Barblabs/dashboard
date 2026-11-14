@@ -11,8 +11,6 @@ import type { Known, Override, Schemas } from './schemas'
 // The CMDBs the dashboard knows how to talk to; only iTop has a connection flow today.
 export type CmdbProvider = 'itop' | 'servicenow'
 
-export type CmdbSyncFailure = Schemas['SyncFailureResponse']
-
 /*
  * `last_sync` is when the latest successful Sync finished; `last_sync_failure` is set only
  * while the latest Sync failed, and carries no code, only the message.

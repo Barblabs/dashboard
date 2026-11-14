@@ -38,16 +38,10 @@ export type AssetInformationClassification =
       { value: InformationClassification; declared_by: string; declared_at: string }
     >
 
-export type Product = Schemas['ProductResponse']
-
 /** `product` is `null` for an Unidentified Component: threats cannot be checked against it. */
-export type SoftwareComponent = Override<Schemas['SoftwareResponse'], { role: SoftwareRole }>
+type SoftwareComponent = Override<Schemas['SoftwareResponse'], { role: SoftwareRole }>
 
-export type Hardware = Schemas['HardwareResponse']
-
-export type AssetOwner = Override<Schemas['OwnerResponse'], { source: 'declared' | 'imported' }>
-
-export type AreaRef = Schemas['AreaRefResponse']
+type AssetOwner = Override<Schemas['OwnerResponse'], { source: 'declared' | 'imported' }>
 
 /*
  * The spec types the vocabularies as plain strings. `retired` is what the CMDB reports,

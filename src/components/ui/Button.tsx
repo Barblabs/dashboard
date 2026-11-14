@@ -1,7 +1,7 @@
 import { Button as BaseButton } from '@base-ui/react/button'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
-export type ButtonSize = 'lg' | 'md' | 'sm'
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type ButtonSize = 'lg' | 'md' | 'sm'
 
 type ButtonProps = Omit<BaseButton.Props, 'className'> & {
   variant?: ButtonVariant
