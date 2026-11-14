@@ -3,7 +3,7 @@ import type { Asset, Exposure } from './assets'
 import { api, ApiError } from './client'
 import { allAssetPages } from './inventory'
 import { PRIORITIZATIONS_KEY } from './prioritizations'
-import { declarationSaved, declarationSettled } from './declarations'
+import { declarationSaved, declarationSettled, type DeclarationChange } from './declarations'
 import type { Known, Schemas } from './schemas'
 
 type DeclareExposureRequest = Known<Schemas['DeclareExposureRequest']>
@@ -18,10 +18,7 @@ async function fetchAsset(asset: Asset): Promise<Asset | null> {
 }
 
 /** `null` clears the Declaration, falling back to the imported Exposure. */
-export interface ExposureChange {
-  asset: Asset
-  exposure: Exposure | null
-}
+export type ExposureChange = DeclarationChange<Exposure>
 
 export interface ExposureSaved {
   asset: Asset
@@ -29,22 +26,22 @@ export interface ExposureSaved {
   rescored: boolean
 }
 
-function shows(asset: Asset, exposure: Exposure | null): boolean {
-  return exposure === null
+function shows(asset: Asset, value: Exposure | null): boolean {
+  return value === null
     ? asset.exposure.source === 'imported'
-    : asset.exposure.source === 'declared' && asset.exposure.value === exposure
+    : asset.exposure.source === 'declared' && asset.exposure.value === value
 }
 
 function isServerError(error: unknown): boolean {
   return error instanceof ApiError && error.failure.kind === 'http' && error.failure.status >= 500
 }
 
-async function sendChange({ asset, exposure }: ExposureChange): Promise<ExposureSaved> {
+async function sendChange({ asset, value }: ExposureChange): Promise<ExposureSaved> {
   try {
     const saved =
-      exposure === null
+      value === null
         ? await api.delete<Asset>(`/assets/${asset.id}/exposure`)
-        : await api.put<Asset>(`/assets/${asset.id}/exposure`, { exposure } satisfies DeclareExposureRequest)
+        : await api.put<Asset>(`/assets/${asset.id}/exposure`, { exposure: value } satisfies DeclareExposureRequest)
     return { asset: saved, rescored: true }
   } catch (error) {
     /*
@@ -53,7 +50,7 @@ async function sendChange({ asset, exposure }: ExposureChange): Promise<Exposure
      */
     if (!isServerError(error)) throw error
     const current = await fetchAsset(asset).catch(() => null)
-    if (current && shows(current, exposure)) return { asset: current, rescored: false }
+    if (current && shows(current, value)) return { asset: current, rescored: false }
     throw error
   }
 }
@@ -83,5 +80,3 @@ export function useExposureMutation({
     },
   })
 }
-
-export type ExposureMutation = ReturnType<typeof useExposureMutation>

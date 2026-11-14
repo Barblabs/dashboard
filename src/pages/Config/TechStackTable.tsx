@@ -10,7 +10,7 @@ import { useDialogTarget } from '../../components/ui/useDialogTarget'
 import { AssetFilterBar } from './AssetFilterBar'
 import { AssetInspector } from './AssetInspector'
 import { AssetPager } from './AssetPager'
-import { ExposureSheet, type ExposureSheetTarget } from './ExposureSheet'
+import { AssetTriageSheet, type AssetTriageTarget } from './AssetTriageSheet'
 
 const KEYS = {
   loading: 'config.inventory.loading',
@@ -22,7 +22,7 @@ const KEYS = {
  * Triage is a to-do: the count covers the whole inventory, not the page on screen.
  * Nothing shows until the count is known, so it never claims everything is triaged.
  */
-function TriageBanner({ onTriage }: { onTriage: (sheet: ExposureSheetTarget) => void }) {
+function TriageBanner({ onTriage }: { onTriage: (sheet: AssetTriageTarget) => void }) {
   const { t } = useTranslation()
   const canEdit = useCanEdit()
   const { data: pending } = useNeedsTriageQuery()
@@ -54,7 +54,7 @@ function TriageBanner({ onTriage }: { onTriage: (sheet: ExposureSheetTarget) => 
 export function TechStackTable() {
   const { t } = useTranslation()
   const { query, filtered, navigating, filters, filterBy, pager } = useInventory()
-  const exposureSheet = useDialogTarget<ExposureSheetTarget>()
+  const triageSheet = useDialogTarget<AssetTriageTarget>()
   // The Inspector carries the pager in its list; without it (an empty or failed page) the pager
   // stands on its own, so a later page always offers the way back.
   const inspecting = (query.data?.assets.length ?? 0) > 0
@@ -73,7 +73,7 @@ export function TechStackTable() {
           </div>
           <AssetFilterBar filters={filters} onChange={filterBy} />
         </div>
-        <TriageBanner onTriage={exposureSheet.show} />
+        <TriageBanner onTriage={triageSheet.show} />
       </div>
 
       <QueryBoundary query={query} keys={KEYS}>
@@ -87,7 +87,7 @@ export function TechStackTable() {
               assets={assets}
               busy={navigating}
               pager={pager}
-              onOpenExposure={(asset) => exposureSheet.show({ mode: 'single', asset })}
+              onOpenExposure={(asset) => triageSheet.show({ mode: 'single', asset })}
             />
           )
         }
@@ -99,7 +99,7 @@ export function TechStackTable() {
         </div>
       )}
 
-      <ExposureSheet dialog={exposureSheet} />
+      <AssetTriageSheet dialog={triageSheet} />
     </section>
   )
 }
