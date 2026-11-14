@@ -4,25 +4,26 @@ import {
   ASSET_KINDS,
   CRITICALITIES,
   EXPOSURES,
+  INFORMATION_CLASSIFICATIONS,
   type Asset,
-  type AssetExposure,
   type AssetsPage,
 } from '../../api/assets'
-import { importedExposure } from '../assets'
+import { importedExposure, UNCLASSIFIED } from '../assets'
 import { assetsStore } from '../assets-store'
 import { apiUrl } from '../url'
 import { mockCaller } from './auth'
 import { failure, isOneOf } from './responses'
 
 type DeclareExposureRequest = { exposure?: unknown }
+type DeclareInformationClassificationRequest = { information_classification?: unknown }
 
 /*
  * Applies the rules barbackend checks after the body, in its order: the role, then the Asset.
- * `change` returns the new Exposure, or a failure response to send instead.
+ * `change` returns the fields it changes, or a failure response to send instead.
  */
-async function changeExposure(
+async function changeAsset(
   id: number,
-  change: (asset: Asset) => AssetExposure | Response,
+  change: (asset: Asset) => Partial<Asset> | Response,
 ): Promise<Response> {
   if (mockCaller().role !== 'customer_admin') {
     return failure(403, 'forbidden', 'only a customer admin can do this')
@@ -30,9 +31,9 @@ async function changeExposure(
   const assets = assetsStore.load()
   const asset = assets.find((a) => a.id === id)
   if (!asset) return failure(404, 'asset_not_found', 'asset not found')
-  const exposure = change(asset)
-  if (exposure instanceof Response) return exposure
-  const updated: Asset = { ...asset, exposure }
+  const changed = change(asset)
+  if (changed instanceof Response) return changed
+  const updated: Asset = { ...asset, ...changed }
   assetsStore.save(assets.map((a) => (a.id === id ? updated : a)))
   return HttpResponse.json(updated)
 }
@@ -67,20 +68,43 @@ export const assetsHandlers = [
     if (typeof exposure !== 'string' || !isOneOf(EXPOSURES, exposure)) {
       return failure(400, 'invalid_request', 'exposure must be internet_facing or internal')
     }
-    return changeExposure(Number(params['id']), (asset) => {
+    return changeAsset(Number(params['id']), (asset) => {
       if (!asset.active) return failure(409, 'asset_inactive', 'asset is inactive')
       return {
-        value: exposure,
-        source: 'declared',
-        imported: asset.exposure.imported,
-        declared_by: mockCaller().email,
-        declared_at: new Date().toISOString(),
+        exposure: {
+          value: exposure,
+          source: 'declared',
+          imported: asset.exposure.imported,
+          declared_by: mockCaller().email,
+          declared_at: new Date().toISOString(),
+        },
       }
     })
   }),
 
   // Clearing is allowed on an Inactive Asset too: only declaring needs it monitored.
   http.delete(apiUrl('/assets/:id/exposure'), ({ params }) =>
-    changeExposure(Number(params['id']), (asset) => importedExposure(asset.exposure.imported)),
+    changeAsset(Number(params['id']), (asset) => ({ exposure: importedExposure(asset.exposure.imported) })),
+  ),
+
+  http.put(apiUrl('/assets/:id/information-classification'), async ({ params, request }) => {
+    const { information_classification: value } = (await request.json()) as DeclareInformationClassificationRequest
+    if (typeof value !== 'string' || !isOneOf(INFORMATION_CLASSIFICATIONS, value)) {
+      return failure(400, 'invalid_request', 'information_classification must be public, private or confidential')
+    }
+    return changeAsset(Number(params['id']), (asset) => {
+      if (!asset.active) return failure(409, 'asset_inactive', 'asset is inactive')
+      return {
+        information_classification: {
+          value,
+          declared_by: mockCaller().email,
+          declared_at: new Date().toISOString(),
+        },
+      }
+    })
+  }),
+
+  http.delete(apiUrl('/assets/:id/information-classification'), ({ params }) =>
+    changeAsset(Number(params['id']), () => ({ information_classification: UNCLASSIFIED })),
   ),
 ]
