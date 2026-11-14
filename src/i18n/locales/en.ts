@@ -638,13 +638,6 @@ export const en = {
         imported: 'Exposure of {{name}}: {{value}}, from iTop',
         declared: 'Exposure of {{name}}: {{value}}, declared',
       },
-      banner: {
-        count_one: '{{count}} Active Asset has Unknown Exposure.',
-        count_other: '{{count}} Active Assets have Unknown Exposure.',
-        dataGap: 'Their Findings carry a Data Gap until someone answers.',
-        answer: 'Answer them',
-        none: 'Every Active Asset has an Exposure.',
-      },
       sheet: {
         queueTitle: 'Answer Unknown Exposures',
         singleTitle: 'Exposure',

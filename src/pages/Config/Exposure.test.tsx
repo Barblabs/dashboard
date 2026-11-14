@@ -9,8 +9,8 @@ import { apiUrl } from '../../mocks/url'
 import { renderApp, seedSource, VIEWER } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
 
-// The seed's Active Assets with Unknown Exposure, in inventory order.
-const UNKNOWN = ['analytics-worker-03', 'core-switch-01', 'payments-gateway', 'reporting-batch-01']
+// The seed's Active Assets that need triage, in inventory order.
+const NEEDS_TRIAGE = ['prod-api-01', 'analytics-worker-03', 'core-switch-01', 'payments-gateway', 'reporting-batch-01']
 
 function seeded(name: string): Asset {
   const asset = mockAssets.find((a) => a.name === name)
@@ -75,7 +75,7 @@ function clearInStore(name: string) {
 }
 
 describe('Exposure', () => {
-  it('counts the Unknown Exposures of every page of the inventory, not only the one on screen', async () => {
+  it('counts the Assets that need triage on every page of the inventory, not only the one on screen', async () => {
     const [prodApi, analyticsWorker, , coreSwitch] = mockAssets
     const counted: Record<string, string>[] = []
     server.use(
@@ -92,7 +92,7 @@ describe('Exposure', () => {
     )
     await renderTechStack()
 
-    expect(await screen.findByText('3 Active Assets have Unknown Exposure.')).toBeInTheDocument()
+    expect(await screen.findByText('4 Assets need triage.')).toBeInTheDocument()
     expect(counted).toEqual([
       { active: 'true', limit: '200' },
       { active: 'true', limit: '200', cursor: 'page-2' },
@@ -102,26 +102,28 @@ describe('Exposure', () => {
   it('walks the queue with Skip and progress, then sums up what was answered', async () => {
     const user = await renderTechStack()
 
-    await user.click(await screen.findByRole('button', { name: 'Answer them' }))
+    await user.click(await screen.findByRole('button', { name: 'Triage them' }))
     const sheet = within(await screen.findByRole('dialog', { name: 'Answer Unknown Exposures' }))
-    expect(sheet.getByText('1 of 4')).toBeInTheDocument()
-    expect(sheet.getByText(UNKNOWN[0]!)).toBeInTheDocument()
+    expect(sheet.getByText('1 of 5')).toBeInTheDocument()
+    expect(sheet.getByText(NEEDS_TRIAGE[0]!)).toBeInTheDocument()
 
     await user.click(sheet.getByRole('radio', { name: /Internet-facing/ }))
     await user.click(sheet.getByRole('button', { name: 'Declare and next' }))
-    expect(await sheet.findByText('2 of 4')).toBeInTheDocument()
-    expect(sheet.getByText(UNKNOWN[1]!)).toBeInTheDocument()
+    expect(await sheet.findByText('2 of 5')).toBeInTheDocument()
+    expect(sheet.getByText(NEEDS_TRIAGE[1]!)).toBeInTheDocument()
     await user.click(sheet.getByRole('button', { name: 'Skip' }))
-    expect(await sheet.findByText('3 of 4')).toBeInTheDocument()
+    expect(await sheet.findByText('3 of 5')).toBeInTheDocument()
     await user.click(sheet.getByRole('button', { name: 'Skip' }))
-    expect(await sheet.findByText('4 of 4')).toBeInTheDocument()
+    expect(await sheet.findByText('4 of 5')).toBeInTheDocument()
+    await user.click(sheet.getByRole('button', { name: 'Skip' }))
+    expect(await sheet.findByText('5 of 5')).toBeInTheDocument()
     await user.click(sheet.getByRole('button', { name: 'Skip' }))
 
-    expect(await sheet.findByText('1 of 4 answered')).toBeInTheDocument()
+    expect(await sheet.findByText('1 of 5 answered')).toBeInTheDocument()
     expect(sheet.getByText(/The ones you skipped still show Unknown in the inventory\./)).toBeInTheDocument()
     // Each answer is confirmed by the progress and the summary, not by a toast.
     expect(toasts().queryByText(/Declared/)).not.toBeInTheDocument()
-    expect(await screen.findByText('3 Active Assets have Unknown Exposure.')).toBeInTheDocument()
+    expect(await screen.findByText('5 Assets need triage.')).toBeInTheDocument()
 
     await user.click(sheet.getByRole('button', { name: 'Done' }))
     await waitFor(() => expect(sheetOpen()).toBe(false))
@@ -168,14 +170,14 @@ describe('Exposure', () => {
     await waitFor(() =>
       expect(exposureButton('ledger-db')).toHaveAccessibleName('Exposure of ledger-db: Unknown, from iTop'),
     )
-    expect(await screen.findByText('5 Active Assets have Unknown Exposure.')).toBeInTheDocument()
+    expect(await screen.findByText('6 Assets need triage.')).toBeInTheDocument()
   })
 
   it('a Viewer sees where an Exposure comes from, with no way to declare it', async () => {
     const user = await renderTechStack(() => renderApp('/', VIEWER))
 
-    expect(await screen.findByText('4 Active Assets have Unknown Exposure.')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Answer them' })).not.toBeInTheDocument()
+    expect(await screen.findByText('5 Assets need triage.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Triage them' })).not.toBeInTheDocument()
 
     await openExposure(user, 'ledger-db')
     const sheet = within(await screen.findByRole('dialog', { name: 'Exposure' }))
@@ -202,13 +204,13 @@ describe('Exposure', () => {
   it('an Asset that turned Inactive meanwhile says the save did not happen, in place of the reason', async () => {
     server.use(
       http.put(apiUrl('/assets/:id/exposure'), () => {
-        assetsStore.save(assetsStore.load().map((a) => (a.name === UNKNOWN[0] ? { ...a, active: false } : a)))
+        assetsStore.save(assetsStore.load().map((a) => (a.name === NEEDS_TRIAGE[0] ? { ...a, active: false } : a)))
         return failure(409, 'asset_inactive', 'asset is inactive')
       }),
     )
     const user = await renderTechStack()
 
-    await user.click(await screen.findByRole('button', { name: 'Answer them' }))
+    await user.click(await screen.findByRole('button', { name: 'Triage them' }))
     const sheet = within(await screen.findByRole('dialog', { name: 'Answer Unknown Exposures' }))
     await user.click(sheet.getByRole('radio', { name: /Internal/ }))
     await user.click(sheet.getByRole('button', { name: 'Declare and next' }))
@@ -220,10 +222,10 @@ describe('Exposure', () => {
     expect(sheet.queryByRole('radio')).not.toBeInTheDocument()
     expect(sheet.queryByRole('button', { name: 'Skip' })).not.toBeInTheDocument()
     // The inventory refetched: the Asset left the Active list.
-    await waitFor(() => expect(screen.queryByRole('option', { name: /analytics-worker-03/ })).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByRole('option', { name: /prod-api-01/ })).not.toBeInTheDocument())
 
     await user.click(sheet.getByRole('button', { name: 'Next' }))
-    expect(await sheet.findByText('2 of 4')).toBeInTheDocument()
+    expect(await sheet.findByText('2 of 5')).toBeInTheDocument()
   })
 
   it('a server error after the Declaration committed is a saved change whose Findings wait for the next Sync', async () => {
@@ -251,21 +253,21 @@ describe('Exposure', () => {
   it('the queue still warns when a saved answer could not rescore its Findings', async () => {
     server.use(
       http.put(apiUrl('/assets/:id/exposure'), () => {
-        declareInStore(UNKNOWN[0]!, 'internal')
+        declareInStore(NEEDS_TRIAGE[0]!, 'internal')
         return failure(500, 'internal_error', 'rescore failed')
       }),
     )
     const user = await renderTechStack()
 
-    await user.click(await screen.findByRole('button', { name: 'Answer them' }))
+    await user.click(await screen.findByRole('button', { name: 'Triage them' }))
     const sheet = within(await screen.findByRole('dialog', { name: 'Answer Unknown Exposures' }))
     await user.click(sheet.getByRole('radio', { name: /Internal/ }))
     await user.click(sheet.getByRole('button', { name: 'Declare and next' }))
 
-    expect(await sheet.findByText('2 of 4')).toBeInTheDocument()
+    expect(await sheet.findByText('2 of 5')).toBeInTheDocument()
     expect(
       toasts().getByText(
-        "Declared analytics-worker-03 Internal, but its Findings couldn't be rescored. Their Scores update at the next Sync.",
+        "Declared prod-api-01 Internal, but its Findings couldn't be rescored. Their Scores update at the next Sync.",
       ),
     ).toBeInTheDocument()
   })
@@ -311,7 +313,7 @@ describe('Exposure', () => {
     const release = holdRequests('put', '/assets/:id/exposure')
     const user = await renderTechStack()
 
-    await user.click(await screen.findByRole('button', { name: 'Answer them' }))
+    await user.click(await screen.findByRole('button', { name: 'Triage them' }))
     const sheet = within(await screen.findByRole('dialog', { name: 'Answer Unknown Exposures' }))
     await user.click(sheet.getByRole('radio', { name: /Internal/ }))
     await user.click(sheet.getByRole('button', { name: 'Declare and next' }))
@@ -321,6 +323,6 @@ describe('Exposure', () => {
     expect(sheet.getByRole('radio', { name: /Internet-facing/ })).toBeDisabled()
 
     release()
-    expect(await sheet.findByText('2 of 4')).toBeInTheDocument()
+    expect(await sheet.findByText('2 of 5')).toBeInTheDocument()
   })
 })

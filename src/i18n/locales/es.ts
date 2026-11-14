@@ -640,13 +640,6 @@ export const es: Translations = {
         imported: 'Exposición de {{name}}: {{value}}, de iTop',
         declared: 'Exposición de {{name}}: {{value}}, declarada',
       },
-      banner: {
-        count_one: '{{count}} activo en monitoreo tiene la Exposición desconocida.',
-        count_other: '{{count}} activos en monitoreo tienen la Exposición desconocida.',
-        dataGap: 'Sus hallazgos llevan un Data Gap hasta que alguien responda.',
-        answer: 'Responder',
-        none: 'Todos los activos en monitoreo tienen Exposición.',
-      },
       sheet: {
         queueTitle: 'Responder Exposiciones desconocidas',
         singleTitle: 'Exposición',
