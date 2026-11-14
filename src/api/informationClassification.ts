@@ -7,7 +7,7 @@ import type { Known, Schemas } from './schemas'
 type DeclareInformationClassificationRequest = Known<Schemas['DeclareInformationClassificationRequest']>
 
 /** `null` clears the Declaration, leaving the Asset Unclassified. */
-export type InformationClassificationChange = DeclarationChange<InformationClassification>
+type InformationClassificationChange = DeclarationChange<InformationClassification>
 
 function sendChange({ asset, value }: InformationClassificationChange): Promise<Asset> {
   const path = `/assets/${asset.id}/information-classification`
