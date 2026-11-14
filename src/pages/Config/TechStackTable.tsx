@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { useUnknownExposureQuery } from '../../api/exposure'
 import { useInventory } from '../../api/inventory'
+import { useNeedsTriageQuery } from '../../api/triage'
 import { useCanEdit } from '../../auth/permissions'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Button } from '../../components/ui/Button'
@@ -10,7 +10,7 @@ import { useDialogTarget } from '../../components/ui/useDialogTarget'
 import { AssetFilterBar } from './AssetFilterBar'
 import { AssetInspector } from './AssetInspector'
 import { AssetPager } from './AssetPager'
-import { ExposureSheet, type ExposureSheetTarget } from './ExposureSheet'
+import { AssetTriageSheet, type AssetTriageTarget } from './AssetTriageSheet'
 
 const KEYS = {
   loading: 'config.inventory.loading',
@@ -19,32 +19,32 @@ const KEYS = {
 } as const
 
 /*
- * Unknown Exposure is a to-do: the count covers the whole inventory, not the page on screen.
- * Nothing shows until the count is known, so it never claims everything is answered.
+ * Triage is a to-do: the count covers the whole inventory, not the page on screen.
+ * Nothing shows until the count is known, so it never claims everything is triaged.
  */
-function UnknownExposureBanner({ onAnswer }: { onAnswer: (sheet: ExposureSheetTarget) => void }) {
+function TriageBanner({ onTriage }: { onTriage: (sheet: AssetTriageTarget) => void }) {
   const { t } = useTranslation()
   const canEdit = useCanEdit()
-  const { data: unknown } = useUnknownExposureQuery()
-  if (!unknown) return null
+  const { data: pending } = useNeedsTriageQuery()
+  if (!pending) return null
 
-  if (unknown.length === 0) {
+  if (pending.length === 0) {
     return (
       <p className="flex items-center gap-2 font-body text-[0.8125rem] text-gray">
         <CheckIcon size={13} className="text-nav-active-bg" />
-        {t('config.exposure.banner.none')}
+        {t('config.triage.banner.none')}
       </p>
     )
   }
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-md border border-high bg-high/10 px-4 py-2.5 font-body text-[0.8125rem] text-navy">
       <p className="min-w-0 flex-1 leading-[1.4]">
-        <strong className="font-semibold">{t('config.exposure.banner.count', { count: unknown.length })}</strong>{' '}
-        <span className="text-gray">{t('config.exposure.banner.dataGap')}</span>
+        <strong className="font-semibold">{t('config.triage.banner.count', { count: pending.length })}</strong>{' '}
+        <span className="text-gray">{t('config.triage.banner.detail')}</span>
       </p>
       {canEdit && (
-        <Button size="sm" onClick={() => onAnswer({ mode: 'queue', assets: unknown })}>
-          {t('config.exposure.banner.answer')}
+        <Button size="sm" onClick={() => onTriage({ mode: 'queue', assets: pending })}>
+          {t('config.triage.banner.action')}
         </Button>
       )}
     </div>
@@ -54,7 +54,7 @@ function UnknownExposureBanner({ onAnswer }: { onAnswer: (sheet: ExposureSheetTa
 export function TechStackTable() {
   const { t } = useTranslation()
   const { query, filtered, navigating, filters, filterBy, pager } = useInventory()
-  const exposureSheet = useDialogTarget<ExposureSheetTarget>()
+  const triageSheet = useDialogTarget<AssetTriageTarget>()
   // The Inspector carries the pager in its list; without it (an empty or failed page) the pager
   // stands on its own, so a later page always offers the way back.
   const inspecting = (query.data?.assets.length ?? 0) > 0
@@ -73,7 +73,7 @@ export function TechStackTable() {
           </div>
           <AssetFilterBar filters={filters} onChange={filterBy} />
         </div>
-        <UnknownExposureBanner onAnswer={exposureSheet.show} />
+        <TriageBanner onTriage={triageSheet.show} />
       </div>
 
       <QueryBoundary query={query} keys={KEYS}>
@@ -87,7 +87,7 @@ export function TechStackTable() {
               assets={assets}
               busy={navigating}
               pager={pager}
-              onOpenExposure={(asset) => exposureSheet.show({ mode: 'single', asset })}
+              onOpenTriage={(asset) => triageSheet.show({ mode: 'single', asset })}
             />
           )
         }
@@ -99,7 +99,7 @@ export function TechStackTable() {
         </div>
       )}
 
-      <ExposureSheet dialog={exposureSheet} />
+      <AssetTriageSheet dialog={triageSheet} />
     </section>
   )
 }

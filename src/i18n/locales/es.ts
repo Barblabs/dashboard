@@ -578,6 +578,12 @@ export const es: Translations = {
         internal: 'Interno',
         unknown: 'Desconocida',
       },
+      informationClassification: {
+        public: 'Pública',
+        private: 'Privada',
+        confidential: 'Confidencial',
+        unclassified: 'Sin clasificar',
+      },
       lifecycleStage: {
         production: 'Producción',
         implementation: 'Implementación',
@@ -599,6 +605,7 @@ export const es: Translations = {
       record: {
         criticality: 'Criticidad',
         exposure: 'Exposición',
+        informationClassification: 'Clasificación de la Información',
         lifecycleStage: 'Ciclo de vida',
         owner: 'Dueño',
         area: 'Área',
@@ -618,6 +625,7 @@ export const es: Translations = {
         unidentifiedCount_other: '{{count}} de {{total}} no identificados',
         gaps: {
           unknownExposure: 'Exposición desconocida',
+          unclassified: 'Sin clasificar',
           unidentified_one: '{{count}} componente no identificado',
           unidentified_other: '{{count}} componentes no identificados',
         },
@@ -632,26 +640,12 @@ export const es: Translations = {
         imported: 'Exposición de {{name}}: {{value}}, de iTop',
         declared: 'Exposición de {{name}}: {{value}}, declarada',
       },
-      banner: {
-        count_one: '{{count}} activo en monitoreo tiene la Exposición desconocida.',
-        count_other: '{{count}} activos en monitoreo tienen la Exposición desconocida.',
-        dataGap: 'Sus hallazgos llevan un Data Gap hasta que alguien responda.',
-        answer: 'Responder',
-        none: 'Todos los activos en monitoreo tienen Exposición.',
-      },
       sheet: {
-        queueTitle: 'Responder Exposiciones desconocidas',
-        singleTitle: 'Exposición',
-        position: '{{index}} de {{total}}',
-        criticality: 'Criticidad {{criticality}}',
-        declared: 'Declarada',
-        declaredBy: '{{value}}, declarada por {{user}} el {{date}}.',
         nothingDeclared: 'Nada declarado.',
         imported: 'De iTop',
         importedFrom: '{{value}}, por su ubicación en iTop.',
         unknownVirtualMachine: 'Desconocida: iTop no tiene ubicación para una máquina virtual.',
         unknownLocation: 'Desconocida: su ubicación en iTop no es una que barbattack lea.',
-        inUse: 'En uso',
         question: '¿Se puede alcanzar desde internet?',
         help: {
           internet_facing: 'Alcanzable desde internet.',
@@ -659,29 +653,63 @@ export const es: Translations = {
         },
         internalWarning:
           'Interno baja el Score de cada hallazgo abierto de este activo, y ningún Data Gap lo marcará si es un error.',
-        viewerReason: 'Solo un Administrador puede declarar una Exposición.',
-        inactiveReason: 'barbattack no monitorea los activos inactivos, así que su Exposición no se puede declarar.',
         useImported: 'Usar la de iTop ({{value}})',
-        clearing: 'Quitando…',
-        skip: 'Saltar',
-        next: 'Siguiente',
-        declare: 'Declarar',
-        declareAndNext: 'Declarar y seguir',
-        declaring: 'Declarando…',
-        saveFailed: 'No se pudo guardar. Nada cambió; inténtalo de nuevo.',
-        turnedInactive: 'Este activo acaba de quedar inactivo, así que su Exposición no se puede declarar.',
-        answered: '{{answered}} de {{total}} respondidos',
-        rescored: 'Sus hallazgos abiertos se recalcularon, así que la lista de hallazgos puede haber cambiado de orden.',
-        skipped: 'Los que saltaste siguen como desconocidos en el inventario.',
-        done: 'Listo',
+        declare: 'Declarar Exposición',
       },
       toast: {
-        declared: '{{name}} declarado {{value}}. Sus hallazgos abiertos se recalcularon.',
-        cleared: '{{name}} vuelve a la Exposición de iTop ({{value}}). Sus hallazgos abiertos se recalcularon.',
         declaredNotRescored:
           '{{name}} declarado {{value}}, pero sus hallazgos no se pudieron recalcular. Sus Scores se actualizan en la próxima sincronización.',
         clearedNotRescored:
           '{{name}} vuelve a la Exposición de iTop ({{value}}), pero sus hallazgos no se pudieron recalcular. Sus Scores se actualizan en la próxima sincronización.',
+      },
+    },
+    informationClassification: {
+      cellLabel: 'Clasificación de la Información de {{name}}: {{value}}',
+      sheet: {
+        unclassifiedProvenance: 'iTop no tiene un campo para esto, así que solo una declaración lo define.',
+        question: '¿Qué tan sensibles son los datos que guarda?',
+        help: {
+          public: 'Sus datos podrían publicarse sin hacer daño.',
+          private: 'Sus datos son solo para tu organización.',
+          confidential: 'Sus datos harían un daño serio si se filtraran: personales, financieros o secretos.',
+        },
+        declare: 'Declarar Clasificación',
+      },
+    },
+    triage: {
+      banner: {
+        count_one: '{{count}} activo necesita revisión.',
+        count_other: '{{count}} activos necesitan revisión.',
+        detail:
+          'Tienen Exposición desconocida o no tienen Clasificación de la Información. La Exposición desconocida deja un Data Gap en sus hallazgos.',
+        action: 'Revisarlos',
+        none: 'Todos los activos activos están revisados.',
+      },
+      sheet: {
+        singleTitle: 'Revisar activo',
+        queueTitle: 'Revisar activos',
+        position: '{{index}} de {{total}}',
+        criticality: 'Criticidad {{criticality}}',
+        declared: 'Declarada',
+        declaredBy: '{{value}}, declarada por {{user}} el {{date}}.',
+        inUse: 'En uso',
+        viewerReason: 'Solo un Administrador puede declarar una Exposición o una Clasificación de la Información.',
+        inactiveReason:
+          'barbattack no monitorea los activos inactivos, así que su Exposición y su Clasificación de la Información no se pueden declarar.',
+        turnedInactive:
+          'Este activo acaba de quedar inactivo, así que su Exposición y su Clasificación de la Información no se pueden declarar.',
+        clear: 'Quitar',
+        clearing: 'Quitando…',
+        declaring: 'Declarando…',
+        saveFailed: 'No se pudo guardar. Nada cambió; inténtalo de nuevo.',
+        saved: 'Guardado',
+        notSaved: '{{sections}} sin guardar',
+        next: 'Siguiente',
+        summary: '{{triaged}} de {{total}} activos revisados',
+        summaryDetail:
+          'Donde declaraste una Exposición, sus hallazgos abiertos se recalcularon, así que la lista de hallazgos puede haber cambiado de orden.',
+        summarySkipped: 'Los que pasaste siguen como desconocidos o sin clasificar en el inventario.',
+        done: 'Listo',
       },
     },
     tabs: {

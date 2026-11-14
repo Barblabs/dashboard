@@ -1,5 +1,5 @@
 import type { TFunction } from 'i18next'
-import type { Asset, Exposure } from '../../api/assets'
+import type { Asset, Exposure, InformationClassification } from '../../api/assets'
 import { EMPTY } from '../../i18n/format'
 
 function versioned(name: string, version: string) {
@@ -14,4 +14,12 @@ export function osLabel(asset: Asset): string {
 /** An Exposure's name, Unknown when neither the CMDB Source nor a Declaration gives it. */
 export function exposureLabel(t: TFunction<'translation'>, value: Exposure | null): string {
   return t(`config.inventory.exposure.${value ?? 'unknown'}`)
+}
+
+/** An Information Classification's name, Unclassified until a Declaration gives it. */
+export function informationClassificationLabel(
+  t: TFunction<'translation'>,
+  value: InformationClassification | null,
+): string {
+  return t(`config.inventory.informationClassification.${value ?? 'unclassified'}`)
 }

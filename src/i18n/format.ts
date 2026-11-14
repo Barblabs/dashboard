@@ -29,6 +29,15 @@ export function useDateFormat(style: DateStyle = 'medium'): (iso: string) => str
   }, [locale, style])
 }
 
+/** Joins names the way the UI's language does: "A and B" in English, "A y B" in Spanish. */
+export function useListFormat(): (items: string[]) => string {
+  const locale = useLocale()
+  return useMemo(() => {
+    const format = new Intl.ListFormat(locale, { type: 'conjunction' })
+    return (items) => format.format(items)
+  }, [locale])
+}
+
 /** How long ago an ISO date was, in minutes under an hour and in hours after that. */
 export function useRelativeTime(): (iso: string) => string {
   const { t } = useTranslation()

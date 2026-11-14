@@ -576,6 +576,12 @@ export const en = {
         internal: 'Internal',
         unknown: 'Unknown',
       },
+      informationClassification: {
+        public: 'Public',
+        private: 'Private',
+        confidential: 'Confidential',
+        unclassified: 'Unclassified',
+      },
       lifecycleStage: {
         production: 'Production',
         implementation: 'Implementation',
@@ -597,6 +603,7 @@ export const en = {
       record: {
         criticality: 'Criticality',
         exposure: 'Exposure',
+        informationClassification: 'Information Classification',
         lifecycleStage: 'Lifecycle Stage',
         owner: 'Owner',
         area: 'Area',
@@ -616,6 +623,7 @@ export const en = {
         unidentifiedCount_other: '{{count}} of {{total}} unidentified',
         gaps: {
           unknownExposure: 'Unknown Exposure',
+          unclassified: 'Unclassified',
           unidentified_one: '{{count}} Unidentified Component',
           unidentified_other: '{{count}} Unidentified Components',
         },
@@ -630,26 +638,12 @@ export const en = {
         imported: 'Exposure of {{name}}: {{value}}, from iTop',
         declared: 'Exposure of {{name}}: {{value}}, declared',
       },
-      banner: {
-        count_one: '{{count}} Active Asset has Unknown Exposure.',
-        count_other: '{{count}} Active Assets have Unknown Exposure.',
-        dataGap: 'Their Findings carry a Data Gap until someone answers.',
-        answer: 'Answer them',
-        none: 'Every Active Asset has an Exposure.',
-      },
       sheet: {
-        queueTitle: 'Answer Unknown Exposures',
-        singleTitle: 'Exposure',
-        position: '{{index}} of {{total}}',
-        criticality: '{{criticality}} Criticality',
-        declared: 'Declared',
-        declaredBy: '{{value}}, declared by {{user}} on {{date}}.',
         nothingDeclared: 'Nothing declared.',
         imported: 'From iTop',
         importedFrom: '{{value}}, from its iTop Location.',
         unknownVirtualMachine: 'Unknown: iTop has no Location for a Virtual Machine.',
         unknownLocation: "Unknown: its iTop Location isn't one barbattack reads.",
-        inUse: 'In use',
         question: 'Is it reachable from the public internet?',
         help: {
           internet_facing: 'Reachable from the public internet.',
@@ -657,29 +651,63 @@ export const en = {
         },
         internalWarning:
           "Internal lowers the Score of every open Finding on this Asset, and no Data Gap will flag it if it's wrong.",
-        viewerReason: 'Only a Customer Admin can declare an Exposure.',
-        inactiveReason: "barbattack doesn't monitor Inactive Assets, so their Exposure can't be declared.",
         useImported: "Use iTop's ({{value}})",
-        clearing: 'Clearing…',
-        skip: 'Skip',
-        next: 'Next',
-        declare: 'Declare',
-        declareAndNext: 'Declare and next',
-        declaring: 'Declaring…',
-        saveFailed: "Couldn't save it. Nothing changed; try again.",
-        turnedInactive: "This Asset just turned Inactive, so its Exposure can't be declared.",
-        answered: '{{answered}} of {{total}} answered',
-        rescored: 'Their open Findings were rescored, so the Findings list may have reordered.',
-        skipped: 'The ones you skipped still show Unknown in the inventory.',
-        done: 'Done',
+        declare: 'Declare Exposure',
       },
       toast: {
-        declared: 'Declared {{name}} {{value}}. Its open Findings were rescored.',
-        cleared: "{{name}} is back to iTop's Exposure ({{value}}). Its open Findings were rescored.",
         declaredNotRescored:
           "Declared {{name}} {{value}}, but its Findings couldn't be rescored. Their Scores update at the next Sync.",
         clearedNotRescored:
           "{{name}} is back to iTop's Exposure ({{value}}), but its Findings couldn't be rescored. Their Scores update at the next Sync.",
+      },
+    },
+    informationClassification: {
+      cellLabel: 'Information Classification of {{name}}: {{value}}',
+      sheet: {
+        unclassifiedProvenance: 'iTop has no field for it, so only a declaration sets it.',
+        question: 'How sensitive is the data it holds?',
+        help: {
+          public: 'Its data could be published without harm.',
+          private: 'Its data is meant for your organization only.',
+          confidential: 'Its data would do serious harm if leaked: personal, financial or secret.',
+        },
+        declare: 'Declare Classification',
+      },
+    },
+    triage: {
+      banner: {
+        count_one: '{{count}} Asset needs triage.',
+        count_other: '{{count}} Assets need triage.',
+        detail:
+          'They have an Unknown Exposure or no Information Classification. Unknown Exposure leaves a Data Gap on their Findings.',
+        action: 'Triage them',
+        none: 'Every Active Asset is triaged.',
+      },
+      sheet: {
+        singleTitle: 'Triage Asset',
+        queueTitle: 'Triage Assets',
+        position: '{{index}} of {{total}}',
+        criticality: '{{criticality}} Criticality',
+        declared: 'Declared',
+        declaredBy: '{{value}}, declared by {{user}} on {{date}}.',
+        inUse: 'In use',
+        viewerReason: 'Only a Customer Admin can declare an Exposure or an Information Classification.',
+        inactiveReason:
+          "barbattack doesn't monitor Inactive Assets, so their Exposure and Information Classification can't be declared.",
+        turnedInactive:
+          "This Asset just turned Inactive, so its Exposure and Information Classification can't be declared.",
+        clear: 'Clear',
+        clearing: 'Clearing…',
+        declaring: 'Declaring…',
+        saveFailed: "Couldn't save it. Nothing changed; try again.",
+        saved: 'Saved',
+        notSaved: '{{sections}} not saved',
+        next: 'Next',
+        summary: '{{triaged}} of {{total}} Assets triaged',
+        summaryDetail:
+          'Where you declared an Exposure, open Findings were rescored, so the Findings list may have reordered.',
+        summarySkipped: 'The ones you moved past still show Unknown or Unclassified in the inventory.',
+        done: 'Done',
       },
     },
     tabs: {

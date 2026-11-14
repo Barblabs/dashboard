@@ -41,6 +41,13 @@
   @keyframes fade-in {
     from { opacity: 0; }
   }
+
+  /* Scales too, so it is only used behind motion-safe, with fade-in as its reduced-motion fallback. */
+  --animate-pop-in: pop-in 200ms ease-out;
+
+  @keyframes pop-in {
+    from { opacity: 0; scale: 0.9; }
+  }
 }
 
 /* Keyboard focus ring shared by the navy controls (buttons, inputs, links). */

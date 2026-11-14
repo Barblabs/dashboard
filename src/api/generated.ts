@@ -122,6 +122,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assets/{id}/information-classification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Declare an Asset's Information Classification
+         * @description Only a Customer Admin declares it, and only on an Active Asset. Unclassified cannot be declared: clear the Declaration instead. It is not scored, so no Finding is rescored. A Sync never changes it.
+         */
+        put: operations["declare-asset-information-classification"];
+        post?: never;
+        /**
+         * Clear an Asset's Information Classification
+         * @description Only a Customer Admin clears it, even on an Inactive Asset. The Asset is Unclassified again.
+         */
+        delete: operations["clear-asset-information-classification"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/business-context": {
         parameters: {
             query?: never;
@@ -481,26 +505,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/slack/deliveries/test": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Queue a hand-written Slack message (testing only)
-         * @description Writes one finding-shaped row to the delivery queue and lets the worker send it on its next poll, so the queue can be exercised from Bruno. Every field is optional and falls back to a demo value. Customer Admin only.
-         */
-        post: operations["queue-test-slack-delivery"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/slack/install/start": {
         parameters: {
             query?: never;
@@ -706,6 +710,7 @@ export interface components {
             id: number;
             /** Format: date-time */
             inactive_since: string | null;
+            information_classification: components["schemas"]["InformationClassificationResponse"];
             kind: string;
             /**
              * @description Null when the CMDB Source does not give it, and for a retired Asset
@@ -853,6 +858,15 @@ export interface components {
              * @enum {string}
              */
             exposure: "internet_facing" | "internal";
+        } & {
+            [key: string]: unknown;
+        };
+        DeclareInformationClassificationRequest: {
+            /**
+             * @description Unclassified cannot be declared; clear the Declaration instead
+             * @enum {string}
+             */
+            information_classification: "public" | "private" | "confidential";
         } & {
             [key: string]: unknown;
         };
@@ -1009,6 +1023,20 @@ export interface components {
         HardwareResponse: {
             model: string;
             vendor: string;
+        };
+        InformationClassificationResponse: {
+            /**
+             * Format: date-time
+             * @description When it was declared; null when Unclassified
+             */
+            declared_at: string | null;
+            /** @description Email of the User who declared it; null when Unclassified */
+            declared_by: string | null;
+            /**
+             * @description The declared Information Classification; null when Unclassified
+             * @enum {string|null}
+             */
+            value: "public" | "private" | "confidential" | null;
         };
         InviteUserRequest: {
             /**
@@ -1331,46 +1359,6 @@ export interface components {
             /** @enum {string} */
             role: "exploitation" | "primary_impact" | "secondary_impact";
             tactics: string[];
-        };
-        TestDeliveryRequest: {
-            /** @description Asset the message is about. Defaults to test-asset. */
-            asset?: string;
-            /** @description Slack channel id. Defaults to the installation's Security Team channel. */
-            channel_id?: string;
-            /** @description Defaults to medium. */
-            criticality?: string;
-            /** @description Header subject. Defaults to CVE-2026-0001. */
-            cve?: string;
-            /** Format: double */
-            cvss?: number;
-            /** @description Also queue the same message as a DM to owner_email. */
-            dm?: boolean;
-            /**
-             * Format: double
-             * @description Probability, 0 to 1.
-             */
-            epss?: number;
-            /** @description Defaults to internal. */
-            exposure?: string;
-            kev?: boolean;
-            /** @description Asset Owner named in the footer, and the DM target when dm is set. */
-            owner_email?: string;
-            /** @description Link in the footer, if any. */
-            portal_url?: string;
-            /** @description The free text of the message. Defaults to Hello from the queue. */
-            recommendation?: string;
-            /** Format: double */
-            score?: number;
-            /** @description Defaults to Medium. */
-            score_band?: string;
-        };
-        TestDeliveryResponse: {
-            queued: components["schemas"]["TestDeliveryTarget"][];
-        };
-        TestDeliveryTarget: {
-            id: string;
-            target: string;
-            target_kind: string;
         };
         TestResponse: {
             code?: string;
@@ -1835,6 +1823,144 @@ export interface operations {
         };
     };
     "clear-asset-exposure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "declare-asset-information-classification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeclareInformationClassificationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "clear-asset-information-classification": {
         parameters: {
             query?: never;
             header?: never;
@@ -3294,84 +3420,6 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-        };
-    };
-    "queue-test-slack-delivery": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TestDeliveryRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TestDeliveryResponse"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Conflict */
-            409: {
                 headers: {
                     [name: string]: unknown;
                 };

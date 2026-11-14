@@ -23,6 +23,21 @@ export type AssetExposure = Override<
   { value: Exposure | null; imported: Exposure | null }
 >
 
+export type InformationClassification = NonNullable<Schemas['InformationClassificationResponse']['value']>
+export const INFORMATION_CLASSIFICATIONS = [
+  'public',
+  'private',
+  'confidential',
+] as const satisfies readonly InformationClassification[]
+
+/** Only ever declared, so it is all set or, when Unclassified, all `null` (ADR 0031). */
+export type AssetInformationClassification =
+  | Override<Schemas['InformationClassificationResponse'], { value: null; declared_by: null; declared_at: null }>
+  | Override<
+      Schemas['InformationClassificationResponse'],
+      { value: InformationClassification; declared_by: string; declared_at: string }
+    >
+
 export type Product = Schemas['ProductResponse']
 
 /** `product` is `null` for an Unidentified Component: threats cannot be checked against it. */
@@ -45,6 +60,7 @@ export type Asset = Override<
     kind: AssetKind
     criticality: Criticality | null
     exposure: AssetExposure
+    information_classification: AssetInformationClassification
     owner: AssetOwner | null
     /** Already in display order. */
     software: SoftwareComponent[]
