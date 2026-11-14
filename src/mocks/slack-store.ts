@@ -15,19 +15,6 @@ export const mockInstallationActive: SlackInstallation = {
   state: 'active',
 }
 
-export const mockInstallationPendingChannel: SlackInstallation = {
-  team_id: 'T0123456789',
-  team_name: 'BARBATTACK Demo',
-  channel_id: '',
-  channel_name: '',
-  state: 'active',
-}
-
-export const mockInstallationNeedsReauth: SlackInstallation = {
-  ...mockInstallationActive,
-  state: 'needs re-authorisation',
-}
-
 // One delivery the Slack app refused because its Messages tab is off in the Slack
 // configuration; an admin enables it and retries.
 export const mockDeliveryOne: SlackFailedDelivery = {

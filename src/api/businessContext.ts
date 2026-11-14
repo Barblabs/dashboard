@@ -186,7 +186,7 @@ export type BusinessContext = Override<
 
 export type Draft = Override<Schemas['DraftResponse'], { context: BusinessContextFields }>
 
-export type DraftFile = Known<Schemas['DraftFile']>
+type DraftFile = Known<Schemas['DraftFile']>
 
 /** Pasted text, files or both; the agent reads them together. */
 export type DraftSource = Override<Known<Schemas['DraftBusinessContextRequest']>, { files?: DraftFile[] }>
