@@ -87,7 +87,7 @@ export function TechStackTable() {
               assets={assets}
               busy={navigating}
               pager={pager}
-              onOpenExposure={(asset) => triageSheet.show({ mode: 'single', asset })}
+              onOpenTriage={(asset) => triageSheet.show({ mode: 'single', asset })}
             />
           )
         }

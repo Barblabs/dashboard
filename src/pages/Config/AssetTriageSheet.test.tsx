@@ -281,6 +281,17 @@ describe('Asset triage', () => {
     expect(classification.queryByRole('alert')).not.toBeInTheDocument()
   })
 
+  it('the Information Classification in the record opens the sheet for its Asset', async () => {
+    const user = await renderTechStack()
+    await user.click(screen.getByRole('option', { name: /core-switch-01/ }))
+
+    await user.click(screen.getByRole('button', { name: 'Information Classification of core-switch-01: Public' }))
+
+    const sheet = within(await screen.findByRole('dialog', { name: 'Triage Asset' }))
+    expect(sheet.getByText('core-switch-01')).toBeInTheDocument()
+    expect(classificationSection(sheet).getByRole('radio', { name: /Public/ })).toBeChecked()
+  })
+
   it('a Viewer sees both values and who declared them, with no way to change them', async () => {
     const user = await renderTechStack(() => renderApp('/', VIEWER))
 
