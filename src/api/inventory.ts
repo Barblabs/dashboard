@@ -6,7 +6,7 @@ import { connectionScopeKey } from './cmdb'
 import { listCache } from './listCache'
 import type { Loadable } from './loadable'
 
-const DEFAULT_ASSET_FILTERS: AssetFilters = { active: 'true', kind: [], criticality: [] }
+const DEFAULT_ASSET_FILTERS: AssetFilters = { active: 'true', kind: [], criticality: [], area: [] }
 
 const ASSETS_PAGE_SIZE = 50
 
@@ -18,6 +18,7 @@ function assetsPath(filters: AssetFilters, cursor: string | null, limit: number)
   const params = new URLSearchParams({ limit: String(limit), active: filters.active })
   for (const kind of filters.kind) params.append('kind', kind)
   for (const criticality of filters.criticality) params.append('criticality', criticality)
+  for (const area of filters.area) params.append('area', String(area))
   if (cursor) params.set('cursor', cursor)
   return `/assets?${params}`
 }
@@ -62,7 +63,7 @@ interface Listing {
 }
 
 // Lists are compared by content: each change builds a new one, so a cleared list still equals the default.
-function sameFilter(a: string | readonly string[], b: string | readonly string[]) {
+function sameFilter(a: string | readonly unknown[], b: string | readonly unknown[]) {
   if (typeof a === 'string' || typeof b === 'string') return a === b
   return a.length === b.length && a.every((value, i) => value === b[i])
 }

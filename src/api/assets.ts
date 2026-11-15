@@ -72,6 +72,8 @@ export interface AssetFilters {
   active: ActivityFilter
   kind: AssetKind[]
   criticality: CriticalityFilter[]
+  /** Area ids, as in `GET /areas`. */
+  area: number[]
 }
 
 export function assetKey(asset: Pick<Asset, 'source_id' | 'record_id'>) {
