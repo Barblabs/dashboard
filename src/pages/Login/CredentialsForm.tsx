@@ -10,6 +10,7 @@ import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
+import { PasswordInput } from '../../components/ui/PasswordInput'
 import { cognitoErrorKey } from './cognitoErrorKey'
 
 const credSchema = z.object({
@@ -83,8 +84,7 @@ export function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
         label={t('login.form.password.label')}
         error={errors.password && t('login.form.password.required')}
       >
-        <Input
-          type="password"
+        <PasswordInput
           autoComplete="current-password"
           placeholder="••••••••••••"
           {...register('password')}

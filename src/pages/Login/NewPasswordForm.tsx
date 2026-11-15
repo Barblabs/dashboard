@@ -9,7 +9,7 @@ import { completeSignIn } from '../../auth/session'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
-import { Input } from '../../components/ui/Input'
+import { PasswordInput } from '../../components/ui/PasswordInput'
 import { cognitoErrorKey } from './cognitoErrorKey'
 
 const newPwSchema = z.object({
@@ -67,8 +67,7 @@ export function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
         help={t('login.newPassword.policy')}
         error={errors.newPassword && t('login.newPassword.required')}
       >
-        <Input
-          type="password"
+        <PasswordInput
           autoComplete="new-password"
           autoFocus
           {...register('newPassword')}
@@ -79,8 +78,7 @@ export function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
         label={t('login.newPassword.confirmLabel')}
         error={errors.confirmPassword && t('login.newPassword.mismatch')}
       >
-        <Input
-          type="password"
+        <PasswordInput
           autoComplete="new-password"
           {...register('confirmPassword')}
         />

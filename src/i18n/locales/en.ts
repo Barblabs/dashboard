@@ -4,6 +4,8 @@ export const en = {
     close: 'Close',
     toastRegion: 'Notifications',
     newTab: '(opens in a new tab)',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
   },
   sidebar: {
     superAdmin: 'Super Admin',

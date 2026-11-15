@@ -13,6 +13,7 @@ import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
+import { PasswordInput } from '../../components/ui/PasswordInput'
 import { Panel, PanelTitle } from '../../components/ui/Panel'
 import { translatedOrBackendMessage, requestErrorText } from '../../i18n/errors'
 
@@ -178,8 +179,7 @@ export function ItopForm({
           help={t('config.form.password.help')}
           error={errorText(errors.password?.message)}
         >
-          <Input
-            type="password"
+          <PasswordInput
             autoComplete="new-password"
             disabled={busy}
             {...register('password', { onChange: () => clearErrors('password') })}

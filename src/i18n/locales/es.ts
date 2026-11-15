@@ -6,6 +6,8 @@ export const es: Translations = {
     close: 'Cerrar',
     toastRegion: 'Notificaciones',
     newTab: '(abre en una nueva pestaña)',
+    showPassword: 'Mostrar contraseña',
+    hidePassword: 'Ocultar contraseña',
   },
   sidebar: {
     superAdmin: 'Super Admin',
