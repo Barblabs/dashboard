@@ -13,12 +13,22 @@ interface MultiSelectProps {
   value: string[]
   onChange: (value: string[]) => void
   placeholder?: string
+  disabled?: boolean
   emptyText: string
   removeLabel: (label: string) => string
 }
 
 /** Picks several options from a searchable list; the chosen ones show as removable chips. */
-export function MultiSelect({ id, options, value, onChange, placeholder, emptyText, removeLabel }: MultiSelectProps) {
+export function MultiSelect({
+  id,
+  options,
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  emptyText,
+  removeLabel,
+}: MultiSelectProps) {
   const items = useMemo(
     () => Combobox.createItems(options, { getValue: (o) => o.value, getLabel: (o) => o.label }),
     [options],
@@ -30,13 +40,14 @@ export function MultiSelect({ id, options, value, onChange, placeholder, emptyTe
       items={items}
       multiple
       value={value}
+      disabled={disabled}
       onValueChange={(next) => onChange(next)}
       // Several options are often picked in a row, so choosing one keeps the list open.
       onOpenChange={(open, details) => {
         if (!open && details.reason === 'item-press') details.cancel()
       }}
     >
-      <Combobox.InputGroup className="flex min-h-11 w-full cursor-text flex-wrap items-center gap-1.5 rounded-md border border-border-panel bg-white px-2 py-1.5 transition-[border-color] duration-150 ease-[ease] focus-within:border-navy">
+      <Combobox.InputGroup className="flex min-h-11 w-full cursor-text flex-wrap items-center gap-1.5 rounded-md border border-border-panel bg-white px-2 py-1.5 transition-[border-color] duration-150 ease-[ease] focus-within:border-navy data-disabled:cursor-not-allowed data-disabled:opacity-60">
         <Combobox.Chips className="flex w-full flex-wrap items-center gap-1.5">
           {value.map((v) => (
             <Combobox.Chip
