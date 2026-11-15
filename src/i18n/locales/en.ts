@@ -558,6 +558,10 @@ export const en = {
         criticality: 'Criticality',
         allKinds: 'All types',
         allCriticalities: 'All criticalities',
+        exposure: 'Exposure',
+        allExposures: 'All exposures',
+        informationClassification: 'Information Classification',
+        allInformationClassifications: 'All classifications',
         noOptions: 'No matches.',
         remove: 'Remove {{value}}',
         activity: {
