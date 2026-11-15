@@ -36,13 +36,9 @@ export function StartScreen({ readOnly, onImport, onStart }: StartScreenProps) {
         <Button size="lg" onClick={onImport}>
           {t('businessContext.start.import')}
         </Button>
-        <button
-          type="button"
-          onClick={onStart}
-          className="cursor-pointer rounded-md px-2 py-1 font-body text-[0.875rem] text-gray underline-offset-4 hover:text-navy hover:underline focus-ring"
-        >
+        <Button variant="link" onClick={onStart}>
           {t('businessContext.start.manual')}
-        </button>
+        </Button>
       </div>
     </section>
   )

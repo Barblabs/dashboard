@@ -139,13 +139,9 @@ export function ItopForm({
     <Panel className={`gap-5 ${className}`}>
       <div className="flex items-baseline justify-between gap-3">
         <PanelTitle id={titleId}>{t(copy.title)}</PanelTitle>
-        <button
-          type="button"
-          className="cursor-pointer p-0 font-body text-[0.875rem] whitespace-nowrap text-gray underline underline-offset-2 hover:text-navy focus-ring"
-          onClick={onBack}
-        >
+        <Button variant="link" size="sm" onClick={onBack}>
           {t(copy.back)}
-        </button>
+        </Button>
       </div>
 
       <div className="flex flex-col gap-4">
