@@ -5,7 +5,6 @@ import {
   currentAsset,
   currentScoreDetails,
   findingInformationClassification,
-  scoreMoved,
   type CurrentOrder,
   type Finding,
   type FindingAsset,
@@ -19,6 +18,7 @@ import { informationClassificationLabel } from '../Config/assetText'
 import { ActionPlanSection } from './ActionPlanSection'
 import { FeedbackSection } from './FeedbackSection'
 import { FindingBadges } from './GroupPanel'
+import { scorePoints } from './score'
 import { ScoreBandBadge } from './ScoreBandBadge'
 import { LABEL, MONO, WRITTEN } from './styles'
 
@@ -202,13 +202,12 @@ function ScoreDetails({ finding }: { finding: Finding }) {
   return (
     <div className="flex flex-col gap-3">
       <p className="flex flex-wrap items-baseline gap-3">
-        <span className="font-title text-[1.75rem] leading-none text-navy">{score.value}</span>
+        <span className="font-title text-[1.75rem] leading-none text-navy">{scorePoints(score.value)}</span>
         <ScoreBandBadge band={score.band} />
         <span className="font-body text-[0.875rem] text-gray">
           {t('findings.detail.score.rank', { rank: finding.score_rank })}
         </span>
       </p>
-      {scoreMoved(finding) && <p className="text-[0.8125rem] text-gray">{t('findings.detail.score.moved')}</p>}
       <dl className={FACTS}>
         {factors.map(([name, value]) => (
           <Fact key={name} label={t(`findings.detail.score.factors.${name}`)}>

@@ -25,8 +25,6 @@ function storeFinding(cve: string, change: (finding: Finding) => Finding) {
   prioritizationsStore.save([{ ...newest!, findings }, ...older])
 }
 
-const MOVED = 'Score updated; the order is recalculated when the change is ≥ 0.1'
-
 async function openFinding(user: ReturnType<typeof renderApp>, cve: string) {
   await user.click(screen.getByRole('button', { name: `Open ${cve}` }))
   return screen.findByRole('dialog', { name: cve })
@@ -98,17 +96,14 @@ describe('Findings', () => {
     expect(within(dialog).getByText('Lifecycle Stage unknown')).toBeInTheDocument()
   })
 
-  it('shows the Score as it is now, noting when it moved since the finding was placed', async () => {
+  it('shows the Score as it is now, from 0 to 100', async () => {
     const user = await renderFindings()
 
-    expect(within(rowOf('CVE-2024-23897')).getByText('0.1909')).toBeInTheDocument()
-    expect(within(rowOf('CVE-2024-23897')).getByRole('img', { name: MOVED })).toBeInTheDocument()
-    expect(within(rowOf('CVE-2025-1094')).queryByRole('img', { name: MOVED })).not.toBeInTheDocument()
+    expect(within(rowOf('CVE-2024-23897')).getByText('19')).toBeInTheDocument()
 
     const dialog = await openFinding(user, 'CVE-2024-23897')
 
-    expect(within(dialog).getByText('0.1909')).toBeInTheDocument()
-    expect(within(dialog).getByText(MOVED)).toBeInTheDocument()
+    expect(within(dialog).getByText('19')).toBeInTheDocument()
     expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Implementation$/)
     expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^0.8$/)
     // The order stays the snapshot's.
@@ -119,12 +114,11 @@ describe('Findings', () => {
     storeFinding('CVE-2024-23897', (f) => ({ ...f, closed_at: '2026-11-12T10:00:00Z', current: null }))
     const user = await renderFindings()
 
-    expect(within(rowOf('CVE-2024-23897')).getByText('0.2386')).toBeInTheDocument()
+    expect(within(rowOf('CVE-2024-23897')).getByText('24')).toBeInTheDocument()
     const dialog = await openFinding(user, 'CVE-2024-23897')
 
     expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Production$/)
     expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^1$/)
-    expect(within(dialog).queryByText(MOVED)).not.toBeInTheDocument()
   })
 
   it('a multiplier of 0 is still shown', async () => {

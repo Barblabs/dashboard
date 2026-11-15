@@ -111,14 +111,6 @@ export function currentAsset(finding: Finding): FindingAsset {
 }
 
 /**
- * Whether the Score moved since the Finding was placed. The order stays the snapshot's: the
- * Finding is placed again only when its Score moves by 0.1 or more.
- */
-export function scoreMoved(finding: Finding): boolean {
-  return finding.current !== null && finding.current.score_details.value !== finding.score
-}
-
-/**
  * The Asset's Information Classification as `/assets` gives it: a Finding says `unclassified`
  * where the Asset's Declaration is `null`.
  */

@@ -3,7 +3,6 @@ import {
   currentScore,
   currentScoreDetails,
   placedByNewest,
-  scoreMoved,
   type CurrentOrder,
   type Finding,
   type PriorityGroup,
@@ -11,6 +10,7 @@ import {
 import { Badge } from '../../components/ui/Badge'
 import { Panel, PanelTitle } from '../../components/ui/Panel'
 import { CELL, HEADER_CELL } from '../../components/ui/table'
+import { scorePoints } from './score'
 import { ScoreBandBadge } from './ScoreBandBadge'
 import { MONO, WRITTEN } from './styles'
 
@@ -92,17 +92,7 @@ function FindingRow({ order, finding, onOpen }: { order: CurrentOrder; finding: 
         {finding.component} {finding.version}
       </td>
       <td className={`${CELL} ${MONO}`}>
-        {currentScore(finding)}
-        {scoreMoved(finding) && (
-          <span
-            role="img"
-            aria-label={t('findings.detail.score.moved')}
-            title={t('findings.detail.score.moved')}
-            className="ml-1.5 text-gray"
-          >
-            ↻
-          </span>
-        )}
+        {scorePoints(currentScore(finding))}
         <ScoreBandBadge band={currentScoreDetails(finding).band} className="ml-2" />
       </td>
       <td className={`${CELL} ${MONO} text-gray`}>#{finding.score_rank}</td>
