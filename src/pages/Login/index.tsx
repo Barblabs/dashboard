@@ -4,7 +4,7 @@ import { Navigate, useLocation } from 'react-router'
 import { returnToOf } from '../../auth/returnTo'
 import { useAuthStore, useCurrentUser } from '../../auth/store'
 import { MOCK_MODE } from '../../mockMode'
-import { homePath } from '../../routes'
+import { canOpen, homePath } from '../../routes'
 import { CredentialsForm } from './CredentialsForm'
 import { LoginLayout } from './LoginLayout'
 import { MockSignIn } from './MockSignIn'
@@ -25,7 +25,10 @@ export function LoginPage() {
   const [step, setStep] = useState<Step>({ kind: 'credentials' })
 
   if (deactivated) return <Navigate to="/deactivated" replace />
-  if (user) return <Navigate to={returnTo ?? homePath(user.role)} replace />
+  if (user) {
+    const destination = returnTo !== null && canOpen(user.role, returnTo) ? returnTo : homePath(user.role)
+    return <Navigate to={destination} replace />
+  }
   if (MOCK_MODE) return <MockSignIn />
 
   return (

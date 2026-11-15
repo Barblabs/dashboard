@@ -135,12 +135,13 @@ describe('Returning after signing in', () => {
     expect(window.location.pathname).toBe('/tenants')
   })
 
-  it('denies a page the role cannot see', async () => {
+  it('sends a Viewer to their home when the returnTo path is not open to them', async () => {
     const user = renderApp('/users', null)
 
     await user.click(await screen.findByRole('button', { name: 'Viewer (viewer)' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/config')
   })
 })
 
