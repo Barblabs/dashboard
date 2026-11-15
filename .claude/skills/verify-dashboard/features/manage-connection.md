@@ -2,6 +2,7 @@
 
 ## Sub-features
 - Connected bar: "iTop connected" badge, URL, user, "Last sync: ..."
+- Below it, the tabs "Tech stack" (tech-stack-inventory.md) and "Areas" (areas.md)
 - "Sync now": shows "Sync complete." status and refreshes the inventory
 - "Edit connection": modal dialog "Edit iTop connection" over the connected view; password required again
 - "Disconnect": inline confirmation strip, then back to the selector
@@ -9,12 +10,12 @@
 - Viewer: the bar and inventory without Sync now / Edit connection / Disconnect; with no source only "No CMDB is configured for your organization."
 
 ## How to get to it (user POV)
-Connected view of `/config`: the bar above the tech stack.
+Connected view of `/config`, CMDB tab: the bar above the tech stack.
 
 ## Driving it with Playwright
 `node drive.mjs sync-edit-disconnect` (customer_admin) and `node drive.mjs viewer-readonly` (connects as admin, signs out, checks the viewer). Dialog: `getByRole('dialog', { name: 'Edit iTop connection' })`, button "Save changes". Disconnect: "Disconnect", then "Yes, disconnect".
 
-Unreachable here: the sync failure path. The MSW sync handler (`src/test/mocks/handlers/cmdb.ts`) always succeeds and has no failure switch, so "Update credentials" needs a real backend whose iTop rejects the credentials (or a failure toggle added to that handler, which is product test code).
+Unreachable here: the sync failure path. The MSW sync handler (`src/mocks/handlers/cmdb.ts`) always succeeds and has no failure switch, so "Update credentials" needs a real backend whose iTop rejects the credentials (or a failure toggle added to that handler, which is product code).
 
 ## Gotchas
 - Sync and Disconnect are disabled while a sync is in flight.

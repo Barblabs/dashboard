@@ -13,5 +13,6 @@ Sidebar footer, on any signed-in page.
 
 ## Gotchas
 - The driver pins `en-US`, so every other scenario assumes English text.
-- The reload signs the user out; in Spanish the mock role buttons are translated ("Administrador (customer_admin)", "Lector (viewer)").
-- End state: heading "Configuración" visible, `localStorage.language === 'es'`, the login page after reload is in Spanish, and after signing in again "Configuración" shows with ES pressed.
+- In Spanish the sidebar's sign out is "Cerrar sesión" and the mock role buttons are translated ("Administrador (customer_admin)", "Lector (viewer)").
+- Text written by the agents and the mock fixtures (group reasons, plans, drafts) stays in Spanish in both languages.
+- End state: heading "Configuración" visible, `localStorage.language === 'es'`, still Spanish with ES pressed after a reload, and the sign-in page in Spanish after signing out.

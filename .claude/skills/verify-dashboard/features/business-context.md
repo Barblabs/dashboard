@@ -8,13 +8,14 @@
 - Domains are cleaned: lowercased, scheme, path, `www.` and trailing dot removed
 - Import dialog "Import documents": hidden file input labelled "Files" (`.pdf,.docx,.txt,.md,.markdown,.csv,.json`), "Or paste text", "Generate draft"; the draft fills the form and a status says "N fields were filled from your documents. Review them and save."
 - Save: "Save" (disabled until a change), status "✓ Saved"; a stale version shows an alert with "Load the newest version"
-- Viewer: values as plain text (lists comma-separated, an em dash placeholder when empty), no Save or Import
+- "Discard changes" appears once the form is dirty
+- Viewer: values as plain text (lists comma-separated, a `-` placeholder when empty), no Save or Import
 
 ## How to get to it (user POV)
-Sidebar link "Business context".
+Sidebar link "Business context". Saved versions feed the Findings summary ("Weighed with business context vN").
 
 ## Driving it with Playwright
-`node drive.mjs business-context`: import a `.txt` with `setInputFiles` on `getByLabel('Files')`, wait for the draft (the mock answers after about 2.5 s), add `https://www.Example.COM/path` to "Domains", save, then check the viewer sees `example.com` without controls.
+`node drive.mjs business-context`: import a `.txt` with `setInputFiles` on `getByLabel('Files')`, wait for the draft (the mock answers after about 2.5 s), add `https://www.Example.COM/path` to "Domains", save, then check the viewer sees `example.com` without controls. "Import documents" shows twice on the start screen (header and start card); the script takes the first. The viewer signs in straight back onto `/business-context` (see the return gap in sign-in-and-roles.md).
 
 ## Gotchas
 - The mock ignores the file content and always returns the same Spanish draft.
