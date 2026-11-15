@@ -827,6 +827,8 @@ export interface components {
             /** @enum {string} */
             exposure: "internet_facing" | "internal" | "unknown";
             /** @enum {string} */
+            information_classification: "confidential" | "private" | "public" | "unclassified";
+            /** @enum {string} */
             lifecycle_stage: "production" | "implementation" | "stock" | "unknown";
         };
         CurrentResponse: {
@@ -945,6 +947,11 @@ export interface components {
             criticality: "high" | "medium" | "low" | "unknown";
             /** @enum {string} */
             exposure: "internet_facing" | "internal" | "unknown";
+            /**
+             * @description Unclassified while no Customer Admin declared it, which does not mean the data is public
+             * @enum {string}
+             */
+            information_classification: "confidential" | "private" | "public" | "unclassified";
             kind: string;
             /** @enum {string} */
             lifecycle_stage: "production" | "implementation" | "stock" | "unknown";
@@ -1234,6 +1241,11 @@ export interface components {
              */
             alpha: number;
             /**
+             * @description The Score Band. Null before Scoring Model 3, which has no Bands
+             * @enum {string|null}
+             */
+            band: "critical" | "high" | "medium" | "low" | null;
+            /**
              * Format: double
              * @description EPSS probability
              */
@@ -1242,6 +1254,11 @@ export interface components {
             criticality_multiplier: number;
             /** @description Inputs a default replaced: the Score is estimated, not measured */
             data_gaps: string[];
+            /**
+             * Format: double
+             * @description From 0 to 1, how much KEV and EPSS count as a sign the CVE is exploited: 1 when KEV lists it or its EPSS reaches 10%. Null before Scoring Model 3
+             */
+            exploit_signal: number | null;
             /** Format: double */
             exposure_multiplier: number;
             /**
@@ -1249,6 +1266,11 @@ export interface components {
              * @description 1 when KEV lists the CVE
              */
             gamma: number;
+            /**
+             * Format: double
+             * @description Null before Scoring Model 3, and while the Asset is Unclassified, which does not count: the impact is then Criticality's alone
+             */
+            information_classification_multiplier: number | null;
             /**
              * Format: double
              * @description 1 in a Scoring Model without a lifecycle factor

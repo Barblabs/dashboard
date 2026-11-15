@@ -147,7 +147,6 @@ export const en = {
       },
       score: {
         rank: 'By Score alone it would be #{{rank}}.',
-        moved: 'Score updated; the order is recalculated when the change is ≥ 0.1',
         factors: {
           alpha: 'CVSS',
           beta: 'EPSS',
@@ -156,6 +155,15 @@ export const en = {
           criticality: 'Criticality multiplier',
           exposure: 'Exposure multiplier',
           lifecycle: 'Lifecycle multiplier',
+          exploitSignal: 'Exploit signal',
+          informationClassification: 'Classification multiplier',
+        },
+        notInModel: 'Not in this model',
+        band: {
+          critical: 'Critical',
+          high: 'High',
+          medium: 'Medium',
+          low: 'Low',
         },
         estimated: 'Estimated: some inputs were missing and took a default.',
         measured: 'Measured: no input was missing.',
@@ -166,6 +174,7 @@ export const en = {
           criticality_unknown: 'Criticality unknown',
           exposure_undeclared: 'Exposure unknown',
           lifecycle_unknown: 'Lifecycle Stage unknown',
+          information_classification_undeclared: 'Information Classification undeclared',
         },
       },
       vulnerability: {
@@ -194,6 +203,8 @@ export const en = {
         criticality: 'Criticality',
         exposure: 'Exposure',
         lifecycleStage: 'Lifecycle Stage',
+        informationClassification: 'Information Classification',
+        unclassifiedHelp: "No one has declared it; it doesn't count toward the Score.",
         criticalServices: 'Critical services it runs',
         noCriticalServices: 'It runs none of the critical services in your business context.',
       },

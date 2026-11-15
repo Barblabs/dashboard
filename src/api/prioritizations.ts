@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
-import type { AssetKind, SoftwareRole } from './assets'
+import type { AssetKind, InformationClassification, SoftwareRole } from './assets'
 import type { Downtime, Impact } from './businessContext'
 import { api } from './client'
 import { connectionScopeKey } from './cmdb'
@@ -24,9 +24,13 @@ type DataGap =
   | 'criticality_unknown'
   | 'exposure_undeclared'
   | 'lifecycle_unknown'
+  | 'information_classification_undeclared'
 
 export type Technique = Override<Schemas['TechniqueResponse'], { role: TechniqueRole }>
 type CriticalService = Override<Schemas['CriticalServiceResponse'], { impact: Impact; max_downtime: Downtime }>
+
+/** Set by the backend from Scoring Model 3 on, never derived here from the value. */
+export type ScoreBand = NonNullable<Schemas['ScoreResponse']['band']>
 
 export type ScoreDetails = Override<Schemas['ScoreResponse'], { data_gaps: DataGap[] }>
 export type FindingAsset = Override<
@@ -75,7 +79,7 @@ export interface CurrentOrder {
   previousCreatedAt: string | null
 }
 
-export const PRIORITIZATIONS_KEY = [...connectionScopeKey, 'prioritizations'] as const
+const PRIORITIZATIONS_KEY = [...connectionScopeKey, 'prioritizations'] as const
 
 const CURRENT_KEY = [...PRIORITIZATIONS_KEY, 'current'] as const
 
@@ -107,11 +111,16 @@ export function currentAsset(finding: Finding): FindingAsset {
 }
 
 /**
- * Whether the Score moved since the Finding was placed. The order stays the snapshot's: the
- * Finding is placed again only when its Score moves by 0.1 or more.
+ * The Asset's Information Classification as `/assets` gives it: a Finding says `unclassified`
+ * where the Asset's Declaration is `null`.
  */
-export function scoreMoved(finding: Finding): boolean {
-  return finding.current !== null && finding.current.score_details.value !== finding.score
+export function findingInformationClassification(asset: FindingAsset): InformationClassification | null {
+  return asset.information_classification === 'unclassified' ? null : asset.information_classification
+}
+
+/** Refetches the Findings after a change that rescores them. */
+export function invalidatePrioritizations(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({ queryKey: PRIORITIZATIONS_KEY })
 }
 
 /** Whether the newest Prioritization is the one that placed the Finding. */
