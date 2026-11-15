@@ -8,11 +8,15 @@ import { completeNewPassword } from '../../auth/cognito'
 import { completeSignIn } from '../../auth/session'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
+import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
 import { cognitoErrorKey } from './cognitoErrorKey'
 
 const newPwSchema = z.object({
   newPassword: z.string().min(1),
+  confirmPassword: z.string().min(1),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  path: ['confirmPassword'],
 })
 type NewPwFields = z.infer<typeof newPwSchema>
 
@@ -24,7 +28,7 @@ export function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
   const { t } = useTranslation()
   const [serverError, setServerError] = useState<string | null>(null)
 
-  const { register, handleSubmit, formState: { isSubmitting } } = useForm<NewPwFields>({
+  const { register, handleSubmit, formState: { isSubmitting, errors } } = useForm<NewPwFields>({
     resolver: zodResolver(newPwSchema),
   })
 
@@ -41,6 +45,7 @@ export function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
 
   return (
     <form
+      noValidate
       onSubmit={(e) => { void handleSubmit(onSubmit)(e) }}
       className="flex w-[420px] flex-col gap-[18px] rounded-xl border border-border-panel bg-white px-8 pb-7 pt-8"
     >
@@ -57,20 +62,29 @@ export function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
         <Alert tone="error">{serverError}</Alert>
       )}
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="newPassword" className="font-body text-[0.875rem] font-semibold text-navy">
-          {t('login.newPassword.label')}
-        </label>
+      <Field
+        label={t('login.newPassword.label')}
+        help={t('login.newPassword.policy')}
+        error={errors.newPassword && t('login.newPassword.required')}
+      >
         <Input
-          id="newPassword"
           type="password"
           autoComplete="new-password"
+          autoFocus
           {...register('newPassword')}
         />
-        <p className="font-body text-[0.8125rem] leading-[1.4] text-gray">
-          {t('login.newPassword.policy')}
-        </p>
-      </div>
+      </Field>
+
+      <Field
+        label={t('login.newPassword.confirmLabel')}
+        error={errors.confirmPassword && t('login.newPassword.mismatch')}
+      >
+        <Input
+          type="password"
+          autoComplete="new-password"
+          {...register('confirmPassword')}
+        />
+      </Field>
 
       <Button type="submit" variant="secondary" size="lg" loading={isSubmitting} className="w-full justify-center">
         {isSubmitting ? t('login.newPassword.submitting') : t('login.newPassword.submit')}
