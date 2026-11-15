@@ -1,0 +1,594 @@
+// Drives the running dashboard (mock mode) like a user and saves screenshots + a JSON report.
+// Usage: node drive.mjs <scenario> [--headed]
+// Each scenario starts from a fresh browser context (empty localStorage = fresh mock data); run launch.sh first.
+import { createRequire } from 'node:module'
+import { execFileSync } from 'node:child_process'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const here = path.dirname(fileURLToPath(import.meta.url))
+const verifyHome = (process.env.VERIFY_HOME ?? path.join(process.env.TMPDIR ?? '/tmp', 'verify-dashboard')).replace(/\/$/, '')
+const chromium = await loadChromium()
+const FRONT = `http://localhost:${process.env.FRONT_PORT ?? 15173}`
+const API = `http://localhost:${process.env.MOCK_API_PORT ?? 18080}`
+const scenarioName = process.argv[2]
+const headed = process.argv.includes('--headed')
+
+async function loadChromium() {
+  const require = createRequire(path.join(verifyHome, 'tools', 'package.json'))
+  return require('playwright-core').chromium
+}
+
+// playwright-core ships no assertion lib; a tiny poll-based one is enough here.
+function expect(locator) {
+  return {
+    toBeVisible: (timeout = 5000) => locator.waitFor({ state: 'visible', timeout }),
+    toBeHidden: (timeout = 5000) => locator.waitFor({ state: 'hidden', timeout }),
+  }
+}
+
+const evidenceDir = path.join(process.env.EVIDENCE_DIR ?? path.join(verifyHome, 'evidence'), `${scenarioName}-${new Date().toISOString().replace(/[:.]/g, '-')}`)
+mkdirSync(evidenceDir, { recursive: true })
+const steps = []
+const apiCalls = []
+const externalRequests = []
+let context
+let page
+
+// <main> is the scroll container, so a full-page screenshot only shows the viewport anyway.
+// Pass a locator to scroll the part that matters into view first.
+async function shot(label, focus) {
+  if (focus) await focus.scrollIntoViewIfNeeded()
+  // Dialogs and sheets fade and slide in; a shot taken mid-transition shows them half there.
+  await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running' || a.effect?.getTiming().iterations === Infinity))
+  const file = `${String(steps.length + 1).padStart(2, '0')}-${label}.png`
+  await page.screenshot({ path: path.join(evidenceDir, file) })
+  steps.push({ label, screenshot: file, url: page.url() })
+}
+
+function check(condition, message) {
+  if (!condition) throw new Error(message)
+}
+
+const callsTo = (method, pathPrefix) => apiCalls.filter((c) => c.method === method && c.path.startsWith(pathPrefix))
+
+// In mock mode /login is a role picker; the picked role is kept in localStorage, so the session
+// survives reloads and page.goto until signOut().
+const ROLE_BUTTON = {
+  platform_admin: 'Super Admin (platform_admin)',
+  customer_admin: 'Admin (customer_admin)',
+  viewer: 'Viewer (viewer)',
+}
+const HOME = { platform_admin: '/tenants', customer_admin: '/config', viewer: '/config' }
+
+// Signing in returns to the page the guard sent the visitor away from, if any; pass `landing`
+// when that is not the role's home.
+async function signIn(role, landing = HOME[role]) {
+  if (!page.url().endsWith('/login')) await page.goto(`${FRONT}/login`)
+  await page.getByRole('button', { name: ROLE_BUTTON[role] }).click()
+  await page.waitForURL(`**${landing}`)
+}
+// Signing in again after this returns to the page signed out from, whatever the role; pass
+// `{ fresh: true }` to open / so the next sign-in lands on its role's home (reopening /login keeps it).
+async function signOut({ fresh = false } = {}) {
+  await page.getByRole('button', { name: 'Sign out' }).click()
+  await page.waitForURL('**/login')
+  if (fresh) {
+    await goto('/')
+    await page.waitForURL('**/login')
+  }
+}
+const goto = async (pathname) => page.goto(`${FRONT}${pathname}`)
+const sidebarLink = (name) => page.getByRole('navigation').getByRole('link', { name, exact: true })
+const tab = (name) => page.getByRole('tab', { name, exact: true })
+
+/*
+ * Mock backend state that no UI path can create in mock mode (a finished Slack OAuth). Written to
+ * the mock's localStorage store and picked up by a reload. Never use it to skip a step under test.
+ */
+async function seedMockBackend(key, value) {
+  await page.evaluate(([k, v]) => localStorage.setItem(k, JSON.stringify(v)), [key, value])
+  await page.reload()
+}
+
+const ITOP = { url: 'http://10.0.0.5:8000', user: 'barb-reader', password: 'not-a-real-secret' }
+
+async function fillItop(login = ITOP) {
+  await page.getByLabel('iTop address (IP or URL)').fill(login.url)
+  await page.getByLabel('User', { exact: true }).fill(login.user)
+  await page.getByLabel('Password').fill(login.password)
+}
+
+// The tech stack is a listbox of Assets beside the selected Asset's record.
+const assetList = () => page.getByRole('listbox', { name: 'Tech stack' })
+const assetOption = (name) => assetList().getByRole('option').filter({ hasText: name })
+const assetRecord = (name) => page.getByRole('article', { name })
+
+async function connect() {
+  await expect(page.getByRole('heading', { name: 'Choose your CMDB' })).toBeVisible()
+  await page.getByRole('button', { name: 'Select' }).click()
+  await fillItop()
+  await page.getByRole('button', { name: 'Test connection' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Connection successful' })).toBeVisible()
+  await page.getByRole('button', { name: 'Connect and sync' }).click()
+  await expect(page.getByText('iTop connected')).toBeVisible()
+  await expect(assetList()).toBeVisible()
+}
+
+const scenarios = {
+  async connect() {
+    await signIn('customer_admin')
+    await shot('selector')
+    await page.getByRole('button', { name: 'Select' }).click()
+    // Rejected profile: the translated error from the API code must show.
+    await fillItop({ ...ITOP, user: 'admin' })
+    await page.getByRole('button', { name: 'Test connection' }).click()
+    await expect(page.getByRole('alert').filter({ hasText: "does not have the 'REST Services User' profile" })).toBeVisible()
+    await shot('admin-rejected')
+    await page.getByLabel('User', { exact: true }).fill(ITOP.user)
+    await page.getByRole('button', { name: 'Test connection' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Connection successful' })).toBeVisible()
+    await shot('test-ok')
+    await page.getByRole('button', { name: 'Connect and sync' }).click()
+    await expect(page.getByText('iTop connected')).toBeVisible()
+    await expect(assetList()).toBeVisible()
+    await shot('connected')
+    const [created] = callsTo('POST', '/cmdb/source').filter((c) => c.path === '/cmdb/source')
+    check(created?.body?.user === ITOP.user && created?.body?.url === ITOP.url, `connect request mismatch: ${JSON.stringify(created)}`)
+    // The session and the stored source both survive a reload.
+    await page.reload()
+    await expect(page.getByText('iTop connected')).toBeVisible()
+    check(page.url().endsWith('/config'), `reload left /config: ${page.url()}`)
+    await shot('after-reload')
+  },
+
+  async 'sync-edit-disconnect'() {
+    await signIn('customer_admin')
+    await connect()
+    await page.getByRole('button', { name: 'Sync now' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Sync complete.' })).toBeVisible()
+    await shot('synced')
+    await page.getByRole('button', { name: 'Edit connection' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Edit iTop connection' })
+    await expect(dialog).toBeVisible()
+    await dialog.getByLabel('User', { exact: true }).fill('barb-reader-2')
+    await dialog.getByLabel('Password').fill('not-a-real-secret')
+    await shot('edit-dialog')
+    await dialog.getByRole('button', { name: 'Save changes' }).click()
+    await expect(dialog).toBeHidden()
+    await expect(page.getByText('barb-reader-2')).toBeVisible()
+    await shot('edited')
+    await page.getByRole('button', { name: 'Disconnect' }).click()
+    await expect(page.getByText('This will disconnect the CMDB.')).toBeVisible()
+    await page.getByRole('button', { name: 'Yes, disconnect' }).click()
+    await expect(page.getByRole('heading', { name: 'Choose your CMDB' })).toBeVisible()
+    await shot('disconnected')
+    check(callsTo('POST', '/cmdb/source/sync').length === 1, 'expected one sync request')
+    check(callsTo('PUT', '/cmdb/source')[0]?.body?.user === 'barb-reader-2', 'edit did not send the new user')
+    check(callsTo('DELETE', '/cmdb/source').length === 1, 'expected one disconnect request')
+  },
+
+  async 'viewer-readonly'() {
+    await signIn('viewer')
+    await expect(page.getByText('No CMDB is configured for your organization.')).toBeVisible()
+    check(await page.getByRole('button', { name: 'Select' }).count() === 0, 'viewer sees the CMDB selector')
+    await shot('viewer-not-connected')
+    await signOut()
+    await signIn('customer_admin')
+    await connect()
+    await signOut()
+    // Signing in returns to the page signed out from: /config either way.
+    await signIn('viewer')
+    await expect(page.getByText('iTop connected')).toBeVisible()
+    await expect(assetList()).toBeVisible()
+    for (const name of ['Sync now', 'Edit connection', 'Disconnect', 'Triage them']) {
+      check(await page.getByRole('button', { name }).count() === 0, `viewer sees "${name}"`)
+    }
+    await shot('viewer-connected')
+  },
+
+  async inventory() {
+    await signIn('customer_admin')
+    await connect()
+    await expect(page.getByText('7 assets')).toBeVisible()
+    await page.getByLabel('Status').selectOption('all')
+    await expect(page.getByText('8 assets')).toBeVisible()
+    await shot('all-statuses', assetList())
+    await page.getByLabel('Type').selectOption('server')
+    await expect(page.getByText('2 assets')).toBeVisible()
+    await shot('servers-only', assetList())
+    // The first Asset is selected; picking another shows its record.
+    await assetOption('crm-db-primary').click()
+    await expect(assetRecord('crm-db-primary')).toBeVisible()
+    await assetList().press('ArrowUp')
+    await expect(assetRecord('prod-api-01')).toBeVisible()
+    await expect(assetRecord('prod-api-01').getByText('internal-billing-agent')).toBeVisible()
+    await expect(assetRecord('prod-api-01').getByText('Unidentified', { exact: true })).toBeVisible()
+    await shot('record', assetRecord('prod-api-01'))
+    await page.getByLabel('Criticality').selectOption('low')
+    await expect(page.getByText('No assets match these filters.')).toBeVisible()
+    await shot('no-matches', page.getByText('No assets match these filters.'))
+    check(await page.getByRole('navigation', { name: 'Pages' }).count() === 0, 'pager shown without a next cursor')
+    const last = callsTo('GET', '/assets').at(-1)?.path ?? ''
+    check(/active=all/.test(last) && /kind=server/.test(last) && /criticality=low/.test(last), `last /assets query missing filters: ${last}`)
+  },
+
+  async triage() {
+    await signIn('customer_admin')
+    await connect()
+    await expect(page.getByText('5 Assets need triage.')).toBeVisible()
+    await shot('banner')
+    await page.getByRole('button', { name: 'Triage them' }).click()
+    const sheet = page.getByRole('dialog', { name: 'Triage Assets' })
+    await expect(sheet.getByText('1 of 5')).toBeVisible()
+    // 1 of 5 is prod-api-01: Exposure comes from iTop, Information Classification is missing.
+    await sheet.getByRole('radio', { name: /^Confidential/ }).check()
+    await sheet.getByRole('button', { name: 'Declare Classification' }).click()
+    await expect(sheet.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
+    await shot('classification-declared')
+    await sheet.getByRole('button', { name: 'Next', exact: true }).click()
+    await expect(sheet.getByText('2 of 5')).toBeVisible()
+    await sheet.getByRole('radio', { name: /^Internal/ }).check()
+    await expect(sheet.getByText('Internal lowers the Score')).toBeVisible()
+    await sheet.getByRole('button', { name: 'Declare Exposure' }).click()
+    await expect(sheet.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
+    await shot('exposure-declared')
+    for (let i = 0; i < 4; i++) await sheet.getByRole('button', { name: 'Next', exact: true }).click()
+    await expect(sheet.getByText('2 of 5 Assets triaged')).toBeVisible()
+    await shot('summary')
+    await sheet.getByRole('button', { name: 'Done' }).click()
+    await expect(sheet).toBeHidden()
+    // prod-api-01 is now triaged; analytics-worker-03 still has no Classification.
+    await expect(page.getByText('4 Assets need triage.')).toBeVisible()
+    // Single mode: the record's Exposure button opens the sheet for that Asset; clearing goes back to
+    // iTop's value. iTop has none for a Virtual Machine, so the button reads "Clear", not "Use iTop's".
+    await assetOption('analytics-worker-03').click()
+    await assetRecord('analytics-worker-03').getByRole('button', { name: /^Exposure of analytics-worker-03: Internal, declared/ }).click()
+    const single = page.getByRole('dialog', { name: 'Triage Asset' })
+    const exposure = single.getByRole('region', { name: 'Exposure' })
+    await exposure.getByRole('button', { name: 'Clear' }).click()
+    await expect(exposure.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
+    await shot('exposure-cleared')
+    await page.keyboard.press('Escape')
+    await expect(assetRecord('analytics-worker-03').getByRole('button', { name: /^Exposure of analytics-worker-03: Unknown, from iTop/ })).toBeVisible()
+    check(callsTo('PUT', '/assets/1/information-classification')[0]?.body?.information_classification === 'confidential', 'classification request mismatch')
+    check(callsTo('PUT', '/assets/2/exposure')[0]?.body?.exposure === 'internal', 'exposure request mismatch')
+    check(callsTo('DELETE', '/assets/2/exposure').length === 1, 'expected one exposure clear')
+    // A viewer opens the same sheet read-only.
+    await signOut()
+    await signIn('viewer')
+    await assetRecord('prod-api-01').getByRole('button', { name: /^Information Classification of prod-api-01: Confidential/ }).click()
+    const viewerSheet = page.getByRole('dialog', { name: 'Triage Asset' })
+    await expect(viewerSheet.getByText('Only a Customer Admin can declare')).toBeVisible()
+    for (const name of ['Declare Exposure', 'Declare Classification', 'Clear']) {
+      check(await viewerSheet.getByRole('button', { name }).count() === 0, `viewer sees "${name}"`)
+    }
+    await shot('viewer-sheet')
+  },
+
+  async areas() {
+    await signIn('customer_admin')
+    await connect()
+    await tab('Areas').click()
+    await expect(page.getByText('2 areas')).toBeVisible()
+    await shot('areas')
+    const row = (name) => page.getByRole('row').filter({ hasText: name })
+    await row('Data Platform').getByRole('button', { name: 'Set owner' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Owner of Data Platform' })
+    await dialog.getByLabel('Email').fill('not-an-email')
+    await dialog.getByRole('button', { name: 'Save' }).click()
+    await expect(dialog.getByText('Enter a valid email.')).toBeVisible()
+    await dialog.getByLabel('Email').fill('data-lead@example.com')
+    await dialog.getByRole('button', { name: 'Save' }).click()
+    await expect(dialog).toBeHidden()
+    await expect(row('Data Platform').getByText('data-lead@example.com')).toBeVisible()
+    await shot('owner-set')
+    await page.getByLabel('Status').last().selectOption('all')
+    await expect(page.getByText('3 areas')).toBeVisible()
+    await expect(row('Legacy ERP').getByText(/Inactive since/)).toBeVisible()
+    await shot('all-areas')
+    check(callsTo('PUT', '/areas/2/owner')[0]?.body?.email === 'data-lead@example.com', 'owner request mismatch')
+    check(callsTo('PUT', '/areas/').length === 1, 'the invalid email reached the API')
+    await signOut()
+    await signIn('viewer')
+    await tab('Areas').click()
+    await expect(row('Data Platform').getByText('data-lead@example.com')).toBeVisible()
+    check(await page.getByRole('button', { name: /owner/ }).count() === 0, 'viewer can edit an owner')
+    await shot('viewer-areas')
+  },
+
+  async slack() {
+    await signIn('customer_admin')
+    await tab('Slack').click()
+    await expect(page.getByRole('heading', { name: "BARBATTACK isn't delivering to Slack yet" })).toBeVisible()
+    await shot('not-connected')
+    // Connect opens Slack's consent page in a popup; slack.com is blocked, only the URL is checked.
+    const popupOpened = context.waitForEvent('page')
+    await page.getByRole('button', { name: 'Connect Slack' }).click()
+    const popup = await popupOpened
+    await popup.waitForLoadState().catch(() => {})
+    check(externalRequests.some((url) => url.startsWith('https://slack.com/oauth/v2/authorize')), `popup did not open Slack: ${externalRequests}`)
+    await popup.close()
+    // Finishing the OAuth happens on Slack and the backend; seed what it would leave behind.
+    await seedMockBackend('barbattack_slack_installation', {
+      team_id: 'T0123456789', team_name: 'BARBATTACK Demo', channel_id: '', channel_name: '', state: 'active',
+    })
+    await seedMockBackend('barbattack_slack_deliveries', [{
+      target: '#security-team', target_kind: 'channel', attempts: 3, created_at: new Date().toISOString(),
+      failure_code: 'channel_unreachable', last_error: 'not_in_channel', kind: 'finding',
+    }])
+    await tab('Slack').click()
+    await expect(page.getByText('Slack connected')).toBeVisible()
+    check(await page.getByRole('button', { name: 'Send test' }).isDisabled(), 'Send test enabled without a channel')
+    await page.getByLabel('Security Team channel').selectOption({ label: '#security-team' })
+    await expect(page.getByText('#security-team').first()).toBeVisible()
+    await page.getByRole('button', { name: 'Send test' }).click()
+    await expect(page.getByText('Test message sent to #security-team.')).toBeVisible()
+    await shot('channel-and-test')
+    await expect(page.getByText('1 failed delivery')).toBeVisible()
+    await page.getByRole('button', { name: 'Retry all' }).click()
+    await expect(page.getByText('Returned 1 deliveries to the queue.')).toBeVisible()
+    await expect(page.getByText('No failed deliveries.')).toBeVisible()
+    await shot('retried')
+    check(callsTo('PUT', '/slack/installation')[0]?.body?.channel_id === 'C09SECGRP1', 'channel request mismatch')
+    await signOut()
+    await signIn('viewer')
+    await tab('Slack').click()
+    await expect(page.getByText('Slack connected')).toBeVisible()
+    for (const name of ['Send test', 'Disconnect']) {
+      check(await page.getByRole('button', { name }).count() === 0, `viewer sees "${name}"`)
+    }
+    await shot('viewer')
+    await signOut()
+    await signIn('customer_admin')
+    await tab('Slack').click()
+    await page.getByRole('button', { name: 'Disconnect' }).click()
+    await page.getByRole('button', { name: 'Yes, disconnect' }).click()
+    await expect(page.getByRole('heading', { name: "BARBATTACK isn't delivering to Slack yet" })).toBeVisible()
+    await shot('disconnected')
+    check(callsTo('DELETE', '/slack/installation').length === 1, 'expected one Slack disconnect')
+  },
+
+  async findings() {
+    await signIn('customer_admin')
+    await sidebarLink('Findings').click()
+    await expect(page.getByText('5 findings, 3 groups')).toBeVisible()
+    for (const n of [1, 2, 3]) await expect(page.getByText(`Group ${n}`, { exact: true })).toBeVisible()
+    await shot('order')
+    await page.getByRole('button', { name: 'Open CVE-2021-41773' }).click()
+    const detail = page.getByRole('dialog')
+    await expect(detail.getByRole('heading', { name: 'Score' })).toBeVisible()
+    check(new URL(page.url()).searchParams.has('finding'), 'the open Finding is not in the URL')
+    await shot('detail')
+    // The open Finding lives in the URL, so a reload lands on it.
+    await page.reload()
+    await expect(detail.getByRole('heading', { name: 'Action plan' })).toBeVisible()
+    await detail.getByRole('button', { name: 'Ask Luna for an action plan' }).click()
+    await expect(detail.getByText('Luna is writing the plan')).toBeVisible()
+    await expect(detail.getByText(/^Written by Luna/)).toBeVisible(15000)
+    await shot('plan', detail.getByText(/^Written by Luna/))
+    await detail.getByLabel('What do you say?').selectOption({ label: 'Should be attended earlier' })
+    await detail.getByLabel('Why').fill('Customer-facing and exploited in the wild.')
+    await detail.getByRole('button', { name: 'Send' }).click()
+    await expect(detail.getByText('Saved.')).toBeVisible()
+    await shot('feedback', detail.getByText('Saved.'))
+    await detail.getByRole('button', { name: 'Close' }).first().click()
+    await expect(detail).toBeHidden()
+    const plans = callsTo('POST', '/prioritizations/').filter((c) => c.path.endsWith('/plans'))
+    const feedback = callsTo('POST', '/prioritizations/').filter((c) => c.path.endsWith('/feedback'))
+    check(plans.length === 1, 'expected one plan request')
+    check(feedback[0]?.body?.verdict === 'should_be_earlier', `feedback request mismatch: ${JSON.stringify(feedback[0]?.body)}`)
+  },
+
+  async language() {
+    await signIn('customer_admin')
+    await expect(page.getByRole('heading', { name: 'Configuration' })).toBeVisible()
+    await page.getByRole('group', { name: 'Language' }).getByRole('button', { name: 'ES' }).click()
+    await expect(page.getByRole('heading', { name: 'Configuración' })).toBeVisible()
+    await shot('spanish')
+    const stored = await page.evaluate(() => localStorage.getItem('language'))
+    check(stored === 'es', `localStorage.language is ${stored}`)
+    await page.reload()
+    await expect(page.getByRole('heading', { name: 'Configuración' })).toBeVisible()
+    const pressed = await page.getByRole('group', { name: 'Idioma' }).getByRole('button', { name: 'ES' }).getAttribute('aria-pressed')
+    check(pressed === 'true', 'ES is not marked active after reload')
+    // The sign-in page has no switcher but follows the stored choice.
+    await page.getByRole('button', { name: 'Cerrar sesión' }).click()
+    await expect(page.getByRole('button', { name: 'Administrador (customer_admin)' })).toBeVisible()
+    await shot('login-in-spanish')
+  },
+
+  async navigation() {
+    await goto('/users')
+    await page.waitForURL('**/login')
+    await shot('guard-to-login')
+    // Signing in returns to the page the guard turned away.
+    await signIn('customer_admin', '/users')
+    for (const link of ['Findings', 'Configuration', 'Business context', 'Notifications', 'Users']) {
+      await expect(sidebarLink(link)).toBeVisible()
+    }
+    await sidebarLink('Notifications').click()
+    await expect(page.getByRole('heading', { name: 'Notifications' })).toBeVisible()
+    await expect(page.getByText('Coming soon')).toBeVisible()
+    await shot('nav-notifications')
+    // A session survives a typed URL and a reload.
+    await goto('/tenants')
+    await expect(page.getByText('Access denied')).toBeVisible()
+    await shot('forbidden')
+    await goto('/does-not-exist')
+    await expect(page.getByText('Page not found')).toBeVisible()
+    await shot('not-found')
+    await goto('/')
+    await page.waitForURL('**/config')
+    await signOut()
+    await signIn('viewer')
+    check(await sidebarLink('Users').count() === 0, 'viewer sees the Users link')
+    await goto('/users')
+    await expect(page.getByText('Access denied')).toBeVisible()
+    await shot('viewer-forbidden-users')
+    await signOut({ fresh: true })
+    await signIn('platform_admin')
+    for (const link of ['Tenants', 'Dashboard']) await expect(sidebarLink(link)).toBeVisible()
+    check(await sidebarLink('Configuration').count() === 0, 'platform_admin sees Configuration')
+    await expect(page.getByText('superadmin@barbattack.example')).toBeVisible()
+    await goto('/config')
+    await expect(page.getByText('Access denied')).toBeVisible()
+    await shot('platform-admin-forbidden-config')
+    await goto('/')
+    await page.waitForURL('**/tenants')
+    await signOut()
+    await shot('signed-out')
+  },
+
+  async 'business-context'() {
+    await signIn('customer_admin')
+    await sidebarLink('Business context').click()
+    await expect(page.getByRole('heading', { name: 'Start with your documents' })).toBeVisible()
+    await shot('empty')
+    await page.getByRole('button', { name: 'Import documents' }).first().click()
+    const dialog = page.getByRole('dialog', { name: 'Import documents' })
+    await expect(dialog).toBeVisible()
+    await dialog.getByLabel('Files').setInputFiles({ name: 'acme.txt', mimeType: 'text/plain', buffer: Buffer.from('ACME Corp runs a payments platform in Mexico.') })
+    await shot('import-dialog')
+    await dialog.getByRole('button', { name: 'Generate draft' }).click()
+    await expect(dialog).toBeHidden(15000)
+    await expect(page.getByRole('status').filter({ hasText: 'fields were filled from your documents' })).toBeVisible()
+    await shot('draft-applied')
+    await page.getByRole('tab', { name: /Digital footprint/ }).click()
+    const domains = page.getByLabel('Domains')
+    await domains.fill('https://www.Example.COM/path')
+    await domains.press('Enter')
+    await expect(page.getByText('example.com', { exact: true })).toBeVisible()
+    await shot('domain-canonical')
+    await page.getByRole('button', { name: 'Save', exact: true }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
+    await shot('saved')
+    const saved = callsTo('PUT', '/business-context').at(-1)
+    check(JSON.stringify(saved?.body ?? {}).includes('"example.com"'), `saved body lacks example.com: ${JSON.stringify(saved?.body)}`)
+    await signOut()
+    await signIn('viewer', '/business-context')
+    await page.getByRole('tab', { name: /Digital footprint/ }).click()
+    // The viewer sees each list as one comma-separated line, not as chips.
+    await expect(page.getByText(/(^|, )example\.com(,|$)/)).toBeVisible()
+    for (const name of ['Save', 'Import documents']) {
+      check(await page.getByRole('button', { name, exact: true }).count() === 0, `viewer sees "${name}"`)
+    }
+    await shot('viewer-readonly')
+  },
+
+  async users() {
+    await signIn('customer_admin')
+    await sidebarLink('Users').click()
+    await expect(page.getByRole('heading', { name: 'Users', level: 1 })).toBeVisible()
+    await expect(page.getByText('3 users')).toBeVisible()
+    await expect(page.getByText('Invitation pending')).toBeVisible()
+    await shot('list')
+    await page.getByRole('button', { name: 'Invite user' }).click()
+    const invite = page.getByRole('dialog', { name: 'Invite user' })
+    await invite.getByLabel('Email').fill('new@acme.example')
+    await invite.getByRole('combobox').selectOption({ label: 'Admin' })
+    await shot('invite-dialog')
+    await invite.getByRole('button', { name: 'Send invitation' }).click()
+    await expect(invite).toBeHidden()
+    await expect(page.getByText('Invitation sent to new@acme.example.')).toBeVisible()
+    await expect(page.getByText('4 users')).toBeVisible()
+    const row = (email) => page.getByRole('row').filter({ hasText: email })
+    await row('admin@acme.example').getByRole('button', { name: 'Disable' }).click()
+    await page.getByRole('dialog', { name: 'Disable user' }).getByRole('button', { name: 'Yes, disable' }).click()
+    await expect(page.getByText('4 users · 1 disabled')).toBeVisible()
+    await shot('disabled')
+    // new@acme.example is now the only active admin: demoting it must be refused.
+    await row('new@acme.example').getByRole('button', { name: 'Edit role' }).click()
+    const edit = page.getByRole('dialog', { name: 'Change role' })
+    await edit.getByRole('combobox').selectOption({ label: 'Viewer' })
+    await edit.getByRole('button', { name: 'Save' }).click()
+    await expect(edit.getByRole('alert').filter({ hasText: 'Cannot remove the last admin' })).toBeVisible()
+    await shot('last-admin-refused')
+    check(callsTo('POST', '/users')[0]?.body?.email === 'new@acme.example', 'invite request mismatch')
+  },
+
+  async tenants() {
+    await signIn('platform_admin')
+    await expect(page.getByRole('heading', { name: 'Organizations' })).toBeVisible()
+    await expect(page.getByText('3 organizations · 1 deactivated')).toBeVisible()
+    await shot('list')
+    const create = async (name) => {
+      await page.getByRole('button', { name: 'New organization' }).click()
+      await page.getByLabel('Organization name').fill(name)
+      await page.getByRole('button', { name: 'Next' }).click()
+      await page.getByRole('textbox', { name: 'Admin email' }).fill('admin@delta.example')
+      await page.getByRole('button', { name: 'Create and send invitation' }).click()
+    }
+    await create('Delta SA')
+    await expect(page.getByText('4 organizations · 1 deactivated')).toBeVisible()
+    const card = (name) => page.getByTestId('customer-card').filter({ hasText: name })
+    await card('Acme Corp').getByRole('button', { name: 'Deactivate', exact: true }).click()
+    await page.getByRole('button', { name: 'Yes, deactivate' }).click()
+    await expect(page.getByText('4 organizations · 2 deactivated')).toBeVisible()
+    await shot('created-and-deactivated')
+    await create('beta ltd')
+    await expect(page.getByRole('alert').filter({ hasText: 'An organization with this name already exists.' })).toBeVisible()
+    await shot('duplicate-refused')
+    await page.keyboard.press('Escape')
+    await sidebarLink('Dashboard').click()
+    await expect(page.getByRole('heading', { name: 'Recent organizations' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'New organizations per month' })).toBeVisible()
+    await shot('dashboard')
+    steps.push({ label: 'dashboard stat cards', text: await page.getByRole('main').innerText() })
+  },
+}
+
+if (!scenarios[scenarioName]) {
+  console.error(`unknown scenario "${scenarioName}". Choose one of: ${Object.keys(scenarios).join(', ')}`)
+  process.exit(2)
+}
+
+const executablePath = execFileSync('node', [path.join(here, 'find-browser.mjs')]).toString().trim()
+const browser = await chromium.launch({ executablePath, headless: !headed })
+// Fresh context = empty localStorage = fresh mock data and no session; English forced so selectors below are stable.
+context = await browser.newContext({ locale: 'en-US', viewport: { width: 1280, height: 900 } })
+// Nothing outside the dev server, the mocked API base and the web fonts may be reached (Slack's consent page, for one).
+const ALLOWED = [FRONT, API, 'https://fonts.googleapis.com/', 'https://fonts.gstatic.com/']
+await context.route((url) => !ALLOWED.some((origin) => url.href.startsWith(origin)), (route) => {
+  externalRequests.push(route.request().url())
+  return route.abort()
+})
+// The dev-only React Query Devtools button floats bottom-right, over dialog and sheet footers.
+await context.addInitScript(() => {
+  addEventListener('DOMContentLoaded', () => {
+    const style = document.createElement('style')
+    style.textContent = '.tsqd-open-btn-container { display: none !important; }'
+    document.head.append(style)
+  })
+})
+page = await context.newPage()
+const consoleErrors = []
+page.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()))
+page.on('pageerror', (e) => consoleErrors.push(String(e)))
+// MSW answers inside the browser, but Playwright still sees each call; this is the side-effect record.
+page.on('response', async (response) => {
+  const request = response.request()
+  if (!request.url().startsWith(API)) return
+  const url = new URL(request.url())
+  let body = null
+  try { body = request.postDataJSON() } catch { body = request.postData() ? '<non-JSON body>' : null }
+  if (body && typeof body === 'object' && 'password' in body) body = { ...body, password: '<redacted>' }
+  apiCalls.push({ method: request.method(), path: url.pathname + url.search, status: response.status(), servedByMock: response.fromServiceWorker(), body })
+})
+
+let failure = null
+try {
+  await page.goto(`${FRONT}/login`)
+  await scenarios[scenarioName]()
+} catch (error) {
+  failure = String(error)
+  await shot('FAILURE').catch(() => {})
+}
+const unmocked = apiCalls.filter((c) => !c.servedByMock)
+if (!failure && unmocked.length) failure = `API calls not served by MSW: ${unmocked.map((c) => `${c.method} ${c.path}`).join(', ')}`
+writeFileSync(path.join(evidenceDir, 'report.json'), JSON.stringify({ scenario: scenarioName, passed: failure === null, failure, steps, consoleErrors, apiCalls, externalRequests }, null, 2))
+await browser.close()
+console.log(`${failure ? 'FAIL' : 'PASS'} ${scenarioName} - evidence: ${evidenceDir}`)
+if (failure) console.log(failure)
+process.exit(failure ? 1 : 0)

@@ -1,4 +1,4 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignore": ["src/api/generated.ts"]
+  "ignore": ["src/api/generated.ts", ".claude/skills/**"]
 }
