@@ -10,16 +10,11 @@ import { renderApp, seedSource, VIEWER } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
 
 /*
- * The seed's Active Assets that need triage, in inventory order. prod-api-01 has an Exposure but
- * is Unclassified; core-switch-01 is classified but its Exposure is Unknown.
+ * The seed's Active Assets that need triage, in queue order: those with an Unknown Exposure, then
+ * the other Unclassified ones. core-switch-01 is classified but its Exposure is Unknown;
+ * prod-api-01 has an Exposure but is Unclassified.
  */
-const NEEDS_TRIAGE = ['prod-api-01', 'analytics-worker-03', 'core-switch-01', 'payments-gateway', 'reporting-batch-01']
-
-function seeded(name: string): Asset {
-  const asset = mockAssets.find((a) => a.name === name)
-  if (!asset) throw new Error(`no seeded asset ${name}`)
-  return asset
-}
+const NEEDS_TRIAGE = ['analytics-worker-03', 'core-switch-01', 'payments-gateway', 'reporting-batch-01', 'prod-api-01']
 
 async function renderTechStack(user = renderApp) {
   seedSource()
@@ -93,59 +88,65 @@ function clearInStore(name: string) {
 }
 
 describe('Asset triage', () => {
-  it('counts the Assets that need triage on every page of the inventory, not only the one on screen', async () => {
-    const [prodApi, analyticsWorker, crmDb, coreSwitch] = mockAssets
+  it('counts the Unknown Exposures and the Unclassified on every page, an Asset missing both once', async () => {
+    const [prodApi, analyticsWorker, , coreSwitch] = mockAssets
     const counted: Record<string, string>[] = []
     server.use(
       http.get(apiUrl('/assets'), ({ request }) => {
         const params = new URL(request.url).searchParams
         if (params.get('limit') !== '200') return undefined
         counted.push(Object.fromEntries(params))
-        const page: AssetsPage =
-          params.get('cursor') === 'page-2'
-            ? { assets: [coreSwitch!, seeded('ledger-db')], next_cursor: null, total: 5 }
-            : { assets: [prodApi!, analyticsWorker!, crmDb!], next_cursor: 'page-2', total: 5 }
+        const page: AssetsPage = params.has('information_classification')
+          ? { assets: [prodApi!, analyticsWorker!], next_cursor: null, total: 2 }
+          : params.get('cursor') === 'page-2'
+            ? { assets: [coreSwitch!], next_cursor: null, total: 2 }
+            : { assets: [analyticsWorker!], next_cursor: 'page-2', total: 2 }
         return HttpResponse.json(page)
       }),
     )
     await renderTechStack()
 
-    // crm-db-primary and ledger-db have both values; the others miss at least one.
+    // analytics-worker-03 has neither value, so both requests return it.
     expect(await screen.findByText('3 Assets need triage.')).toBeInTheDocument()
-    expect(counted).toEqual([
-      { active: 'true', limit: '200' },
-      { active: 'true', limit: '200', cursor: 'page-2' },
-    ])
+    expect(counted).toEqual(
+      expect.arrayContaining([
+        { active: 'true', limit: '200', exposure: 'unknown' },
+        { active: 'true', limit: '200', exposure: 'unknown', cursor: 'page-2' },
+        { active: 'true', limit: '200', information_classification: 'unclassified' },
+      ]),
+    )
+    expect(counted).toHaveLength(3)
   })
 
   it('walks Assets missing either value with Next, then sums up the ones where something was saved', async () => {
     const user = await renderTechStack()
     const sheet = await openQueue(user)
 
-    // Its Exposure is known: only its Information Classification is missing.
     expect(sheet.getByText('1 of 5')).toBeInTheDocument()
     expect(sheet.getByText(NEEDS_TRIAGE[0]!)).toBeInTheDocument()
+    await user.click(exposureSection(sheet).getByRole('radio', { name: /Internet-facing/ }))
+    await user.click(sheet.getByRole('button', { name: 'Declare Exposure' }))
+    expect(await exposureSection(sheet).findByRole('status')).toHaveTextContent('Saved')
+    expect(sheet.getByText('1 of 5')).toBeInTheDocument()
+    await user.click(sheet.getByRole('button', { name: 'Next' }))
+
+    // Classified, but its Exposure is Unknown.
+    expect(await sheet.findByText('2 of 5')).toBeInTheDocument()
+    expect(sheet.getByText(NEEDS_TRIAGE[1]!)).toBeInTheDocument()
+    expect(classificationSection(sheet).getByText(/^Public, declared by admin@barbattack\.example on /)).toBeInTheDocument()
+    await user.click(sheet.getByRole('button', { name: 'Next' }))
+    expect(await sheet.findByText('3 of 5')).toBeInTheDocument()
+    await user.click(sheet.getByRole('button', { name: 'Next' }))
+    expect(await sheet.findByText('4 of 5')).toBeInTheDocument()
+    await user.click(sheet.getByRole('button', { name: 'Next' }))
+
+    // Its Exposure is known: only its Information Classification is missing.
+    expect(await sheet.findByText('5 of 5')).toBeInTheDocument()
+    expect(sheet.getByText(NEEDS_TRIAGE[4]!)).toBeInTheDocument()
     expect(exposureSection(sheet).getByText('Internet-facing, from its iTop Location.')).toBeInTheDocument()
     await user.click(classificationSection(sheet).getByRole('radio', { name: /Confidential/ }))
     await user.click(sheet.getByRole('button', { name: 'Declare Classification' }))
     expect(await classificationSection(sheet).findByRole('status')).toHaveTextContent('Saved')
-    expect(sheet.getByText('1 of 5')).toBeInTheDocument()
-    await user.click(sheet.getByRole('button', { name: 'Next' }))
-
-    expect(await sheet.findByText('2 of 5')).toBeInTheDocument()
-    await user.click(exposureSection(sheet).getByRole('radio', { name: /Internet-facing/ }))
-    await user.click(sheet.getByRole('button', { name: 'Declare Exposure' }))
-    expect(await exposureSection(sheet).findByRole('status')).toHaveTextContent('Saved')
-    await user.click(sheet.getByRole('button', { name: 'Next' }))
-
-    // Classified, but its Exposure is Unknown.
-    expect(await sheet.findByText('3 of 5')).toBeInTheDocument()
-    expect(sheet.getByText(NEEDS_TRIAGE[2]!)).toBeInTheDocument()
-    expect(classificationSection(sheet).getByText(/^Public, declared by admin@barbattack\.example on /)).toBeInTheDocument()
-    await user.click(sheet.getByRole('button', { name: 'Next' }))
-    expect(await sheet.findByText('4 of 5')).toBeInTheDocument()
-    await user.click(sheet.getByRole('button', { name: 'Next' }))
-    expect(await sheet.findByText('5 of 5')).toBeInTheDocument()
     await user.click(sheet.getByRole('button', { name: 'Next' }))
 
     expect(await sheet.findByText('2 of 5 Assets triaged')).toBeInTheDocument()
