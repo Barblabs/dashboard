@@ -192,7 +192,7 @@ const scenarios = {
     await signIn('customer_admin')
     await connect()
     const filters = page.getByRole('group', { name: 'Filter assets' })
-    // Type and Criticality are multi-selects: the list stays open between picks, Escape closes it.
+    // Type, Criticality, Exposure and Information Classification are multi-selects: the list stays open between picks, Escape closes it.
     const choose = async (label, ...options) => {
       await filters.getByRole('combobox', { name: label }).click()
       for (const name of options) await page.getByRole('option', { name, exact: true }).click()
@@ -236,6 +236,23 @@ const scenarios = {
     await shot('unknown-criticality', filters)
     const unknown = callsTo('GET', '/assets').at(-1)?.path ?? ''
     check(/criticality=unknown/.test(unknown) && !/kind=/.test(unknown), `unknown Criticality query wrong: ${unknown}`)
+    await removeChip('Unknown')
+    // ledger-db has no Exposure from iTop but a Declared one, so it is not Unknown.
+    await page.getByLabel('Status').selectOption('true')
+    await choose('Exposure', 'Unknown')
+    await expect(page.getByText('4 assets')).toBeVisible()
+    await expect(assetOption('ledger-db')).toBeHidden()
+    await expect(assetOption('core-switch-01')).toBeVisible()
+    await shot('unknown-exposure', filters)
+    await choose('Information Classification', 'Public', 'Unclassified')
+    await expect(page.getByText('4 assets')).toBeVisible()
+    await shot('exposure-and-classification', filters)
+    const both = callsTo('GET', '/assets').at(-1)?.path ?? ''
+    check(
+      /exposure=unknown/.test(both) &&
+        /information_classification=public&information_classification=unclassified/.test(both),
+      `Exposure and Classification query wrong: ${both}`,
+    )
   },
 
   async triage() {
@@ -243,22 +260,30 @@ const scenarios = {
     await connect()
     await expect(page.getByText('5 Assets need triage.')).toBeVisible()
     await shot('banner')
+    // The banner counts two filtered reads, not a scan of the whole inventory.
+    const counted = callsTo('GET', '/assets').filter((call) => /limit=200/.test(call.path)).map((call) => call.path)
+    check(counted.some((query) => /active=true/.test(query) && /exposure=unknown/.test(query)), `no Unknown Exposure read: ${counted}`)
+    check(counted.some((query) => /active=true/.test(query) && /information_classification=unclassified/.test(query)), `no Unclassified read: ${counted}`)
+    check(counted.length === 2, `expected two triage reads: ${counted}`)
     await page.getByRole('button', { name: 'Triage them' }).click()
     const sheet = page.getByRole('dialog', { name: 'Triage Assets' })
     await expect(sheet.getByText('1 of 5')).toBeVisible()
-    // 1 of 5 is prod-api-01: Exposure comes from iTop, Information Classification is missing.
-    await sheet.getByRole('radio', { name: /^Confidential/ }).check()
-    await sheet.getByRole('button', { name: 'Declare Classification' }).click()
-    await expect(sheet.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
-    await shot('classification-declared')
-    await sheet.getByRole('button', { name: 'Next', exact: true }).click()
-    await expect(sheet.getByText('2 of 5')).toBeVisible()
+    // The Unknown Exposures come first: 1 of 5 is analytics-worker-03, missing both values.
+    await expect(sheet.getByText('analytics-worker-03')).toBeVisible()
     await sheet.getByRole('radio', { name: /^Internal/ }).check()
     await expect(sheet.getByText('Internal lowers the Score')).toBeVisible()
     await sheet.getByRole('button', { name: 'Declare Exposure' }).click()
     await expect(sheet.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
     await shot('exposure-declared')
     for (let i = 0; i < 4; i++) await sheet.getByRole('button', { name: 'Next', exact: true }).click()
+    // 5 of 5 is prod-api-01: Exposure comes from iTop, Information Classification is missing.
+    await expect(sheet.getByText('5 of 5')).toBeVisible()
+    await expect(sheet.getByText('prod-api-01')).toBeVisible()
+    await sheet.getByRole('radio', { name: /^Confidential/ }).check()
+    await sheet.getByRole('button', { name: 'Declare Classification' }).click()
+    await expect(sheet.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
+    await shot('classification-declared')
+    await sheet.getByRole('button', { name: 'Next', exact: true }).click()
     await expect(sheet.getByText('2 of 5 Assets triaged')).toBeVisible()
     await shot('summary')
     await sheet.getByRole('button', { name: 'Done' }).click()
