@@ -49,6 +49,7 @@ export const assetsHandlers = [
     const criticalities = params.getAll('criticality')
     const exposures = params.getAll('exposure')
     const classifications = params.getAll('information_classification')
+    const areas = params.getAll('area')
     if (!isOneOf(ACTIVITY_FILTERS, active)) return failure(400, 'invalid_request', 'invalid active')
     if (!kinds.every((kind) => isOneOf(ASSET_KINDS, kind))) {
       return failure(400, 'invalid_request', 'unknown kind')
@@ -62,6 +63,7 @@ export const assetsHandlers = [
     if (!classifications.every((classification) => isOneOf(INFORMATION_CLASSIFICATION_FILTERS, classification))) {
       return failure(400, 'invalid_request', 'unknown information_classification')
     }
+    if (!areas.every((area) => /^\d+$/.test(area))) return failure(400, 'invalid_request', 'invalid area')
     if (params.has('cursor')) return failure(400, 'invalid_request', 'malformed cursor')
 
     const matches = (asset: Asset) =>
@@ -70,7 +72,8 @@ export const assetsHandlers = [
       (criticalities.length === 0 || criticalities.includes(asset.criticality ?? 'unknown')) &&
       (exposures.length === 0 || exposures.includes(asset.exposure.value ?? 'unknown')) &&
       (classifications.length === 0 ||
-        classifications.includes(asset.information_classification.value ?? 'unclassified'))
+        classifications.includes(asset.information_classification.value ?? 'unclassified')) &&
+      (areas.length === 0 || (asset.area !== null && areas.includes(String(asset.area.id))))
     const assets = assetsStore.load().filter(matches)
     return HttpResponse.json<AssetsPage>({ assets, next_cursor: null, total: assets.length })
   }),

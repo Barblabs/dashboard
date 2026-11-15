@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useAreasQuery } from '../../api/areas'
 import {
   ACTIVITY_FILTERS,
   ASSET_KINDS,
@@ -23,6 +24,8 @@ export function AssetFilterBar({
   onChange: (filters: AssetFilters) => void
 }) {
   const { t } = useTranslation()
+  // Inactive Areas still hold Assets, so they stay choosable.
+  const areas = useAreasQuery('all')
   const kindOptions = useMemo(
     () => ASSET_KINDS.map((kind) => ({ value: kind, label: t(`config.inventory.kind.${kind}`) })),
     [t],
@@ -48,6 +51,14 @@ export function AssetFilterBar({
         label: informationClassificationLabel(t, pick(INFORMATION_CLASSIFICATIONS, classification)),
       })),
     [t],
+  )
+  const areaOptions = useMemo(
+    () =>
+      (areas.data?.areas ?? []).map((area) => ({
+        value: String(area.id),
+        label: area.active ? area.name : t('config.inventory.filters.inactiveArea', { name: area.name }),
+      })),
+    [areas.data, t],
   )
 
   return (
@@ -94,6 +105,14 @@ export function AssetFilterBar({
           onChange({ ...filters, information_classification: pickAll(INFORMATION_CLASSIFICATION_FILTERS, values) })
         }
         placeholder={t('config.inventory.filters.allInformationClassifications')}
+      />
+      <FilterMultiSelect
+        label={t('config.inventory.filters.area')}
+        options={areaOptions}
+        value={filters.area.map(String)}
+        onChange={(values) => onChange({ ...filters, area: values.map(Number) })}
+        placeholder={t('config.inventory.filters.allAreas')}
+        disabled={!areas.isSuccess}
       />
     </div>
   )

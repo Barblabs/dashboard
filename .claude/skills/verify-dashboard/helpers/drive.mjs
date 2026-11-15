@@ -192,7 +192,7 @@ const scenarios = {
     await signIn('customer_admin')
     await connect()
     const filters = page.getByRole('group', { name: 'Filter assets' })
-    // Type, Criticality, Exposure and Information Classification are multi-selects: the list stays open between picks, Escape closes it.
+    // Type, Criticality, Exposure, Information Classification and Area are multi-selects: the list stays open between picks, Escape closes it.
     const choose = async (label, ...options) => {
       await filters.getByRole('combobox', { name: label }).click()
       for (const name of options) await page.getByRole('option', { name, exact: true }).click()
@@ -237,6 +237,15 @@ const scenarios = {
     const unknown = callsTo('GET', '/assets').at(-1)?.path ?? ''
     check(/criticality=unknown/.test(unknown) && !/kind=/.test(unknown), `unknown Criticality query wrong: ${unknown}`)
     await removeChip('Unknown')
+    await choose('Area', 'Infrastructure', 'Legacy ERP (inactive)')
+    await expect(page.getByText('5 assets', { exact: true })).toBeVisible()
+    await expect(assetOption('erp-app-02')).toBeVisible()
+    await expect(assetOption('analytics-worker-03')).toBeHidden()
+    await shot('two-areas', filters)
+    const areas = callsTo('GET', '/assets').at(-1)?.path ?? ''
+    check(/area=1&area=3/.test(areas), `two Areas not sent as repeated ids: ${areas}`)
+    await removeChip('Infrastructure')
+    await removeChip('Legacy ERP (inactive)')
     // ledger-db has no Exposure from iTop but a Declared one, so it is not Unknown.
     await page.getByLabel('Status').selectOption('true')
     await choose('Exposure', 'Unknown')

@@ -1,5 +1,5 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Asset, AssetsPage } from '../../api/assets'
 import { i18n } from '../../i18n'
@@ -493,6 +493,52 @@ describe('Tech stack', () => {
     expect(option('core-switch-01')).toBeInTheDocument()
     expect(option('prod-api-01')).toBeInTheDocument()
     expect(assetList().queryByRole('option', { name: /crm-db-primary/ })).not.toBeInTheDocument()
+  })
+
+  it('several Areas list the assets of any of them', async () => {
+    const user = await renderInventory()
+
+    await chooseFilter(user, 'Area', 'Infrastructure', 'Data Platform')
+
+    expect(await screen.findByText('6 assets')).toBeInTheDocument()
+    expect(assetList().queryByRole('option', { name: /core-switch-01/ })).not.toBeInTheDocument()
+    expect(option('analytics-worker-03')).toBeInTheDocument()
+  })
+
+  it('pages through several Areas sending each one on every request', async () => {
+    const areasSent: string[][] = []
+    serveTwoPages()
+    server.use(
+      http.get(apiUrl('/assets'), ({ request }) => {
+        areasSent.push(new URL(request.url).searchParams.getAll('area'))
+        return undefined
+      }),
+    )
+    const user = await renderInventory()
+
+    await chooseFilter(user, 'Area', 'Infrastructure', 'Data Platform')
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(await screen.findByRole('option', { name: /crm-db-primary/ })).toBeInTheDocument()
+    expect(screen.getByText('Page 2')).toBeInTheDocument()
+    expect(areasSent[areasSent.length - 1]).toEqual(['1', '2'])
+  })
+
+  it('an Inactive Area can be chosen, marked as such, and lists its assets', async () => {
+    const user = await renderInventory()
+
+    await user.selectOptions(screen.getByLabelText('Status'), 'All')
+    await chooseFilter(user, 'Area', 'Legacy ERP (inactive)')
+
+    expect(await screen.findByText('1 asset')).toBeInTheDocument()
+    expect(option('erp-app-02')).toBeInTheDocument()
+  })
+
+  it('the Area filter is disabled until the Areas load', async () => {
+    server.use(http.get(apiUrl('/areas'), () => delay('infinite')))
+    await renderInventory()
+
+    expect(screen.getByRole('combobox', { name: 'Area' })).toBeDisabled()
   })
 
   it('removing the last chip lists the inventory unfiltered again', async () => {

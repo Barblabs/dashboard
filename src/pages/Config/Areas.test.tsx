@@ -61,17 +61,17 @@ function areaNames() {
 }
 
 describe('Areas', () => {
-  it('opens on the tech stack and requests the areas only once their tab opens', async () => {
+  it('opens on the tech stack, whose Area filter reads every area, and lists the active ones once their tab opens', async () => {
     const queries = countAreaRequests()
     const user = await renderConnected()
 
     expect(screen.getByRole('tab', { name: 'Tech stack' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByRole('option', { name: /prod-api-01/ })).toBeInTheDocument()
-    expect(queries).toEqual([])
+    await waitFor(() => expect(queries).toEqual(['all']))
 
     await openAreas(user)
 
-    expect(queries).toEqual(['true'])
+    expect(queries).toEqual(['all', 'true'])
     expect(screen.getByText('2 areas')).toBeInTheDocument()
     expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual([
       'Area', 'Owner', 'Status', '',
@@ -115,12 +115,14 @@ describe('Areas', () => {
   })
 
   it('a failed load shows the error, and retrying recovers', async () => {
+    // Only the tab's first request fails: the inventory's Area filter reads every area before it.
+    let failed = false
     server.use(
-      http.get(
-        apiUrl('/areas'),
-        () => HttpResponse.json({ code: 'internal_error', error: 'boom' }, { status: 500 }),
-        { once: true },
-      ),
+      http.get(apiUrl('/areas'), ({ request }) => {
+        if (failed || new URL(request.url).searchParams.get('active') !== 'true') return undefined
+        failed = true
+        return HttpResponse.json({ code: 'internal_error', error: 'boom' }, { status: 500 })
+      }),
     )
     const user = await renderConnected()
     await user.click(screen.getByRole('tab', { name: 'Areas' }))
