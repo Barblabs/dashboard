@@ -7,7 +7,7 @@ alive() { [ -f "$RUN_DIR/$1.pid" ] && kill -0 "$(cat "$RUN_DIR/$1.pid")" 2>/dev/
 check "frontend process is ours and alive" "alive frontend"
 check "frontend port is listening" "lsof -iTCP:$FRONT_PORT -sTCP:LISTEN -t"
 check "frontend serves the app shell" "curl -sf $FRONT_URL/ | grep -q 'id=\"root\"'"
-check "mock mode is on (VITE_USE_MOCK=true)" "curl -sf $FRONT_URL/src/main.tsx | grep -q '\"VITE_USE_MOCK\": \"true\"'"
+check "mock mode is on (VITE_USE_MOCK=true)" "curl -sf $FRONT_URL/src/mockMode.ts | grep -q '\"VITE_USE_MOCK\": \"true\"'"
 check "API base points at $MOCK_API_URL" "curl -sf $FRONT_URL/src/api/client.ts | grep -q '$MOCK_API_URL'"
 check "MSW worker script is served" "curl -sf $FRONT_URL/mockServiceWorker.js | grep -q 'Mock Service Worker'"
 check "nothing listens on the mock API port $MOCK_API_PORT" "! lsof -iTCP:$MOCK_API_PORT -sTCP:LISTEN -t"
