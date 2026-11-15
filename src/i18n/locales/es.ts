@@ -558,8 +558,11 @@ export const es: Translations = {
         active: 'Estado',
         kind: 'Tipo',
         criticality: 'Criticidad',
+        area: 'Área',
         allKinds: 'Todos los tipos',
         allCriticalities: 'Todas las criticidades',
+        allAreas: 'Todas las áreas',
+        inactiveArea: '{{name}} (inactiva)',
         noOptions: 'Sin resultados.',
         remove: 'Quitar {{value}}',
         activity: {
