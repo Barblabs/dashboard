@@ -6,6 +6,7 @@ import { i18n } from '../../i18n'
 import { mockAreas } from '../../mocks/areas'
 import { areasStore } from '../../mocks/areas-store'
 import { apiUrl } from '../../mocks/url'
+import { chooseFilter } from '../../test/filters'
 import { renderApp, seedSource } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
 
@@ -162,13 +163,13 @@ describe('Areas', () => {
   it('switching tabs keeps the tech stack filters', async () => {
     const user = await renderConnected()
     await screen.findByRole('option', { name: /prod-api-01/ })
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Type' }), 'Server')
+    await chooseFilter(user, 'Type', 'Server')
     await screen.findByText('2 assets')
 
     await openAreas(user)
     await user.click(screen.getByRole('tab', { name: 'Tech stack' }))
 
-    expect(screen.getByRole('combobox', { name: 'Type' })).toHaveValue('server')
+    expect(screen.getByRole('button', { name: 'Remove Server' })).toBeInTheDocument()
     expect(screen.getByText('2 assets')).toBeInTheDocument()
   })
 

@@ -9,7 +9,7 @@ type DeclareExposureRequest = Known<Schemas['DeclareExposureRequest']>
 
 // There is no `GET /assets/{id}`: the Asset is looked up among those of its Kind, Active or not.
 async function fetchAsset(asset: Asset): Promise<Asset | null> {
-  for await (const assets of allAssetPages({ active: 'all', kind: asset.kind })) {
+  for await (const assets of allAssetPages({ active: 'all', kind: [asset.kind] })) {
     const found = assets.find((candidate) => candidate.id === asset.id)
     if (found) return found
   }

@@ -15,7 +15,8 @@ export function FilterSelect({
   return (
     <label className="flex flex-col gap-1 font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase">
       {label}
-      <Select value={value} onChange={(event) => onChange(event.target.value)}>
+      {/* As tall as a filter MultiSelect, so the fields of a filter bar line up. */}
+      <Select className="min-h-11" value={value} onChange={(event) => onChange(event.target.value)}>
         {children}
       </Select>
     </label>

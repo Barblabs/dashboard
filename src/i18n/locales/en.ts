@@ -558,6 +558,8 @@ export const en = {
         criticality: 'Criticality',
         allKinds: 'All types',
         allCriticalities: 'All criticalities',
+        noOptions: 'No matches.',
+        remove: 'Remove {{value}}',
         activity: {
           true: 'Active',
           false: 'Inactive',

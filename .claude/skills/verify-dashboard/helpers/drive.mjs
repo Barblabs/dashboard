@@ -191,11 +191,26 @@ const scenarios = {
   async inventory() {
     await signIn('customer_admin')
     await connect()
+    const filters = page.getByRole('group', { name: 'Filter assets' })
+    // Type and Criticality are multi-selects: the list stays open between picks, Escape closes it.
+    const choose = async (label, ...options) => {
+      await filters.getByRole('combobox', { name: label }).click()
+      for (const name of options) await page.getByRole('option', { name, exact: true }).click()
+      await page.keyboard.press('Escape')
+    }
+    const removeChip = (name) => filters.getByRole('button', { name: `Remove ${name}` }).click()
     await expect(page.getByText('7 assets')).toBeVisible()
+    await shot('filters-default', filters)
     await page.getByLabel('Status').selectOption('all')
     await expect(page.getByText('8 assets')).toBeVisible()
     await shot('all-statuses', assetList())
-    await page.getByLabel('Type').selectOption('server')
+    await choose('Type', 'Server', 'Virtual Machine')
+    await expect(assetOption('core-switch-01')).toBeHidden()
+    await expect(page.getByText('7 assets')).toBeVisible()
+    await shot('two-kinds', filters)
+    const twoKinds = callsTo('GET', '/assets').at(-1)?.path ?? ''
+    check(/kind=server&kind=virtual_machine/.test(twoKinds), `two Kinds not sent as repeated keys: ${twoKinds}`)
+    await removeChip('Virtual Machine')
     await expect(page.getByText('2 assets')).toBeVisible()
     await shot('servers-only', assetList())
     // The first Asset is selected; picking another shows its record.
@@ -206,12 +221,21 @@ const scenarios = {
     await expect(assetRecord('prod-api-01').getByText('internal-billing-agent')).toBeVisible()
     await expect(assetRecord('prod-api-01').getByText('Unidentified', { exact: true })).toBeVisible()
     await shot('record', assetRecord('prod-api-01'))
-    await page.getByLabel('Criticality').selectOption('low')
+    await choose('Criticality', 'Low')
     await expect(page.getByText('No assets match these filters.')).toBeVisible()
     await shot('no-matches', page.getByText('No assets match these filters.'))
     check(await page.getByRole('navigation', { name: 'Pages' }).count() === 0, 'pager shown without a next cursor')
     const last = callsTo('GET', '/assets').at(-1)?.path ?? ''
     check(/active=all/.test(last) && /kind=server/.test(last) && /criticality=low/.test(last), `last /assets query missing filters: ${last}`)
+    await removeChip('Server')
+    await removeChip('Low')
+    await expect(page.getByText('8 assets')).toBeVisible()
+    await choose('Criticality', 'Unknown')
+    await expect(page.getByText('1 asset', { exact: true })).toBeVisible()
+    await expect(assetOption('erp-app-02')).toBeVisible()
+    await shot('unknown-criticality', filters)
+    const unknown = callsTo('GET', '/assets').at(-1)?.path ?? ''
+    check(/criticality=unknown/.test(unknown) && !/kind=/.test(unknown), `unknown Criticality query wrong: ${unknown}`)
   },
 
   async triage() {

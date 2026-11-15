@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 import {
   ACTIVITY_FILTERS,
   ASSET_KINDS,
-  CRITICALITIES,
+  CRITICALITY_FILTERS,
   EXPOSURES,
   INFORMATION_CLASSIFICATIONS,
   type Asset,
@@ -43,21 +43,21 @@ export const assetsHandlers = [
   http.get(apiUrl('/assets'), ({ request }) => {
     const params = new URL(request.url).searchParams
     const active = params.get('active') ?? 'true'
-    const kind = params.get('kind')
-    const criticality = params.get('criticality')
+    const kinds = params.getAll('kind')
+    const criticalities = params.getAll('criticality')
     if (!isOneOf(ACTIVITY_FILTERS, active)) return failure(400, 'invalid_request', 'invalid active')
-    if (kind !== null && !isOneOf(ASSET_KINDS, kind)) {
+    if (!kinds.every((kind) => isOneOf(ASSET_KINDS, kind))) {
       return failure(400, 'invalid_request', 'unknown kind')
     }
-    if (criticality !== null && !isOneOf(CRITICALITIES, criticality)) {
+    if (!criticalities.every((criticality) => isOneOf(CRITICALITY_FILTERS, criticality))) {
       return failure(400, 'invalid_request', 'unknown criticality')
     }
     if (params.has('cursor')) return failure(400, 'invalid_request', 'malformed cursor')
 
     const matches = (asset: Asset) =>
       (active === 'all' || asset.active === (active === 'true')) &&
-      (kind === null || asset.kind === kind) &&
-      (criticality === null || asset.criticality === criticality)
+      (kinds.length === 0 || kinds.includes(asset.kind)) &&
+      (criticalities.length === 0 || criticalities.includes(asset.criticality ?? 'unknown'))
     const assets = assetsStore.load().filter(matches)
     return HttpResponse.json<AssetsPage>({ assets, next_cursor: null, total: assets.length })
   }),

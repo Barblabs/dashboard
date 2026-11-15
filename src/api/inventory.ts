@@ -6,7 +6,7 @@ import { connectionScopeKey } from './cmdb'
 import { listCache } from './listCache'
 import type { Loadable } from './loadable'
 
-const DEFAULT_ASSET_FILTERS: AssetFilters = { active: 'true', kind: null, criticality: null }
+const DEFAULT_ASSET_FILTERS: AssetFilters = { active: 'true', kind: [], criticality: [] }
 
 const ASSETS_PAGE_SIZE = 50
 
@@ -16,8 +16,8 @@ const MAX_ASSETS_PAGE_SIZE = 200
 // The backend rejects a cursor sent with other filters, so every page request repeats them.
 function assetsPath(filters: AssetFilters, cursor: string | null, limit: number) {
   const params = new URLSearchParams({ limit: String(limit), active: filters.active })
-  if (filters.kind) params.set('kind', filters.kind)
-  if (filters.criticality) params.set('criticality', filters.criticality)
+  for (const kind of filters.kind) params.append('kind', kind)
+  for (const criticality of filters.criticality) params.append('criticality', criticality)
   if (cursor) params.set('cursor', cursor)
   return `/assets?${params}`
 }
@@ -61,10 +61,16 @@ interface Listing {
   cursors: string[]
 }
 
+// Lists are compared by content: each change builds a new one, so a cleared list still equals the default.
+function sameFilter(a: string | readonly string[], b: string | readonly string[]) {
+  if (typeof a === 'string' || typeof b === 'string') return a === b
+  return a.length === b.length && a.every((value, i) => value === b[i])
+}
+
 // Every filter is compared, so a new one counts without touching this check.
 function isFiltered(filters: AssetFilters) {
   const keys = Object.keys(DEFAULT_ASSET_FILTERS) as (keyof AssetFilters)[]
-  return keys.some((key) => filters[key] !== DEFAULT_ASSET_FILTERS[key])
+  return keys.some((key) => !sameFilter(filters[key], DEFAULT_ASSET_FILTERS[key]))
 }
 
 export interface Pager {

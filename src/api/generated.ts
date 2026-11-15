@@ -132,13 +132,13 @@ export interface paths {
         get?: never;
         /**
          * Declare an Asset's Information Classification
-         * @description Only a Customer Admin declares it, and only on an Active Asset. Unclassified cannot be declared: clear the Declaration instead. It is not scored, so no Finding is rescored. A Sync never changes it.
+         * @description Only a Customer Admin declares it, and only on an Active Asset. Unclassified cannot be declared: clear the Declaration instead. The Asset's open Findings are rescored before the response; if that fails, the request fails but the Declaration stands. A Sync never changes it.
          */
         put: operations["declare-asset-information-classification"];
         post?: never;
         /**
          * Clear an Asset's Information Classification
-         * @description Only a Customer Admin clears it, even on an Inactive Asset. The Asset is Unclassified again.
+         * @description Only a Customer Admin clears it, even on an Inactive Asset. The Asset is Unclassified again, and its open Findings are rescored before the response.
          */
         delete: operations["clear-asset-information-classification"];
         options?: never;
@@ -1706,10 +1706,16 @@ export interface operations {
                 /** @description next_cursor of the previous page */
                 cursor?: string;
                 active?: "true" | "false" | "all";
-                /** @description Asset Kind code */
-                kind?: "server" | "virtual_machine" | "workstation" | "network_device";
-                /** @description Criticality code */
-                criticality?: "high" | "medium" | "low";
+                /** @description Asset Kind codes, as repeated keys; an Asset of any of them matches */
+                kind?: ("server" | "virtual_machine" | "workstation" | "network_device")[];
+                /** @description Criticality codes, as repeated keys; an Asset with any of them matches, and unknown matches an Asset without a Criticality */
+                criticality?: ("high" | "medium" | "low" | "unknown")[];
+                /** @description Exposure codes, as repeated keys, matched against the effective Exposure (exposure.value); an Asset with any of them matches, and unknown matches an Asset without one */
+                exposure?: ("internet_facing" | "internal" | "unknown")[];
+                /** @description Information Classification codes, as repeated keys; an Asset with any of them matches, and unclassified matches an Asset without a Declaration */
+                information_classification?: ("public" | "private" | "confidential" | "unclassified")[];
+                /** @description Area ids, as in GET /areas, as repeated keys; an Asset in any of them matches */
+                area?: number[];
             };
             header?: never;
             path?: never;
