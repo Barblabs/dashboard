@@ -5,6 +5,7 @@ export const es: Translations = {
     retry: 'Reintentar',
     close: 'Cerrar',
     toastRegion: 'Notificaciones',
+    newTab: '(abre en una nueva pestaña)',
   },
   sidebar: {
     superAdmin: 'Super Admin',

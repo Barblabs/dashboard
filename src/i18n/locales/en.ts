@@ -3,6 +3,7 @@ export const en = {
     retry: 'Retry',
     close: 'Close',
     toastRegion: 'Notifications',
+    newTab: '(opens in a new tab)',
   },
   sidebar: {
     superAdmin: 'Super Admin',

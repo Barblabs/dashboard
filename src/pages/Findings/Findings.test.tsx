@@ -85,6 +85,9 @@ describe('Findings', () => {
     expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^1$/)
     expect(within(dialog).getByText('Measured: no input was missing.')).toBeInTheDocument()
     expect(within(dialog).getByText('No action plan yet. Luna writes one from what is known of this finding.')).toBeInTheDocument()
+    const refLink = within(dialog).getByRole('link', { name: /www\.postgresql\.org\/support\/security\/CVE-2025-1094/ })
+    expect(refLink).toHaveAttribute('target', '_blank')
+    expect(refLink).toHaveAttribute('rel', expect.stringContaining('noopener'))
   })
 
   it('opens a finding on its Close button, not on the index of its sections', async () => {
@@ -263,6 +266,8 @@ describe('Findings', () => {
     expect(within(dialog).getByText('2.442')).toBeInTheDocument()
     expect(within(dialog).getByText('Actualiza Jenkins a 2.442.')).toBeInTheDocument()
     expect(within(dialog).getByText(/Written by Luna/)).toBeInTheDocument()
+    const sourceLinks = within(dialog).getAllByRole('link', { name: /packetstormsecurity\.com/ })
+    expect(sourceLinks[0]).toHaveAttribute('target', '_blank')
   })
 
   it('asks Luna for an action plan and keeps it with the finding', async () => {
