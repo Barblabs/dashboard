@@ -18,6 +18,10 @@ export type SoftwareRole = 'operating_system' | 'application'
 export const EXPOSURES = ['internet_facing', 'internal'] as const
 export type Exposure = (typeof EXPOSURES)[number]
 
+/** Matched on the effective Exposure: `unknown` matches an Asset whose `exposure.value` is `null`. */
+export const EXPOSURE_FILTERS = [...EXPOSURES, 'unknown'] as const
+type ExposureFilter = (typeof EXPOSURE_FILTERS)[number]
+
 /**
  * `value` is the effective Exposure: the Declaration when there is one, otherwise `imported`.
  * Either is `null` when Unknown.
@@ -33,6 +37,10 @@ export const INFORMATION_CLASSIFICATIONS = [
   'private',
   'confidential',
 ] as const satisfies readonly InformationClassification[]
+
+/** `unclassified` matches an Asset without a Declaration. */
+export const INFORMATION_CLASSIFICATION_FILTERS = [...INFORMATION_CLASSIFICATIONS, 'unclassified'] as const
+type InformationClassificationFilter = (typeof INFORMATION_CLASSIFICATION_FILTERS)[number]
 
 /** Only ever declared, so it is all set or, when Unclassified, all `null` (ADR 0031). */
 export type AssetInformationClassification =
@@ -72,6 +80,8 @@ export interface AssetFilters {
   active: ActivityFilter
   kind: AssetKind[]
   criticality: CriticalityFilter[]
+  exposure: ExposureFilter[]
+  information_classification: InformationClassificationFilter[]
 }
 
 export function assetKey(asset: Pick<Asset, 'source_id' | 'record_id'>) {

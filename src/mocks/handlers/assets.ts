@@ -3,7 +3,9 @@ import {
   ACTIVITY_FILTERS,
   ASSET_KINDS,
   CRITICALITY_FILTERS,
+  EXPOSURE_FILTERS,
   EXPOSURES,
+  INFORMATION_CLASSIFICATION_FILTERS,
   INFORMATION_CLASSIFICATIONS,
   type Asset,
   type AssetsPage,
@@ -45,6 +47,8 @@ export const assetsHandlers = [
     const active = params.get('active') ?? 'true'
     const kinds = params.getAll('kind')
     const criticalities = params.getAll('criticality')
+    const exposures = params.getAll('exposure')
+    const classifications = params.getAll('information_classification')
     if (!isOneOf(ACTIVITY_FILTERS, active)) return failure(400, 'invalid_request', 'invalid active')
     if (!kinds.every((kind) => isOneOf(ASSET_KINDS, kind))) {
       return failure(400, 'invalid_request', 'unknown kind')
@@ -52,12 +56,21 @@ export const assetsHandlers = [
     if (!criticalities.every((criticality) => isOneOf(CRITICALITY_FILTERS, criticality))) {
       return failure(400, 'invalid_request', 'unknown criticality')
     }
+    if (!exposures.every((exposure) => isOneOf(EXPOSURE_FILTERS, exposure))) {
+      return failure(400, 'invalid_request', 'unknown exposure')
+    }
+    if (!classifications.every((classification) => isOneOf(INFORMATION_CLASSIFICATION_FILTERS, classification))) {
+      return failure(400, 'invalid_request', 'unknown information_classification')
+    }
     if (params.has('cursor')) return failure(400, 'invalid_request', 'malformed cursor')
 
     const matches = (asset: Asset) =>
       (active === 'all' || asset.active === (active === 'true')) &&
       (kinds.length === 0 || kinds.includes(asset.kind)) &&
-      (criticalities.length === 0 || criticalities.includes(asset.criticality ?? 'unknown'))
+      (criticalities.length === 0 || criticalities.includes(asset.criticality ?? 'unknown')) &&
+      (exposures.length === 0 || exposures.includes(asset.exposure.value ?? 'unknown')) &&
+      (classifications.length === 0 ||
+        classifications.includes(asset.information_classification.value ?? 'unclassified'))
     const assets = assetsStore.load().filter(matches)
     return HttpResponse.json<AssetsPage>({ assets, next_cursor: null, total: assets.length })
   }),
