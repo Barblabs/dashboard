@@ -75,7 +75,7 @@ export interface CurrentOrder {
   previousCreatedAt: string | null
 }
 
-export const PRIORITIZATIONS_KEY = [...connectionScopeKey, 'prioritizations'] as const
+const PRIORITIZATIONS_KEY = [...connectionScopeKey, 'prioritizations'] as const
 
 const CURRENT_KEY = [...PRIORITIZATIONS_KEY, 'current'] as const
 
@@ -112,6 +112,11 @@ export function currentAsset(finding: Finding): FindingAsset {
  */
 export function scoreMoved(finding: Finding): boolean {
   return finding.current !== null && finding.current.score_details.value !== finding.score
+}
+
+/** Refetches the Findings after a change that rescores them. */
+export function invalidatePrioritizations(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({ queryKey: PRIORITIZATIONS_KEY })
 }
 
 /** Whether the newest Prioritization is the one that placed the Finding. */

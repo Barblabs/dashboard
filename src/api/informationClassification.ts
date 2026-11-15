@@ -19,9 +19,9 @@ function sendChange({ asset, value }: InformationClassificationChange): Promise<
 }
 
 /**
- * Declares or clears an Asset's Information Classification. Nothing is scored from it, so unlike
- * Exposure there is no rescore to fall back from: it resolves with the Asset as saved, or rejects
- * with the request's `ApiError` (`asset_inactive` when the Asset turned Inactive).
+ * Declares or clears an Asset's Information Classification, which rescores the Asset's open
+ * Findings (ADR 0032). It resolves with the Asset as saved, or rejects with the request's
+ * `ApiError` (`asset_inactive` when the Asset turned Inactive).
  */
 export function useInformationClassificationMutation() {
   const queryClient = useQueryClient()

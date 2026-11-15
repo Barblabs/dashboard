@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Asset, Exposure } from './assets'
 import { api, ApiError } from './client'
 import { allAssetPages } from './inventory'
-import { PRIORITIZATIONS_KEY } from './prioritizations'
 import { declarationSaved, declarationSettled, type DeclarationChange } from './declarations'
 import type { Known, Schemas } from './schemas'
 
@@ -73,10 +72,7 @@ export function useExposureMutation({
       declarationSaved(queryClient, saved.asset)
       onSaved(saved, change)
     },
-    // Not awaited, so the mutation settles without waiting for the refetches; a change also rescores the Findings.
-    onSettled: () => {
-      declarationSettled(queryClient)
-      void queryClient.invalidateQueries({ queryKey: PRIORITIZATIONS_KEY })
-    },
+    // Not awaited, so the mutation settles without waiting for the refetches.
+    onSettled: () => declarationSettled(queryClient),
   })
 }
