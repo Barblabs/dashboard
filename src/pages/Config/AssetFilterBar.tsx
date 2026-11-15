@@ -4,8 +4,13 @@ import {
   ACTIVITY_FILTERS,
   ASSET_KINDS,
   CRITICALITY_FILTERS,
+  EXPOSURE_FILTERS,
+  EXPOSURES,
+  INFORMATION_CLASSIFICATION_FILTERS,
+  INFORMATION_CLASSIFICATIONS,
   type AssetFilters,
 } from '../../api/assets'
+import { exposureLabel, informationClassificationLabel } from './assetText'
 import { FilterMultiSelect } from './FilterMultiSelect'
 import { FilterSelect } from './FilterSelect'
 import { pick, pickAll } from './filters'
@@ -27,6 +32,20 @@ export function AssetFilterBar({
       CRITICALITY_FILTERS.map((criticality) => ({
         value: criticality,
         label: t(`config.inventory.criticality.${criticality}`),
+      })),
+    [t],
+  )
+  // `pick` reads the Unknown and Unclassified filters as `null`, which the labels name as such.
+  const exposureOptions = useMemo(
+    () =>
+      EXPOSURE_FILTERS.map((exposure) => ({ value: exposure, label: exposureLabel(t, pick(EXPOSURES, exposure)) })),
+    [t],
+  )
+  const informationClassificationOptions = useMemo(
+    () =>
+      INFORMATION_CLASSIFICATION_FILTERS.map((classification) => ({
+        value: classification,
+        label: informationClassificationLabel(t, pick(INFORMATION_CLASSIFICATIONS, classification)),
       })),
     [t],
   )
@@ -59,6 +78,22 @@ export function AssetFilterBar({
         value={filters.criticality}
         onChange={(values) => onChange({ ...filters, criticality: pickAll(CRITICALITY_FILTERS, values) })}
         placeholder={t('config.inventory.filters.allCriticalities')}
+      />
+      <FilterMultiSelect
+        label={t('config.inventory.filters.exposure')}
+        options={exposureOptions}
+        value={filters.exposure}
+        onChange={(values) => onChange({ ...filters, exposure: pickAll(EXPOSURE_FILTERS, values) })}
+        placeholder={t('config.inventory.filters.allExposures')}
+      />
+      <FilterMultiSelect
+        label={t('config.inventory.filters.informationClassification')}
+        options={informationClassificationOptions}
+        value={filters.information_classification}
+        onChange={(values) =>
+          onChange({ ...filters, information_classification: pickAll(INFORMATION_CLASSIFICATION_FILTERS, values) })
+        }
+        placeholder={t('config.inventory.filters.allInformationClassifications')}
       />
     </div>
   )

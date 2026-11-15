@@ -462,6 +462,39 @@ describe('Tech stack', () => {
     expect(option('erp-app-02')).toBeInTheDocument()
   })
 
+  it('the Unknown Exposure lists the assets whose effective Exposure is Unknown, Declared or not', async () => {
+    const user = await renderInventory()
+
+    await chooseFilter(user, 'Exposure', 'Unknown')
+
+    // ledger-db's CMDB Source gives no Exposure, but its Declaration does.
+    expect(await screen.findByText('4 assets')).toBeInTheDocument()
+    for (const name of ['analytics-worker-03', 'core-switch-01', 'payments-gateway', 'reporting-batch-01']) {
+      expect(option(name)).toBeInTheDocument()
+    }
+  })
+
+  it('an Exposure filter matches the Declaration over what the CMDB Source gives', async () => {
+    const user = await renderInventory()
+
+    await chooseFilter(user, 'Exposure', 'Internal')
+
+    expect(await screen.findByText('2 assets')).toBeInTheDocument()
+    expect(option('crm-db-primary')).toBeInTheDocument()
+    expect(option('ledger-db')).toBeInTheDocument()
+  })
+
+  it('several Information Classifications, Unclassified among them, list the assets of any of them', async () => {
+    const user = await renderInventory()
+
+    await chooseFilter(user, 'Information Classification', 'Public', 'Unclassified')
+
+    expect(await screen.findByText('5 assets')).toBeInTheDocument()
+    expect(option('core-switch-01')).toBeInTheDocument()
+    expect(option('prod-api-01')).toBeInTheDocument()
+    expect(assetList().queryByRole('option', { name: /crm-db-primary/ })).not.toBeInTheDocument()
+  })
+
   it('removing the last chip lists the inventory unfiltered again', async () => {
     const user = await renderInventory()
     await chooseFilter(user, 'Type', 'Workstation')
