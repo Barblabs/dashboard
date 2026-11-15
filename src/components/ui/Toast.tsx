@@ -32,7 +32,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <Toast.Portal>
         <Toast.Viewport
           aria-label={t('common.toastRegion')}
-          className="pointer-events-none fixed right-4 bottom-4 z-50 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2"
+          className="pointer-events-none fixed right-4 bottom-4 z-toast flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2"
         >
           <ToastList />
         </Toast.Viewport>

@@ -2,11 +2,11 @@ import type { ReactNode } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 
 const BACKDROP =
-  'fixed inset-0 bg-navy/40 transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0'
+  'fixed inset-0 z-dialog bg-navy/40 transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0'
 
 // Opacity always animates; the scale only when the user allows motion.
 const POPUP =
-  'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-2xl transition-[opacity,scale] duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:scale-[0.96] motion-safe:data-starting-style:scale-[0.96]'
+  'fixed top-1/2 left-1/2 z-dialog -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white shadow-2xl transition-[opacity,scale] duration-200 ease-out data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:scale-[0.96] motion-safe:data-starting-style:scale-[0.96]'
 
 const WIDTH = {
   sm: 'w-[min(32rem,calc(100vw-2rem))]',
