@@ -3,8 +3,12 @@ import type { Override, Schemas } from './schemas'
 export const ASSET_KINDS = ['server', 'virtual_machine', 'workstation', 'network_device'] as const
 export type AssetKind = (typeof ASSET_KINDS)[number]
 
-export const CRITICALITIES = ['high', 'medium', 'low'] as const
+const CRITICALITIES = ['high', 'medium', 'low'] as const
 export type Criticality = (typeof CRITICALITIES)[number]
+
+/** `unknown` matches an Asset whose `criticality` is `null`. */
+export const CRITICALITY_FILTERS = [...CRITICALITIES, 'unknown'] as const
+type CriticalityFilter = (typeof CRITICALITY_FILTERS)[number]
 
 export const ACTIVITY_FILTERS = ['true', 'false', 'all'] as const
 export type ActivityFilter = (typeof ACTIVITY_FILTERS)[number]
@@ -63,10 +67,11 @@ export type Asset = Override<
 
 export type AssetsPage = Override<Schemas['AssetListResponse'], { assets: Asset[] }>
 
+/** An empty list leaves the Assets unfiltered by that field; several values match any of them. */
 export interface AssetFilters {
   active: ActivityFilter
-  kind: AssetKind | null
-  criticality: Criticality | null
+  kind: AssetKind[]
+  criticality: CriticalityFilter[]
 }
 
 export function assetKey(asset: Pick<Asset, 'source_id' | 'record_id'>) {

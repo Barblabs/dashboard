@@ -5,6 +5,7 @@ import type { Asset, AssetsPage } from '../../api/assets'
 import { i18n } from '../../i18n'
 import { importedExposure, mockAssets } from '../../mocks/assets'
 import { apiUrl } from '../../mocks/url'
+import { chooseFilter } from '../../test/filters'
 import { renderApp, seedSource } from '../../test/render'
 import { server } from '../../test/server'
 
@@ -257,7 +258,7 @@ describe('Tech stack', () => {
     const queries = serveTwoPages()
     const user = await renderInventory()
 
-    await user.selectOptions(screen.getByLabelText('Type'), 'Server')
+    await chooseFilter(user, 'Type', 'Server')
     await user.click(screen.getByRole('button', { name: 'Next' }))
 
     expect(await screen.findByRole('option', { name: /crm-db-primary/ })).toBeInTheDocument()
@@ -313,7 +314,7 @@ describe('Tech stack', () => {
     await user.click(screen.getByRole('button', { name: 'Next' }))
     await screen.findByRole('option', { name: /crm-db-primary/ })
 
-    await user.selectOptions(screen.getByLabelText('Criticality'), 'High')
+    await chooseFilter(user, 'Criticality', 'High')
 
     expect(await screen.findByRole('option', { name: /prod-api-01/ })).toBeInTheDocument()
     expect(screen.getByText('Page 1')).toBeInTheDocument()
@@ -350,7 +351,7 @@ describe('Tech stack', () => {
     const user = await renderInventory()
     await user.click(option('core-switch-01'))
 
-    await user.selectOptions(screen.getByLabelText('Criticality'), 'High')
+    await chooseFilter(user, 'Criticality', 'High')
 
     await waitFor(() =>
       expect(screen.queryByRole('option', { name: /core-switch-01/ })).not.toBeInTheDocument(),
@@ -396,8 +397,9 @@ describe('Tech stack', () => {
     const user = renderConnected()
     await screen.findByRole('option', { name: /crm-db-primary/ })
 
-    await user.selectOptions(screen.getByLabelText('Type'), 'Server')
-    await user.selectOptions(screen.getByLabelText('Type'), 'Virtual Machine')
+    await chooseFilter(user, 'Type', 'Server')
+    await user.click(screen.getByRole('button', { name: 'Remove Server' }))
+    await chooseFilter(user, 'Type', 'Virtual Machine')
     await screen.findByRole('option', { name: /analytics-worker-03/ })
     releaseServers()
 
@@ -418,10 +420,74 @@ describe('Tech stack', () => {
     expect(screen.queryByRole('article')).not.toBeInTheDocument()
   })
 
+  it('several Kinds list the assets of any of them', async () => {
+    const user = await renderInventory()
+
+    await chooseFilter(user, 'Type', 'Server', 'Virtual Machine')
+
+    await waitFor(() =>
+      expect(screen.queryByRole('option', { name: /core-switch-01/ })).not.toBeInTheDocument(),
+    )
+    expect(screen.getByText('6 assets')).toBeInTheDocument()
+    expect(option('prod-api-01')).toBeInTheDocument()
+    expect(option('analytics-worker-03')).toBeInTheDocument()
+  })
+
+  it('pages through several Kinds sending each one on every request', async () => {
+    const kindsSent: string[][] = []
+    serveTwoPages()
+    server.use(
+      http.get(apiUrl('/assets'), ({ request }) => {
+        kindsSent.push(new URL(request.url).searchParams.getAll('kind'))
+        return undefined
+      }),
+    )
+    const user = await renderInventory()
+
+    await chooseFilter(user, 'Type', 'Server', 'Virtual Machine')
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(await screen.findByRole('option', { name: /crm-db-primary/ })).toBeInTheDocument()
+    expect(screen.getByText('Page 2')).toBeInTheDocument()
+    expect(kindsSent[kindsSent.length - 1]).toEqual(['server', 'virtual_machine'])
+  })
+
+  it('the Unknown Criticality lists the assets without one', async () => {
+    const user = await renderInventory()
+
+    await user.selectOptions(screen.getByLabelText('Status'), 'All')
+    await chooseFilter(user, 'Criticality', 'Unknown')
+
+    expect(await screen.findByText('1 asset')).toBeInTheDocument()
+    expect(option('erp-app-02')).toBeInTheDocument()
+  })
+
+  it('removing the last chip lists the inventory unfiltered again', async () => {
+    const user = await renderInventory()
+    await chooseFilter(user, 'Type', 'Workstation')
+    await screen.findByText('No assets match these filters.')
+
+    await user.click(screen.getByRole('button', { name: 'Remove Workstation' }))
+
+    expect(await screen.findByText('7 assets')).toBeInTheDocument()
+  })
+
+  it('an empty inventory reads as unfiltered once the last chip is removed', async () => {
+    server.use(http.get(apiUrl('/assets'), () => HttpResponse.json(page([], null, 0))))
+    const user = renderConnected()
+    await screen.findByText('There are no assets in the inventory.')
+    await chooseFilter(user, 'Criticality', 'High')
+    await screen.findByText('No assets match these filters.')
+
+    await user.click(screen.getByRole('button', { name: 'Remove High' }))
+
+    expect(await screen.findByText('There are no assets in the inventory.')).toBeInTheDocument()
+  })
+
   it('says no asset matches when the filters exclude every asset', async () => {
     const user = await renderInventory()
 
-    await user.selectOptions(screen.getByLabelText('Type'), 'Workstation')
+    await chooseFilter(user, 'Type', 'Workstation')
 
     expect(await screen.findByText('No assets match these filters.')).toBeInTheDocument()
     expect(screen.queryByRole('article')).not.toBeInTheDocument()
