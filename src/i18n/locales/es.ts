@@ -560,6 +560,8 @@ export const es: Translations = {
         criticality: 'Criticidad',
         allKinds: 'Todos los tipos',
         allCriticalities: 'Todas las criticidades',
+        noOptions: 'Sin resultados.',
+        remove: 'Quitar {{value}}',
         activity: {
           true: 'Activos',
           false: 'Inactivos',
