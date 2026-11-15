@@ -10,12 +10,14 @@ export function FilterMultiSelect({
   value,
   onChange,
   placeholder,
+  disabled,
 }: {
   label: string
   options: Option[]
   value: string[]
   onChange: (value: string[]) => void
   placeholder: string
+  disabled?: boolean
 }) {
   const { t } = useTranslation()
   const id = useId()
@@ -33,6 +35,7 @@ export function FilterMultiSelect({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
+        disabled={disabled}
         emptyText={t('config.inventory.filters.noOptions')}
         removeLabel={(chosen) => t('config.inventory.filters.remove', { value: chosen })}
       />

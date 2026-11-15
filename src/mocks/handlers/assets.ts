@@ -45,6 +45,7 @@ export const assetsHandlers = [
     const active = params.get('active') ?? 'true'
     const kinds = params.getAll('kind')
     const criticalities = params.getAll('criticality')
+    const areas = params.getAll('area')
     if (!isOneOf(ACTIVITY_FILTERS, active)) return failure(400, 'invalid_request', 'invalid active')
     if (!kinds.every((kind) => isOneOf(ASSET_KINDS, kind))) {
       return failure(400, 'invalid_request', 'unknown kind')
@@ -52,12 +53,14 @@ export const assetsHandlers = [
     if (!criticalities.every((criticality) => isOneOf(CRITICALITY_FILTERS, criticality))) {
       return failure(400, 'invalid_request', 'unknown criticality')
     }
+    if (!areas.every((area) => /^\d+$/.test(area))) return failure(400, 'invalid_request', 'invalid area')
     if (params.has('cursor')) return failure(400, 'invalid_request', 'malformed cursor')
 
     const matches = (asset: Asset) =>
       (active === 'all' || asset.active === (active === 'true')) &&
       (kinds.length === 0 || kinds.includes(asset.kind)) &&
-      (criticalities.length === 0 || criticalities.includes(asset.criticality ?? 'unknown'))
+      (criticalities.length === 0 || criticalities.includes(asset.criticality ?? 'unknown')) &&
+      (areas.length === 0 || (asset.area !== null && areas.includes(String(asset.area.id))))
     const assets = assetsStore.load().filter(matches)
     return HttpResponse.json<AssetsPage>({ assets, next_cursor: null, total: assets.length })
   }),

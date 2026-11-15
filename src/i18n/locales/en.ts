@@ -556,8 +556,11 @@ export const en = {
         active: 'Status',
         kind: 'Type',
         criticality: 'Criticality',
+        area: 'Area',
         allKinds: 'All types',
         allCriticalities: 'All criticalities',
+        allAreas: 'All areas',
+        inactiveArea: '{{name}} (inactive)',
         noOptions: 'No matches.',
         remove: 'Remove {{value}}',
         activity: {
