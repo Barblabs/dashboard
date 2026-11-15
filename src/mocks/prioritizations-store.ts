@@ -5,7 +5,8 @@ import { localStore } from './localStore'
  * Findings of the backend's docs/examples/findings.json, as GET /prioritizations/{id}
  * answers them. The newest Prioritization kept the order of the one before it and placed
  * CVE-2024-6387 in the third group. lab-01 moved to Implementation after CVE-2024-23897 was
- * placed: its current Score dropped by less than 0.1, so it keeps its place.
+ * placed: its current Score dropped by less than 0.1, so it keeps its place. web-01 is declared
+ * Confidential, and CVE-2021-41773 is scored with Scoring Model 3; the rest with Model 1.
  */
 const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
   f1: {
@@ -224,7 +225,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
     "asset_name": "web-01",
     "component": "Apache HTTP Server",
     "version": "2.4.49",
-    "score": 0.6958,
+    "score": 0.98,
     "score_rank": 1,
     "group": 1,
     "placed_at": "2026-11-10T08:58:00Z",
@@ -234,21 +235,21 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality": "medium",
         "exposure": "internet_facing",
         "lifecycle_stage": "production",
-        "information_classification": "unclassified"
+        "information_classification": "confidential"
       },
       "score_details": {
-        "scoring_model": 1,
-        "value": 0.6958,
+        "scoring_model": 3,
+        "value": 0.98,
         "alpha": 0.98,
         "beta": 0.9999,
         "gamma": 1,
-        "vulnerability": 0.994,
-        "criticality_multiplier": 0.7,
+        "vulnerability": 0.98,
+        "criticality_multiplier": 0.75,
         "exposure_multiplier": 1,
         "lifecycle_multiplier": 1,
-        "exploit_signal": null,
-        "information_classification_multiplier": null,
-        "band": null,
+        "exploit_signal": 1,
+        "information_classification_multiplier": 1,
+        "band": "critical",
         "data_gaps": []
       }
     },
@@ -260,23 +261,23 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality": "medium",
         "exposure": "internet_facing",
         "lifecycle_stage": "production",
-        "information_classification": "unclassified",
+        "information_classification": "confidential",
         "critical_services": []
       },
       "component_role": "application",
       "score_details": {
-        "scoring_model": 1,
-        "value": 0.6958,
+        "scoring_model": 3,
+        "value": 0.98,
         "alpha": 0.98,
         "beta": 0.9999,
         "gamma": 1,
-        "vulnerability": 0.994,
-        "criticality_multiplier": 0.7,
+        "vulnerability": 0.98,
+        "criticality_multiplier": 0.75,
         "exposure_multiplier": 1,
         "lifecycle_multiplier": 1,
-        "exploit_signal": null,
-        "information_classification_multiplier": null,
-        "band": null,
+        "exploit_signal": 1,
+        "information_classification_multiplier": 1,
+        "band": "critical",
         "data_gaps": []
       },
       "kev": {
@@ -340,7 +341,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality": "medium",
         "exposure": "internet_facing",
         "lifecycle_stage": "production",
-        "information_classification": "unclassified"
+        "information_classification": "confidential"
       },
       "score_details": {
         "scoring_model": 1,
@@ -366,7 +367,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality": "medium",
         "exposure": "internet_facing",
         "lifecycle_stage": "production",
-        "information_classification": "unclassified",
+        "information_classification": "confidential",
         "critical_services": []
       },
       "component_role": "application",

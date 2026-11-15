@@ -4,18 +4,22 @@ import { useTranslation } from 'react-i18next'
 import {
   currentAsset,
   currentScoreDetails,
+  findingInformationClassification,
   scoreMoved,
   type CurrentOrder,
   type Finding,
+  type FindingAsset,
   type FindingDetails,
   type Technique,
 } from '../../api/prioritizations'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { EMPTY, useDateFormat } from '../../i18n/format'
+import { EMPTY, useDateFormat, usePercentFormat } from '../../i18n/format'
+import { informationClassificationLabel } from '../Config/assetText'
 import { ActionPlanSection } from './ActionPlanSection'
 import { FeedbackSection } from './FeedbackSection'
 import { FindingBadges } from './GroupPanel'
+import { ScoreBandBadge } from './ScoreBandBadge'
 import { LABEL, MONO, WRITTEN } from './styles'
 
 interface Props {
@@ -149,11 +153,37 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
 
 const FACTS = 'grid grid-cols-[repeat(auto-fit,minmax(170px,1fr))] gap-4'
 
+type FactorName =
+  | 'alpha'
+  | 'beta'
+  | 'gamma'
+  | 'vulnerability'
+  | 'criticality'
+  | 'exposure'
+  | 'lifecycle'
+  | 'exploitSignal'
+  | 'informationClassification'
+
+/** Why a factor has no value, shown in place of a 0 that would read as measured. */
+interface Unscored {
+  unscored: string
+}
+
+/** A factor as the backend gave it, already formatted when it is a percentage. */
+type FactorValue = number | string | Unscored
+
+/** Scoring Model 3 added the Exploit Signal and the Information Classification multiplier (ADR 0032). */
+const FIRST_MODEL_WITH_CLASSIFICATION = 3
+
 function ScoreDetails({ finding }: { finding: Finding }) {
   const { t } = useTranslation()
+  const formatPercent = usePercentFormat()
   // The Score as it is now; the rank, like the order, is the snapshot's.
   const score = currentScoreDetails(finding)
-  const factors = [
+  const notInModel: Unscored = { unscored: t('findings.detail.score.notInModel') }
+  // From Model 3 on, the multiplier is null only while the Asset is Unclassified, which does not count.
+  const unclassified: Unscored = { unscored: informationClassificationLabel(t, null) }
+  const factors: readonly (readonly [FactorName, FactorValue])[] = [
     ['alpha', score.alpha],
     ['beta', score.beta],
     ['gamma', score.gamma],
@@ -161,12 +191,19 @@ function ScoreDetails({ finding }: { finding: Finding }) {
     ['criticality', score.criticality_multiplier],
     ['exposure', score.exposure_multiplier],
     ['lifecycle', score.lifecycle_multiplier],
-  ] as const
+    ['exploitSignal', score.exploit_signal === null ? notInModel : formatPercent(score.exploit_signal)],
+    [
+      'informationClassification',
+      score.information_classification_multiplier ??
+        (score.scoring_model < FIRST_MODEL_WITH_CLASSIFICATION ? notInModel : unclassified),
+    ],
+  ]
 
   return (
     <div className="flex flex-col gap-3">
       <p className="flex flex-wrap items-baseline gap-3">
         <span className="font-title text-[1.75rem] leading-none text-navy">{score.value}</span>
+        <ScoreBandBadge band={score.band} />
         <span className="font-body text-[0.875rem] text-gray">
           {t('findings.detail.score.rank', { rank: finding.score_rank })}
         </span>
@@ -175,7 +212,11 @@ function ScoreDetails({ finding }: { finding: Finding }) {
       <dl className={FACTS}>
         {factors.map(([name, value]) => (
           <Fact key={name} label={t(`findings.detail.score.factors.${name}`)}>
-            <span className={MONO}>{value}</span>
+            {typeof value === 'object' ? (
+              <span className="text-gray">{value.unscored}</span>
+            ) : (
+              <span className={MONO}>{value}</span>
+            )}
           </Fact>
         ))}
       </dl>
@@ -281,6 +322,9 @@ function AssetDetails({ finding }: { finding: Finding }) {
         <Fact label={t('findings.detail.asset.lifecycleStage')}>
           {t(`config.inventory.lifecycleStage.${asset.lifecycle_stage}`)}
         </Fact>
+        <Fact label={t('findings.detail.asset.informationClassification')}>
+          <InformationClassificationValue asset={asset} />
+        </Fact>
         <Fact label={t('findings.detail.asset.component')}>
           <span className={MONO}>
             {finding.component} {finding.version}
@@ -316,6 +360,19 @@ function AssetDetails({ finding }: { finding: Finding }) {
         )}
       </div>
     </div>
+  )
+}
+
+/** Unclassified means no one declared it, not that the data is public: it shows as pending. */
+function InformationClassificationValue({ asset }: { asset: FindingAsset }) {
+  const { t } = useTranslation()
+  const value = findingInformationClassification(asset)
+  const label = informationClassificationLabel(t, value)
+  if (value !== null) return label
+  return (
+    <Badge variant="muted" title={t('findings.detail.asset.unclassifiedHelp')}>
+      {label}
+    </Badge>
   )
 }
 

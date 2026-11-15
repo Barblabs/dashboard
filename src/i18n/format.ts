@@ -29,6 +29,15 @@ export function useDateFormat(style: DateStyle = 'medium'): (iso: string) => str
   }, [locale, style])
 }
 
+/** A share from 0 to 1 as a whole percentage: "85%" in English, "85 %" in Spanish. */
+export function usePercentFormat(): (share: number) => string {
+  const locale = useLocale()
+  return useMemo(() => {
+    const format = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 })
+    return (share) => format.format(share)
+  }, [locale])
+}
+
 /** Joins names the way the UI's language does: "A and B" in English, "A y B" in Spanish. */
 export function useListFormat(): (items: string[]) => string {
   const locale = useLocale()

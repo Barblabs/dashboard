@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import {
   currentScore,
+  currentScoreDetails,
   placedByNewest,
   scoreMoved,
   type CurrentOrder,
@@ -10,6 +11,7 @@ import {
 import { Badge } from '../../components/ui/Badge'
 import { Panel, PanelTitle } from '../../components/ui/Panel'
 import { CELL, HEADER_CELL } from '../../components/ui/table'
+import { ScoreBandBadge } from './ScoreBandBadge'
 import { MONO, WRITTEN } from './styles'
 
 interface Props {
@@ -101,6 +103,7 @@ function FindingRow({ order, finding, onOpen }: { order: CurrentOrder; finding: 
             ↻
           </span>
         )}
+        <ScoreBandBadge band={currentScoreDetails(finding).band} className="ml-2" />
       </td>
       <td className={`${CELL} ${MONO} text-gray`}>#{finding.score_rank}</td>
       <td className={CELL}>

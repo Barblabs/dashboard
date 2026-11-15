@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
-import type { AssetKind, SoftwareRole } from './assets'
+import type { AssetKind, InformationClassification, SoftwareRole } from './assets'
 import type { Downtime, Impact } from './businessContext'
 import { api } from './client'
 import { connectionScopeKey } from './cmdb'
@@ -24,9 +24,13 @@ type DataGap =
   | 'criticality_unknown'
   | 'exposure_undeclared'
   | 'lifecycle_unknown'
+  | 'information_classification_undeclared'
 
 export type Technique = Override<Schemas['TechniqueResponse'], { role: TechniqueRole }>
 type CriticalService = Override<Schemas['CriticalServiceResponse'], { impact: Impact; max_downtime: Downtime }>
+
+/** Set by the backend from Scoring Model 3 on, never derived here from the value. */
+export type ScoreBand = NonNullable<Schemas['ScoreResponse']['band']>
 
 export type ScoreDetails = Override<Schemas['ScoreResponse'], { data_gaps: DataGap[] }>
 export type FindingAsset = Override<
@@ -112,6 +116,14 @@ export function currentAsset(finding: Finding): FindingAsset {
  */
 export function scoreMoved(finding: Finding): boolean {
   return finding.current !== null && finding.current.score_details.value !== finding.score
+}
+
+/**
+ * The Asset's Information Classification as `/assets` gives it: a Finding says `unclassified`
+ * where the Asset's Declaration is `null`.
+ */
+export function findingInformationClassification(asset: FindingAsset): InformationClassification | null {
+  return asset.information_classification === 'unclassified' ? null : asset.information_classification
 }
 
 /** Refetches the Findings after a change that rescores them. */

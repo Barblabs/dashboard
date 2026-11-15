@@ -139,6 +139,74 @@ describe('Findings', () => {
     expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^0$/)
   })
 
+  it('a Scoring Model 3 Score shows its Band, its Exploit Signal and its classification multiplier', async () => {
+    const user = await renderFindings()
+
+    expect(within(rowOf('CVE-2021-41773')).getByText('Critical')).toBeInTheDocument()
+    const dialog = await openFinding(user, 'CVE-2021-41773')
+
+    expect(within(dialog).getByText('Critical')).toBeInTheDocument()
+    expect(within(dialog).getByText('Exploit signal').nextElementSibling).toHaveTextContent(/^100%$/)
+    expect(within(dialog).getByText('Classification multiplier').nextElementSibling).toHaveTextContent(/^1$/)
+    expect(within(dialog).getByText('Information Classification').nextElementSibling).toHaveTextContent(/^Confidential$/)
+  })
+
+  it('shows the Band the backend gave, not one read from the value', async () => {
+    storeFinding('CVE-2021-41773', (f) => ({
+      ...f,
+      current: { ...f.current!, score_details: { ...f.current!.score_details, band: 'medium' } },
+    }))
+    await renderFindings()
+
+    expect(within(rowOf('CVE-2021-41773')).getByText('Medium')).toBeInTheDocument()
+    expect(within(rowOf('CVE-2021-41773')).queryByText('Critical')).not.toBeInTheDocument()
+  })
+
+  it('a Score from before Scoring Model 3 has no Band, and its newer factors say they are not in its model', async () => {
+    storeFinding('CVE-2025-1094', (f) => ({
+      ...f,
+      current: { ...f.current!, score_details: { ...f.current!.score_details, scoring_model: 2 } },
+    }))
+    const user = await renderFindings()
+
+    for (const band of ['Critical', 'High', 'Medium', 'Low']) {
+      expect(within(rowOf('CVE-2025-1094')).queryByText(band)).not.toBeInTheDocument()
+    }
+    const dialog = await openFinding(user, 'CVE-2025-1094')
+
+    expect(within(dialog).getByText('Exploit signal').nextElementSibling).toHaveTextContent(/^Not in this model$/)
+    expect(within(dialog).getByText('Classification multiplier').nextElementSibling).toHaveTextContent(
+      /^Not in this model$/,
+    )
+  })
+
+  it('an Unclassified asset shows as pending, never as Public, and its multiplier says why it has none', async () => {
+    storeFinding('CVE-2021-41773', (f) => ({
+      ...f,
+      current: {
+        asset: { ...f.current!.asset, information_classification: 'unclassified' },
+        score_details: {
+          ...f.current!.score_details,
+          information_classification_multiplier: null,
+          data_gaps: ['information_classification_undeclared'],
+        },
+      },
+    }))
+    const user = await renderFindings()
+
+    const dialog = await openFinding(user, 'CVE-2021-41773')
+
+    const classification = within(dialog).getByText('Information Classification').nextElementSibling as HTMLElement
+    expect(classification).toHaveTextContent(/^Unclassified$/)
+    expect(
+      within(classification).getByTitle("No one has declared it; it doesn't count toward the Score."),
+    ).toBeInTheDocument()
+    expect(within(dialog).queryByText('Public')).not.toBeInTheDocument()
+    expect(within(dialog).getByText('Classification multiplier').nextElementSibling).toHaveTextContent(/^Unclassified$/)
+    expect(within(dialog).getByText('Estimated: some inputs were missing and took a default.')).toBeInTheDocument()
+    expect(within(dialog).getByText('Information Classification undeclared')).toBeInTheDocument()
+  })
+
   it('opens the finding a link names', async () => {
     const id = prioritizationsStore.load()[0]!.findings.find((f) => f.cve_id === 'CVE-2024-23897')!.finding_id
     renderApp(`/findings?finding=${id}`)
