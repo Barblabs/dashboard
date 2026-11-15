@@ -23,7 +23,8 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
       "asset": {
         "criticality": "high",
         "exposure": "internal",
-        "lifecycle_stage": "production"
+        "lifecycle_stage": "production",
+        "information_classification": "unclassified"
       },
       "score_details": {
         "scoring_model": 1,
@@ -35,6 +36,9 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality_multiplier": 1,
         "exposure_multiplier": 0.6,
         "lifecycle_multiplier": 1,
+        "exploit_signal": null,
+        "information_classification_multiplier": null,
+        "band": null,
         "data_gaps": []
       }
     },
@@ -46,6 +50,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality": "high",
         "exposure": "internal",
         "lifecycle_stage": "production",
+        "information_classification": "unclassified",
         "critical_services": [
           {
             "name": "Pagos en línea",
@@ -66,6 +71,9 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality_multiplier": 1,
         "exposure_multiplier": 0.6,
         "lifecycle_multiplier": 1,
+        "exploit_signal": null,
+        "information_classification_multiplier": null,
+        "band": null,
         "data_gaps": []
       },
       "kev": null,
@@ -130,7 +138,8 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
       "asset": {
         "criticality": "high",
         "exposure": "internal",
-        "lifecycle_stage": "production"
+        "lifecycle_stage": "production",
+        "information_classification": "unclassified"
       },
       "score_details": {
         "scoring_model": 1,
@@ -142,6 +151,9 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality_multiplier": 1,
         "exposure_multiplier": 0.6,
         "lifecycle_multiplier": 1,
+        "exploit_signal": null,
+        "information_classification_multiplier": null,
+        "band": null,
         "data_gaps": []
       }
     },
@@ -153,6 +165,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality": "high",
         "exposure": "internal",
         "lifecycle_stage": "production",
+        "information_classification": "unclassified",
         "critical_services": []
       },
       "component_role": "operating_system",
@@ -166,6 +179,9 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality_multiplier": 1,
         "exposure_multiplier": 0.6,
         "lifecycle_multiplier": 1,
+        "exploit_signal": null,
+        "information_classification_multiplier": null,
+        "band": null,
         "data_gaps": []
       },
       "kev": null,
@@ -217,7 +233,8 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
       "asset": {
         "criticality": "medium",
         "exposure": "internet_facing",
-        "lifecycle_stage": "production"
+        "lifecycle_stage": "production",
+        "information_classification": "unclassified"
       },
       "score_details": {
         "scoring_model": 1,
@@ -229,6 +246,9 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality_multiplier": 0.7,
         "exposure_multiplier": 1,
         "lifecycle_multiplier": 1,
+        "exploit_signal": null,
+        "information_classification_multiplier": null,
+        "band": null,
         "data_gaps": []
       }
     },
@@ -240,6 +260,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality": "medium",
         "exposure": "internet_facing",
         "lifecycle_stage": "production",
+        "information_classification": "unclassified",
         "critical_services": []
       },
       "component_role": "application",
@@ -253,6 +274,9 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality_multiplier": 0.7,
         "exposure_multiplier": 1,
         "lifecycle_multiplier": 1,
+        "exploit_signal": null,
+        "information_classification_multiplier": null,
+        "band": null,
         "data_gaps": []
       },
       "kev": {
@@ -315,7 +339,8 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
       "asset": {
         "criticality": "medium",
         "exposure": "internet_facing",
-        "lifecycle_stage": "production"
+        "lifecycle_stage": "production",
+        "information_classification": "unclassified"
       },
       "score_details": {
         "scoring_model": 1,
@@ -327,6 +352,9 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality_multiplier": 0.7,
         "exposure_multiplier": 1,
         "lifecycle_multiplier": 1,
+        "exploit_signal": null,
+        "information_classification_multiplier": null,
+        "band": null,
         "data_gaps": []
       }
     },
@@ -338,6 +366,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality": "medium",
         "exposure": "internet_facing",
         "lifecycle_stage": "production",
+        "information_classification": "unclassified",
         "critical_services": []
       },
       "component_role": "application",
@@ -351,6 +380,9 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality_multiplier": 0.7,
         "exposure_multiplier": 1,
         "lifecycle_multiplier": 1,
+        "exploit_signal": null,
+        "information_classification_multiplier": null,
+        "band": null,
         "data_gaps": []
       },
       "kev": {
@@ -413,7 +445,8 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
       "asset": {
         "criticality": "low",
         "exposure": "internal",
-        "lifecycle_stage": "implementation"
+        "lifecycle_stage": "implementation",
+        "information_classification": "unclassified"
       },
       "score_details": {
         "scoring_model": 2,
@@ -425,6 +458,9 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality_multiplier": 0.4,
         "exposure_multiplier": 0.6,
         "lifecycle_multiplier": 0.8,
+        "exploit_signal": null,
+        "information_classification_multiplier": null,
+        "band": null,
         "data_gaps": []
       }
     },
@@ -436,6 +472,7 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality": "low",
         "exposure": "internal",
         "lifecycle_stage": "production",
+        "information_classification": "unclassified",
         "critical_services": []
       },
       "component_role": "application",
@@ -449,6 +486,9 @@ const FINDINGS: Record<'f1' | 'f2' | 'f3' | 'f4' | 'f5', Finding> = {
         "criticality_multiplier": 0.4,
         "exposure_multiplier": 0.6,
         "lifecycle_multiplier": 1,
+        "exploit_signal": null,
+        "information_classification_multiplier": null,
+        "band": null,
         "data_gaps": []
       },
       "kev": {
