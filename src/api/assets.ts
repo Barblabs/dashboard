@@ -23,13 +23,19 @@ export const EXPOSURE_FILTERS = [...EXPOSURES, 'unknown'] as const
 type ExposureFilter = (typeof EXPOSURE_FILTERS)[number]
 
 /**
- * `value` is the effective Exposure: the Declaration when there is one, otherwise `imported`.
- * Either is `null` when Unknown.
+ * `value` is the effective Exposure: the Declaration when there is one, otherwise `imported`,
+ * which is `null` when Unknown. A Declaration's value, `declared_by` and `declared_at` are all
+ * set exactly when `source` is `declared`.
  */
-export type AssetExposure = Override<
-  Schemas['ExposureResponse'],
-  { value: Exposure | null; imported: Exposure | null }
->
+export type AssetExposure =
+  | Override<
+      Schemas['ExposureResponse'],
+      { source: 'imported'; value: Exposure | null; imported: Exposure | null; declared_by: null; declared_at: null }
+    >
+  | Override<
+      Schemas['ExposureResponse'],
+      { source: 'declared'; value: Exposure; imported: Exposure | null; declared_by: string; declared_at: string }
+    >
 
 export type InformationClassification = NonNullable<Schemas['InformationClassificationResponse']['value']>
 export const INFORMATION_CLASSIFICATIONS = [
