@@ -14,6 +14,7 @@ import {
 } from '../../api/prioritizations'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
+import { ChevronRightIcon } from '../../components/ui/icons'
 import { EMPTY, useDateFormat, useLocale, usePercentFormat } from '../../i18n/format'
 import { informationClassificationLabel } from '../Config/assetText'
 import { ActionPlanSection } from './ActionPlanSection'
@@ -649,13 +650,9 @@ function TechniqueItem({ technique }: { technique: Technique }) {
         onClick={() => setOpen((o) => !o)}
         className="focus-ring flex cursor-pointer items-center gap-1 self-start rounded-sm font-body text-[0.8125rem] font-semibold text-nav-active-bg hover:underline"
       >
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 16 16"
-          className={`size-3.5 shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none ${open ? 'rotate-90' : ''}`}
-        >
-          <path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <ChevronRightIcon
+          className={`shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none ${open ? 'rotate-90' : ''}`}
+        />
         {mitigations > 0
           ? t('findings.detail.threats.showMore', { count: mitigations })
           : t('findings.detail.threats.showQuote')}
