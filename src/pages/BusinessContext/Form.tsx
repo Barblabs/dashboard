@@ -11,6 +11,7 @@ import type {
   Section,
 } from '../../api/businessContext'
 import { Button } from '../../components/ui/Button'
+import { CloseIcon } from '../../components/ui/icons'
 import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { ImportDialog } from './ImportDialog'
 import { FormMetaContext, type FormMeta } from './meta'
@@ -112,9 +113,9 @@ export function BusinessContextForm({
               type="button"
               aria-label={t('businessContext.import.dismiss')}
               onClick={() => setApplied(null)}
-              className="cursor-pointer rounded-md px-2 font-body text-[1.125rem] leading-none text-gray hover:text-navy focus-ring"
+              className="cursor-pointer rounded-sm p-1 text-gray transition-colors hover:text-navy focus-ring"
             >
-              ×
+              <CloseIcon />
             </button>
           </div>
         )}
@@ -150,25 +151,17 @@ export function BusinessContextForm({
             <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border-panel px-6 py-4">
               <div>
                 {previous && (
-                  <button
-                    type="button"
-                    onClick={() => setSection(previous)}
-                    className="cursor-pointer rounded-md px-2 py-1 font-body text-[0.875rem] font-semibold text-gray hover:text-navy focus-ring"
-                  >
+                  <Button variant="link" size="sm" onClick={() => setSection(previous)}>
                     ← {t('businessContext.previous')}
-                  </button>
+                  </Button>
                 )}
               </div>
               <div className="flex flex-wrap items-center justify-end gap-3">
                 <SaveStatus save={save} version={stored.version} />
                 {!readOnly && dirty && !saving && (
-                  <button
-                    type="button"
-                    onClick={discard}
-                    className="cursor-pointer rounded-md px-2 py-1 font-body text-[0.8125rem] text-gray hover:text-navy focus-ring"
-                  >
+                  <Button variant="link" size="sm" onClick={discard}>
                     {t('businessContext.save.discard')}
-                  </button>
+                  </Button>
                 )}
                 {next && (
                   <Button variant="secondary" size="sm" onClick={() => setSection(next)}>

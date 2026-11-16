@@ -13,6 +13,7 @@ import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
+import { PasswordInput } from '../../components/ui/PasswordInput'
 import { Panel, PanelTitle } from '../../components/ui/Panel'
 import { translatedOrBackendMessage, requestErrorText } from '../../i18n/errors'
 
@@ -139,13 +140,9 @@ export function ItopForm({
     <Panel className={`gap-5 ${className}`}>
       <div className="flex items-baseline justify-between gap-3">
         <PanelTitle id={titleId}>{t(copy.title)}</PanelTitle>
-        <button
-          type="button"
-          className="cursor-pointer p-0 font-body text-[0.875rem] whitespace-nowrap text-gray underline underline-offset-2 hover:text-navy focus-ring"
-          onClick={onBack}
-        >
+        <Button variant="link" size="sm" onClick={onBack}>
           {t(copy.back)}
-        </button>
+        </Button>
       </div>
 
       <div className="flex flex-col gap-4">
@@ -182,8 +179,7 @@ export function ItopForm({
           help={t('config.form.password.help')}
           error={errorText(errors.password?.message)}
         >
-          <Input
-            type="password"
+          <PasswordInput
             autoComplete="new-password"
             disabled={busy}
             {...register('password', { onChange: () => clearErrors('password') })}

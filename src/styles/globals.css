@@ -35,6 +35,12 @@
   --font-body:  'Work Sans', sans-serif;
   --font-mono:  'IBM Plex Mono', monospace;
 
+  /* Stacking order: floating < dialog < popover < toast */
+  --z-floating: 10;
+  --z-dialog:   40;
+  --z-popover:  50;
+  --z-toast:    60;
+
   /* Motion. Opacity-only, so it stays on under prefers-reduced-motion. */
   --animate-fade-in: fade-in 200ms ease-out;
 

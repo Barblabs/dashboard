@@ -114,3 +114,22 @@ export function UploadFileIcon({ size = 22, className }: IconProps) {
     </Icon>
   )
 }
+
+export function EyeIcon({ size = 16, className }: IconProps) {
+  return (
+    <Icon size={size} viewBox={16} className={className}>
+      <path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z" strokeWidth="1.3" />
+      <circle cx="8" cy="8" r="2.25" strokeWidth="1.3" />
+    </Icon>
+  )
+}
+
+export function EyeOffIcon({ size = 16, className }: IconProps) {
+  return (
+    <Icon size={size} viewBox={16} className={className}>
+      <path d="M2 2l12 12" strokeWidth="1.3" />
+      <path d="M6.4 3.9A7 7 0 0 1 8 3.5c4 0 6.5 4.5 6.5 4.5a13 13 0 0 1-2 2.6" strokeWidth="1.3" />
+      <path d="M4.5 5.1A7 7 0 0 0 1.5 8S4 12.5 8 12.5a6 6 0 0 0 3.5-1.1" strokeWidth="1.3" />
+    </Icon>
+  )
+}

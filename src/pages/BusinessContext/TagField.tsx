@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import { useController } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { Field as BaseField } from '@base-ui/react/field'
 import { LIMITS, type BusinessContextFields } from '../../api/businessContext'
 import { CloseIcon } from '../../components/ui/icons'
 import { Shell, Shown } from './FieldShell'
@@ -19,7 +20,6 @@ interface TagProps {
 /** Free-text entries: Enter, a comma or a pasted list adds them; repeats are ignored regardless of case. */
 export function TagField({ name, label, placeholder, hideLabel, suggestions, canonical }: TagProps) {
   const { t } = useTranslation()
-  const id = useId()
   const listId = useId()
   const meta = useMeta(name)
   const errorText = useErrorText()
@@ -50,7 +50,7 @@ export function TagField({ name, label, placeholder, hideLabel, suggestions, can
   }
 
   return (
-    <Shell id={id} label={label} error={error ?? undefined} hideLabel={hideLabel} {...meta}>
+    <Shell label={label} error={error ?? undefined} hideLabel={hideLabel} {...meta}>
       {meta.readOnly ? (
         <Shown value={value.join(', ')} />
       ) : (
@@ -75,34 +75,35 @@ export function TagField({ name, label, placeholder, hideLabel, suggestions, can
               </button>
             </span>
           ))}
-          <input
-            id={id}
-            value={draft}
-            list={suggestions?.length ? listId : undefined}
-            placeholder={value.length === 0 ? placeholder : undefined}
-            aria-invalid={Boolean(error)}
-            aria-describedby={error ? `${id}-error` : undefined}
-            onChange={(e) => {
-              setError(null)
-              setDraft(e.target.value)
-            }}
-            onKeyDown={(e) => {
-              if ((e.key === 'Enter' || e.key === ',') && draft.trim()) {
-                e.preventDefault()
-                add(draft)
-              } else if (e.key === 'Backspace' && draft === '' && value.length > 0) {
-                onChange(value.slice(0, -1))
-              }
-            }}
-            onBlur={() => draft.trim() && add(draft)}
-            onPaste={(e) => {
-              const text = e.clipboardData.getData('text')
-              if (/[,\n]/.test(text)) {
-                e.preventDefault()
-                add(text)
-              }
-            }}
-            className="h-7 min-w-24 flex-1 bg-transparent px-1 font-body text-[0.9375rem] text-navy outline-none placeholder:text-gray"
+          <BaseField.Control
+            render={
+              <input
+                value={draft}
+                list={suggestions?.length ? listId : undefined}
+                placeholder={value.length === 0 ? placeholder : undefined}
+                onChange={(e) => {
+                  setError(null)
+                  setDraft(e.target.value)
+                }}
+                onKeyDown={(e) => {
+                  if ((e.key === 'Enter' || e.key === ',') && draft.trim()) {
+                    e.preventDefault()
+                    add(draft)
+                  } else if (e.key === 'Backspace' && draft === '' && value.length > 0) {
+                    onChange(value.slice(0, -1))
+                  }
+                }}
+                onBlur={() => draft.trim() && add(draft)}
+                onPaste={(e) => {
+                  const text = e.clipboardData.getData('text')
+                  if (/[,\n]/.test(text)) {
+                    e.preventDefault()
+                    add(text)
+                  }
+                }}
+                className="h-7 min-w-24 flex-1 bg-transparent px-1 font-body text-[0.9375rem] text-navy outline-none placeholder:text-gray"
+              />
+            }
           />
           {suggestions && suggestions.length > 0 && (
             <datalist id={listId}>

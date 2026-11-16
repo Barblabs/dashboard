@@ -1,5 +1,6 @@
-import { useId, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Field as BaseField } from '@base-ui/react/field'
 import {
   DRAFT_FILE_EXTENSIONS,
   LIMITS,
@@ -10,6 +11,7 @@ import {
 } from '../../api/businessContext'
 import { Button } from '../../components/ui/Button'
 import { DialogLayout } from '../../components/ui/Dialog'
+import { Field } from '../../components/ui/Field'
 import { CloseIcon } from '../../components/ui/icons'
 import { Modal } from '../../components/ui/Modal'
 import { requestErrorText } from '../../i18n/errors'
@@ -39,8 +41,6 @@ export function ImportDialog({ open, onClose, onDraft }: ImportDialogProps) {
 
 function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
   const { t } = useTranslation()
-  const textId = useId()
-  const fileId = useId()
   const fileInput = useRef<HTMLInputElement>(null)
   const draft = useDraftBusinessContextMutation()
   const [files, setFiles] = useState<File[]>([])
@@ -102,79 +102,78 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
       }
     >
       <div className="flex flex-col gap-2">
-        <label htmlFor={fileId} className="font-body text-[0.875rem] font-semibold text-navy">
-          {t('businessContext.import.filesLabel')}
-        </label>
-        <input
-          ref={fileInput}
-          id={fileId}
-          type="file"
-          multiple
-          accept={ACCEPT}
-          disabled={draft.isPending}
-          aria-describedby={`${fileId}-help`}
-          onChange={(e) => {
-            add([...(e.target.files ?? [])])
-            e.target.value = ''
-          }}
-          className="sr-only"
-        />
-        <button
-          type="button"
-          disabled={draft.isPending}
-          onClick={() => fileInput.current?.click()}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault()
-            add([...e.dataTransfer.files])
-          }}
-          className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-dashed border-muted-bg bg-panel px-4 py-6 font-body text-[0.875rem] text-gray transition-colors hover:border-navy hover:text-navy focus-ring disabled:cursor-not-allowed"
-        >
-          <span className="font-semibold text-navy">{t('businessContext.import.choose')}</span>
-          <span id={`${fileId}-help`} className="text-[0.75rem]">
-            {t('businessContext.import.fileHelp')}
-          </span>
-        </button>
-        {files.length > 0 && (
-          <ul className="flex flex-col divide-y divide-border-panel rounded-lg border border-border-panel">
-            {files.map((file) => (
-              <li key={`${file.name}-${file.size}`} className="flex items-center justify-between gap-3 px-3 py-2">
-                <span className="min-w-0 truncate font-body text-[0.875rem] text-navy">{file.name}</span>
-                <span className="flex shrink-0 items-center gap-2">
-                  <span className="font-mono text-[0.75rem] text-gray">{sizeOf(file.size)}</span>
-                  <button
-                    type="button"
-                    disabled={draft.isPending}
-                    aria-label={t('businessContext.import.removeFile', { name: file.name })}
-                    onClick={() => setFiles(files.filter((f) => f !== file))}
-                    className="flex size-6 cursor-pointer items-center justify-center rounded-md text-gray hover:bg-panel hover:text-critical focus-ring"
-                  >
-                    <CloseIcon />
-                  </button>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <Field label={t('businessContext.import.filesLabel')}>
+          <BaseField.Control
+            render={
+              <input
+                ref={fileInput}
+                type="file"
+                multiple
+                accept={ACCEPT}
+                disabled={draft.isPending}
+                onChange={(e) => {
+                  add([...(e.target.files ?? [])])
+                  e.target.value = ''
+                }}
+                className="sr-only"
+              />
+            }
+          />
+          <button
+            type="button"
+            disabled={draft.isPending}
+            onClick={() => fileInput.current?.click()}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault()
+              add([...e.dataTransfer.files])
+            }}
+            className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-dashed border-muted-bg bg-panel px-4 py-6 font-body text-[0.875rem] text-gray transition-colors hover:border-navy hover:text-navy focus-ring disabled:cursor-not-allowed"
+          >
+            <span className="font-semibold text-navy">{t('businessContext.import.choose')}</span>
+            <span className="text-[0.75rem]">{t('businessContext.import.fileHelp')}</span>
+          </button>
+          {files.length > 0 && (
+            <ul className="flex flex-col divide-y divide-border-panel rounded-lg border border-border-panel">
+              {files.map((file) => (
+                <li key={`${file.name}-${file.size}`} className="flex items-center justify-between gap-3 px-3 py-2">
+                  <span className="min-w-0 truncate font-body text-[0.875rem] text-navy">{file.name}</span>
+                  <span className="flex shrink-0 items-center gap-2">
+                    <span className="font-mono text-[0.75rem] text-gray">{sizeOf(file.size)}</span>
+                    <button
+                      type="button"
+                      disabled={draft.isPending}
+                      aria-label={t('businessContext.import.removeFile', { name: file.name })}
+                      onClick={() => setFiles(files.filter((f) => f !== file))}
+                      className="flex size-6 cursor-pointer items-center justify-center rounded-md text-gray hover:bg-panel hover:text-critical focus-ring"
+                    >
+                      <CloseIcon />
+                    </button>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Field>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor={textId} className="font-body text-[0.875rem] font-semibold text-navy">
-          {t('businessContext.import.textLabel')}
-        </label>
-        <textarea
-          id={textId}
-          rows={4}
-          value={text}
-          disabled={draft.isPending}
-          placeholder={t('businessContext.import.textPlaceholder')}
-          onChange={(e) => {
-            setProblem(null)
-            setText(e.target.value)
-          }}
-          className="w-full resize-y rounded-md border border-border-panel bg-white px-3 py-2.5 font-body text-[0.875rem] leading-[1.5] text-navy outline-none placeholder:text-gray focus:border-navy disabled:bg-panel"
+      <Field label={t('businessContext.import.textLabel')}>
+        <BaseField.Control
+          render={
+            <textarea
+              rows={4}
+              value={text}
+              disabled={draft.isPending}
+              placeholder={t('businessContext.import.textPlaceholder')}
+              onChange={(e) => {
+                setProblem(null)
+                setText(e.target.value)
+              }}
+              className="w-full resize-y rounded-md border border-border-panel bg-white px-3 py-2.5 font-body text-[0.875rem] leading-[1.5] text-navy outline-none placeholder:text-gray focus:border-navy disabled:bg-panel"
+            />
+          }
         />
-      </div>
+      </Field>
 
       {draft.isPending && (
         <p role="status" className="flex items-center gap-2 font-body text-[0.875rem] text-nav-active-bg">

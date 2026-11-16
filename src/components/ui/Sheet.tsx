@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next'
 import { CloseIcon } from './icons'
 
 const BACKDROP =
-  'fixed inset-0 bg-navy/25 transition-opacity duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] data-ending-style:opacity-0 data-starting-style:opacity-0'
+  'fixed inset-0 z-dialog bg-navy/25 transition-opacity duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] data-ending-style:opacity-0 data-starting-style:opacity-0'
 
 // Opacity always animates; the slide only when the user allows motion.
 const POPUP =
-  'fixed top-0 right-0 flex h-full w-[min(28rem,100vw)] flex-col bg-white shadow-2xl outline-none transition-[opacity,translate] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:translate-x-6 motion-safe:data-starting-style:translate-x-6'
+  'fixed top-0 right-0 z-dialog flex h-full w-[min(28rem,100vw)] flex-col bg-white shadow-2xl outline-none transition-[opacity,translate] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:translate-x-6 motion-safe:data-starting-style:translate-x-6'
 
 interface SheetProps {
   open: boolean

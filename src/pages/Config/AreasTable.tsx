@@ -4,6 +4,7 @@ import { useAreasQuery, type Area } from '../../api/areas'
 import { ACTIVITY_FILTERS, type ActivityFilter } from '../../api/assets'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge } from '../../components/ui/Badge'
+import { Button } from '../../components/ui/Button'
 import { useDialogTarget } from '../../components/ui/useDialogTarget'
 import { useDateFormat } from '../../i18n/format'
 import { AreaOwnerDialog } from './AreaOwnerDialog'
@@ -33,9 +34,6 @@ function AreaStatus({ area }: { area: Area }) {
     </Badge>
   )
 }
-
-const OWNER_ACTION =
-  'cursor-pointer p-0 font-body text-[0.8125rem] whitespace-nowrap text-navy underline decoration-navy/30 underline-offset-2 transition-colors hover:decoration-navy focus-ring'
 
 interface AreaRowsProps {
   areas: Area[]
@@ -80,9 +78,9 @@ function AreaRows({ areas, onEditOwner }: AreaRowsProps) {
               </td>
               {onEditOwner && (
                 <td className={`${CELL} text-right`}>
-                  <button type="button" className={OWNER_ACTION} onClick={() => onEditOwner(area)}>
+                  <Button variant="link" size="sm" onClick={() => onEditOwner(area)}>
                     {area.owner_email ? t('config.areas.owner.edit') : t('config.areas.owner.set')}
-                  </button>
+                  </Button>
                 </td>
               )}
             </tr>

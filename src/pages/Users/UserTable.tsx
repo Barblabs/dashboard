@@ -6,6 +6,7 @@ import { Badge, type BadgeVariant } from '../../components/ui/Badge'
 import { BanIcon, PencilIcon } from '../../components/ui/icons'
 import { Message } from '../../components/ui/Message'
 import { SearchField } from '../../components/ui/SearchField'
+import { CELL, HEADER_CELL } from '../../components/ui/table'
 
 type UserStatus = 'disabled' | 'pending' | 'active'
 
@@ -19,8 +20,6 @@ const STATUS_BADGE: Record<Exclude<UserStatus, 'active'>, BadgeVariant> = {
   disabled: 'muted',
   pending: 'warning',
 }
-
-const TH = 'px-4 py-3 font-body text-[0.75rem] font-semibold uppercase tracking-wider text-gray text-left'
 
 export function UserTable({
   users,
@@ -56,12 +55,12 @@ export function UserTable({
         <Message>{users.length === 0 ? t('users.empty') : t('users.noMatches')}</Message>
       ) : (
         <div className="overflow-hidden rounded-lg border border-border-panel">
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse text-[0.875rem]">
             <thead>
               <tr className="border-b border-border-panel bg-panel">
-                <th className={TH}>{t('users.columns.email')}</th>
-                <th className={TH}>{t('users.columns.role')}</th>
-                <th className={TH} />
+                <th className={HEADER_CELL}>{t('users.columns.email')}</th>
+                <th className={HEADER_CELL}>{t('users.columns.role')}</th>
+                <th className={HEADER_CELL} />
               </tr>
             </thead>
             <tbody className="bg-white">
@@ -72,10 +71,10 @@ export function UserTable({
                 return (
                   <tr
                     key={user.id}
-                    className={`border-b border-border-panel last:border-0 ${isDisabled ? 'opacity-50' : ''}`}
+                    className={`[&:last-child>td]:border-0 ${isDisabled ? 'opacity-50' : ''}`}
                   >
-                    <td className="px-4 py-3 font-body text-[0.875rem] text-navy">
-                      <div className="flex flex-wrap items-center gap-2">
+                    <td className={CELL}>
+                      <div className="flex flex-wrap items-center gap-2 font-body">
                         {/* An email has no break points: without this it widens the table and pushes the actions out of view. */}
                         <span className="min-w-0 wrap-anywhere">{user.email}</span>
                         {isSelf && <Badge variant="caps">{t('users.you')}</Badge>}
@@ -84,12 +83,12 @@ export function UserTable({
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className={CELL}>
                       <Badge variant={user.role === 'customer_admin' ? 'solid' : 'outline'}>
                         {t(`users.role.${user.role}`)}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className={`${CELL} text-right`}>
                       {!isDisabled && (
                         <div className="flex items-center justify-end gap-1">
                           <button

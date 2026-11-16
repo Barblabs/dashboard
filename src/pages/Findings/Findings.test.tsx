@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { http } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Finding } from '../../api/prioritizations'
@@ -85,6 +85,9 @@ describe('Findings', () => {
     expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^1$/)
     expect(within(dialog).getByText('Measured: no input was missing.')).toBeInTheDocument()
     expect(within(dialog).getByText('No action plan yet. Luna writes one from what is known of this finding.')).toBeInTheDocument()
+    const refLink = within(dialog).getByRole('link', { name: /postgresql\.org\/support\/security\/CVE-2025-1094/ })
+    expect(refLink).toHaveAttribute('target', '_blank')
+    expect(refLink).toHaveAttribute('rel', 'noreferrer')
   })
 
   it('opens a finding on its Close button, not on the index of its sections', async () => {
@@ -263,6 +266,8 @@ describe('Findings', () => {
     expect(within(dialog).getByText('2.442')).toBeInTheDocument()
     expect(within(dialog).getByText('Actualiza Jenkins a 2.442.')).toBeInTheDocument()
     expect(within(dialog).getByText(/Written by Luna/)).toBeInTheDocument()
+    const sourceLinks = within(dialog).getAllByRole('link', { name: /packetstormsecurity\.com/ })
+    expect(sourceLinks[0]).toHaveAttribute('target', '_blank')
   })
 
   it('asks Luna for an action plan and keeps it with the finding', async () => {
@@ -303,6 +308,19 @@ describe('Findings', () => {
     expect(within(dialog).getByText('Should be attended earlier', { selector: 'span' })).toBeInTheDocument()
     expect(within(dialog).getByText('Corre la nómina.')).toBeInTheDocument()
     expect(prioritizationsStore.load()[0]!.feedback).toHaveLength(1)
+  })
+
+  it('shows the too-long error on the note field when it exceeds 2000 characters', async () => {
+    const user = renderApp('/findings', VIEWER)
+    await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+    const dialog = await openFinding(user, 'CVE-2024-6387')
+
+    fireEvent.change(within(dialog).getByLabelText('Why'), { target: { value: 'a'.repeat(2001) } })
+    await user.click(within(dialog).getByRole('button', { name: 'Send' }))
+
+    const noteField = within(dialog).getByLabelText('Why')
+    expect(noteField).toHaveAttribute('aria-invalid', 'true')
+    expect(within(dialog).getByText('The note can have up to 2000 characters.')).toBeInTheDocument()
   })
 
   it('says there is nothing yet before the first prioritization', async () => {

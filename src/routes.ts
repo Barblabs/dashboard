@@ -46,6 +46,12 @@ export function pagesFor(role: Role) {
   return PAGES.filter((page) => page.roles.includes(role))
 }
 
+/** Whether the role may open the path (first segment matches one of its pages). */
+export function canOpen(role: Role, path: string): boolean {
+  const id = path.split('/')[1]?.split(/[?#]/)[0] ?? ''
+  return pagesFor(role).some((page) => page.id === id)
+}
+
 export function pagePath(id: PageId) {
   return `/${id}`
 }

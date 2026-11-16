@@ -8,11 +8,13 @@ import { signIn } from '../../auth/cognito'
 import { completeSignIn } from '../../auth/session'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
+import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
+import { PasswordInput } from '../../components/ui/PasswordInput'
 import { cognitoErrorKey } from './cognitoErrorKey'
 
 const credSchema = z.object({
-  email: z.string().min(1),
+  email: z.string().min(1).email(),
   password: z.string().min(1),
 })
 type CredFields = z.infer<typeof credSchema>
@@ -25,7 +27,7 @@ export function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
   const { t } = useTranslation()
   const [serverError, setServerError] = useState<string | null>(null)
 
-  const { register, handleSubmit, formState: { isSubmitting } } = useForm<CredFields>({
+  const { register, handleSubmit, formState: { isSubmitting, errors } } = useForm<CredFields>({
     resolver: zodResolver(credSchema),
   })
 
@@ -48,6 +50,7 @@ export function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
 
   return (
     <form
+      noValidate
       onSubmit={(e) => { void handleSubmit(onSubmit)(e) }}
       className="flex w-[420px] flex-col gap-[18px] rounded-xl border border-border-panel bg-white px-8 pb-7 pt-8"
     >
@@ -64,31 +67,29 @@ export function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
         <Alert tone="error">{serverError}</Alert>
       )}
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="font-body text-[0.875rem] font-semibold text-navy">
-          {t('login.form.email')}
-        </label>
+      <Field
+        label={t('login.form.email.label')}
+        error={errors.email && (errors.email.type === 'too_small' ? t('login.form.email.required') : t('login.form.email.invalid'))}
+      >
         <Input
-          id="email"
           type="email"
           autoComplete="email"
-          placeholder={t('login.form.emailPlaceholder')}
+          autoFocus
+          placeholder={t('login.form.email.placeholder')}
           {...register('email')}
         />
-      </div>
+      </Field>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="font-body text-[0.875rem] font-semibold text-navy">
-          {t('login.form.password')}
-        </label>
-        <Input
-          id="password"
-          type="password"
+      <Field
+        label={t('login.form.password.label')}
+        error={errors.password && t('login.form.password.required')}
+      >
+        <PasswordInput
           autoComplete="current-password"
           placeholder="••••••••••••"
           {...register('password')}
         />
-      </div>
+      </Field>
 
       <Button type="submit" variant="secondary" size="lg" loading={isSubmitting} className="w-full justify-center">
         {isSubmitting ? t('login.form.submitting') : t('login.form.submit')}
