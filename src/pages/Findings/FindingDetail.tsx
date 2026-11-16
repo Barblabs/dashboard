@@ -14,13 +14,8 @@ import {
 } from '../../api/prioritizations'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-<<<<<<< HEAD
 import { EMPTY, useDateFormat, useLocale, usePercentFormat } from '../../i18n/format'
 import { informationClassificationLabel } from '../Config/assetText'
-=======
-import { EMPTY, useDateFormat } from '../../i18n/format'
-import { ExternalLink } from '../../components/ui/ExternalLink'
->>>>>>> 6cc943d (feat(findings): make sources and references clickable ExternalLink (#61))
 import { ActionPlanSection } from './ActionPlanSection'
 import { Evidence } from './Evidence'
 import { FeedbackSection } from './FeedbackSection'

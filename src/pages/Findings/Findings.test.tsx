@@ -85,9 +85,9 @@ describe('Findings', () => {
     expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^1$/)
     expect(within(dialog).getByText('Measured: no input was missing.')).toBeInTheDocument()
     expect(within(dialog).getByText('No action plan yet. Luna writes one from what is known of this finding.')).toBeInTheDocument()
-    const refLink = within(dialog).getByRole('link', { name: /www\.postgresql\.org\/support\/security\/CVE-2025-1094/ })
+    const refLink = within(dialog).getByRole('link', { name: /postgresql\.org\/support\/security\/CVE-2025-1094/ })
     expect(refLink).toHaveAttribute('target', '_blank')
-    expect(refLink).toHaveAttribute('rel', expect.stringContaining('noopener'))
+    expect(refLink).toHaveAttribute('rel', 'noreferrer')
   })
 
   it('opens a finding on its Close button, not on the index of its sections', async () => {
