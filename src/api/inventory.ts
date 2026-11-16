@@ -6,7 +6,14 @@ import { connectionScopeKey } from './cmdb'
 import { listCache } from './listCache'
 import type { Loadable } from './loadable'
 
-const DEFAULT_ASSET_FILTERS: AssetFilters = { active: 'true', kind: [], criticality: [], area: [] }
+const DEFAULT_ASSET_FILTERS: AssetFilters = {
+  active: 'true',
+  kind: [],
+  criticality: [],
+  exposure: [],
+  information_classification: [],
+  area: [],
+}
 
 const ASSETS_PAGE_SIZE = 50
 
@@ -18,6 +25,10 @@ function assetsPath(filters: AssetFilters, cursor: string | null, limit: number)
   const params = new URLSearchParams({ limit: String(limit), active: filters.active })
   for (const kind of filters.kind) params.append('kind', kind)
   for (const criticality of filters.criticality) params.append('criticality', criticality)
+  for (const exposure of filters.exposure) params.append('exposure', exposure)
+  for (const classification of filters.information_classification) {
+    params.append('information_classification', classification)
+  }
   for (const area of filters.area) params.append('area', String(area))
   if (cursor) params.set('cursor', cursor)
   return `/assets?${params}`

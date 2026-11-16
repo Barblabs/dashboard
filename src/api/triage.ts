@@ -1,5 +1,5 @@
 import { useQuery, type QueryClient } from '@tanstack/react-query'
-import type { Asset } from './assets'
+import type { Asset, AssetFilters } from './assets'
 import { connectionScopeKey } from './cmdb'
 import { allAssetPages } from './inventory'
 
@@ -11,19 +11,26 @@ function needsTriage(asset: Asset): boolean {
   return asset.active && (asset.exposure.value === null || asset.information_classification.value === null)
 }
 
-async function fetchNeedsTriage(): Promise<Asset[]> {
-  const pending: Asset[] = []
-  for await (const assets of allAssetPages({ active: 'true' })) {
-    pending.push(...assets.filter(needsTriage))
-  }
-  return pending
+async function fetchAll(filters: Partial<AssetFilters>): Promise<Asset[]> {
+  const assets: Asset[] = []
+  for await (const page of allAssetPages(filters)) assets.push(...page)
+  return assets
 }
 
-/**
- * Every Active Asset that needs triage, across the whole inventory: `GET /assets` cannot filter
- * by Exposure or Information Classification, so this pages through all of it, apart from the
- * table's filters and page.
+/*
+ * Filters combine with AND, so the OR triage needs takes two requests. An Asset missing both
+ * values comes back from each and counts once; the queue asks for the Unknown Exposures first.
  */
+async function fetchNeedsTriage(): Promise<Asset[]> {
+  const [unknownExposure, unclassified] = await Promise.all([
+    fetchAll({ active: 'true', exposure: ['unknown'] }),
+    fetchAll({ active: 'true', information_classification: ['unclassified'] }),
+  ])
+  const ids = new Set(unknownExposure.map((asset) => asset.id))
+  return [...unknownExposure, ...unclassified.filter((asset) => !ids.has(asset.id))]
+}
+
+/** Every Active Asset that needs triage, across the whole inventory, apart from the table's filters and page. */
 export function useNeedsTriageQuery() {
   return useQuery({ queryKey: NEEDS_TRIAGE_KEY, queryFn: fetchNeedsTriage })
 }
