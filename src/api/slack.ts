@@ -14,9 +14,9 @@ import type { Known, Schemas } from './schemas'
  * whole tree (mirrors `connectionScopeKey` in cmdb.ts).
  */
 const SLACK_KEY = ['slack'] as const
-export const SLACK_INSTALLATION_KEY = [...SLACK_KEY, 'installation'] as const
+const SLACK_INSTALLATION_KEY = [...SLACK_KEY, 'installation'] as const
 const SLACK_CHANNELS_KEY = [...SLACK_KEY, 'channels'] as const
-export const SLACK_FAILED_KEY = [...SLACK_KEY, 'deliveries', 'failed'] as const
+const SLACK_FAILED_KEY = [...SLACK_KEY, 'deliveries', 'failed'] as const
 
 export type SlackInstallation = Schemas['SlackInstallationResponse']
 /** Channel ids start as empty strings until an admin finishes the connection. */
@@ -40,12 +40,12 @@ const installationQuery = queryOptions({
 
 const channelsQuery = queryOptions({
   queryKey: SLACK_CHANNELS_KEY,
-  queryFn: () => api.get<{ channels: SlackChannel[] }>('/slack/channels'),
+  queryFn: () => api.get<Schemas['SlackChannelsResponse']>('/slack/channels'),
 })
 
 const failedDeliveriesQuery = queryOptions({
   queryKey: SLACK_FAILED_KEY,
-  queryFn: () => api.get<{ deliveries: SlackFailedDelivery[] }>('/slack/deliveries/failed'),
+  queryFn: () => api.get<Schemas['SlackFailedDeliveriesResponse']>('/slack/deliveries/failed'),
 })
 
 export function useSlackInstallationQuery() {
@@ -62,6 +62,12 @@ export function useFailedDeliveriesQuery() {
 
 function refetchInstallation(queryClient: QueryClient) {
   return queryClient.invalidateQueries({ queryKey: SLACK_INSTALLATION_KEY })
+}
+
+/** Refetches the installation and the failed deliveries, which an install or a retry changes. */
+export function refetchDeliveryState(queryClient: QueryClient) {
+  void refetchInstallation(queryClient)
+  void queryClient.invalidateQueries({ queryKey: SLACK_FAILED_KEY })
 }
 
 export function useSlackInstallStartMutation() {
@@ -99,10 +105,7 @@ export function useRetryFailedDeliveriesMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: () => api.post<SlackRetryResult>('/slack/deliveries/retry'),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: SLACK_FAILED_KEY })
-      void queryClient.invalidateQueries({ queryKey: SLACK_INSTALLATION_KEY })
-    },
+    onSuccess: () => refetchDeliveryState(queryClient),
   })
 }
 
