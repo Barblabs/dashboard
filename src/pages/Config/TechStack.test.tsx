@@ -452,6 +452,23 @@ describe('Tech stack', () => {
     expect(kindsSent[kindsSent.length - 1]).toEqual(['server', 'virtual_machine'])
   })
 
+  it('counts the chosen advanced filters, and clearing them keeps the Status', async () => {
+    const user = await renderInventory()
+
+    await user.selectOptions(screen.getByLabelText('Status'), 'All')
+    await chooseFilter(user, 'Type', 'Server', 'Virtual Machine')
+    await chooseFilter(user, 'Criticality', 'High')
+
+    expect(await screen.findByRole('button', { name: 'Filters · 3' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Clear' }))
+
+    expect(await screen.findByRole('button', { name: 'Filters' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Clear' })).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Status')).toHaveValue('all')
+    expect(await screen.findByRole('option', { name: /erp-app-02/ })).toBeInTheDocument()
+  })
+
   it('the Unknown Criticality lists the assets without one', async () => {
     const user = await renderInventory()
 
