@@ -110,30 +110,41 @@ describe('Cognito tokens', () => {
     const accessTokens = await Promise.all(Array.from({ length: 10 }, () => cognitoTokens.currentAccessToken()))
 
     expect(accessTokens).toEqual(Array.from({ length: 10 }, () => RENEWED_ACCESS_TOKEN))
-    expect(calls.map((call) => call.operation)).toEqual(['InitiateAuth'])
-    expect(calls[0]?.body).toMatchObject({
-      AuthFlow: 'REFRESH_TOKEN_AUTH',
-      AuthParameters: { REFRESH_TOKEN: 'stored-refresh-token' },
-    })
+    expect(calls).toEqual([
+      {
+        operation: 'GetTokensFromRefreshToken',
+        body: { ClientId: 'test-client-id', RefreshToken: 'stored-refresh-token' },
+      },
+    ])
     expect(localStorage.getItem(`${PREFIX}.${USERNAME}.accessToken`)).toBe(RENEWED_ACCESS_TOKEN)
   })
 
-  it('has no token when Cognito rejects the renewal, and keeps nothing stored', async () => {
+  it.each([
+    'NotAuthorizedException',
+    'TokenRevokedException',
+    'UserNotFoundException',
+    'ResourceNotFoundException',
+  ])('has no token when Cognito rejects the renewal with %s, and keeps nothing stored', async (type) => {
     vi.useFakeTimers({ toFake: ['setTimeout'] })
-    cognito(() => cognitoError(400, 'NotAuthorizedException'))
+    cognito(() => cognitoError(400, type))
     storeSession({ expiresIn: -60 })
 
     expect(await giveUpRetrying(cognitoTokens.currentAccessToken())).toBeNull()
     expect(storedKeys()).toEqual([])
   })
 
-  it('reports Cognito unreachable while renewing, and keeps the tokens', async () => {
+  it.each([
+    ['a network error', () => HttpResponse.error()],
+    ['an internal error', () => cognitoError(500, 'InternalErrorException')],
+    ['throttling', () => cognitoError(400, 'TooManyRequestsException')],
+  ])('reports Cognito unreachable on %s while renewing, and keeps the tokens', async (_, answer) => {
     vi.useFakeTimers({ toFake: ['setTimeout'] })
-    cognito(() => HttpResponse.error())
+    cognito(answer)
     storeSession({ expiresIn: -60 })
 
     await expect(giveUpRetrying(cognitoTokens.currentAccessToken())).rejects.toBeInstanceOf(TokensUnreachable)
     expect(cognitoTokens.hasStored()).toBe(true)
+    expect(localStorage.getItem(`${PREFIX}.${USERNAME}.refreshToken`)).toBe('stored-refresh-token')
   })
 
   it('forgets by clearing storage and revoking the refresh token', async () => {

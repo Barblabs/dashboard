@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { CognitoUser } from 'amazon-cognito-identity-js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -26,11 +25,7 @@ const newPwSchema = z
   })
 type NewPwFields = z.infer<typeof newPwSchema>
 
-interface NewPasswordFormProps {
-  cognitoUser: CognitoUser
-}
-
-export function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
+export function NewPasswordForm() {
   const { t } = useTranslation()
   const validationText = useValidationText()
   const [serverError, setServerError] = useState<string | null>(null)
@@ -42,7 +37,7 @@ export function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
   async function onSubmit({ newPassword }: NewPwFields) {
     setServerError(null)
     try {
-      await completeNewPassword(cognitoUser, newPassword)
+      await completeNewPassword(newPassword)
       const failure = await completeSignIn()
       if (failure) setServerError(t(failure))
     } catch (err) {

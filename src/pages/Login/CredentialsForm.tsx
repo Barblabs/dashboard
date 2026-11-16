@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { CognitoUser } from 'amazon-cognito-identity-js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -22,7 +21,7 @@ const credSchema = z.object({
 type CredFields = z.infer<typeof credSchema>
 
 interface CredFormProps {
-  onNewPasswordRequired: (cognitoUser: CognitoUser) => void
+  onNewPasswordRequired: () => void
 }
 
 export function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
@@ -37,10 +36,8 @@ export function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
   async function onSubmit({ email, password }: CredFields) {
     setServerError(null)
     try {
-      const result = await signIn(email, password)
-
-      if (result.kind === 'newPasswordRequired') {
-        onNewPasswordRequired(result.cognitoUser)
+      if ((await signIn(email, password)) === 'newPasswordRequired') {
+        onNewPasswordRequired()
         return
       }
 

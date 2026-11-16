@@ -1,10 +1,5 @@
-import {
-  AuthenticationDetails,
-  CognitoUser,
-  CognitoUserPool,
-  type CognitoUserSession,
-  type IAuthenticationCallback,
-} from 'amazon-cognito-identity-js'
+import { Amplify } from 'aws-amplify'
+import { confirmSignIn, fetchAuthSession, signIn as amplifySignIn, type SignInOutput } from 'aws-amplify/auth'
 import { singleFlight } from './singleFlight'
 import { onStorageKeyRemoved } from './storageEvents'
 import { TokensUnreachable, type Tokens } from './tokens'
@@ -13,54 +8,50 @@ const REGION = import.meta.env.VITE_COGNITO_REGION as string
 const USER_POOL_ID = import.meta.env.VITE_COGNITO_USER_POOL_ID as string
 const CLIENT_ID = import.meta.env.VITE_COGNITO_CLIENT_ID as string
 
-// The SDK's own key layout in localStorage, its default storage.
+// Amplify's own key layout in localStorage, its default storage.
 const KEY_PREFIX = `CognitoIdentityServiceProvider.${CLIENT_ID}`
 const LAST_AUTH_USER_KEY = `${KEY_PREFIX}.LastAuthUser`
 
-// Built on first use: mock mode never configures Cognito, and the pool rejects missing ids.
-let poolInstance: CognitoUserPool | null = null
+// Done on first use: mock mode never configures Cognito, and Amplify rejects missing ids.
+let configured = false
 
-function pool(): CognitoUserPool {
-  poolInstance ??= new CognitoUserPool({ UserPoolId: USER_POOL_ID, ClientId: CLIENT_ID })
-  return poolInstance
+function configure() {
+  if (configured) return
+  Amplify.configure({ Auth: { Cognito: { userPoolId: USER_POOL_ID, userPoolClientId: CLIENT_ID } } })
+  configured = true
 }
 
-export type SignInResult =
-  | { kind: 'success' }
-  | { kind: 'newPasswordRequired'; cognitoUser: CognitoUser; userAttributes: Record<string, string> }
+export type SignInResult = 'success' | 'newPasswordRequired'
 
-// On success the SDK has stored the tokens; `cognitoTokens` hands them out from there.
-export function signIn(email: string, password: string): Promise<SignInResult> {
-  const cognitoUser = new CognitoUser({ Username: email, Pool: pool() })
-  const authDetails = new AuthenticationDetails({ Username: email, Password: password })
+type NextStep = SignInOutput['nextStep']
 
-  return new Promise((resolve, reject) => {
-    const callbacks: IAuthenticationCallback = {
-      onSuccess() {
-        resolve({ kind: 'success' })
-      },
-      onFailure(err) {
-        reject(err)
-      },
-      newPasswordRequired(userAttributes: Record<string, string>) {
-        resolve({ kind: 'newPasswordRequired', cognitoUser, userAttributes })
-      },
-    }
-    cognitoUser.authenticateUser(authDetails, callbacks)
-  })
+class UnsupportedSignInStep extends Error {
+  constructor(step: NextStep['signInStep']) {
+    super(`Signing in needs a step this app does not support: ${step}`)
+    this.name = 'UnsupportedSignInStep'
+  }
 }
 
-export function completeNewPassword(cognitoUser: CognitoUser, newPassword: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    cognitoUser.completeNewPasswordChallenge(newPassword, {}, {
-      onSuccess() {
-        resolve()
-      },
-      onFailure(err) {
-        reject(err)
-      },
-    })
-  })
+function resultOf({ signInStep }: NextStep): SignInResult {
+  if (signInStep === 'DONE') return 'success'
+  if (signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') return 'newPasswordRequired'
+  throw new UnsupportedSignInStep(signInStep)
+}
+
+/*
+ * On success Amplify has stored the tokens; `cognitoTokens` hands them out from there.
+ * Amplify keeps a pending challenge in memory, so `completeNewPassword` needs nothing back.
+ */
+export async function signIn(email: string, password: string): Promise<SignInResult> {
+  configure()
+  const { nextStep } = await amplifySignIn({ username: email, password })
+  return resultOf(nextStep)
+}
+
+export async function completeNewPassword(newPassword: string): Promise<void> {
+  configure()
+  const { nextStep } = await confirmSignIn({ challengeResponse: newPassword })
+  if (nextStep.signInStep !== 'DONE') throw new UnsupportedSignInStep(nextStep.signInStep)
 }
 
 /*
@@ -70,31 +61,40 @@ export function completeNewPassword(cognitoUser: CognitoUser, newPassword: strin
  */
 const TRANSIENT_FAILURES = new Set(['NetworkError', 'InternalErrorException', 'TooManyRequestsException'])
 
-function isTransient(error: Error): boolean {
-  const code = (error as Error & { code?: unknown }).code
-  return typeof code === 'string' && TRANSIENT_FAILURES.has(code)
+function isTransient(error: unknown): boolean {
+  return error instanceof Error && TRANSIENT_FAILURES.has(error.name)
 }
 
 /*
- * A fresh CognitoUser reads the tokens from storage every time, so a renewal made by
- * another tab is picked up here too. `getSession` renews the access token if it expired.
+ * Amplify reads the tokens from storage every time, so a renewal made by another tab is
+ * picked up here too, and renews the access token if it expired. It keeps the tokens after
+ * some failures that end the session, so those clear storage here.
  */
-function readAccessToken(): Promise<string | null> {
-  const user = pool().getCurrentUser()
-  if (!user) return Promise.resolve(null)
-  return new Promise((resolve, reject) => {
-    user.getSession((error: Error | null, session: CognitoUserSession | null) => {
-      if (session) resolve(session.getAccessToken().getJwtToken())
-      else if (error && isTransient(error)) reject(new TokensUnreachable(error))
-      else resolve(null)
-    })
-  })
+async function readAccessToken(): Promise<string | null> {
+  configure()
+  try {
+    const { tokens } = await fetchAuthSession()
+    if (tokens) return tokens.accessToken.toString()
+  } catch (error) {
+    if (isTransient(error)) throw new TokensUnreachable(error)
+  }
+  clearStorage()
+  return null
 }
 
 // Requests that find the token expired at the same time wait on a single renewal.
 const currentAccessToken = singleFlight(readAccessToken)
 
-// RevokeToken is a public, unauthenticated Cognito operation the SDK's typings do not expose.
+// Returns the refresh token it removed, if there was one.
+function clearStorage(): string | null {
+  const refreshToken = localStorage.getItem(`${KEY_PREFIX}.${localStorage.getItem(LAST_AUTH_USER_KEY)}.refreshToken`)
+  for (const key of Object.keys(localStorage)) {
+    if (key.startsWith(`${KEY_PREFIX}.`)) localStorage.removeItem(key)
+  }
+  return refreshToken
+}
+
+// Amplify's own signOut revokes before it clears storage, retrying while Cognito is unreachable.
 async function revoke(refreshToken: string) {
   await fetch(`https://cognito-idp.${REGION}.amazonaws.com/`, {
     method: 'POST',
@@ -111,10 +111,7 @@ async function revoke(refreshToken: string) {
  * restore the session, whatever happens to the revocation.
  */
 async function forget() {
-  const user = pool().getCurrentUser()
-  if (!user) return
-  const refreshToken = localStorage.getItem(`${KEY_PREFIX}.${user.getUsername()}.refreshToken`)
-  user.signOut()
+  const refreshToken = clearStorage()
   if (!refreshToken) return
   try {
     await revoke(refreshToken)
@@ -124,7 +121,7 @@ async function forget() {
 }
 
 export const cognitoTokens: Tokens = {
-  hasStored: () => pool().getCurrentUser() !== null,
+  hasStored: () => localStorage.getItem(LAST_AUTH_USER_KEY) !== null,
   currentAccessToken,
   forget,
   onForgottenElsewhere: (listener) => onStorageKeyRemoved(LAST_AUTH_USER_KEY, listener),

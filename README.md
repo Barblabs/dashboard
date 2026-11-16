@@ -18,7 +18,7 @@ de activos del CMDB y los hallazgos de vulnerabilidades priorizados.
 | `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom` | Pruebas | Ver [Pruebas](#pruebas). Interactuar con `user-event`, buscar por rol, label o texto, nunca por clases o estado interno. |
 | `react-router` | Ruteo | Las rutas viven en `src/routes.ts` (qué página ve cada rol) y `src/App.tsx` (guardas de sesión y de rol). Una página nueva se agrega a `PAGES`. |
 | `zustand` | Estado global de cliente | Hoy solo la sesión (`src/auth/store.ts`). Úsalo solo para estado de UI compartido entre ramas lejanas del árbol; el estado del servidor va en react-query y el estado local en `useState`. |
-| `amazon-cognito-identity-js` | Inicio de sesión | Solo dentro de `src/auth/cognito.ts`; el resto de la app pide tokens a `tokens` de `src/auth/tokenSource.ts`. |
+| `aws-amplify` (`aws-amplify/auth`) | Inicio de sesión | Solo dentro de `src/auth/cognito.ts`; el resto de la app pide tokens a `tokens` de `src/auth/tokenSource.ts`. |
 | `recharts` | Gráficas | La del panel de administración (`src/pages/AdminDashboard`). |
 
 ## Requisitos
