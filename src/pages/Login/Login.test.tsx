@@ -51,6 +51,18 @@ describe('CredentialsForm', () => {
     expect(signIn).not.toHaveBeenCalled()
   })
 
+  it('shows a required error, not an invalid one, when the email is empty', async () => {
+    const user = userEvent.setup()
+    render(<CredentialsForm onNewPasswordRequired={vi.fn<() => void>()} />)
+
+    await user.type(screen.getByLabelText('Password'), 'some-pass')
+    await user.click(screen.getByRole('button', { name: 'Sign in' }))
+
+    expect(await screen.findByText('Email is required.')).toBeInTheDocument()
+    expect(screen.queryByText('Enter a valid email address.')).not.toBeInTheDocument()
+    expect(signIn).not.toHaveBeenCalled()
+  })
+
   it('shows an invalid email error and does not call signIn', async () => {
     const user = userEvent.setup()
     render(<CredentialsForm onNewPasswordRequired={vi.fn<() => void>()} />)
@@ -77,6 +89,16 @@ describe('NewPasswordForm', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }))
 
     expect(completeNewPassword).toHaveBeenCalledWith(cognitoUser, 'NewPass123!')
+  })
+
+  it('shows a required error when the new password is empty', async () => {
+    const user = userEvent.setup()
+    render(<NewPasswordForm cognitoUser={cognitoUser} />)
+
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(await screen.findByText('Password is required.')).toBeInTheDocument()
+    expect(completeNewPassword).not.toHaveBeenCalled()
   })
 
   it('shows a mismatch error and does not call completeNewPassword when passwords differ', async () => {
