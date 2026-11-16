@@ -14,6 +14,7 @@ import { DialogLayout } from '../../components/ui/Dialog'
 import { Field } from '../../components/ui/Field'
 import { CloseIcon } from '../../components/ui/icons'
 import { Modal } from '../../components/ui/Modal'
+import { Textarea } from '../../components/ui/Textarea'
 import { requestErrorText } from '../../i18n/errors'
 
 const ACCEPT = DRAFT_FILE_EXTENSIONS.map((ext) => `.${ext}`).join(',')
@@ -158,20 +159,15 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
       </div>
 
       <Field label={t('businessContext.import.textLabel')}>
-        <BaseField.Control
-          render={
-            <textarea
-              rows={4}
-              value={text}
-              disabled={draft.isPending}
-              placeholder={t('businessContext.import.textPlaceholder')}
-              onChange={(e) => {
-                setProblem(null)
-                setText(e.target.value)
-              }}
-              className="w-full resize-y rounded-md border border-border-panel bg-white px-3 py-2.5 font-body text-[0.875rem] leading-[1.5] text-navy outline-none placeholder:text-gray focus:border-navy disabled:bg-panel"
-            />
-          }
+        <Textarea
+          rows={4}
+          value={text}
+          disabled={draft.isPending}
+          placeholder={t('businessContext.import.textPlaceholder')}
+          onChange={(e) => {
+            setProblem(null)
+            setText(e.target.value)
+          }}
         />
       </Field>
 
