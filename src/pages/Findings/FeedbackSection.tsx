@@ -62,7 +62,7 @@ export function FeedbackSection({ order, finding }: { order: CurrentOrder; findi
                 <span className="text-[0.75rem] text-gray">{formatDate(f.created_at)}</span>
                 {f.via_analista && <Badge variant="muted">{t('findings.detail.feedback.viaAnalista')}</Badge>}
               </span>
-              {f.note && <p className={WRITTEN}>{f.note}</p>}
+              {f.note && <p className={`${WRITTEN} text-navy`}>{f.note}</p>}
             </li>
           ))}
         </ul>
