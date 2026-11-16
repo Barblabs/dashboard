@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { CognitoUser } from 'amazon-cognito-identity-js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { signIn, completeNewPassword } from '../../auth/cognito'
 import { completeSignIn } from '../../auth/session'
@@ -29,7 +28,7 @@ beforeEach(() => {
 
 describe('CredentialsForm', () => {
   it('calls signIn with the email and password on submit', async () => {
-    vi.mocked(signIn).mockResolvedValue({ kind: 'success' })
+    vi.mocked(signIn).mockResolvedValue('success')
     const user = userEvent.setup()
     render(<CredentialsForm onNewPasswordRequired={vi.fn<() => void>()} />)
 
@@ -77,23 +76,21 @@ describe('CredentialsForm', () => {
 })
 
 describe('NewPasswordForm', () => {
-  const cognitoUser = {} as CognitoUser
-
   it('calls completeNewPassword with the new password when both fields match', async () => {
     vi.mocked(completeNewPassword).mockResolvedValue(undefined)
     const user = userEvent.setup()
-    render(<NewPasswordForm cognitoUser={cognitoUser} />)
+    render(<NewPasswordForm />)
 
     await user.type(screen.getByLabelText('New password'), 'NewPass123!')
     await user.type(screen.getByLabelText('Confirm password'), 'NewPass123!')
     await user.click(screen.getByRole('button', { name: 'Save' }))
 
-    expect(completeNewPassword).toHaveBeenCalledWith(cognitoUser, 'NewPass123!')
+    expect(completeNewPassword).toHaveBeenCalledWith('NewPass123!')
   })
 
   it('shows a required error when the new password is empty', async () => {
     const user = userEvent.setup()
-    render(<NewPasswordForm cognitoUser={cognitoUser} />)
+    render(<NewPasswordForm />)
 
     await user.click(screen.getByRole('button', { name: 'Save' }))
 
@@ -103,7 +100,7 @@ describe('NewPasswordForm', () => {
 
   it('shows a mismatch error and does not call completeNewPassword when passwords differ', async () => {
     const user = userEvent.setup()
-    render(<NewPasswordForm cognitoUser={cognitoUser} />)
+    render(<NewPasswordForm />)
 
     await user.type(screen.getByLabelText('New password'), 'NewPass123!')
     await user.type(screen.getByLabelText('Confirm password'), 'Different456!')

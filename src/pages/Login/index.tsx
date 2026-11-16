@@ -1,4 +1,3 @@
-import type { CognitoUser } from 'amazon-cognito-identity-js'
 import { useState } from 'react'
 import { Navigate, useLocation } from 'react-router'
 import { returnToOf } from '../../auth/returnTo'
@@ -10,9 +9,7 @@ import { LoginLayout } from './LoginLayout'
 import { MockSignIn } from './MockSignIn'
 import { NewPasswordForm } from './NewPasswordForm'
 
-type Step =
-  | { kind: 'credentials' }
-  | { kind: 'newPassword'; cognitoUser: CognitoUser }
+type Step = 'credentials' | 'newPassword'
 
 /*
  * Signing in moves the session; this page follows it wherever it lands: back to the page
@@ -22,7 +19,7 @@ export function LoginPage() {
   const user = useCurrentUser()
   const returnTo = returnToOf(useLocation().state)
   const deactivated = useAuthStore((s) => s.session.status === 'deactivated')
-  const [step, setStep] = useState<Step>({ kind: 'credentials' })
+  const [step, setStep] = useState<Step>('credentials')
 
   if (deactivated) return <Navigate to="/deactivated" replace />
   if (user) {
@@ -33,12 +30,10 @@ export function LoginPage() {
 
   return (
     <LoginLayout>
-      {step.kind === 'credentials' ? (
-        <CredentialsForm
-          onNewPasswordRequired={(cognitoUser) => setStep({ kind: 'newPassword', cognitoUser })}
-        />
+      {step === 'credentials' ? (
+        <CredentialsForm onNewPasswordRequired={() => setStep('newPassword')} />
       ) : (
-        <NewPasswordForm cognitoUser={step.cognitoUser} />
+        <NewPasswordForm />
       )}
     </LoginLayout>
   )
