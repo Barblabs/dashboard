@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { useCurrentOrderQuery, type CurrentOrder } from '../../api/prioritizations'
@@ -32,6 +33,8 @@ function CurrentOrderView({ order }: { order: CurrentOrder }) {
   const { t } = useTranslation()
   const formatDate = useDateFormat()
   const [params, setParams] = useSearchParams()
+  // The rail's index comes first in the dialog, but opening a Finding should not land on it.
+  const closeButton = useRef<HTMLButtonElement>(null)
   const { prioritization } = order
   const openId = params.get(FINDING_PARAM)
   const open = prioritization.findings.find((f) => f.finding_id === openId)
@@ -60,8 +63,8 @@ function CurrentOrderView({ order }: { order: CurrentOrder }) {
         <GroupPanel key={group.position} order={order} group={group} onOpen={openFinding} />
       ))}
 
-      <Modal open={open !== undefined} onClose={close} width="xl">
-        {open && <FindingDetail order={order} finding={open} onClose={close} />}
+      <Modal open={open !== undefined} onClose={close} width="xl" initialFocus={closeButton}>
+        {open && <FindingDetail order={order} finding={open} onClose={close} closeButton={closeButton} />}
       </Modal>
     </div>
   )
