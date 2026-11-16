@@ -555,8 +555,9 @@ describe('Tech stack', () => {
 
   it('the Area filter is disabled until the Areas load', async () => {
     server.use(http.get(apiUrl('/areas'), () => delay('infinite')))
-    await renderInventory()
+    const user = await renderInventory()
 
+    await user.click(screen.getByRole('button', { name: /^Filters/ }))
     expect(screen.getByRole('combobox', { name: 'Area' })).toBeDisabled()
   })
 

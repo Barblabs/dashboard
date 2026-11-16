@@ -62,17 +62,15 @@ export function TechStackTable() {
   return (
     <section>
       <div className="flex flex-col gap-4 border-b border-border-panel px-6 pt-5 pb-4">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="flex items-baseline gap-3">
-            <h2 className="font-title text-[1rem] text-navy">{t('config.inventory.title')}</h2>
-            {query.data && (
-              <span className="font-body text-[0.8125rem] text-gray">
-                {t('config.inventory.total', { count: query.data.total })}
-              </span>
-            )}
-          </div>
-          <AssetFilterBar filters={filters} onChange={filterBy} />
+        <div className="flex items-baseline gap-3">
+          <h2 className="font-title text-[1rem] text-navy">{t('config.inventory.title')}</h2>
+          {query.data && (
+            <span className="font-body text-[0.8125rem] text-gray">
+              {t('config.inventory.total', { count: query.data.total })}
+            </span>
+          )}
         </div>
+        <AssetFilterBar filters={filters} onChange={filterBy} />
         <TriageBanner onTriage={triageSheet.show} />
       </div>
 

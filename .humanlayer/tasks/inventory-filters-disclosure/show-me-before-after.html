@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Filtros del inventario — antes y después</title>
+<style>
+  :root {
+    --navy: #0F385B;
+    --gray: #637180;
+    --panel: #F4F7FA;
+    --border: #D9E1E8;
+    --white: #fff;
+    --navy-5: rgba(15,56,91,.05);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #E9EEF3; color: var(--navy); padding: 32px 20px 56px; }
+  .wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 28px; }
+  h1 { font-size: 18px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--gray); font-size: 13px; margin: 0 0 8px; }
+  .case { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .case > header { padding: 12px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .tag { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+  .tag.bad { background: #FCE8EB; color: #B01C30; }
+  .tag.good { background: #E4F3EA; color: #1C7A45; }
+  .case > header .note { font-size: 12.5px; color: var(--gray); }
+  .body { padding: 20px 24px 26px; }
+
+  /* shared field look */
+  .label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--gray); margin-bottom: 6px; }
+  .field { height: 44px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); display: flex; align-items: center; padding: 0 12px; font-size: 14px; color: var(--gray); justify-content: space-between; }
+  .field .chev { color: var(--gray); }
+  .stack-title { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+  .stack-title h2 { font-size: 16px; margin: 0; }
+  .stack-title .count { color: var(--gray); font-size: 13px; }
+
+  /* BEFORE: flex-wrap of fixed-width fields */
+  .before-bar { display: flex; flex-wrap: wrap; gap: 16px; }
+  .before-bar .cell { width: 256px; max-width: 100%; }
+  .before-bar .cell.status { width: 150px; }
+  .mis { position: relative; }
+  .mis::after { content: ""; position: absolute; left: 0; right: 0; top: -8px; height: 0; }
+  .stagger-note { margin-top: 12px; font-size: 12px; color: #B01C30; display:flex; gap:6px; align-items:center;}
+
+  /* AFTER: header + grid disclosure */
+  .after-head { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-bottom: 14px; }
+  .after-head .status { width: 176px; max-width: 100%; }
+  .disclosure-row { display: flex; align-items: center; gap: 8px; }
+  .trigger { height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; border: 1px solid var(--navy); border-radius: 8px; background: var(--navy-5); font-size: 14px; font-weight: 600; color: var(--navy); }
+  .trigger .chev { transform: rotate(180deg); transition: transform .2s; }
+  .badge { }
+  .clear { font-size: 13px; font-weight: 600; color: var(--gray); padding: 4px 8px; border-radius: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px 16px; padding-top: 4px; }
+  .legend { margin-top: 14px; font-size: 12px; color: #1C7A45; display:flex; gap:6px; align-items:center;}
+  .col-lines { position: relative; }
+
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: 1fr; }
+    .before-bar .cell, .before-bar .cell.status { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <h1>Filtros del inventario — antes y después</h1>
+    <p class="sub">Stack tecnológico · ocho filtros. Etiquetas reales del producto.</p>
+  </div>
+
+  <!-- BEFORE -->
+  <section class="case">
+    <header>
+      <span class="tag bad">Antes</span>
+      <span class="note">flex-wrap de campos de 256 px fijos · la fila 2 no cae bajo la fila 1</span>
+    </header>
+    <div class="body">
+      <div class="stack-title">
+        <h2>Stack tecnológico</h2><span class="count">15 activos</span>
+      </div>
+      <div class="before-bar">
+        <div class="cell status"><div class="label">Estado</div><div class="field">Activos <span class="chev">▾</span></div></div>
+        <div class="cell"><div class="label">Tipo</div><div class="field">Todos los tipos <span class="chev">▾</span></div></div>
+        <div class="cell"><div class="label">Criticidad</div><div class="field">Todas las criticidades <span class="chev">▾</span></div></div>
+        <div class="cell"><div class="label">Exposición</div><div class="field">Todas las exposiciones <span class="chev">▾</span></div></div>
+        <div class="cell"><div class="label">Clasificación de la información</div><div class="field">Todas las clasificaciones <span class="chev">▾</span></div></div>
+        <div class="cell"><div class="label">Ciclo de vida</div><div class="field">Todos los ciclos de vida <span class="chev">▾</span></div></div>
+        <div class="cell"><div class="label">Área</div><div class="field">Todas las áreas <span class="chev">▾</span></div></div>
+      </div>
+      <p class="stagger-note">✕ Estado es más angosto y de otro tipo; la fila 2 arranca desde la izquierda, sin columna que alinee.</p>
+    </div>
+  </section>
+
+  <!-- AFTER -->
+  <section class="case">
+    <header>
+      <span class="tag good">Después</span>
+      <span class="note">Estado + desplegable “Filtros” en la cabecera · los seis avanzados en una rejilla alineada por columnas</span>
+    </header>
+    <div class="body">
+      <div class="stack-title">
+        <h2>Stack tecnológico</h2><span class="count">15 activos</span>
+      </div>
+      <div class="after-head">
+        <div class="status"><div class="label">Estado</div><div class="field">Activos <span class="chev">▾</span></div></div>
+        <div class="disclosure-row">
+          <span class="trigger">Filtros · 2 <span class="chev">▾</span></span>
+          <span class="clear">Limpiar</span>
+        </div>
+      </div>
+      <div class="grid">
+        <div><div class="label">Tipo</div><div class="field">Todos los tipos <span class="chev">▾</span></div></div>
+        <div><div class="label">Criticidad</div><div class="field">Todas las criticidades <span class="chev">▾</span></div></div>
+        <div><div class="label">Exposición</div><div class="field">Todas las exposiciones <span class="chev">▾</span></div></div>
+        <div><div class="label">Clasificación de la información</div><div class="field">Todas las clasificaciones <span class="chev">▾</span></div></div>
+        <div><div class="label">Ciclo de vida</div><div class="field">Todos los ciclos de vida <span class="chev">▾</span></div></div>
+        <div><div class="label">Área</div><div class="field">Todas las áreas <span class="chev">▾</span></div></div>
+      </div>
+      <p class="legend">✓ Columnas iguales y fluidas: la fila 2 cae bajo la fila 1. La cabecera muestra solo Estado y un contador; el resto, un clic más abajo.</p>
+    </div>
+  </section>
+</div>
+</body>
+</html>

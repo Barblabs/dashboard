@@ -555,6 +555,10 @@ export const es: Translations = {
       noArea: 'Sin área',
       filters: {
         label: 'Filtrar activos',
+        more: 'Filtros',
+        moreActive: 'Filtros · {{count}}',
+        clear: 'Limpiar',
+        panelLabel: 'Más filtros',
         active: 'Estado',
         kind: 'Tipo',
         criticality: 'Criticidad',
