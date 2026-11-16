@@ -1,11 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import { listCache } from './listCache'
-import type { Schemas } from './schemas'
+import { everyOf, type Schemas } from './schemas'
 
 export type UserResponse = Schemas['UserResponse']
 type UserListResponse = Schemas['UserListResponse']
 export type CustomerRole = UserResponse['role']
+
+// In the order the role pickers offer them.
+export const CUSTOMER_ROLES = everyOf<CustomerRole>()(['viewer', 'customer_admin'])
 
 const USERS_KEY = ['users'] as const
 const usersList = listCache<UserResponse>(USERS_KEY, 'users')

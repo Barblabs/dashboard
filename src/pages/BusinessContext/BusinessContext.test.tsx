@@ -2,9 +2,10 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
-import type { CountryCode, DraftSource } from '../../api/businessContext'
+import type { DraftSource } from '../../api/businessContext'
 import type { AuthUser } from '../../auth/store'
 import { businessContextStore, MOCK_DRAFT, unsaved } from '../../mocks/business-context-store'
+import { draftSourceBody } from '../../mocks/handlers/businessContext'
 import { apiUrl } from '../../mocks/url'
 import { renderApp, VIEWER } from '../../test/render'
 import { server } from '../../test/server'
@@ -128,7 +129,7 @@ describe('Business context', () => {
     let sent: DraftSource | undefined
     server.use(
       http.post(apiUrl('/business-context/draft'), async ({ request }) => {
-        sent = (await request.json()) as DraftSource
+        sent = draftSourceBody.parse(await request.json())
         return HttpResponse.json({ context: MOCK_DRAFT, gaps: [] })
       }),
     )
@@ -202,10 +203,14 @@ describe('Business context', () => {
   it('says why codes outside the lists stop a save', async () => {
     const stored = unsaved()
     stored.version = 1
-    // Stored data comes from the backend, which types the code as any string.
-    stored.context.geography.headquarters = 'XX' as CountryCode
-    stored.context.geography.countries = ['MX', 'XX' as CountryCode]
     businessContextStore.save(stored)
+    // The backend types a code as any string, so what it serves can hold one outside the lists.
+    const geography = { headquarters: 'XX', countries: ['MX', 'XX'] }
+    server.use(
+      http.get(apiUrl('/business-context'), () =>
+        HttpResponse.json({ ...stored, context: { ...stored.context, geography } }),
+      ),
+    )
     const user = await renderPage()
     await user.type(screen.getByLabelText('What does your organization do?'), 'We sell shoes online.')
 

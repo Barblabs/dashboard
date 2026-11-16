@@ -271,9 +271,9 @@ const scenarios = {
     await shot('banner')
     // The banner counts two filtered reads, not a scan of the whole inventory.
     const counted = callsTo('GET', '/assets').filter((call) => /limit=200/.test(call.path)).map((call) => call.path)
-    check(counted.some((query) => /active=true/.test(query) && /exposure=unknown/.test(query)), `no Unknown Exposure read: ${counted}`)
-    check(counted.some((query) => /active=true/.test(query) && /information_classification=unclassified/.test(query)), `no Unclassified read: ${counted}`)
-    check(counted.length === 2, `expected two triage reads: ${counted}`)
+    check(counted.some((query) => /active=true/.test(query) && /exposure=unknown/.test(query)), `no Unknown Exposure read: ${counted.join(', ')}`)
+    check(counted.some((query) => /active=true/.test(query) && /information_classification=unclassified/.test(query)), `no Unclassified read: ${counted.join(', ')}`)
+    check(counted.length === 2, `expected two triage reads: ${counted.join(', ')}`)
     await page.getByRole('button', { name: 'Triage them' }).click()
     const sheet = page.getByRole('dialog', { name: 'Triage Assets' })
     await expect(sheet.getByText('1 of 5')).toBeVisible()
@@ -366,7 +366,7 @@ const scenarios = {
     await page.getByRole('button', { name: 'Connect Slack' }).click()
     const popup = await popupOpened
     await popup.waitForLoadState().catch(() => {})
-    check(externalRequests.some((url) => url.startsWith('https://slack.com/oauth/v2/authorize')), `popup did not open Slack: ${externalRequests}`)
+    check(externalRequests.some((url) => url.startsWith('https://slack.com/oauth/v2/authorize')), `popup did not open Slack: ${externalRequests.join(', ')}`)
     await popup.close()
     // Finishing the OAuth happens on Slack and the backend; seed what it would leave behind.
     await seedMockBackend('barbattack_slack_installation', {

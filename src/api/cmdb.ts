@@ -6,10 +6,11 @@ import {
   type QueryClient,
 } from '@tanstack/react-query'
 import { api, type BackendFailure } from './client'
-import type { Known, Override, Schemas } from './schemas'
+import { everyOf, type Known, type Override, type Schemas } from './schemas'
 
 // The CMDBs the dashboard knows how to talk to; only iTop has a connection flow today.
 export type CmdbProvider = 'itop' | 'servicenow'
+export const CMDB_PROVIDERS = everyOf<CmdbProvider>()(['itop', 'servicenow'])
 
 /*
  * `last_sync` is when the latest successful Sync finished; `last_sync_failure` is set only

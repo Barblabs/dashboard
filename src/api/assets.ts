@@ -3,7 +3,7 @@ import type { Override, Schemas } from './schemas'
 export const ASSET_KINDS = ['server', 'virtual_machine', 'workstation', 'network_device'] as const
 export type AssetKind = (typeof ASSET_KINDS)[number]
 
-const CRITICALITIES = ['high', 'medium', 'low'] as const
+export const CRITICALITIES = ['high', 'medium', 'low'] as const
 export type Criticality = (typeof CRITICALITIES)[number]
 
 /** `unknown` matches an Asset whose `criticality` is `null`. */
@@ -13,7 +13,8 @@ type CriticalityFilter = (typeof CRITICALITY_FILTERS)[number]
 export const ACTIVITY_FILTERS = ['true', 'false', 'all'] as const
 export type ActivityFilter = (typeof ACTIVITY_FILTERS)[number]
 
-export type SoftwareRole = 'operating_system' | 'application'
+export const SOFTWARE_ROLES = ['operating_system', 'application'] as const
+export type SoftwareRole = (typeof SOFTWARE_ROLES)[number]
 
 export const EXPOSURES = ['internet_facing', 'internal'] as const
 export type Exposure = (typeof EXPOSURES)[number]
@@ -49,7 +50,7 @@ export const INFORMATION_CLASSIFICATION_FILTERS = [...INFORMATION_CLASSIFICATION
 type InformationClassificationFilter = (typeof INFORMATION_CLASSIFICATION_FILTERS)[number]
 
 type LifecycleStage = NonNullable<Schemas['AssetResponse']['lifecycle_stage']>
-const LIFECYCLE_STAGES = [
+export const LIFECYCLE_STAGES = [
   'production',
   'implementation',
   'stock',

@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw'
+import { z, type ZodType } from 'zod'
 import {
   ACTIVITY_FILTERS,
   ASSET_KINDS,
@@ -11,14 +12,20 @@ import {
   type Asset,
   type AssetsPage,
 } from '../../api/assets'
+import { isOneOf, type Known, type Schemas } from '../../api/schemas'
 import { importedExposure, UNCLASSIFIED } from '../assets'
 import { assetsStore } from '../assets-store'
 import { apiUrl } from '../url'
 import { mockCaller } from './auth'
-import { failure, isOneOf } from './responses'
+import { failure, parsedBody } from './responses'
 
-type DeclareExposureRequest = { exposure?: unknown }
-type DeclareInformationClassificationRequest = { information_classification?: unknown }
+// barbackend validates the body against its schema before it looks at who is asking.
+const declareExposureBody = z.object({ exposure: z.enum(EXPOSURES) }) satisfies ZodType<
+  Known<Schemas['DeclareExposureRequest']>
+>
+const declareInformationClassificationBody = z.object({
+  information_classification: z.enum(INFORMATION_CLASSIFICATIONS),
+}) satisfies ZodType<Known<Schemas['DeclareInformationClassificationRequest']>>
 
 /*
  * Applies the rules barbackend checks after the body, in its order: the role, then the Asset.
@@ -85,11 +92,9 @@ export const assetsHandlers = [
   }),
 
   http.put(apiUrl('/assets/:id/exposure'), async ({ params, request }) => {
-    const { exposure } = (await request.json()) as DeclareExposureRequest
-    // The backend validates the body against its schema before it looks at who is asking.
-    if (typeof exposure !== 'string' || !isOneOf(EXPOSURES, exposure)) {
-      return failure(400, 'invalid_request', 'exposure must be internet_facing or internal')
-    }
+    const body = await parsedBody(request, declareExposureBody)
+    if (body instanceof Response) return body
+    const { exposure } = body
     return changeAsset(Number(params['id']), (asset) => {
       if (!asset.active) return failure(409, 'asset_inactive', 'asset is inactive')
       return {
@@ -110,10 +115,9 @@ export const assetsHandlers = [
   ),
 
   http.put(apiUrl('/assets/:id/information-classification'), async ({ params, request }) => {
-    const { information_classification: value } = (await request.json()) as DeclareInformationClassificationRequest
-    if (typeof value !== 'string' || !isOneOf(INFORMATION_CLASSIFICATIONS, value)) {
-      return failure(400, 'invalid_request', 'information_classification must be public, private or confidential')
-    }
+    const body = await parsedBody(request, declareInformationClassificationBody)
+    if (body instanceof Response) return body
+    const { information_classification: value } = body
     return changeAsset(Number(params['id']), (asset) => {
       if (!asset.active) return failure(409, 'asset_inactive', 'asset is inactive')
       return {

@@ -1,3 +1,4 @@
+import { everyOf, isOneOf } from '../api/schemas'
 import type { Role } from './store'
 import { onStorageKeyRemoved } from './storageEvents'
 import type { Tokens } from './tokens'
@@ -9,12 +10,15 @@ import type { Tokens } from './tokens'
  */
 export const MOCK_ROLE_KEY = 'barbattack_mock_role'
 
+export const MOCK_ROLES = everyOf<Role>()(['platform_admin', 'customer_admin', 'viewer'])
+
 export function setMockRole(role: Role) {
   localStorage.setItem(MOCK_ROLE_KEY, role)
 }
 
 export function storedMockRole(): Role | null {
-  return localStorage.getItem(MOCK_ROLE_KEY) as Role | null
+  const stored = localStorage.getItem(MOCK_ROLE_KEY)
+  return stored !== null && isOneOf(MOCK_ROLES, stored) ? stored : null
 }
 
 export const mockTokens: Tokens = {

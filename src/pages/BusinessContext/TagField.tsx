@@ -3,7 +3,7 @@ import { useController } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useValidationText } from '../../i18n/validation'
 import { Field as BaseField } from '@base-ui/react/field'
-import { LIMITS, type BusinessContextFields } from '../../api/businessContext'
+import { characterCount, LIMITS, type BusinessContextFields } from '../../api/businessContext'
 import { CloseIcon } from '../../components/ui/icons'
 import { Shell, Shown } from './FieldShell'
 import { useMeta, type FieldPathOf } from './meta'
@@ -39,7 +39,7 @@ export function TagField({ name, label, placeholder, hideLabel, suggestions, can
     for (const entry of raw.split(/[,\n]/).map((e) => e.trim()).filter(Boolean)) {
       const result = canonical ? canonical(entry) : { value: entry }
       if ('error' in result) return setError(result.error)
-      if ([...result.value].length > LIMITS.entry) {
+      if (characterCount(result.value) > LIMITS.entry) {
         return setError(t('businessContext.validation.tooLong', { max: LIMITS.entry }))
       }
       if (!next.some((v) => v.toLowerCase() === result.value.toLowerCase())) next.push(result.value)

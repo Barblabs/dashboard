@@ -1,5 +1,7 @@
 import type { ActionPlan, Finding, Prioritization, PriorityGroup } from '../api/prioritizations'
+import { z } from 'zod'
 import { localStore } from './localStore'
+import { prioritizationSchema } from './prioritizations-schema'
 
 /*
  * Findings of the backend's docs/examples/findings.json, as GET /prioritizations/{id}
@@ -624,7 +626,7 @@ const MOCK_PRIORITIZATIONS: Prioritization[] = [
     prompt_id: '10446cd88908',
     groups: GROUPS.map((g) =>
       g.position === 3
-        ? { ...g, reason: g.reason.split('\n\n')[0]!, finding_ids: [FINDINGS.f1.finding_id], evidence: g.evidence.slice(0, 2) }
+        ? { ...g, reason: g.reason.split('\n\n')[0], finding_ids: [FINDINGS.f1.finding_id], evidence: g.evidence.slice(0, 2) }
         : g,
     ),
     findings: Object.values(FINDINGS).filter((f) => f.finding_id !== FINDINGS.f2.finding_id),
@@ -634,4 +636,8 @@ const MOCK_PRIORITIZATIONS: Prioritization[] = [
 ]
 
 /** Newest first, as GET /prioritizations lists them. */
-export const prioritizationsStore = localStore<Prioritization[]>('barbattack_mock_prioritizations', MOCK_PRIORITIZATIONS)
+export const prioritizationsStore = localStore(
+  'barbattack_mock_prioritizations',
+  z.array(prioritizationSchema),
+  MOCK_PRIORITIZATIONS,
+)

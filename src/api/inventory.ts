@@ -5,6 +5,7 @@ import { api, errorCode } from './client'
 import { connectionScopeKey } from './cmdb'
 import { listCache } from './listCache'
 import type { Loadable } from './loadable'
+import { everyOf } from './schemas'
 
 export const DEFAULT_ASSET_FILTERS: AssetFilters = {
   active: 'true',
@@ -81,10 +82,19 @@ function sameFilter(a: string | readonly unknown[], b: string | readonly unknown
   return a.length === b.length && a.every((value, i) => value === b[i])
 }
 
-// Every filter is compared, so a new one counts without touching this check.
+// Every filter is compared: `everyOf` fails `tsc` until a new one is listed here.
+const FILTER_KEYS = everyOf<keyof AssetFilters>()([
+  'active',
+  'kind',
+  'criticality',
+  'exposure',
+  'information_classification',
+  'lifecycle_stage',
+  'area',
+])
+
 function isFiltered(filters: AssetFilters) {
-  const keys = Object.keys(DEFAULT_ASSET_FILTERS) as (keyof AssetFilters)[]
-  return keys.some((key) => !sameFilter(filters[key], DEFAULT_ASSET_FILTERS[key]))
+  return FILTER_KEYS.some((key) => !sameFilter(filters[key], DEFAULT_ASSET_FILTERS[key]))
 }
 
 export interface Pager {

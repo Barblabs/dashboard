@@ -4,21 +4,40 @@ import { singleFlight } from './singleFlight'
 import { onStorageKeyRemoved } from './storageEvents'
 import { TokensUnreachable, type Tokens } from './tokens'
 
-const REGION = import.meta.env.VITE_COGNITO_REGION as string
-const USER_POOL_ID = import.meta.env.VITE_COGNITO_USER_POOL_ID as string
-const CLIENT_ID = import.meta.env.VITE_COGNITO_CLIENT_ID as string
+interface CognitoSettings {
+  region: string
+  userPoolId: string
+  clientId: string
+}
+
+let settings: CognitoSettings | null = null
+
+/*
+ * Read on first use, not on import: mock mode imports this module too and sets none of them.
+ * Amplify is configured with them once they are known to be there, since it rejects missing ids.
+ */
+function cognito(): CognitoSettings {
+  if (settings) return settings
+  const {
+    VITE_COGNITO_REGION: region,
+    VITE_COGNITO_USER_POOL_ID: userPoolId,
+    VITE_COGNITO_CLIENT_ID: clientId,
+  } = import.meta.env
+  if (!region || !userPoolId || !clientId) {
+    throw new Error('VITE_COGNITO_REGION, VITE_COGNITO_USER_POOL_ID and VITE_COGNITO_CLIENT_ID must be set outside mock mode')
+  }
+  Amplify.configure({ Auth: { Cognito: { userPoolId, userPoolClientId: clientId } } })
+  settings = { region, userPoolId, clientId }
+  return settings
+}
 
 // Amplify's own key layout in localStorage, its default storage.
-const KEY_PREFIX = `CognitoIdentityServiceProvider.${CLIENT_ID}`
-const LAST_AUTH_USER_KEY = `${KEY_PREFIX}.LastAuthUser`
+function keyPrefix() {
+  return `CognitoIdentityServiceProvider.${cognito().clientId}`
+}
 
-// Done on first use: mock mode never configures Cognito, and Amplify rejects missing ids.
-let configured = false
-
-function configure() {
-  if (configured) return
-  Amplify.configure({ Auth: { Cognito: { userPoolId: USER_POOL_ID, userPoolClientId: CLIENT_ID } } })
-  configured = true
+function lastAuthUserKey() {
+  return `${keyPrefix()}.LastAuthUser`
 }
 
 export type SignInResult = 'success' | 'newPasswordRequired'
@@ -43,13 +62,13 @@ function resultOf({ signInStep }: NextStep): SignInResult {
  * Amplify keeps a pending challenge in memory, so `completeNewPassword` needs nothing back.
  */
 export async function signIn(email: string, password: string): Promise<SignInResult> {
-  configure()
+  cognito()
   const { nextStep } = await amplifySignIn({ username: email, password })
   return resultOf(nextStep)
 }
 
 export async function completeNewPassword(newPassword: string): Promise<void> {
-  configure()
+  cognito()
   const { nextStep } = await confirmSignIn({ challengeResponse: newPassword })
   if (nextStep.signInStep !== 'DONE') throw new UnsupportedSignInStep(nextStep.signInStep)
 }
@@ -71,7 +90,7 @@ function isTransient(error: unknown): boolean {
  * some failures that end the session, so those clear storage here.
  */
 async function readAccessToken(): Promise<string | null> {
-  configure()
+  cognito()
   try {
     const { tokens } = await fetchAuthSession()
     if (tokens) return tokens.accessToken.toString()
@@ -87,22 +106,24 @@ const currentAccessToken = singleFlight(readAccessToken)
 
 // Returns the refresh token it removed, if there was one.
 function clearStorage(): string | null {
-  const refreshToken = localStorage.getItem(`${KEY_PREFIX}.${localStorage.getItem(LAST_AUTH_USER_KEY)}.refreshToken`)
+  const prefix = keyPrefix()
+  const refreshToken = localStorage.getItem(`${prefix}.${localStorage.getItem(lastAuthUserKey())}.refreshToken`)
   for (const key of Object.keys(localStorage)) {
-    if (key.startsWith(`${KEY_PREFIX}.`)) localStorage.removeItem(key)
+    if (key.startsWith(`${prefix}.`)) localStorage.removeItem(key)
   }
   return refreshToken
 }
 
 // Amplify's own signOut revokes before it clears storage, retrying while Cognito is unreachable.
 async function revoke(refreshToken: string) {
-  await fetch(`https://cognito-idp.${REGION}.amazonaws.com/`, {
+  const { region, clientId } = cognito()
+  await fetch(`https://cognito-idp.${region}.amazonaws.com/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-amz-json-1.1',
       'X-Amz-Target': 'AWSCognitoIdentityProviderService.RevokeToken',
     },
-    body: JSON.stringify({ Token: refreshToken, ClientId: CLIENT_ID }),
+    body: JSON.stringify({ Token: refreshToken, ClientId: clientId }),
   })
 }
 
@@ -121,8 +142,8 @@ async function forget() {
 }
 
 export const cognitoTokens: Tokens = {
-  hasStored: () => localStorage.getItem(LAST_AUTH_USER_KEY) !== null,
+  hasStored: () => localStorage.getItem(lastAuthUserKey()) !== null,
   currentAccessToken,
   forget,
-  onForgottenElsewhere: (listener) => onStorageKeyRemoved(LAST_AUTH_USER_KEY, listener),
+  onForgottenElsewhere: (listener) => onStorageKeyRemoved(lastAuthUserKey(), listener),
 }

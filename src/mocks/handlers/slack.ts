@@ -1,8 +1,14 @@
 import { http, HttpResponse } from 'msw'
+import { z, type ZodType } from 'zod'
 import type { SlackChannelRequest } from '../../api/slack'
 import { MOCK_CHANNELS, slackDeliveriesStore, slackInstallationStore } from '../slack-store'
 import { apiUrl } from '../url'
-import { failure } from './responses'
+import { failure, parsedBody } from './responses'
+
+const channelBody = z.object({
+  channel_id: z.string().optional(),
+  channel_name: z.string().optional(),
+}) satisfies ZodType<SlackChannelRequest>
 
 export const slackHandlers = [
   http.get(apiUrl('/slack/installation'), () => {
@@ -21,7 +27,8 @@ export const slackHandlers = [
   }),
 
   http.put(apiUrl('/slack/installation'), async ({ request }) => {
-    const body = (await request.json()) as SlackChannelRequest
+    const body = await parsedBody(request, channelBody)
+    if (body instanceof Response) return body
     const channel = MOCK_CHANNELS.find((c) => c.id === body.channel_id)
     if (!channel) {
       return failure(400, 'slack_channel_not_set', 'choose a channel from the list first')

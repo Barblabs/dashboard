@@ -169,7 +169,7 @@ function useActiveSection(column: RefObject<HTMLElement | null>, ids: string[]):
 
   useEffect(() => {
     const root = column.current
-    if (!root) return
+    if (!root) return undefined
     const sections = joined.split(' ')
     const onScroll = () => {
       const limit = root.getBoundingClientRect().top + root.clientHeight / 3

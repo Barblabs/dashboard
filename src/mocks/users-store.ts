@@ -1,4 +1,5 @@
-import type { UserResponse } from '../api/users'
+import { z, type ZodType } from 'zod'
+import { CUSTOMER_ROLES, type UserResponse } from '../api/users'
 import { localStore } from './localStore'
 
 export const MOCK_USERS: UserResponse[] = [
@@ -28,4 +29,13 @@ export const MOCK_USERS: UserResponse[] = [
   },
 ]
 
-export const usersStore = localStore('barbattack_mock_users', MOCK_USERS)
+const userSchema = z.strictObject({
+  id: z.string(),
+  email: z.string(),
+  role: z.enum(CUSTOMER_ROLES),
+  created_at: z.string(),
+  disabled_at: z.string().nullable(),
+  pending: z.boolean(),
+}) satisfies ZodType<UserResponse>
+
+export const usersStore = localStore('barbattack_mock_users', z.array(userSchema), MOCK_USERS)

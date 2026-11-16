@@ -15,14 +15,16 @@ export const VERDICTS = [
 type Verdict = (typeof VERDICTS)[number]
 
 /** The inputs a Scoring Model replaced with a default, which make a Score estimated. */
-type DataGap =
-  | 'cvss_estimated'
-  | 'epss_pending'
-  | 'kev_stale'
-  | 'criticality_unknown'
-  | 'exposure_undeclared'
-  | 'lifecycle_unknown'
-  | 'information_classification_undeclared'
+export const DATA_GAPS = [
+  'cvss_estimated',
+  'epss_pending',
+  'kev_stale',
+  'criticality_unknown',
+  'exposure_undeclared',
+  'lifecycle_unknown',
+  'information_classification_undeclared',
+] as const
+type DataGap = (typeof DATA_GAPS)[number]
 
 export type Technique = Schemas['TechniqueResponse']
 type CriticalService = Override<Schemas['CriticalServiceResponse'], { impact: Impact; max_downtime: Downtime }>

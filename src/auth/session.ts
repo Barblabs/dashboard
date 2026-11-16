@@ -1,4 +1,4 @@
-import { authOutcomeOf } from '../api/client'
+import { authOutcomeOf, type AuthOutcome } from '../api/client'
 import { fetchMe } from '../api/me'
 import { signOut } from './signOut'
 import { singleFlight } from './singleFlight'
@@ -22,21 +22,23 @@ async function verifyStoredTokens(): Promise<Verification> {
     store.establishSession(await fetchMe())
     return 'settled'
   } catch (error) {
-    switch (authOutcomeOf(error)) {
-      case 'rejected':
-        return reject()
-      case 'deactivated':
-        store.deactivate()
-        return 'settled'
-      case null:
-        return 'unreachable'
-    }
+    const outcome = authOutcomeOf(error)
+    return outcome === null ? 'unreachable' : VERIFICATION_OF[outcome]()
   }
 }
 
 function reject(): Verification {
   signOut()
   return 'rejected'
+}
+
+// A Record, so `tsc` fails when a new outcome has no verification.
+const VERIFICATION_OF: Record<AuthOutcome, () => Verification> = {
+  rejected: reject,
+  deactivated: () => {
+    useAuthStore.getState().deactivate()
+    return 'settled'
+  },
 }
 
 const SIGN_IN_FAILURES = {

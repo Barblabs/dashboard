@@ -46,7 +46,7 @@ type MessageValues = { user?: string }
 
 export function translatedOrBackendMessage(
   { code, error }: BackendFailure,
-  t: TFunction<'translation'>,
+  t: TFunction,
   fallback: ParseKeys,
   values: MessageValues = {},
 ): string {
@@ -58,19 +58,19 @@ export function translatedOrBackendMessage(
 /** Passing a query or mutation's `error`, null until it fails, yields null until then. */
 export function requestErrorText(
   error: Error,
-  t: TFunction<'translation'>,
+  t: TFunction,
   keys: RequestErrorKeys,
   values?: MessageValues,
 ): string
 export function requestErrorText(
   error: Error | null,
-  t: TFunction<'translation'>,
+  t: TFunction,
   keys: RequestErrorKeys,
   values?: MessageValues,
 ): string | null
 export function requestErrorText(
   error: Error | null,
-  t: TFunction<'translation'>,
+  t: TFunction,
   keys: RequestErrorKeys,
   values: MessageValues = {},
 ): string | null {

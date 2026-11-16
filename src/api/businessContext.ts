@@ -2,7 +2,7 @@ import { useIsMutating, useMutation, useQuery, useQueryClient } from '@tanstack/
 import type { AssetsPage } from './assets'
 import { api } from './client'
 import { connectionScopeKey } from './cmdb'
-import type { Known, Override, Schemas } from './schemas'
+import { everyOf, type Known, type Override, type Schemas } from './schemas'
 
 export type Sector = Schemas['ProfileFields']['sectors'][number]
 export type OrganizationType = Schemas['ProfileFields']['organization_type']
@@ -16,89 +16,82 @@ export type RiskAppetite = Schemas['RiskFields']['appetite']
 export type Impact = Schemas['CriticalServiceField']['impact']
 export type Downtime = Schemas['CriticalServiceField']['max_downtime']
 
-/*
- * The vocabularies, in the backend's order. Each is a Record so `tsc` fails when the backend
- * adds or drops a code and generated.ts is regenerated.
- */
-function codes<T extends string>(record: Record<T, true>): T[] {
-  return Object.keys(record) as T[]
-}
+// The vocabularies, in the backend's order; `everyOf` fails `tsc` when the backend adds or drops a code.
+export const SECTORS = everyOf<Sector>()([
+  'agriculture', 'aerospace', 'automotive', 'chemical', 'commercial',
+  'communications', 'construction', 'defense', 'education', 'energy',
+  'entertainment', 'financial-services', 'government',
+  'government-emergency-services', 'government-local', 'government-national',
+  'government-public-services', 'government-regional', 'healthcare',
+  'hospitality-leisure', 'infrastructure', 'infrastructure-dams',
+  'infrastructure-nuclear', 'infrastructure-water', 'insurance',
+  'manufacturing', 'mining', 'non-profit', 'pharmaceuticals', 'retail',
+  'technology', 'telecommunications', 'transportation', 'utilities',
+  'biotechnology', 'cryptocurrency', 'e-commerce', 'food-beverage',
+  'gaming', 'legal', 'logistics', 'maritime', 'media', 'oil-gas',
+  'professional-services', 'real-estate', 'research', 'semiconductors',
+])
 
-export const SECTORS = codes<Sector>({
-  agriculture: true, aerospace: true, automotive: true, chemical: true, commercial: true,
-  communications: true, construction: true, defense: true, education: true, energy: true,
-  entertainment: true, 'financial-services': true, government: true,
-  'government-emergency-services': true, 'government-local': true, 'government-national': true,
-  'government-public-services': true, 'government-regional': true, healthcare: true,
-  'hospitality-leisure': true, infrastructure: true, 'infrastructure-dams': true,
-  'infrastructure-nuclear': true, 'infrastructure-water': true, insurance: true,
-  manufacturing: true, mining: true, 'non-profit': true, pharmaceuticals: true, retail: true,
-  technology: true, telecommunications: true, transportation: true, utilities: true,
-  biotechnology: true, cryptocurrency: true, 'e-commerce': true, 'food-beverage': true,
-  gaming: true, legal: true, logistics: true, maritime: true, media: true, 'oil-gas': true,
-  'professional-services': true, 'real-estate': true, research: true, semiconductors: true,
-})
+export const ORGANIZATION_TYPES = everyOf<Exclude<OrganizationType, ''>>()([
+  'private_company', 'public_company', 'subsidiary', 'state_owned',
+  'government', 'non_profit', 'academic', 'cooperative',
+  'international_organization',
+])
 
-export const ORGANIZATION_TYPES = codes<Exclude<OrganizationType, ''>>({
-  private_company: true, public_company: true, subsidiary: true, state_owned: true,
-  government: true, non_profit: true, academic: true, cooperative: true,
-  international_organization: true,
-})
+export const EMPLOYEE_RANGES = everyOf<Exclude<EmployeeRange, ''>>()([
+  '1_9', '10_49', '50_249', '250_999', '1000_4999',
+  '5000_9999', '10000_plus',
+])
 
-export const EMPLOYEE_RANGES = codes<Exclude<EmployeeRange, ''>>({
-  '1_9': true, '10_49': true, '50_249': true, '250_999': true, '1000_4999': true,
-  '5000_9999': true, '10000_plus': true,
-})
+export const REVENUE_RANGES = everyOf<Exclude<RevenueRange, ''>>()([
+  'under_1m', '1m_5m', '5m_10m', '10m_50m', '50m_100m',
+  '100m_250m', '250m_1b', '1b_10b', 'over_10b',
+])
 
-export const REVENUE_RANGES = codes<Exclude<RevenueRange, ''>>({
-  under_1m: true, '1m_5m': true, '5m_10m': true, '10m_50m': true, '50m_100m': true,
-  '100m_250m': true, '250m_1b': true, '1b_10b': true, over_10b: true,
-})
+export const DATA_CATEGORIES = everyOf<DataCategory>()([
+  'personal_data', 'sensitive_personal_data', 'government_ids', 'payment_cards',
+  'financial_data', 'tax_data', 'health_data', 'biometric_data',
+  'children_data', 'employee_data', 'location_data', 'communications',
+  'credentials', 'intellectual_property', 'source_code', 'research_data',
+  'legal_data', 'operational_data', 'classified_information',
+])
 
-export const DATA_CATEGORIES = codes<DataCategory>({
-  personal_data: true, sensitive_personal_data: true, government_ids: true, payment_cards: true,
-  financial_data: true, tax_data: true, health_data: true, biometric_data: true,
-  children_data: true, employee_data: true, location_data: true, communications: true,
-  credentials: true, intellectual_property: true, source_code: true, research_data: true,
-  legal_data: true, operational_data: true, classified_information: true,
-})
+export const REGULATIONS = everyOf<Regulation>()([
+  'gdpr', 'uk_gdpr', 'lfpdppp', 'lgpdppso', 'lgpd', 'habeas_data_co',
+  'ley_21719_cl', 'ley_25326_ar', 'ccpa', 'pipeda', 'pci_dss', 'sox',
+  'glba', 'cnbv', 'banxico', 'ley_fintech', 'cnsf', 'lfpiorpi', 'dora',
+  'nydfs_500', 'swift_csp', 'sec_cyber', 'hipaa', 'hitrust',
+  'nom_024_ssa3', 'nom_151', 'nis2', 'nerc_cip', 'iec_62443', 'tisax',
+  'cmmc', 'fedramp', 'fisma', 'ferpa', 'coppa', 'iso_27001',
+  'iso_27701', 'iso_22301', 'soc_2', 'nist_csf', 'nist_800_53',
+  'cis_controls', 'cobit',
+])
 
-export const REGULATIONS = codes<Regulation>({
-  gdpr: true, uk_gdpr: true, lfpdppp: true, lgpdppso: true, lgpd: true, habeas_data_co: true,
-  ley_21719_cl: true, ley_25326_ar: true, ccpa: true, pipeda: true, pci_dss: true, sox: true,
-  glba: true, cnbv: true, banxico: true, ley_fintech: true, cnsf: true, lfpiorpi: true, dora: true,
-  nydfs_500: true, swift_csp: true, sec_cyber: true, hipaa: true, hitrust: true,
-  nom_024_ssa3: true, nom_151: true, nis2: true, nerc_cip: true, iec_62443: true, tisax: true,
-  cmmc: true, fedramp: true, fisma: true, ferpa: true, coppa: true, iso_27001: true,
-  iso_27701: true, iso_22301: true, soc_2: true, nist_csf: true, nist_800_53: true,
-  cis_controls: true, cobit: true,
-})
+export const ENVIRONMENTS = everyOf<Environment>()([
+  'on_premises', 'private_cloud', 'public_cloud', 'saas',
+  'email_collaboration', 'erp', 'containers', 'mainframe', 'legacy_systems',
+  'operational_technology', 'iot', 'public_web_apps', 'public_apis',
+  'mobile_apps', 'point_of_sale', 'atms', 'branch_offices', 'remote_work',
+  'byod',
+])
 
-export const ENVIRONMENTS = codes<Environment>({
-  on_premises: true, private_cloud: true, public_cloud: true, saas: true,
-  email_collaboration: true, erp: true, containers: true, mainframe: true, legacy_systems: true,
-  operational_technology: true, iot: true, public_web_apps: true, public_apis: true,
-  mobile_apps: true, point_of_sale: true, atms: true, branch_offices: true, remote_work: true,
-  byod: true,
-})
+export const CONCERNS = everyOf<Concern>()([
+  'ransomware', 'data_theft', 'accidental_exposure', 'fraud',
+  'business_email_compromise', 'phishing', 'social_engineering',
+  'account_takeover', 'malware', 'vulnerability_exploitation', 'web_attacks',
+  'espionage', 'sabotage', 'ddos', 'insider', 'supply_chain',
+  'third_party_breach', 'hacktivism', 'cryptojacking',
+])
 
-export const CONCERNS = codes<Concern>({
-  ransomware: true, data_theft: true, accidental_exposure: true, fraud: true,
-  business_email_compromise: true, phishing: true, social_engineering: true,
-  account_takeover: true, malware: true, vulnerability_exploitation: true, web_attacks: true,
-  espionage: true, sabotage: true, ddos: true, insider: true, supply_chain: true,
-  third_party_breach: true, hacktivism: true, cryptojacking: true,
-})
+export const RISK_APPETITES = everyOf<Exclude<RiskAppetite, ''>>()([
+  'averse', 'minimal', 'cautious', 'open', 'eager',
+])
 
-export const RISK_APPETITES = codes<Exclude<RiskAppetite, ''>>({
-  averse: true, minimal: true, cautious: true, open: true, eager: true,
-})
+export const IMPACTS = everyOf<Exclude<Impact, ''>>()(['critical', 'high', 'medium', 'low'])
 
-export const IMPACTS = codes<Exclude<Impact, ''>>({ critical: true, high: true, medium: true, low: true })
-
-export const DOWNTIMES = codes<Exclude<Downtime, ''>>({
-  under_1h: true, '1h_4h': true, '4h_24h': true, '1d_3d': true, '3d_7d': true, over_7d: true,
-})
+export const DOWNTIMES = everyOf<Exclude<Downtime, ''>>()([
+  'under_1h', '1h_4h', '4h_24h', '1d_3d', '3d_7d', 'over_7d',
+])
 
 /** ISO 3166-1 alpha-2, as the backend accepts them. */
 export const COUNTRIES = [
@@ -165,8 +158,12 @@ export type FieldPath = {
 }[Section]
 
 function valueAt(fields: BusinessContextFields, path: FieldPath): unknown {
-  const [section, field] = path.split('.') as [Section, string]
-  return (fields[section] as Record<string, unknown>)[field]
+  for (const [section, values] of Object.entries(fields)) {
+    for (const [field, value] of Object.entries(values)) {
+      if (`${section}.${field}` === path) return value
+    }
+  }
+  return undefined
 }
 
 /** Whether a field's value says anything: non-blank text, a code, or a non-empty list. */
@@ -190,6 +187,17 @@ type DraftFile = Known<Schemas['DraftFile']>
 
 /** Pasted text, files or both; the agent reads them together. */
 export type DraftSource = Override<Known<Schemas['DraftBusinessContextRequest']>, { files?: DraftFile[] }>
+
+/*
+ * A text's length as the backend measures it against `LIMITS`: in Unicode code points, as Go's
+ * `utf8.RuneCountInString` counts them. A string iterates by code point, so an emoji made of
+ * a surrogate pair counts once, while one built from several code points counts each.
+ */
+export function characterCount(text: string): number {
+  let count = 0
+  for (const _ of text) count++
+  return count
+}
 
 /** Mirrors the backend's limits, so the form flags them before a save is refused. */
 export const LIMITS = {
@@ -247,7 +255,12 @@ export function draftMediaTypeOf(file: File): string | null {
 function readBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.addEventListener('load', () => resolve(String(reader.result).split(',', 2)[1] ?? ''))
+    reader.addEventListener('load', () => {
+      // `readAsDataURL` always ends in a string; `ArrayBuffer` is what `readAsArrayBuffer` gives.
+      const { result } = reader
+      if (typeof result === 'string') resolve(result.split(',', 2)[1] ?? '')
+      else reject(new Error('read failed'))
+    })
     reader.addEventListener('error', () => reject(reader.error ?? new Error('read failed')))
     reader.readAsDataURL(file)
   })

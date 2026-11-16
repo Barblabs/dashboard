@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { setMockRole } from '../../auth/mockTokens'
+import { MOCK_ROLES, setMockRole } from '../../auth/mockTokens'
 import { completeSignIn } from '../../auth/session'
 import type { Role } from '../../auth/store'
 import { Wordmark } from '../../components/Wordmark'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
-
-const MOCK_ROLES: readonly Role[] = ['platform_admin', 'customer_admin', 'viewer']
 
 // Picking a role stands in for Cognito storing tokens; the rest is the real sign-in.
 export function MockSignIn() {
