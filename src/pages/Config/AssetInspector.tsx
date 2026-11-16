@@ -1,6 +1,14 @@
 import { useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { assetKey, unidentifiedCount, type Asset, type Criticality } from '../../api/assets'
+import type { ParseKeys } from 'i18next'
+import {
+  assetKey,
+  missingValues,
+  unidentifiedCount,
+  type Asset,
+  type Criticality,
+  type TriagedValue,
+} from '../../api/assets'
 import type { Pager } from '../../api/inventory'
 import { AssetPager } from './AssetPager'
 import { AssetRecord } from './AssetRecord'
@@ -12,6 +20,11 @@ const CRITICALITY_DOT: Record<Criticality, string> = {
   low: 'bg-muted-bg',
 }
 
+const GAP_LABELS: Record<TriagedValue, ParseKeys> = {
+  exposure: 'config.inventory.inspector.gaps.unknownExposure',
+  informationClassification: 'config.inventory.inspector.gaps.unclassified',
+}
+
 const optionId = (asset: Asset) => `asset-${assetKey(asset)}`
 
 /** Flags what the Asset is missing: a value to triage, or Components threats can't be checked against. */
@@ -19,10 +32,9 @@ function GapDot({ asset }: { asset: Asset }) {
   const { t } = useTranslation()
   const unidentified = unidentifiedCount(asset)
   const gaps = [
-    asset.exposure.value === null && t('config.inventory.inspector.gaps.unknownExposure'),
-    asset.information_classification.value === null && t('config.inventory.inspector.gaps.unclassified'),
-    unidentified > 0 && t('config.inventory.inspector.gaps.unidentified', { count: unidentified }),
-  ].filter(Boolean)
+    ...missingValues(asset).map((value) => t(GAP_LABELS[value])),
+    ...(unidentified > 0 ? [t('config.inventory.inspector.gaps.unidentified', { count: unidentified })] : []),
+  ]
   if (gaps.length === 0) return null
 
   const label = gaps.join(' · ')

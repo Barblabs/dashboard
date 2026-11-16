@@ -1,5 +1,5 @@
 import { useQuery, type QueryClient } from '@tanstack/react-query'
-import type { Asset, AssetFilters } from './assets'
+import { missingValues, type Asset, type AssetFilters } from './assets'
 import { connectionScopeKey } from './cmdb'
 import { allAssetPages } from './inventory'
 
@@ -8,7 +8,7 @@ const NEEDS_TRIAGE_KEY = [...connectionScopeKey, 'needs-triage'] as const
 
 // What the banner counts and the queue walks through: an Active Asset missing a value a User declares.
 function needsTriage(asset: Asset): boolean {
-  return asset.active && (asset.exposure.value === null || asset.information_classification.value === null)
+  return asset.active && missingValues(asset).length > 0
 }
 
 async function fetchAll(filters: Partial<AssetFilters>): Promise<Asset[]> {
