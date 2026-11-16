@@ -20,3 +20,6 @@ node_modules/
 
 # Claude Code local settings — no subir al repo
 .claude/settings.local.json
+
+# Local agent task artifacts (PR descriptions, notes)
+.humanlayer/
