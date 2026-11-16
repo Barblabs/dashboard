@@ -147,6 +147,7 @@ export const en = {
       readMore_one: 'Read {{count}} more paragraph',
       readMore_other: 'Read {{count}} more paragraphs',
       showLess: 'Show less',
+      showAllReferences: 'Show all {{count}} references',
       opensInNewTab: '(opens in a new tab)',
       evidence: {
         kevDateAdded: 'In KEV since',

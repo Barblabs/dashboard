@@ -135,6 +135,21 @@ describe('Findings', () => {
     expect(within(dialog).getByRole('link', { name: /example\.com/ })).toHaveAttribute('href', 'https://example.com/advisory')
   })
 
+  it('keeps a long list of references behind a toggle', async () => {
+    const references = Array.from({ length: 12 }, (_, i) => `https://example.com/errata/${i}`)
+    storeFinding('CVE-2025-1094', (f) => ({ ...f, details: { ...f.details, references } }))
+    const user = await renderFindings()
+
+    const dialog = await openFinding(user, 'CVE-2025-1094')
+    const links = () => within(dialog).queryAllByRole('link', { name: /example\.com/ })
+
+    expect(links()).toHaveLength(5)
+    await user.click(within(dialog).getByRole('button', { name: 'Show all 12 references' }))
+    expect(links()).toHaveLength(12)
+    await user.click(within(dialog).getByRole('button', { name: 'Show less' }))
+    expect(links()).toHaveLength(5)
+  })
+
   it('a finding on an asset of Unknown Lifecycle Stage says its Score is estimated', async () => {
     storeFinding('CVE-2025-1094', (f) => ({
       ...f,
