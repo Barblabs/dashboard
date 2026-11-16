@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useValidationText } from '../../i18n/validation'
 import { z } from 'zod'
 import { useCreateCustomerMutation } from '../../api/customers'
 import { Alert } from '../../components/ui/Alert'
@@ -50,6 +51,7 @@ function StepIndicator({ step }: { step: CreateStep['number'] }) {
 
 function CreateBody({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation()
+  const validationText = useValidationText()
   const create = useCreateCustomerMutation()
   const [current, setCurrent] = useState<CreateStep>({ number: 1 })
 
@@ -83,11 +85,7 @@ function CreateBody({ onClose }: { onClose: () => void }) {
       >
         <Field
           label={t('tenants.create.step1.label')}
-          error={
-            step1Form.formState.errors.name?.message
-              ? t(step1Form.formState.errors.name.message as 'tenants.create.step1.required')
-              : undefined
-          }
+          error={validationText(step1Form.formState.errors.name?.message)}
         >
           <Input
             placeholder={t('tenants.create.step1.placeholder')}
@@ -124,11 +122,7 @@ function CreateBody({ onClose }: { onClose: () => void }) {
       <div className="flex flex-col gap-4">
         <Field
           label={t('tenants.create.step2.label')}
-          error={
-            step2Form.formState.errors.admin_email?.message
-              ? t(step2Form.formState.errors.admin_email.message as 'tenants.create.step2.required')
-              : undefined
-          }
+          error={validationText(step2Form.formState.errors.admin_email?.message)}
         >
           <Input
             type="email"

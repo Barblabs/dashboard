@@ -1,13 +1,14 @@
 import { useId, useMemo } from 'react'
 import { useController } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useValidationText } from '../../i18n/validation'
 import { Input } from '../../components/ui/Input'
 import { MultiSelect, type Option } from '../../components/ui/MultiSelect'
 import { Select } from '../../components/ui/Select'
 import { Textarea } from '../../components/ui/Textarea'
 import { Shell, Shown } from './FieldShell'
 import { LIMITS, type BusinessContextFields } from '../../api/businessContext'
-import { useErrorText, useMeta, type FieldPathOf } from './meta'
+import { useMeta, type FieldPathOf } from './meta'
 import { useVocab, type Codes, type Vocab } from './vocab'
 
 /*
@@ -28,9 +29,9 @@ interface TextProps {
 
 export function TextField({ name, label, placeholder, max, hideLabel, rows, className = '' }: TextProps) {
   const meta = useMeta(name)
-  const errorText = useErrorText()
+  const errorText = useValidationText()
   const { field, fieldState } = useController<BusinessContextFields, TextProps['name']>({ name })
-  const error = errorText(fieldState.error?.message, max)
+  const error = errorText(fieldState.error?.message, { max })
   const length = [...field.value].length
   return (
     <Shell
@@ -77,7 +78,7 @@ export function SelectField({ name, vocab, label, emptyLabel, hint, hideLabel }:
   const { t } = useTranslation()
   const meta = useMeta(name)
   const { codes, labelOf } = useVocab(vocab)
-  const errorText = useErrorText()
+  const errorText = useValidationText()
   const { field, fieldState } = useController<BusinessContextFields, OneOf['name']>({ name })
   const error = errorText(fieldState.error?.message)
   return (
@@ -112,9 +113,9 @@ export function MultiSelectField({ name, vocab, label, placeholder }: MultiSelec
   const id = useId()
   const meta = useMeta(name)
   const { codes, labelOf } = useVocab(vocab)
-  const errorText = useErrorText()
+  const errorText = useValidationText()
   const { field, fieldState } = useController<BusinessContextFields, SomeOf['name']>({ name })
-  const error = errorText(fieldState.error?.message, LIMITS.entries)
+  const error = errorText(fieldState.error?.message, { max: LIMITS.entries })
   const options = useMemo<Option[]>(() => codes.map((code) => ({ value: code, label: labelOf(code) })), [codes, labelOf])
   return (
     // id is passed explicitly: Combobox.Input does not auto-register with the Field context.

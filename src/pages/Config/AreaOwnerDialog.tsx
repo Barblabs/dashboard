@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { ParseKeys } from 'i18next'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useValidationText } from '../../i18n/validation'
 import { z } from 'zod'
 import { useSetAreaOwnerMutation, type Area } from '../../api/areas'
 import { Button } from '../../components/ui/Button'
@@ -22,6 +22,7 @@ export function AreaOwnerDialog({ dialog }: { dialog: DialogTarget<Area> }) {
 
 function AreaOwnerBody({ area, onClose }: { area: Area; onClose: () => void }) {
   const { t } = useTranslation()
+  const validationText = useValidationText()
   const setOwner = useSetAreaOwnerMutation()
 
   const {
@@ -70,7 +71,7 @@ function AreaOwnerBody({ area, onClose }: { area: Area; onClose: () => void }) {
     >
       <Field
         label={t('config.areas.owner.email')}
-        error={errors.email?.message && t(errors.email.message as ParseKeys)}
+        error={validationText(errors.email?.message)}
       >
         <Input
           type="email"

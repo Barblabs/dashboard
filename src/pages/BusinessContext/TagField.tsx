@@ -1,11 +1,12 @@
 import { useId, useState } from 'react'
 import { useController } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useValidationText } from '../../i18n/validation'
 import { Field as BaseField } from '@base-ui/react/field'
 import { LIMITS, type BusinessContextFields } from '../../api/businessContext'
 import { CloseIcon } from '../../components/ui/icons'
 import { Shell, Shown } from './FieldShell'
-import { useErrorText, useMeta, type FieldPathOf } from './meta'
+import { useMeta, type FieldPathOf } from './meta'
 
 interface TagProps {
   name: FieldPathOf<string[]>
@@ -22,7 +23,7 @@ export function TagField({ name, label, placeholder, hideLabel, suggestions, can
   const { t } = useTranslation()
   const listId = useId()
   const meta = useMeta(name)
-  const errorText = useErrorText()
+  const errorText = useValidationText()
   const {
     field: { value, onChange },
     fieldState,
@@ -31,7 +32,7 @@ export function TagField({ name, label, placeholder, hideLabel, suggestions, can
   const [entryError, setError] = useState<string | null>(null)
   // What was just typed comes first; otherwise the schema's word on the whole list, such as a
   // draft that grew it past the limit.
-  const error = entryError ?? errorText(fieldState.error?.message, LIMITS.entries) ?? null
+  const error = entryError ?? errorText(fieldState.error?.message, { max: LIMITS.entries }) ?? null
 
   function add(raw: string) {
     const next = [...value]

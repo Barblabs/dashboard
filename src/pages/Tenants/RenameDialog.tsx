@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useValidationText } from '../../i18n/validation'
 import { useRenameCustomerMutation, type CustomerResponse } from '../../api/customers'
 import { Button } from '../../components/ui/Button'
 import { DialogLayout, TargetModal } from '../../components/ui/Dialog'
@@ -20,6 +21,7 @@ export function RenameDialog({ dialog }: { dialog: DialogTarget<CustomerResponse
 
 function RenameBody({ customer, onClose }: { customer: CustomerResponse; onClose: () => void }) {
   const { t } = useTranslation()
+  const validationText = useValidationText()
   const rename = useRenameCustomerMutation()
 
   const {
@@ -53,7 +55,7 @@ function RenameBody({ customer, onClose }: { customer: CustomerResponse; onClose
     >
       <Field
         label={t('tenants.rename.label')}
-        error={errors.name?.message ? t(errors.name.message as 'tenants.create.step1.required') : undefined}
+        error={validationText(errors.name?.message)}
       >
         <Input disabled={rename.isPending} {...register('name')} />
       </Field>

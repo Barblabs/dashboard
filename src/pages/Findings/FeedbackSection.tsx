@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useValidationText } from '../../i18n/validation'
 import { z } from 'zod'
 import {
   useRecordFeedbackMutation,
@@ -30,6 +31,7 @@ type FeedbackFields = z.infer<typeof feedbackSchema>
 /** What Users said about the Finding, on any Prioritization of the chain, and a form to add to it. */
 export function FeedbackSection({ order, finding }: { order: CurrentOrder; finding: Finding }) {
   const { t } = useTranslation()
+  const validationText = useValidationText()
   const formatDate = useDateFormat()
   const record = useRecordFeedbackMutation(order.prioritization.id)
   const said = order.prioritization.feedback.filter((f) => f.finding_id === finding.finding_id)
@@ -83,7 +85,7 @@ export function FeedbackSection({ order, finding }: { order: CurrentOrder; findi
         </Field>
         <Field
           label={t('findings.detail.feedback.note')}
-          error={errors.note?.message && t(errors.note.message as 'findings.detail.feedback.noteTooLong')}
+          error={validationText(errors.note?.message)}
         >
           <Textarea rows={3} disabled={record.isPending} {...register('note')} />
         </Field>

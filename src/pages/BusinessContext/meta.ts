@@ -1,8 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { Path, PathValue } from 'react-hook-form'
-import { useTranslation } from 'react-i18next'
 import type { BusinessContextFields } from '../../api/businessContext'
-import type { ValidationKey } from './schema'
 
 /*
  * The fields whose value is exactly `V`. react-hook-form's `FieldPathByValue` only checks
@@ -28,10 +26,4 @@ export const FormMetaContext = createContext<FormMeta>({ filled: new Set(), read
 export function useMeta(name: Path<BusinessContextFields>) {
   const { filled, readOnly } = useContext(FormMetaContext)
   return { suggested: filled.has(name), readOnly }
-}
-
-/** The schema's messages are translation keys; the field passes the limit that applies. */
-export function useErrorText() {
-  const { t } = useTranslation()
-  return (message: string | undefined, max?: number) => (message ? t(message as ValidationKey, { max }) : undefined)
 }
