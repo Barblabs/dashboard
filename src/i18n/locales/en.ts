@@ -563,6 +563,8 @@ export const en = {
         allExposures: 'All exposures',
         informationClassification: 'Information Classification',
         allInformationClassifications: 'All classifications',
+        lifecycleStage: 'Lifecycle Stage',
+        allLifecycleStages: 'All lifecycle stages',
         allAreas: 'All areas',
         inactiveArea: '{{name}} (inactive)',
         noOptions: 'No matches.',

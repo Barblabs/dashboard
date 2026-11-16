@@ -495,6 +495,25 @@ describe('Tech stack', () => {
     expect(assetList().queryByRole('option', { name: /crm-db-primary/ })).not.toBeInTheDocument()
   })
 
+  it('several Lifecycle Stages list the assets of any of them', async () => {
+    const user = await renderInventory()
+
+    await chooseFilter(user, 'Lifecycle Stage', 'Implementation', 'In stock')
+
+    expect(await screen.findByText('2 assets')).toBeInTheDocument()
+    expect(option('analytics-worker-03')).toBeInTheDocument()
+    expect(option('reporting-batch-01')).toBeInTheDocument()
+  })
+
+  it('the Unknown Lifecycle Stage lists the assets the CMDB Source gives none for', async () => {
+    const user = await renderInventory()
+
+    await chooseFilter(user, 'Lifecycle Stage', 'Unknown')
+
+    expect(await screen.findByText('1 asset')).toBeInTheDocument()
+    expect(option('core-switch-01')).toBeInTheDocument()
+  })
+
   it('several Areas list the assets of any of them', async () => {
     const user = await renderInventory()
 

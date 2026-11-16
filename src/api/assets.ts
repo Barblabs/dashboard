@@ -42,6 +42,17 @@ export const INFORMATION_CLASSIFICATIONS = [
 export const INFORMATION_CLASSIFICATION_FILTERS = [...INFORMATION_CLASSIFICATIONS, 'unclassified'] as const
 type InformationClassificationFilter = (typeof INFORMATION_CLASSIFICATION_FILTERS)[number]
 
+type LifecycleStage = NonNullable<Schemas['AssetResponse']['lifecycle_stage']>
+const LIFECYCLE_STAGES = [
+  'production',
+  'implementation',
+  'stock',
+] as const satisfies readonly LifecycleStage[]
+
+/** `unknown` matches an Asset whose `lifecycle_stage` is `null`, a retired Asset included. */
+export const LIFECYCLE_STAGE_FILTERS = [...LIFECYCLE_STAGES, 'unknown'] as const
+type LifecycleStageFilter = (typeof LIFECYCLE_STAGE_FILTERS)[number]
+
 /** Only ever declared, so it is all set or, when Unclassified, all `null` (ADR 0031). */
 export type AssetInformationClassification =
   | Override<Schemas['InformationClassificationResponse'], { value: null; declared_by: null; declared_at: null }>
@@ -82,6 +93,7 @@ export interface AssetFilters {
   criticality: CriticalityFilter[]
   exposure: ExposureFilter[]
   information_classification: InformationClassificationFilter[]
+  lifecycle_stage: LifecycleStageFilter[]
   /** Area ids, as in `GET /areas`. */
   area: number[]
 }

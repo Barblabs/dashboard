@@ -9,6 +9,7 @@ import {
   EXPOSURES,
   INFORMATION_CLASSIFICATION_FILTERS,
   INFORMATION_CLASSIFICATIONS,
+  LIFECYCLE_STAGE_FILTERS,
   type AssetFilters,
 } from '../../api/assets'
 import { exposureLabel, informationClassificationLabel } from './assetText'
@@ -49,6 +50,14 @@ export function AssetFilterBar({
       INFORMATION_CLASSIFICATION_FILTERS.map((classification) => ({
         value: classification,
         label: informationClassificationLabel(t, pick(INFORMATION_CLASSIFICATIONS, classification)),
+      })),
+    [t],
+  )
+  const lifecycleStageOptions = useMemo(
+    () =>
+      LIFECYCLE_STAGE_FILTERS.map((stage) => ({
+        value: stage,
+        label: t(`config.inventory.lifecycleStage.${stage}`),
       })),
     [t],
   )
@@ -105,6 +114,13 @@ export function AssetFilterBar({
           onChange({ ...filters, information_classification: pickAll(INFORMATION_CLASSIFICATION_FILTERS, values) })
         }
         placeholder={t('config.inventory.filters.allInformationClassifications')}
+      />
+      <FilterMultiSelect
+        label={t('config.inventory.filters.lifecycleStage')}
+        options={lifecycleStageOptions}
+        value={filters.lifecycle_stage}
+        onChange={(values) => onChange({ ...filters, lifecycle_stage: pickAll(LIFECYCLE_STAGE_FILTERS, values) })}
+        placeholder={t('config.inventory.filters.allLifecycleStages')}
       />
       <FilterMultiSelect
         label={t('config.inventory.filters.area')}

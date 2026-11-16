@@ -1714,6 +1714,8 @@ export interface operations {
                 exposure?: ("internet_facing" | "internal" | "unknown")[];
                 /** @description Information Classification codes, as repeated keys; an Asset with any of them matches, and unclassified matches an Asset without a Declaration */
                 information_classification?: ("public" | "private" | "confidential" | "unclassified")[];
+                /** @description Lifecycle stage codes, as repeated keys; an Asset with any of them matches, and unknown matches an Asset without one, a retired Asset included */
+                lifecycle_stage?: ("production" | "implementation" | "stock" | "unknown")[];
                 /** @description Area ids, as in GET /areas, as repeated keys; an Asset in any of them matches */
                 area?: number[];
             };

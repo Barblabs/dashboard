@@ -565,6 +565,8 @@ export const es: Translations = {
         allExposures: 'Todas las exposiciones',
         informationClassification: 'Clasificación de la Información',
         allInformationClassifications: 'Todas las clasificaciones',
+        lifecycleStage: 'Ciclo de vida',
+        allLifecycleStages: 'Todos los ciclos de vida',
         allAreas: 'Todas las áreas',
         inactiveArea: '{{name}} (inactiva)',
         noOptions: 'Sin resultados.',
