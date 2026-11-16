@@ -14,13 +14,9 @@ import { Select } from '../../components/ui/Select'
 import { Alert } from '../../components/ui/Alert'
 import { slackCodeKey } from './slackCodes'
 import { useSlackInstallConnect } from './useSlackInstallConnect'
+import { CONNECTION_DETAIL, ConnectionBar, DisconnectConfirm } from './ConnectionBar'
 
-const DETAIL = 'overflow-hidden text-[0.8125rem] text-ellipsis whitespace-nowrap'
 const COPY = 'font-mono text-navy'
-const SEPARATOR = 'text-[0.875rem] text-border-panel'
-const STRIP = 'flex animate-fade-in flex-wrap items-center gap-4 border-t px-6 py-3.5'
-const STRIP_TEXT = 'flex-1 font-body text-[0.875rem] leading-[1.4]'
-const CONFIRM_STRIP = `${STRIP} border-border-panel bg-panel`
 
 interface Props {
   installation: SlackInstallation
@@ -41,28 +37,24 @@ export function SlackInstallationBar({ installation, readOnly = false }: Props) 
   const testResult = testMutation.data
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border border-border-panel">
-      <div className="flex flex-wrap items-center gap-4 bg-white px-6 py-4">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-          <Badge variant="solid">
-            <span className="size-[7px] shrink-0 rounded-full bg-cyan" />
-            {t('slack.connected.badge')}
+    <ConnectionBar
+      badge={t('slack.connected.badge')}
+      details={[
+        <span key="team" className={`${CONNECTION_DETAIL} ${COPY}`}>
+          {installation.team_name}
+        </span>,
+        <span key="channel" className={`${CONNECTION_DETAIL} ${channelSet ? COPY : 'font-body text-gray'}`}>
+          {channelSet ? `#${installation.channel_name}` : t('slack.channels.notSet')}
+        </span>,
+        needsReauth && (
+          <Badge key="needsReauth" variant="warning">
+            {t('slack.connected.needsReauth')}
           </Badge>
-          <span className={`${DETAIL} ${COPY}`}>{installation.team_name}</span>
-          <span className={SEPARATOR}>·</span>
-          <span className={`${DETAIL} ${channelSet ? COPY : 'font-body text-gray'}`}>
-            {channelSet ? `#${installation.channel_name}` : t('slack.channels.notSet')}
-          </span>
-          {needsReauth && (
-            <>
-              <span className={SEPARATOR}>·</span>
-              <Badge variant="warning">{t('slack.connected.needsReauth')}</Badge>
-            </>
-          )}
-        </div>
-
-        {!readOnly && (
-          <div className="flex shrink-0 flex-wrap gap-2">
+        ),
+      ]}
+      actions={
+        !readOnly && (
+          <>
             {needsReauth ? (
               <Button size="sm" loading={install.pending} onClick={() => void install.connect()}>
                 {t('slack.connected.reauthorise')}
@@ -88,9 +80,10 @@ export function SlackInstallationBar({ installation, readOnly = false }: Props) 
             >
               {t('slack.connected.actions.disconnect')}
             </Button>
-          </div>
-        )}
-      </div>
+          </>
+        )
+      }
+    >
 
       {/* The Security Team channel must be picked before deliveries can flow; once set,
           an admin can change it at any time. A reader only sees the choice or the wait. */}
@@ -167,38 +160,19 @@ export function SlackInstallationBar({ installation, readOnly = false }: Props) 
       )}
 
       {!readOnly && showConfirm && (
-        <div className={CONFIRM_STRIP}>
-          {disconnectMutation.isError ? (
-            <p role="alert" className={`${STRIP_TEXT} text-critical`}>
-              {requestErrorText(disconnectMutation.error, t, {
-                fallback: 'slack.connected.disconnectFailed',
-              })}
-            </p>
-          ) : (
-            <p className={`${STRIP_TEXT} text-navy`}>{t('slack.connected.confirm.text')}</p>
-          )}
-          <div className="flex shrink-0 gap-2">
-            <Button
-              variant="danger"
-              size="sm"
-              loading={disconnectMutation.isPending}
-              onClick={() => disconnectMutation.mutate()}
-            >
-              {t('slack.connected.confirm.confirm')}
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                disconnectMutation.reset()
-                setShowConfirm(false)
-              }}
-            >
-              {t('slack.connected.confirm.cancel')}
-            </Button>
-          </div>
-        </div>
+        <DisconnectConfirm
+          text={t('slack.connected.confirm.text')}
+          error={requestErrorText(disconnectMutation.error, t, { fallback: 'slack.connected.disconnectFailed' })}
+          confirmLabel={t('slack.connected.confirm.confirm')}
+          cancelLabel={t('slack.connected.confirm.cancel')}
+          pending={disconnectMutation.isPending}
+          onConfirm={() => disconnectMutation.mutate()}
+          onCancel={() => {
+            disconnectMutation.reset()
+            setShowConfirm(false)
+          }}
+        />
       )}
-    </div>
+    </ConnectionBar>
   )
 }
