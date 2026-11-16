@@ -553,6 +553,10 @@ export const en = {
       noArea: 'No Area',
       filters: {
         label: 'Filter assets',
+        more: 'Filters',
+        moreActive: 'Filters · {{count}}',
+        clear: 'Clear',
+        panelLabel: 'More filters',
         active: 'Status',
         kind: 'Type',
         criticality: 'Criticality',
