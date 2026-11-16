@@ -18,9 +18,8 @@ const SLACK_INSTALLATION_KEY = [...SLACK_KEY, 'installation'] as const
 const SLACK_CHANNELS_KEY = [...SLACK_KEY, 'channels'] as const
 const SLACK_FAILED_KEY = [...SLACK_KEY, 'deliveries', 'failed'] as const
 
+/** `channel_id` and `channel_name` are empty strings until an admin picks the channel. */
 export type SlackInstallation = Schemas['SlackInstallationResponse']
-/** Channel ids start as empty strings until an admin finishes the connection. */
-export type UnsetChannel = SlackInstallation & { channel_id: ''; channel_name: '' }
 
 export type SlackChannel = Schemas['SlackChannelResponse']
 export type SlackChannelRequest = Known<Schemas['SlackChannelRequest']>

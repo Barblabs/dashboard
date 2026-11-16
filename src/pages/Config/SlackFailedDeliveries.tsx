@@ -56,7 +56,7 @@ export function SlackFailedDeliveries() {
       {retry.isSuccess && deliveries.length === 0 && (
         <div className="px-6 pt-4">
           <p className="font-body text-[0.875rem] text-nav-active-bg">
-            {t('slack.deliveries.retrySucceeded', { count: retry.data.retried ?? 0 })}
+            {t('slack.deliveries.retrySucceeded', { count: retry.data.retried })}
           </p>
         </div>
       )}
