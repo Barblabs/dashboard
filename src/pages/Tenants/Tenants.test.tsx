@@ -7,9 +7,9 @@ import { PLATFORM_ADMIN, renderApp, seedCustomers } from '../../test/render'
 import { server } from '../../test/server'
 import { MOCK_CUSTOMERS } from '../../mocks/customers-store'
 
-const ORG_A = MOCK_CUSTOMERS[0]!
-const ORG_B = MOCK_CUSTOMERS[1]!
-const ORG_C = MOCK_CUSTOMERS[2]!
+const ORG_A = MOCK_CUSTOMERS[0]
+const ORG_B = MOCK_CUSTOMERS[1]
+const ORG_C = MOCK_CUSTOMERS[2]
 
 async function renderTenants() {
   const user = renderApp('/tenants', PLATFORM_ADMIN)

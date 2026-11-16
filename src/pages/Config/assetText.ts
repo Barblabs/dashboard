@@ -12,13 +12,13 @@ export function osLabel(asset: Asset): string {
 }
 
 /** An Exposure's name, Unknown when neither the CMDB Source nor a Declaration gives it. */
-export function exposureLabel(t: TFunction<'translation'>, value: Exposure | null): string {
+export function exposureLabel(t: TFunction, value: Exposure | null): string {
   return t(`config.inventory.exposure.${value ?? 'unknown'}`)
 }
 
 /** An Information Classification's name, Unclassified until a Declaration gives it. */
 export function informationClassificationLabel(
-  t: TFunction<'translation'>,
+  t: TFunction,
   value: InformationClassification | null,
 ): string {
   return t(`config.inventory.informationClassification.${value ?? 'unclassified'}`)

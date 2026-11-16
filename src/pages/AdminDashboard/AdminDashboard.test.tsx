@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -7,10 +8,8 @@ import { server } from '../../test/server'
 import { MOCK_CUSTOMERS } from '../../mocks/customers-store'
 
 vi.mock('recharts', () => ({
-  ResponsiveContainer: ({ children }: { children: unknown }) => <div>{children as never}</div>,
-  BarChart: ({ children }: { children: unknown }) => (
-    <div data-testid="bar-chart">{children as never}</div>
-  ),
+  ResponsiveContainer: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  BarChart: ({ children }: { children: ReactNode }) => <div data-testid="bar-chart">{children}</div>,
   Bar: () => null,
   XAxis: () => null,
   YAxis: () => null,
@@ -20,7 +19,7 @@ vi.mock('recharts', () => ({
 
 async function renderDashboard() {
   const user = renderApp('/admin-dashboard', PLATFORM_ADMIN)
-  await screen.findByText(MOCK_CUSTOMERS[2]!.name)
+  await screen.findByText(MOCK_CUSTOMERS[2].name)
   return user
 }
 
@@ -58,9 +57,9 @@ describe('AdminDashboard', () => {
     process.env.TZ = 'America/Mexico_City'
     try {
       // 02:00 UTC on November 1st is still October 31st in Mexico City.
-      seedCustomers([{ ...MOCK_CUSTOMERS[0]!, created_at: '2026-11-01T02:00:00Z' }])
+      seedCustomers([{ ...MOCK_CUSTOMERS[0], created_at: '2026-11-01T02:00:00Z' }])
       renderApp('/admin-dashboard', PLATFORM_ADMIN)
-      await screen.findByText(MOCK_CUSTOMERS[0]!.name)
+      await screen.findByText(MOCK_CUSTOMERS[0].name)
 
       expect(stat('New this month')).toBe('0')
     } finally {
@@ -74,9 +73,9 @@ describe('AdminDashboard', () => {
     const recentSection = screen
       .getByText('Recent organizations')
       .closest('section')!
-    expect(within(recentSection).getByText(MOCK_CUSTOMERS[0]!.name)).toBeInTheDocument()
-    expect(within(recentSection).getByText(MOCK_CUSTOMERS[1]!.name)).toBeInTheDocument()
-    expect(within(recentSection).getByText(MOCK_CUSTOMERS[2]!.name)).toBeInTheDocument()
+    expect(within(recentSection).getByText(MOCK_CUSTOMERS[0].name)).toBeInTheDocument()
+    expect(within(recentSection).getByText(MOCK_CUSTOMERS[1].name)).toBeInTheDocument()
+    expect(within(recentSection).getByText(MOCK_CUSTOMERS[2].name)).toBeInTheDocument()
   })
 
   it('marks each recent organization with a one-word status', async () => {
@@ -84,8 +83,8 @@ describe('AdminDashboard', () => {
 
     const recentSection = screen.getByText('Recent organizations').closest('section')!
     const row = (name: string) => within(recentSection).getByText(name).closest('li')!
-    expect(within(row(MOCK_CUSTOMERS[0]!.name)).getByText('Active')).toBeInTheDocument()
-    expect(within(row(MOCK_CUSTOMERS[2]!.name)).getByText('Deactivated')).toBeInTheDocument()
+    expect(within(row(MOCK_CUSTOMERS[0].name)).getByText('Active')).toBeInTheDocument()
+    expect(within(row(MOCK_CUSTOMERS[2].name)).getByText('Deactivated')).toBeInTheDocument()
   })
 
   it('renders the bar chart container', async () => {

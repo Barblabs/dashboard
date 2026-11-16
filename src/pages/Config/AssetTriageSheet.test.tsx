@@ -97,10 +97,10 @@ describe('Asset triage', () => {
         if (params.get('limit') !== '200') return undefined
         counted.push(Object.fromEntries(params))
         const page: AssetsPage = params.has('information_classification')
-          ? { assets: [prodApi!, analyticsWorker!], next_cursor: null, total: 2 }
+          ? { assets: [prodApi, analyticsWorker], next_cursor: null, total: 2 }
           : params.get('cursor') === 'page-2'
-            ? { assets: [coreSwitch!], next_cursor: null, total: 2 }
-            : { assets: [analyticsWorker!], next_cursor: 'page-2', total: 2 }
+            ? { assets: [coreSwitch], next_cursor: null, total: 2 }
+            : { assets: [analyticsWorker], next_cursor: 'page-2', total: 2 }
         return HttpResponse.json(page)
       }),
     )
@@ -123,7 +123,7 @@ describe('Asset triage', () => {
     const sheet = await openQueue(user)
 
     expect(sheet.getByText('1 of 5')).toBeInTheDocument()
-    expect(sheet.getByText(NEEDS_TRIAGE[0]!)).toBeInTheDocument()
+    expect(sheet.getByText(NEEDS_TRIAGE[0])).toBeInTheDocument()
     await user.click(exposureSection(sheet).getByRole('radio', { name: /Internet-facing/ }))
     await user.click(sheet.getByRole('button', { name: 'Declare Exposure' }))
     expect(await exposureSection(sheet).findByRole('status')).toHaveTextContent('Saved')
@@ -132,7 +132,7 @@ describe('Asset triage', () => {
 
     // Classified, but its Exposure is Unknown.
     expect(await sheet.findByText('2 of 5')).toBeInTheDocument()
-    expect(sheet.getByText(NEEDS_TRIAGE[1]!)).toBeInTheDocument()
+    expect(sheet.getByText(NEEDS_TRIAGE[1])).toBeInTheDocument()
     expect(classificationSection(sheet).getByText(/^Public, declared by admin@barbattack\.example on /)).toBeInTheDocument()
     await user.click(sheet.getByRole('button', { name: 'Next' }))
     expect(await sheet.findByText('3 of 5')).toBeInTheDocument()
@@ -142,7 +142,7 @@ describe('Asset triage', () => {
 
     // Its Exposure is known: only its Information Classification is missing.
     expect(await sheet.findByText('5 of 5')).toBeInTheDocument()
-    expect(sheet.getByText(NEEDS_TRIAGE[4]!)).toBeInTheDocument()
+    expect(sheet.getByText(NEEDS_TRIAGE[4])).toBeInTheDocument()
     expect(exposureSection(sheet).getByText('Internet-facing, from its iTop Location.')).toBeInTheDocument()
     await user.click(classificationSection(sheet).getByRole('radio', { name: /Confidential/ }))
     await user.click(sheet.getByRole('button', { name: 'Declare Classification' }))

@@ -9,14 +9,32 @@ const SELECT =
 
 /*
  * Rendered through Base UI's field control, like Input: inside a Field its label and help
- * text reach the select, which a bare <select> never registers for.
+ * text reach the select, which a bare <select> never registers for. The control reads its own
+ * props (id, name, value, disabled); the rest, typed for a <select>, go on the element, whose
+ * handlers and ref Base UI merges with its own.
  */
-export function Select({ className = '', children, ...props }: ComponentProps<'select'>) {
+export function Select({
+  className = '',
+  id,
+  name,
+  value,
+  defaultValue,
+  disabled,
+  autoFocus,
+  ...props
+}: ComponentProps<'select'>) {
   return (
     <span className="relative flex w-full">
-      <BaseInput render={<select />} className={`${SELECT} ${className}`} {...(props as BaseInput.Props)}>
-        {children}
-      </BaseInput>
+      <BaseInput
+        render={<select {...props} />}
+        className={`${SELECT} ${className}`}
+        id={id}
+        name={name}
+        value={value}
+        defaultValue={defaultValue}
+        disabled={disabled}
+        autoFocus={autoFocus}
+      />
       <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-gray" />
     </span>
   )

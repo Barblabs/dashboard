@@ -17,7 +17,7 @@ const PLAN_ERRORS = new Map<string, ParseKeys>([
   ['agent_unavailable', 'findings.detail.plan.unavailable'],
 ])
 
-function planErrorText(error: Error | null, t: TFunction<'translation'>): string | null {
+function planErrorText(error: Error | null, t: TFunction): string | null {
   const key = PLAN_ERRORS.get(errorCode(error) ?? '')
   return key ? t(key) : requestErrorText(error, t, { fallback: 'findings.detail.plan.failed' })
 }

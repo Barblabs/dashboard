@@ -21,8 +21,8 @@ function rowOf(cve: string) {
 /** Changes one Finding of the newest stored Prioritization, before the app reads it. */
 function storeFinding(cve: string, change: (finding: Finding) => Finding) {
   const [newest, ...older] = prioritizationsStore.load()
-  const findings = newest!.findings.map((f) => (f.cve_id === cve ? change(f) : f))
-  prioritizationsStore.save([{ ...newest!, findings }, ...older])
+  const findings = newest.findings.map((f) => (f.cve_id === cve ? change(f) : f))
+  prioritizationsStore.save([{ ...newest, findings }, ...older])
 }
 
 async function openFinding(user: ReturnType<typeof renderApp>, cve: string) {
@@ -40,8 +40,8 @@ describe('Findings', () => {
       'Explotada por ransomware, en un activo interno de laboratorio',
       'Alta probabilidad de explotación en el servidor de pagos',
     ])
-    expect(within(groups[0]!).getByRole('button', { name: 'Open CVE-2021-41773' })).toBeInTheDocument()
-    expect(within(groups[2]!).getByText(/Se suma CVE-2024-6387/)).toBeInTheDocument()
+    expect(within(groups[0]).getByRole('button', { name: 'Open CVE-2021-41773' })).toBeInTheDocument()
+    expect(within(groups[2]).getByText(/Se suma CVE-2024-6387/)).toBeInTheDocument()
     expect(screen.getByText(/5 findings, 3 groups/)).toBeInTheDocument()
     expect(screen.getByText('Weighed with business context v1')).toBeInTheDocument()
   })
@@ -100,10 +100,10 @@ describe('Findings', () => {
 
   it('marks whole evidence values only, never a value inside a longer word', async () => {
     const [newest, ...older] = prioritizationsStore.load()
-    const groups = newest!.groups.map((g) =>
+    const groups = newest.groups.map((g) =>
       g.position === 2 ? { ...g, reason: 'Va después porque lab-01 es de criticidad low, y no hay que follow nada.' } : g,
     )
-    prioritizationsStore.save([{ ...newest!, groups }, ...older])
+    prioritizationsStore.save([{ ...newest, groups }, ...older])
     const user = await renderFindings()
 
     const dialog = await openFinding(user, 'CVE-2024-23897')
@@ -261,7 +261,8 @@ describe('Findings', () => {
 
     const dialog = await openFinding(user, 'CVE-2021-41773')
 
-    const classification = within(dialog).getByText('Information Classification').nextElementSibling as HTMLElement
+    const classification = within(dialog).getByText('Information Classification').nextElementSibling
+    if (!(classification instanceof HTMLElement)) throw new Error('no value next to Information Classification')
     expect(classification).toHaveTextContent(/^Unclassified$/)
     expect(
       within(classification).getByTitle("No one has declared it; it doesn't count toward the Score."),
@@ -273,7 +274,7 @@ describe('Findings', () => {
   })
 
   it('opens the finding a link names', async () => {
-    const id = prioritizationsStore.load()[0]!.findings.find((f) => f.cve_id === 'CVE-2024-23897')!.finding_id
+    const id = prioritizationsStore.load()[0].findings.find((f) => f.cve_id === 'CVE-2024-23897')!.finding_id
     renderApp(`/findings?finding=${id}`)
 
     const dialog = await screen.findByRole('dialog', { name: 'CVE-2024-23897' })
@@ -322,7 +323,7 @@ describe('Findings', () => {
     expect(await within(dialog).findByText('Saved.')).toBeInTheDocument()
     expect(within(dialog).getByText('Should be attended earlier', { selector: 'span' })).toBeInTheDocument()
     expect(within(dialog).getByText('Corre la nómina.')).toBeInTheDocument()
-    expect(prioritizationsStore.load()[0]!.feedback).toHaveLength(1)
+    expect(prioritizationsStore.load()[0].feedback).toHaveLength(1)
   })
 
   it('shows the too-long error on the note field when it exceeds 2000 characters', async () => {

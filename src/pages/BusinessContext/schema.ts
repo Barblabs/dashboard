@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import {
+  characterCount,
   CONCERNS,
   COUNTRIES,
   DATA_CATEGORIES,
@@ -22,8 +23,8 @@ const SERVICE_NAME = 'businessContext.validation.serviceName'
 const SERVICE_NAME_TAKEN = 'businessContext.validation.serviceNameTaken'
 const UNKNOWN_CODE = 'businessContext.validation.unknownCode'
 
-// The backend counts characters after trimming, as the user reads them.
-const text = (max: number) => z.string().refine((s) => [...s.trim()].length <= max, TOO_LONG)
+// The backend counts characters after trimming.
+const text = (max: number) => z.string().refine((s) => characterCount(s.trim()) <= max, TOO_LONG)
 const entries = z.array(z.string()).max(LIMITS.entries, TOO_MANY)
 
 // Checked as a whole so the error sits on the field, which is what shows it, not on one entry.
@@ -32,8 +33,9 @@ function oneOf<T extends string>(codes: readonly T[]) {
   return z.custom<T[]>((list) => Array.isArray(list) && list.every((code) => known.has(code)), UNKNOWN_CODE)
 }
 
-function optional<T extends string>(codes: readonly T[]) {
-  return z.enum(['', ...codes] as ['' | T, ...('' | T)[]], UNKNOWN_CODE)
+// A code from the list, or blank for none.
+function optional<T extends string>(codes: readonly T[]): z.ZodEnum<{ [K in '' | T]: K }> {
+  return z.enum(['', ...codes], UNKNOWN_CODE)
 }
 
 const service = z.object({

@@ -1,8 +1,20 @@
 import { delay, http, HttpResponse } from 'msw'
+import { z, type ZodType } from 'zod'
 import { isStated, type BusinessContextFields, type DraftSource } from '../../api/businessContext'
+import { businessContextSchema } from '../../pages/BusinessContext/schema'
 import { KEY_FIELDS, businessContextStore, MOCK_DRAFT } from '../business-context-store'
 import { apiUrl } from '../url'
-import { failure } from './responses'
+import { failure, parsedBody } from './responses'
+
+const saveBody = z.object({ version: z.number().int(), context: businessContextSchema }) satisfies ZodType<{
+  version: number
+  context: BusinessContextFields
+}>
+
+export const draftSourceBody = z.object({
+  text: z.string().optional(),
+  files: z.array(z.object({ name: z.string(), media_type: z.string(), data: z.string() })).optional(),
+}) satisfies ZodType<DraftSource>
 
 const gaps = (context: BusinessContextFields) => KEY_FIELDS.filter((path) => !isStated(context, path))
 
@@ -11,7 +23,9 @@ export const businessContextHandlers = [
   http.get(apiUrl('/business-context'), () => HttpResponse.json(businessContextStore.load())),
 
   http.put(apiUrl('/business-context'), async ({ request }) => {
-    const { version, context } = (await request.json()) as { version: number; context: BusinessContextFields }
+    const body = await parsedBody(request, saveBody)
+    if (body instanceof Response) return body
+    const { version, context } = body
     const current = businessContextStore.load()
     if (version !== current.version) {
       return failure(409, 'business_context_stale', 'the business context changed since it was read')
@@ -35,7 +49,8 @@ export const businessContextHandlers = [
   }),
 
   http.post(apiUrl('/business-context/draft'), async ({ request }) => {
-    const source = (await request.json()) as DraftSource
+    const source = await parsedBody(request, draftSourceBody)
+    if (source instanceof Response) return source
     const files = source.files ?? []
     if ((files.length === 0 && !source.text) || files.some((f) => f.media_type.startsWith('image/'))) {
       return failure(400, 'invalid_document', 'invalid document')

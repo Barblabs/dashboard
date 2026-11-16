@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { z } from 'zod'
 import { server } from '../test/server'
 import { cognitoTokens } from './cognito'
 import { TokensUnreachable } from './tokens'
@@ -37,7 +38,7 @@ function cognito(answer: (operation: string, body: Record<string, unknown>) => R
   server.use(
     http.post(COGNITO, async ({ request }) => {
       const operation = (request.headers.get('X-Amz-Target') ?? '').split('.').pop() ?? ''
-      const body = (await request.json()) as Record<string, unknown>
+      const body = z.record(z.string(), z.unknown()).parse(await request.json())
       calls.push({ operation, body })
       return answer(operation, body)
     }),

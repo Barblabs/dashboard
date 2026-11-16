@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { z } from 'zod'
 import { signOut } from '../auth/signOut'
 import { useAuthStore } from '../auth/store'
 import { TokensUnreachable } from '../auth/tokens'
@@ -46,10 +47,13 @@ export function authOutcomeOf(error: unknown): AuthOutcome | null {
   return null
 }
 
-interface ErrorBody {
-  error?: unknown
-  code?: unknown
-}
+/*
+ * The backend's error body, read field by field: a failure from something in between, such as
+ * a proxy, may carry neither field, or text that is not JSON at all.
+ */
+const errorBody = z
+  .object({ error: z.string().nullable().catch(null), code: z.string().nullable().catch(null) })
+  .catch({ error: null, code: null })
 
 // Cancellations and non-axios errors are not request failures: they pass through untouched.
 function toApiError(error: unknown): unknown {
@@ -57,12 +61,8 @@ function toApiError(error: unknown): unknown {
   if (!error.response) return new ApiError(error.message, { kind: 'network' })
 
   const { status, data } = error.response
-  const body = (typeof data === 'object' && data !== null ? data : {}) as ErrorBody
-  return new ApiError(typeof body.error === 'string' ? body.error : error.message, {
-    kind: 'http',
-    status,
-    code: typeof body.code === 'string' ? body.code : null,
-  })
+  const body = errorBody.parse(data)
+  return new ApiError(body.error ?? error.message, { kind: 'http', status, code: body.code })
 }
 
 /*

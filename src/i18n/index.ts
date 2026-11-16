@@ -25,7 +25,8 @@ i18n.on('languageChanged', (language) => {
   document.documentElement.lang = language
 })
 
-i18n
+// Settles once the language is detected and the bundled resources are loaded; the app renders after.
+export const i18nReady = i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({

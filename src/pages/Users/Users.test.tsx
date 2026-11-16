@@ -2,14 +2,14 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import type { UserEvent } from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import type { UserResponse } from '../../api/users'
 import { apiUrl } from '../../mocks/url'
 import { renderApp, seedUsers } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
+import { inviteBody } from '../../mocks/handlers/users'
 import { MOCK_USERS } from '../../mocks/users-store'
 
-const ADMIN = MOCK_USERS[0]!
-const VIEWER = MOCK_USERS[1]!
+const ADMIN = MOCK_USERS[0]
+const VIEWER = MOCK_USERS[1]
 
 async function submitInvite(user: UserEvent, email: string) {
   await user.click(screen.getByRole('button', { name: 'Invite user' }))
@@ -125,7 +125,7 @@ describe('Users', () => {
   it('warns when the invitation email has not gone out yet, and lists the user as pending', async () => {
     server.use(
       http.post(apiUrl('/users'), async ({ request }) => {
-        const { email, role } = (await request.json()) as { email: string; role: UserResponse['role'] }
+        const { email, role } = inviteBody.parse(await request.json())
         return HttpResponse.json(
           { id: 'user-new', email, role, created_at: '2026-11-12T00:00:00Z', disabled_at: null, pending: true },
           { status: 201 },

@@ -1,8 +1,13 @@
 import { http, HttpResponse } from 'msw'
-import type { CmdbLogin, CmdbSource, CmdbSourceRequest } from '../../api/cmdb'
+import { z, type ZodType } from 'zod'
+import { CMDB_PROVIDERS, type CmdbLogin, type CmdbSource, type CmdbSourceRequest } from '../../api/cmdb'
 import { sourceStore } from '../cmdb-store'
 import { apiUrl } from '../url'
-import { failure } from './responses'
+import { failure, parsedBody } from './responses'
+
+const loginBody = z.object({ url: z.string(), user: z.string(), password: z.string() }) satisfies ZodType<CmdbLogin>
+
+const sourceBody = loginBody.extend({ provider: z.enum(CMDB_PROVIDERS) }) satisfies ZodType<CmdbSourceRequest>
 
 function notConnected() {
   return failure(404, 'not_connected', 'no CMDB source is connected')
@@ -23,13 +28,16 @@ export const cmdbHandlers = [
   }),
 
   http.post(apiUrl('/cmdb/source/test'), async ({ request }) => {
-    const login = (await request.json()) as CmdbSourceRequest
+    const login = await parsedBody(request, sourceBody)
+    if (login instanceof Response) return login
     const rejected = rejectAdminWithoutRestProfile(login)
     return HttpResponse.json(rejected ? { ok: false, ...rejected } : { ok: true })
   }),
 
   http.post(apiUrl('/cmdb/source'), async ({ request }) => {
-    const { provider, url, user, password } = (await request.json()) as CmdbSourceRequest
+    const body = await parsedBody(request, sourceBody)
+    if (body instanceof Response) return body
+    const { provider, url, user, password } = body
     if (sourceStore.load()) {
       return failure(409, 'already_connected', 'a CMDB source is already connected')
     }
@@ -47,7 +55,8 @@ export const cmdbHandlers = [
   }),
 
   http.put(apiUrl('/cmdb/source'), async ({ request }) => {
-    const login = (await request.json()) as CmdbLogin
+    const login = await parsedBody(request, loginBody)
+    if (login instanceof Response) return login
     const current = sourceStore.load()
     if (!current) return notConnected()
     const rejected = rejectAdminWithoutRestProfile(login)

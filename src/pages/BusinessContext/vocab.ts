@@ -53,7 +53,7 @@ interface Vocabulary<T extends string> {
 }
 
 // A mapped type, so indexing it with a generic `Vocab` keeps the codes and the names paired.
-const VOCABS: { [V in Vocab]: (t: TFunction<'translation'>, language: string) => Vocabulary<Codes[V]> } = {
+const VOCABS: { [V in Vocab]: (t: TFunction, language: string) => Vocabulary<Codes[V]> } = {
   sectors: (t) => ({ codes: SECTORS, labelOf: (c) => t(`businessContext.vocab.sectors.${c}`) }),
   organizationTypes: (t) => ({ codes: ORGANIZATION_TYPES, labelOf: (c) => t(`businessContext.vocab.organizationTypes.${c}`) }),
   employees: (t) => ({ codes: EMPLOYEE_RANGES, labelOf: (c) => t(`businessContext.vocab.employees.${c}`) }),

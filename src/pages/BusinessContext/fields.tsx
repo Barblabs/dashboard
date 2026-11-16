@@ -7,7 +7,7 @@ import { MultiSelect, type Option } from '../../components/ui/MultiSelect'
 import { Select } from '../../components/ui/Select'
 import { Textarea } from '../../components/ui/Textarea'
 import { Shell, Shown } from './FieldShell'
-import { LIMITS, type BusinessContextFields } from '../../api/businessContext'
+import { characterCount, LIMITS, type BusinessContextFields } from '../../api/businessContext'
 import { useMeta, type FieldPathOf } from './meta'
 import { useVocab, type Codes, type Vocab } from './vocab'
 
@@ -32,7 +32,7 @@ export function TextField({ name, label, placeholder, max, hideLabel, rows, clas
   const errorText = useValidationText()
   const { field, fieldState } = useController<BusinessContextFields, TextProps['name']>({ name })
   const error = errorText(fieldState.error?.message, { max })
-  const length = [...field.value].length
+  const length = characterCount(field.value)
   return (
     <Shell
       label={label}

@@ -75,7 +75,7 @@ export function ClampedText({ text }: { text: string }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <WrittenText text={open ? text : paragraphs[0]!} />
+      <WrittenText text={open ? text : paragraphs[0]} />
       <button
         type="button"
         aria-expanded={open}

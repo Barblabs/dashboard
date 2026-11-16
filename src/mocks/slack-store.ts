@@ -1,5 +1,6 @@
-import { localStore } from './localStore'
+import { z, type ZodType } from 'zod'
 import type { SlackChannel, SlackFailedDelivery, SlackInstallation } from '../api/slack'
+import { localStore } from './localStore'
 
 export const MOCK_CHANNELS: SlackChannel[] = [
   { id: 'C09SECGRP1', is_private: false, name: 'security-team' },
@@ -27,12 +28,24 @@ export const mockDeliveryOne: SlackFailedDelivery = {
   kind: 'finding',
 }
 
-export const slackInstallationStore = localStore<SlackInstallation | null>(
-  'barbattack_slack_installation',
-  null,
-)
+const installationSchema = z.strictObject({
+  team_id: z.string(),
+  team_name: z.string(),
+  channel_id: z.string(),
+  channel_name: z.string(),
+  state: z.enum(['active', 'needs re-authorisation', 'removed']),
+}) satisfies ZodType<SlackInstallation>
 
-export const slackDeliveriesStore = localStore<SlackFailedDelivery[]>(
-  'barbattack_slack_deliveries',
-  [],
-)
+const deliverySchema = z.strictObject({
+  target: z.string(),
+  target_kind: z.string(),
+  kind: z.string(),
+  attempts: z.number().int(),
+  created_at: z.string(),
+  failure_code: z.string().optional(),
+  last_error: z.string().optional(),
+}) satisfies ZodType<SlackFailedDelivery>
+
+export const slackInstallationStore = localStore('barbattack_slack_installation', installationSchema.nullable(), null)
+
+export const slackDeliveriesStore = localStore('barbattack_slack_deliveries', z.array(deliverySchema), [])

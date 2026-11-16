@@ -1,4 +1,5 @@
-import type { CmdbSource } from '../api/cmdb'
+import { z, type ZodType } from 'zod'
+import { CMDB_PROVIDERS, type CmdbSource } from '../api/cmdb'
 import { localStore } from './localStore'
 
 export const mockSource: Omit<CmdbSource, 'last_sync'> = {
@@ -8,4 +9,12 @@ export const mockSource: Omit<CmdbSource, 'last_sync'> = {
   last_sync_failure: null,
 }
 
-export const sourceStore = localStore<CmdbSource | null>('barbattack_cmdb_source', null)
+const sourceSchema = z.strictObject({
+  provider: z.enum(CMDB_PROVIDERS),
+  url: z.string(),
+  user: z.string().nullable(),
+  last_sync: z.string().nullable(),
+  last_sync_failure: z.strictObject({ at: z.string(), error: z.string() }).nullable(),
+}) satisfies ZodType<CmdbSource>
+
+export const sourceStore = localStore('barbattack_cmdb_source', sourceSchema.nullable(), null)

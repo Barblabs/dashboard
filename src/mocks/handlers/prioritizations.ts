@@ -1,8 +1,17 @@
 import { delay, http, HttpResponse } from 'msw'
+import { z, type ZodType } from 'zod'
 import { VERDICTS, type ActionPlan, type Feedback, type Finding, type Prioritization } from '../../api/prioritizations'
+import type { Schemas } from '../../api/schemas'
 import { prioritizationsStore } from '../prioritizations-store'
 import { apiUrl } from '../url'
-import { failure, isOneOf } from './responses'
+import { failure, parsedBody } from './responses'
+
+const planBody = z.object({ finding_id: z.string() }) satisfies ZodType<Schemas['PlanRequestBody']>
+const feedbackBody = z.object({
+  finding_id: z.string(),
+  verdict: z.enum(VERDICTS),
+  note: z.string().optional(),
+}) satisfies ZodType<Schemas['FeedbackRequestBody']>
 
 function find(id: string) {
   const all = prioritizationsStore.load()
@@ -60,9 +69,11 @@ export const prioritizationsHandlers = [
   }),
 
   http.post(apiUrl('/prioritizations/:id/plans'), async ({ params, request }) => {
+    const body = await parsedBody(request, planBody)
+    if (body instanceof Response) return body
     const { all, prioritization } = find(String(params.id))
     if (!prioritization) return failure(404, 'prioritization_not_found', 'prioritization not found')
-    const { finding_id } = (await request.json()) as { finding_id: string }
+    const { finding_id } = body
     const finding = prioritization.findings.find((f) => f.finding_id === finding_id)
     if (!finding) return failure(404, 'finding_not_found', 'finding not found')
     // Luna takes a while; tests run without the wait.
@@ -73,10 +84,10 @@ export const prioritizationsHandlers = [
   }),
 
   http.post(apiUrl('/prioritizations/:id/feedback'), async ({ params, request }) => {
+    const body = await parsedBody(request, feedbackBody)
+    if (body instanceof Response) return body
     const { all, prioritization } = find(String(params.id))
     if (!prioritization) return failure(404, 'prioritization_not_found', 'prioritization not found')
-    const body = (await request.json()) as { finding_id: string; verdict: string; note?: string }
-    if (!isOneOf(VERDICTS, body.verdict)) return failure(400, 'invalid_request', 'unknown verdict')
     if (!prioritization.findings.some((f) => f.finding_id === body.finding_id)) {
       return failure(404, 'finding_not_found', 'finding not found')
     }

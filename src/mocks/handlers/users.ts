@@ -1,8 +1,15 @@
 import { http, HttpResponse } from 'msw'
-import type { CustomerRole, UserResponse } from '../../api/users'
+import { z, type ZodType } from 'zod'
+import type { Known, Schemas } from '../../api/schemas'
+import { CUSTOMER_ROLES, type UserResponse } from '../../api/users'
 import { usersStore } from '../users-store'
 import { apiUrl } from '../url'
-import { failure } from './responses'
+import { failure, parsedBody } from './responses'
+
+export const inviteBody = z.object({ email: z.string(), role: z.enum(CUSTOMER_ROLES) }) satisfies ZodType<
+  Known<Schemas['InviteUserRequest']>
+>
+const changeRoleBody = z.object({ role: z.enum(CUSTOMER_ROLES) }) satisfies ZodType<Known<Schemas['ChangeRoleRequest']>>
 
 function isLastAdmin(users: UserResponse[], excludeId?: string): boolean {
   return (
@@ -17,7 +24,9 @@ export const usersHandlers = [
   }),
 
   http.post(apiUrl('/users'), async ({ request }) => {
-    const { email, role } = (await request.json()) as { email: string; role: CustomerRole }
+    const body = await parsedBody(request, inviteBody)
+    if (body instanceof Response) return body
+    const { email, role } = body
     const users = usersStore.load()
     if (users.some((u) => u.email === email)) {
       return failure(409, 'email_taken', 'a user with this email already exists')
@@ -34,9 +43,11 @@ export const usersHandlers = [
     return HttpResponse.json(user, { status: 201 })
   }),
 
-  http.patch(apiUrl('/users/:id'), async ({ params, request }) => {
-    const id = params['id'] as string
-    const { role } = (await request.json()) as { role: CustomerRole }
+  http.patch<{ id: string }>(apiUrl('/users/:id'), async ({ params, request }) => {
+    const body = await parsedBody(request, changeRoleBody)
+    if (body instanceof Response) return body
+    const { role } = body
+    const { id } = params
     const users = usersStore.load()
     const user = users.find((u) => u.id === id)
     if (!user) return failure(404, 'user_not_found', 'user not found')
@@ -48,8 +59,8 @@ export const usersHandlers = [
     return HttpResponse.json(updated)
   }),
 
-  http.post(apiUrl('/users/:id/disable'), ({ params }) => {
-    const id = params['id'] as string
+  http.post<{ id: string }>(apiUrl('/users/:id/disable'), ({ params }) => {
+    const { id } = params
     const users = usersStore.load()
     const user = users.find((u) => u.id === id)
     if (!user) return failure(404, 'user_not_found', 'user not found')

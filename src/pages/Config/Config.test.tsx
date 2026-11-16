@@ -508,7 +508,7 @@ describe('Configuration', () => {
     await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      `${text}`,
+      text,
     )
     expect(screen.queryByText('iTop connected')).not.toBeInTheDocument()
   })

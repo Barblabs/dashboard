@@ -1,3 +1,4 @@
+import { z, type ZodType } from 'zod'
 import type { CustomerResponse } from '../api/customers'
 import { localStore } from './localStore'
 
@@ -22,4 +23,11 @@ export const MOCK_CUSTOMERS: CustomerResponse[] = [
   },
 ]
 
-export const customersStore = localStore('barbattack_mock_customers', MOCK_CUSTOMERS)
+const customerSchema = z.strictObject({
+  id: z.string(),
+  name: z.string(),
+  created_at: z.string(),
+  deactivated_at: z.string().nullable(),
+}) satisfies ZodType<CustomerResponse>
+
+export const customersStore = localStore('barbattack_mock_customers', z.array(customerSchema), MOCK_CUSTOMERS)

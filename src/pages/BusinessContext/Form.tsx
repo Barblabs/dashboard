@@ -27,6 +27,11 @@ import { StartScreen } from './StartScreen'
 
 const SECTIONS: Section[] = ['profile', 'geography', 'operations', 'footprint', 'risk']
 
+// Base UI types a tab's value as `any`; the tabs here are the sections.
+function isSection(value: unknown): value is Section {
+  return SECTIONS.some((s) => s === value)
+}
+
 const CONTENT: Record<Section, () => ReactNode> = {
   profile: Profile,
   geography: Geography,
@@ -68,6 +73,10 @@ export function BusinessContextForm({
   const position = SECTIONS.indexOf(section)
   const previous = SECTIONS[position - 1]
   const next = SECTIONS[position + 1]
+
+  function showSection(value: unknown) {
+    if (isSection(value)) setSection(value)
+  }
 
   function applyDraft(draft: Draft) {
     const merge = mergeDraft(form.getValues(), draft.context)
@@ -126,7 +135,7 @@ export function BusinessContextForm({
             onSubmit={(e) => void form.handleSubmit((context) => save.mutate({ version: stored.version, context }), showFirstError)(e)}
             className="flex flex-col rounded-xl border border-border-panel bg-white"
           >
-            <Tabs value={section} onValueChange={(value) => setSection(value as Section)}>
+            <Tabs value={section} onValueChange={showSection}>
               <TabList>
                 {SECTIONS.map((s, i) => (
                   <Tab key={s} value={s}>

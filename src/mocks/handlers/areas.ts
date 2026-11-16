@@ -1,13 +1,13 @@
 import { http, HttpResponse } from 'msw'
-import { z } from 'zod'
+import { z, type ZodType } from 'zod'
 import type { Area, AreaListResponse } from '../../api/areas'
 import { ACTIVITY_FILTERS } from '../../api/assets'
-import type { Schemas } from '../../api/schemas'
+import { isOneOf, type Known, type Schemas } from '../../api/schemas'
 import { areasStore } from '../areas-store'
 import { apiUrl } from '../url'
-import { failure, isOneOf } from './responses'
+import { failure, parsedBody } from './responses'
 
-type SetAreaOwnerRequest = Schemas['SetAreaOwnerRequest']
+const setAreaOwnerBody = z.object({ email: z.string().nullable() }) satisfies ZodType<Known<Schemas['SetAreaOwnerRequest']>>
 
 export const areasHandlers = [
   http.get(apiUrl('/areas'), ({ request }) => {
@@ -23,8 +23,10 @@ export const areasHandlers = [
   }),
 
   http.put(apiUrl('/areas/:id/owner'), async ({ params, request }) => {
+    const body = await parsedBody(request, setAreaOwnerBody)
+    if (body instanceof Response) return body
+    const { email } = body
     const id = Number(params['id'])
-    const { email } = (await request.json()) as SetAreaOwnerRequest
     const areas = areasStore.load()
     const area = areas.find((a) => a.id === id)
     if (!area) return failure(404, 'not_found', 'area not found')

@@ -1,5 +1,18 @@
+import { z, type ZodType } from 'zod'
 import {
+  CONCERNS,
+  COUNTRIES,
+  DATA_CATEGORIES,
+  DOWNTIMES,
+  EMPLOYEE_RANGES,
   emptyFields,
+  ENVIRONMENTS,
+  IMPACTS,
+  ORGANIZATION_TYPES,
+  REGULATIONS,
+  REVENUE_RANGES,
+  RISK_APPETITES,
+  SECTORS,
   type BusinessContext,
   type BusinessContextFields,
   type FieldPath,
@@ -23,7 +36,64 @@ export function unsaved(): BusinessContext {
   return { version: 0, saved_at: null, saved_by: null, context: emptyFields(), key_fields: KEY_FIELDS, gaps: KEY_FIELDS }
 }
 
-export const businessContextStore = localStore('barbattack_mock_business_context', unsaved())
+// A code from the list, or blank for none.
+function blankOr<T extends string>(codes: readonly T[]): z.ZodEnum<{ [K in '' | T]: K }> {
+  return z.enum(['', ...codes])
+}
+
+const fieldsSchema = z.strictObject({
+  profile: z.strictObject({
+    summary: z.string(),
+    mission: z.string(),
+    vision: z.string(),
+    sectors: z.array(z.enum(SECTORS)),
+    organization_type: blankOr(ORGANIZATION_TYPES),
+    employees: blankOr(EMPLOYEE_RANGES),
+    annual_revenue: blankOr(REVENUE_RANGES),
+  }),
+  geography: z.strictObject({
+    headquarters: blankOr(COUNTRIES),
+    countries: z.array(z.enum(COUNTRIES)),
+  }),
+  operations: z.strictObject({
+    critical_services: z.array(
+      z.strictObject({
+        name: z.string(),
+        description: z.string(),
+        impact: blankOr(IMPACTS),
+        max_downtime: blankOr(DOWNTIMES),
+        assets: z.array(z.string()),
+      }),
+    ),
+    data_categories: z.array(z.enum(DATA_CATEGORIES)),
+    regulations: z.array(z.enum(REGULATIONS)),
+    environments: z.array(z.enum(ENVIRONMENTS)),
+  }),
+  footprint: z.strictObject({
+    domains: z.array(z.string()),
+    brands: z.array(z.string()),
+    technologies: z.array(z.string()),
+    third_parties: z.array(z.string()),
+  }),
+  risk: z.strictObject({
+    appetite: blankOr(RISK_APPETITES),
+    concerns: z.array(z.enum(CONCERNS)),
+    past_incidents: z.string(),
+    constraints: z.string(),
+    notes: z.string(),
+  }),
+}) satisfies ZodType<BusinessContextFields>
+
+const businessContextSchema = z.strictObject({
+  version: z.number().int(),
+  saved_at: z.string().nullable(),
+  saved_by: z.string().nullable(),
+  context: fieldsSchema,
+  key_fields: z.array(z.string()),
+  gaps: z.array(z.string()),
+}) satisfies ZodType<BusinessContext>
+
+export const businessContextStore = localStore('barbattack_mock_business_context', businessContextSchema, unsaved())
 
 /** What the Drafter answers in mock mode, whatever the document. */
 export const MOCK_DRAFT: BusinessContextFields = {

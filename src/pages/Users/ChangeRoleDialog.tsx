@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useChangeRoleMutation, type CustomerRole, type UserResponse } from '../../api/users'
+import { isOneOf } from '../../api/schemas'
+import { CUSTOMER_ROLES, useChangeRoleMutation, type CustomerRole, type UserResponse } from '../../api/users'
 import { Button } from '../../components/ui/Button'
 import { DialogLayout, TargetModal } from '../../components/ui/Dialog'
 import { Field } from '../../components/ui/Field'
@@ -39,8 +40,10 @@ function ChangeRoleBody({ user, onClose }: { user: UserResponse; onClose: () => 
           value={selectedRole}
           disabled={changeRole.isPending}
           onChange={(e) => {
+            const role = e.target.value
+            if (!isOneOf(CUSTOMER_ROLES, role)) return
             changeRole.reset()
-            setSelectedRole(e.target.value as CustomerRole)
+            setSelectedRole(role)
           }}
         >
           <RoleOptions />
