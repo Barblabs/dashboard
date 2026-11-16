@@ -174,7 +174,7 @@ Requisitos del lado de Terraform:
 ## Linter
 
 ```bash
-npm run lint   # oxlint
+npm run lint   # oxlint, con las reglas que leen los tipos (oxlint-tsgolint)
 ```
 
 Un hook de pre-commit (husky, instalado con `npm install`) corre `npm run lint`
