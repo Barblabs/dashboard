@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { http } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Finding } from '../../api/prioritizations'
@@ -308,6 +308,19 @@ describe('Findings', () => {
     expect(within(dialog).getByText('Should be attended earlier', { selector: 'span' })).toBeInTheDocument()
     expect(within(dialog).getByText('Corre la nómina.')).toBeInTheDocument()
     expect(prioritizationsStore.load()[0]!.feedback).toHaveLength(1)
+  })
+
+  it('shows the too-long error on the note field when it exceeds 2000 characters', async () => {
+    const user = renderApp('/findings', VIEWER)
+    await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+    const dialog = await openFinding(user, 'CVE-2024-6387')
+
+    fireEvent.change(within(dialog).getByLabelText('Why'), { target: { value: 'a'.repeat(2001) } })
+    await user.click(within(dialog).getByRole('button', { name: 'Send' }))
+
+    const noteField = within(dialog).getByLabelText('Why')
+    expect(noteField).toHaveAttribute('aria-invalid', 'true')
+    expect(within(dialog).getByText('The note can have up to 2000 characters.')).toBeInTheDocument()
   })
 
   it('says there is nothing yet before the first prioritization', async () => {

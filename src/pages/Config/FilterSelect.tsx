@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Field } from '../../components/ui/Field'
 import { Select } from '../../components/ui/Select'
 
 export function FilterSelect({
@@ -13,12 +14,15 @@ export function FilterSelect({
   children: ReactNode
 }) {
   return (
-    <label className="flex flex-col gap-1 font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase">
-      {label}
+    <Field
+      label={label}
+      labelClassName="font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase"
+      className="gap-1"
+    >
       {/* As tall as a filter MultiSelect, so the fields of a filter bar line up. */}
-      <Select className="min-h-11" value={value} onChange={(event) => onChange(event.target.value)}>
+      <Select value={value} onChange={(event) => onChange(event.target.value)} className="min-h-11 uppercase">
         {children}
       </Select>
-    </label>
+    </Field>
   )
 }

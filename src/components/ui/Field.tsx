@@ -7,15 +7,17 @@ type FieldProps = Omit<BaseField.Root.Props, 'className' | 'invalid'> & {
   /** Validation is owned by the caller (e.g. react-hook-form); a message here marks the field invalid. */
   error?: ReactNode
   className?: string
+  /** Replaces the default label classes when the label needs a different visual style. */
+  labelClassName?: string
   children: ReactNode
 }
 
-export function Field({ label, help, error, className = '', children, ...props }: FieldProps) {
+export function Field({ label, help, error, className = '', labelClassName, children, ...props }: FieldProps) {
   const invalid = Boolean(error)
 
   return (
     <BaseField.Root invalid={invalid} className={`flex flex-col gap-1 ${className}`} {...props}>
-      <BaseField.Label className="font-body text-[0.875rem] font-semibold text-navy">
+      <BaseField.Label className={labelClassName ?? 'font-body text-[0.875rem] font-semibold text-navy'}>
         {label}
       </BaseField.Label>
       {children}

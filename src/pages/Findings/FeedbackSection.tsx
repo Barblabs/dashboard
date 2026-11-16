@@ -1,4 +1,3 @@
-import { useId } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -12,13 +11,12 @@ import {
 import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { FIELD_SURFACE } from '../../components/ui/fieldSurface'
+import { Field } from '../../components/ui/Field'
 import { Select } from '../../components/ui/Select'
+import { Textarea } from '../../components/ui/Textarea'
 import { requestErrorText } from '../../i18n/errors'
 import { useDateFormat } from '../../i18n/format'
 import { WRITTEN } from './styles'
-
-const FIELD_LABEL = 'font-body text-[0.875rem] font-semibold text-navy'
 
 /** As long as the backend takes. */
 const MAX_NOTE = 2000
@@ -34,8 +32,6 @@ export function FeedbackSection({ order, finding }: { order: CurrentOrder; findi
   const { t } = useTranslation()
   const formatDate = useDateFormat()
   const record = useRecordFeedbackMutation(order.prioritization.id)
-  const verdictId = useId()
-  const noteId = useId()
   const said = order.prioritization.feedback.filter((f) => f.finding_id === finding.finding_id)
   const {
     register,
@@ -73,40 +69,24 @@ export function FeedbackSection({ order, finding }: { order: CurrentOrder; findi
       )}
 
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1">
-          <label htmlFor={verdictId} className={FIELD_LABEL}>
-            {t('findings.detail.feedback.verdict')}
-          </label>
-          <Select id={verdictId} aria-describedby={`${verdictId}-hint`} disabled={record.isPending} {...register('verdict')}>
+        <Field
+          label={t('findings.detail.feedback.verdict')}
+          help={t('findings.detail.feedback.orderHint')}
+        >
+          <Select disabled={record.isPending} {...register('verdict')}>
             {VERDICTS.map((verdict) => (
               <option key={verdict} value={verdict}>
                 {t(`findings.detail.feedback.verdicts.${verdict}`)}
               </option>
             ))}
           </Select>
-          <p id={`${verdictId}-hint`} className="font-body text-[0.75rem] leading-[1.4] text-gray">
-            {t('findings.detail.feedback.orderHint')}
-          </p>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label htmlFor={noteId} className={FIELD_LABEL}>
-            {t('findings.detail.feedback.note')}
-          </label>
-          <textarea
-            id={noteId}
-            rows={3}
-            disabled={record.isPending}
-            aria-invalid={errors.note ? true : undefined}
-            aria-describedby={errors.note ? `${noteId}-error` : undefined}
-            {...register('note')}
-            className={`${FIELD_SURFACE} resize-y px-3 py-2.5 text-[0.9375rem] leading-[1.5] focus:border-navy aria-invalid:border-critical`}
-          />
-          {errors.note?.message && (
-            <p id={`${noteId}-error`} className="font-body text-[0.75rem] text-critical">
-              {t(errors.note.message as 'findings.detail.feedback.noteTooLong')}
-            </p>
-          )}
-        </div>
+        </Field>
+        <Field
+          label={t('findings.detail.feedback.note')}
+          error={errors.note?.message && t(errors.note.message as 'findings.detail.feedback.noteTooLong')}
+        >
+          <Textarea rows={3} disabled={record.isPending} {...register('note')} />
+        </Field>
         {record.isSuccess && <Alert tone="success">{t('findings.detail.feedback.sent')}</Alert>}
         {record.error && (
           <Alert tone="error">{requestErrorText(record.error, t, { fallback: 'findings.detail.feedback.failed' })}</Alert>
