@@ -7,7 +7,8 @@ import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { requestErrorText } from '../../i18n/errors'
 import { useDateFormat } from '../../i18n/format'
-import { LABEL, MONO, WRITTEN } from './styles'
+import { References } from './References'
+import { LABEL, META, MONO, READING } from './styles'
 
 // Why Luna gave no plan. A Map, so a code like "constructor" cannot hit the prototype.
 const PLAN_ERRORS = new Map<string, ParseKeys>([
@@ -24,16 +25,24 @@ function planErrorText(error: Error | null, t: TFunction<'translation'>): string
 /** Luna's newest Action Plan of the Finding, from whichever Prioritization it was asked. */
 export function ActionPlanSection({ order, finding }: { order: CurrentOrder; finding: Finding }) {
   const { t } = useTranslation()
+  const formatDate = useDateFormat()
   const plan = order.prioritization.plans.find((p) => p.finding_id === finding.finding_id)
   const create = useCreatePlanMutation(order.prioritization.id)
   const error = planErrorText(create.error, t)
 
   return (
     <div className="flex flex-col gap-4">
-      {plan ? <PlanView plan={plan} /> : <p className="text-[0.875rem] text-gray">{t('findings.detail.plan.none')}</p>}
+      {plan ? <PlanView plan={plan} /> : <p className={`${META} text-gray`}>{t('findings.detail.plan.none')}</p>}
       {create.isPending && <Alert tone="info">{t('findings.detail.plan.generating')}</Alert>}
       {error && <Alert tone="error">{error}</Alert>}
-      <div>
+      <div
+        className={`flex flex-wrap items-center gap-3 ${plan ? 'justify-between border-t border-border-row pt-3' : ''}`}
+      >
+        {plan && (
+          <span className={`${META} text-gray`}>
+            {t('findings.detail.plan.written', { date: formatDate(plan.created_at) })}
+          </span>
+        )}
         <Button
           variant={plan ? 'secondary' : 'primary'}
           size="sm"
@@ -47,73 +56,76 @@ export function ActionPlanSection({ order, finding }: { order: CurrentOrder; fin
   )
 }
 
+/** The plan as work to do: its steps first, then what fixes it, how to check, and what holds until then. */
 function PlanView({ plan }: { plan: ActionPlan }) {
   const { t } = useTranslation()
-  const formatDate = useDateFormat()
   const { output } = plan
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-[0.8125rem] text-gray">{t('findings.detail.plan.written', { date: formatDate(plan.created_at) })}</p>
-      <Block label={t('findings.detail.plan.summary')}>
-        <p className={WRITTEN}>{output.summary}</p>
-      </Block>
-      <Block label={t('findings.detail.plan.steps')}>
-        <ol className="flex list-decimal flex-col gap-1.5 pl-5">
-          {output.steps.map((step, i) => (
-            <li key={i} className={WRITTEN}>
-              {step}
-            </li>
-          ))}
-        </ol>
-      </Block>
-      <Block label={t('findings.detail.plan.fixedVersion')}>
-        {output.fixed_version ? (
-          <span className={`${MONO} font-semibold text-navy`}>{output.fixed_version}</span>
-        ) : (
-          <p className="text-[0.875rem] text-gray">{t('findings.detail.plan.noFixedVersion')}</p>
+    <div className="flex flex-col gap-5">
+      <p className={`${READING} text-[1rem] font-medium`}>{output.summary}</p>
+
+      <ol aria-label={t('findings.detail.plan.steps')} className="flex flex-col">
+        {output.steps.map((step, i) => (
+          <li key={i} className="flex items-start gap-3 border-b border-border-row py-2.5 last:border-b-0">
+            <span
+              aria-hidden="true"
+              className="mt-px grid size-6 shrink-0 place-items-center rounded-full border border-navy/30 font-body text-[0.75rem] font-semibold text-navy tabular-nums"
+            >
+              {i + 1}
+            </span>
+            <span className={`${READING} text-[0.9375rem]`}>{step}</span>
+          </li>
+        ))}
+      </ol>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Callout label={t('findings.detail.plan.fixedVersion')}>
+          {output.fixed_version ? (
+            <span className="font-mono text-[1rem] font-semibold text-navy">{output.fixed_version}</span>
+          ) : (
+            <span className={`${META} text-gray`}>{t('findings.detail.plan.noFixedVersion')}</span>
+          )}
+        </Callout>
+        <Callout label={t('findings.detail.plan.verification')}>
+          <span className={`${READING} text-[0.875rem]`}>{output.verification}</span>
+        </Callout>
+        {output.mitigation && (
+          <Callout label={t('findings.detail.plan.mitigation')} className="sm:col-span-2">
+            <span className={`${READING} text-[0.875rem]`}>{output.mitigation}</span>
+          </Callout>
         )}
-      </Block>
-      {output.mitigation && (
-        <Block label={t('findings.detail.plan.mitigation')}>
-          <p className={WRITTEN}>{output.mitigation}</p>
-        </Block>
-      )}
+      </div>
+
       {output.attack_mitigations.length > 0 && (
-        <Block label={t('findings.detail.plan.attackMitigations')}>
+        <div className="flex flex-col gap-2">
+          <span className={LABEL}>{t('findings.detail.plan.attackMitigations')}</span>
           <ul className="flex flex-col gap-2">
             {output.attack_mitigations.map((m, i) => (
-              <li key={i} className="flex flex-col gap-0.5">
-                <span className={`${MONO} font-semibold text-navy`}>
+              <li key={i} className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-3">
+                <span className={`${MONO} shrink-0 text-[0.75rem] text-gray`}>
                   {m.mitigation_id} · {m.technique_id}
                 </span>
-                <p className={WRITTEN}>{m.step}</p>
+                <span className={`${READING} text-[0.875rem]`}>{m.step}</span>
               </li>
             ))}
           </ul>
-        </Block>
+        </div>
       )}
-      <Block label={t('findings.detail.plan.verification')}>
-        <p className={WRITTEN}>{output.verification}</p>
-      </Block>
+
       {output.sources.length > 0 && (
-        <Block label={t('findings.detail.plan.sources')}>
-          <ul className="flex flex-col gap-0.5">
-            {output.sources.map((url) => (
-              <li key={url} className={`${MONO} break-all text-gray`}>
-                {url}
-              </li>
-            ))}
-          </ul>
-        </Block>
+        <div className="flex flex-col gap-1">
+          <span className={LABEL}>{t('findings.detail.plan.sources')}</span>
+          <References urls={output.sources} />
+        </div>
       )}
     </div>
   )
 }
 
-function Block({ label, children }: { label: string; children: ReactNode }) {
+function Callout({ label, children, className = '' }: { label: string; children: ReactNode; className?: string }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className={`flex flex-col gap-1 rounded-md bg-panel px-3.5 py-3 ${className}`}>
       <span className={LABEL}>{label}</span>
       {children}
     </div>

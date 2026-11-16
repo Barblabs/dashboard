@@ -12,8 +12,8 @@ const WIDTH = {
   sm: 'w-[min(32rem,calc(100vw-2rem))]',
   md: 'w-[min(36rem,calc(100vw-2rem))]',
   lg: 'w-[min(40rem,calc(100vw-2rem))]',
-  // A whole record to read rather than a form: it scrolls within the viewport.
-  xl: 'w-[min(60rem,calc(100vw-2rem))] max-h-[calc(100vh-4rem)] overflow-y-auto',
+  // A whole record to read rather than a form: a fixed size, inside which its content scrolls.
+  xl: 'w-[min(68rem,calc(100vw-2rem))] h-[min(54rem,calc(100vh-4rem))] overflow-hidden',
 }
 
 export type ModalWidth = keyof typeof WIDTH
@@ -24,10 +24,12 @@ interface Props {
   /** Id of the heading that names the dialog, when it is not a DialogLayout title. */
   labelledBy?: string
   width?: ModalWidth
+  /** What takes focus on open, when the first focusable element is not the right one. */
+  initialFocus?: Dialog.Popup.Props['initialFocus']
   children: ReactNode
 }
 
-export function Modal({ open, onClose, labelledBy, width = 'sm', children }: Props) {
+export function Modal({ open, onClose, labelledBy, width = 'sm', initialFocus, children }: Props) {
   return (
     <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
       <Dialog.Portal>
@@ -35,6 +37,7 @@ export function Modal({ open, onClose, labelledBy, width = 'sm', children }: Pro
         {/* Even an undefined aria-labelledby would override the one Dialog.Title sets. */}
         <Dialog.Popup
           {...(labelledBy && { 'aria-labelledby': labelledBy })}
+          initialFocus={initialFocus}
           className={`${POPUP} ${WIDTH[width]}`}
         >
           {children}

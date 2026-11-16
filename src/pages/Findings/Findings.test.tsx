@@ -63,20 +63,73 @@ describe('Findings', () => {
 
     expect(window.location.search).toContain('finding=')
     expect(within(dialog).getByText(/Improper neutralization of quoting syntax in PostgreSQL libpq/)).toBeInTheDocument()
-    expect(within(dialog).getByText(/CVE-2025-1094 tiene EPSS 0.9003/)).toBeInTheDocument()
-    expect(within(dialog).getByText(/\/asset\/critical_services\/0\/name =/)).toBeInTheDocument()
-    expect(within(dialog).getAllByText('Pagos en línea')).toHaveLength(2)
+    const reason = within(dialog).getByRole('region', { name: 'Why it is here' })
+    expect(reason).toHaveTextContent(/CVE-2025-1094 tiene EPSS 0.9003/)
+    // The values its evidence cites are marked where the reason names them.
+    expect(within(reason).getByText('0.9003', { selector: 'mark' })).toBeInTheDocument()
+    expect(within(reason).getByTitle('/asset/critical_services/0/name')).toHaveTextContent('Critical servicePagos en línea')
     expect(within(dialog).getByText('Critical impact · Tolerates 1–4 hours')).toBeInTheDocument()
     expect(within(dialog).getByText('T1190')).toBeInTheDocument()
-    expect(within(dialog).getByText('M1051')).toBeInTheDocument()
     expect(within(dialog).getByText(/Inferred by the Cartógrafo/)).toBeInTheDocument()
-    expect(within(dialog).getByText('Not in KEV')).toBeInTheDocument()
-    expect(within(dialog).getByText(/Probability 0.9003/)).toBeInTheDocument()
+    expect(within(dialog).queryByText('M1051')).not.toBeInTheDocument()
+    await user.click(within(dialog).getByRole('button', { name: 'Source quote · 1 MITRE mitigation' }))
+    expect(within(dialog).getByText('M1051')).toBeInTheDocument()
+    expect(within(dialog).getAllByText('Not in KEV').length).toBeGreaterThan(0)
+    expect(within(dialog).getByText('90.03% chance of exploitation in the next 30 days')).toBeInTheDocument()
+    expect(within(dialog).getByRole('link', { name: /postgresql\.org/ })).toHaveAttribute(
+      'href',
+      'https://www.postgresql.org/support/security/CVE-2025-1094/',
+    )
     expect(within(dialog).getByText('By Score alone it would be #4.')).toBeInTheDocument()
     expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Production$/)
     expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^1$/)
     expect(within(dialog).getByText('Measured: no input was missing.')).toBeInTheDocument()
     expect(within(dialog).getByText('No action plan yet. Luna writes one from what is known of this finding.')).toBeInTheDocument()
+  })
+
+  it('opens a finding on its Close button, not on the index of its sections', async () => {
+    const user = await renderFindings()
+
+    const dialog = await openFinding(user, 'CVE-2025-1094')
+
+    await waitFor(() => expect(within(dialog).getByRole('button', { name: 'Close' })).toHaveFocus())
+  })
+
+  it('marks whole evidence values only, never a value inside a longer word', async () => {
+    const [newest, ...older] = prioritizationsStore.load()
+    const groups = newest!.groups.map((g) =>
+      g.position === 2 ? { ...g, reason: 'Va después porque lab-01 es de criticidad low, y no hay que follow nada.' } : g,
+    )
+    prioritizationsStore.save([{ ...newest!, groups }, ...older])
+    const user = await renderFindings()
+
+    const dialog = await openFinding(user, 'CVE-2024-23897')
+
+    const reason = within(dialog).getByRole('region', { name: 'Why it is here' })
+    expect(within(reason).getAllByText('low', { selector: 'mark' })).toHaveLength(1)
+  })
+
+  it('shows an EPSS close to 1 without rounding it up to a certain 100%', async () => {
+    const user = await renderFindings()
+
+    const dialog = await openFinding(user, 'CVE-2024-23897')
+
+    // EPSS 0.99999 in the mock.
+    expect(within(dialog).getByText('99.99% chance of exploitation in the next 30 days')).toBeInTheDocument()
+    expect(within(dialog).queryByText(/^100%/)).not.toBeInTheDocument()
+  })
+
+  it('links only http and https references', async () => {
+    storeFinding('CVE-2025-1094', (f) => ({
+      ...f,
+      details: { ...f.details, references: ['javascript:alert(1)', 'https://example.com/advisory'] },
+    }))
+    const user = await renderFindings()
+
+    const dialog = await openFinding(user, 'CVE-2025-1094')
+
+    expect(within(dialog).getByText('javascript:alert(1)').closest('a')).toBeNull()
+    expect(within(dialog).getByRole('link', { name: /example\.com/ })).toHaveAttribute('href', 'https://example.com/advisory')
   })
 
   it('a finding on an asset of Unknown Lifecycle Stage says its Score is estimated', async () => {
