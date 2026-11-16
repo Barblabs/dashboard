@@ -12,6 +12,7 @@ const DEFAULT_ASSET_FILTERS: AssetFilters = {
   criticality: [],
   exposure: [],
   information_classification: [],
+  lifecycle_stage: [],
   area: [],
 }
 
@@ -29,6 +30,7 @@ function assetsPath(filters: AssetFilters, cursor: string | null, limit: number)
   for (const classification of filters.information_classification) {
     params.append('information_classification', classification)
   }
+  for (const stage of filters.lifecycle_stage) params.append('lifecycle_stage', stage)
   for (const area of filters.area) params.append('area', String(area))
   if (cursor) params.set('cursor', cursor)
   return `/assets?${params}`

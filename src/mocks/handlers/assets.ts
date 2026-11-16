@@ -7,6 +7,7 @@ import {
   EXPOSURES,
   INFORMATION_CLASSIFICATION_FILTERS,
   INFORMATION_CLASSIFICATIONS,
+  LIFECYCLE_STAGE_FILTERS,
   type Asset,
   type AssetsPage,
 } from '../../api/assets'
@@ -49,6 +50,7 @@ export const assetsHandlers = [
     const criticalities = params.getAll('criticality')
     const exposures = params.getAll('exposure')
     const classifications = params.getAll('information_classification')
+    const lifecycleStages = params.getAll('lifecycle_stage')
     const areas = params.getAll('area')
     if (!isOneOf(ACTIVITY_FILTERS, active)) return failure(400, 'invalid_request', 'invalid active')
     if (!kinds.every((kind) => isOneOf(ASSET_KINDS, kind))) {
@@ -63,6 +65,9 @@ export const assetsHandlers = [
     if (!classifications.every((classification) => isOneOf(INFORMATION_CLASSIFICATION_FILTERS, classification))) {
       return failure(400, 'invalid_request', 'unknown information_classification')
     }
+    if (!lifecycleStages.every((stage) => isOneOf(LIFECYCLE_STAGE_FILTERS, stage))) {
+      return failure(400, 'invalid_request', 'unknown lifecycle_stage')
+    }
     if (!areas.every((area) => /^\d+$/.test(area))) return failure(400, 'invalid_request', 'invalid area')
     if (params.has('cursor')) return failure(400, 'invalid_request', 'malformed cursor')
 
@@ -73,6 +78,7 @@ export const assetsHandlers = [
       (exposures.length === 0 || exposures.includes(asset.exposure.value ?? 'unknown')) &&
       (classifications.length === 0 ||
         classifications.includes(asset.information_classification.value ?? 'unclassified')) &&
+      (lifecycleStages.length === 0 || lifecycleStages.includes(asset.lifecycle_stage ?? 'unknown')) &&
       (areas.length === 0 || (asset.area !== null && areas.includes(String(asset.area.id))))
     const assets = assetsStore.load().filter(matches)
     return HttpResponse.json<AssetsPage>({ assets, next_cursor: null, total: assets.length })
