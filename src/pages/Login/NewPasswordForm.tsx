@@ -3,6 +3,7 @@ import type { CognitoUser } from 'amazon-cognito-identity-js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useValidationText } from '../../i18n/validation'
 import { z } from 'zod'
 import { completeNewPassword } from '../../auth/cognito'
 import { completeSignIn } from '../../auth/session'
@@ -12,12 +13,17 @@ import { Field } from '../../components/ui/Field'
 import { PasswordInput } from '../../components/ui/PasswordInput'
 import { cognitoErrorKey } from './cognitoErrorKey'
 
-const newPwSchema = z.object({
-  newPassword: z.string().min(1),
-  confirmPassword: z.string().min(1),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  path: ['confirmPassword'],
-})
+// Messages are translation keys: the text is resolved at render time, in the active language.
+const newPwSchema = z
+  .object({
+    newPassword: z.string().min(1, 'login.newPassword.required'),
+    // An empty confirmation can't match a password either.
+    confirmPassword: z.string().min(1, 'login.newPassword.mismatch'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'login.newPassword.mismatch',
+  })
 type NewPwFields = z.infer<typeof newPwSchema>
 
 interface NewPasswordFormProps {
@@ -26,6 +32,7 @@ interface NewPasswordFormProps {
 
 export function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
   const { t } = useTranslation()
+  const validationText = useValidationText()
   const [serverError, setServerError] = useState<string | null>(null)
 
   const { register, handleSubmit, formState: { isSubmitting, errors } } = useForm<NewPwFields>({
@@ -65,7 +72,7 @@ export function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
       <Field
         label={t('login.newPassword.label')}
         help={t('login.newPassword.policy')}
-        error={errors.newPassword && t('login.newPassword.required')}
+        error={validationText(errors.newPassword?.message)}
       >
         <PasswordInput
           autoComplete="new-password"
@@ -76,7 +83,7 @@ export function NewPasswordForm({ cognitoUser }: NewPasswordFormProps) {
 
       <Field
         label={t('login.newPassword.confirmLabel')}
-        error={errors.confirmPassword && t('login.newPassword.mismatch')}
+        error={validationText(errors.confirmPassword?.message)}
       >
         <PasswordInput
           autoComplete="new-password"

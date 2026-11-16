@@ -3,6 +3,7 @@ import type { CognitoUser } from 'amazon-cognito-identity-js'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useValidationText } from '../../i18n/validation'
 import { z } from 'zod'
 import { signIn } from '../../auth/cognito'
 import { completeSignIn } from '../../auth/session'
@@ -13,9 +14,10 @@ import { Input } from '../../components/ui/Input'
 import { PasswordInput } from '../../components/ui/PasswordInput'
 import { cognitoErrorKey } from './cognitoErrorKey'
 
+// Messages are translation keys: the text is resolved at render time, in the active language.
 const credSchema = z.object({
-  email: z.string().min(1).email(),
-  password: z.string().min(1),
+  email: z.string().min(1, 'login.form.email.required').pipe(z.email('login.form.email.invalid')),
+  password: z.string().min(1, 'login.form.password.required'),
 })
 type CredFields = z.infer<typeof credSchema>
 
@@ -25,6 +27,7 @@ interface CredFormProps {
 
 export function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
   const { t } = useTranslation()
+  const validationText = useValidationText()
   const [serverError, setServerError] = useState<string | null>(null)
 
   const { register, handleSubmit, formState: { isSubmitting, errors } } = useForm<CredFields>({
@@ -69,7 +72,7 @@ export function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
 
       <Field
         label={t('login.form.email.label')}
-        error={errors.email && (errors.email.type === 'too_small' ? t('login.form.email.required') : t('login.form.email.invalid'))}
+        error={validationText(errors.email?.message)}
       >
         <Input
           type="email"
@@ -82,7 +85,7 @@ export function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
 
       <Field
         label={t('login.form.password.label')}
-        error={errors.password && t('login.form.password.required')}
+        error={validationText(errors.password?.message)}
       >
         <PasswordInput
           autoComplete="current-password"

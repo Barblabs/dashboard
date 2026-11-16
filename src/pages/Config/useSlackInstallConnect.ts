@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { SLACK_FAILED_KEY, SLACK_INSTALLATION_KEY, useSlackInstallStartMutation } from '../../api/slack'
+import { refetchDeliveryState, useSlackInstallStartMutation } from '../../api/slack'
 
 /*
  * The consent popup closes itself through the `/slack/install/callback` route. We hold a
@@ -17,8 +17,7 @@ export function useSlackInstallConnect() {
     const timer = window.setInterval(() => {
       if (popup.closed) {
         window.clearInterval(timer)
-        void queryClient.invalidateQueries({ queryKey: SLACK_INSTALLATION_KEY })
-        void queryClient.invalidateQueries({ queryKey: SLACK_FAILED_KEY })
+        refetchDeliveryState(queryClient)
       }
     }, 500)
   }

@@ -372,14 +372,15 @@ function TriageSection({ title, saves, children }: { title: string; saves: numbe
 function ExposureProvenance({ asset }: { asset: Asset }) {
   const { t } = useTranslation()
   const formatDate = useDateFormat()
-  const { source, value, imported, declared_by, declared_at } = asset.exposure
+  const exposure = asset.exposure
+  const { source, imported } = exposure
 
   const declaredText =
-    source === 'declared' && declared_by && declared_at
+    exposure.source === 'declared'
       ? t('config.triage.sheet.declaredBy', {
-          value: exposureLabel(t, value),
-          user: declared_by,
-          date: formatDate(declared_at),
+          value: exposureLabel(t, exposure.value),
+          user: exposure.declared_by,
+          date: formatDate(exposure.declared_at),
         })
       : t('config.exposure.sheet.nothingDeclared')
   const importedText = imported

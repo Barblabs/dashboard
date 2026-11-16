@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { ParseKeys } from 'i18next'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useValidationText } from '../../i18n/validation'
 import { z } from 'zod'
 import {
   useConnectMutation,
@@ -69,6 +70,7 @@ export function ItopForm({
   titleId,
 }: Props) {
   const { t } = useTranslation()
+  const validationText = useValidationText()
   const testMutation = useTestLoginMutation(PROVIDER)
   const connectMutation = useConnectMutation(PROVIDER)
   const updateMutation = useUpdateLoginMutation()
@@ -98,10 +100,6 @@ export function ItopForm({
   })
 
   const handleSave = handleSubmit((login) => saveMutation.mutate(login, { onSuccess: onSaved }))
-
-  function errorText(message: string | undefined) {
-    return message && t(message as ParseKeys)
-  }
 
   function resultOf(): { ok: boolean; text: string } | null {
     if (saveMutation.isError) {
@@ -149,7 +147,7 @@ export function ItopForm({
         <Field
           label={t('config.form.url.label')}
           help={t('config.form.url.help')}
-          error={errorText(errors.url?.message)}
+          error={validationText(errors.url?.message)}
         >
           <Input
             type="url"
@@ -163,7 +161,7 @@ export function ItopForm({
         <Field
           label={t('config.form.user.label')}
           help={t('config.form.user.help')}
-          error={errorText(errors.user?.message)}
+          error={validationText(errors.user?.message)}
         >
           <Input
             type="text"
@@ -177,7 +175,7 @@ export function ItopForm({
         <Field
           label={t('config.form.password.label')}
           help={t('config.form.password.help')}
-          error={errorText(errors.password?.message)}
+          error={validationText(errors.password?.message)}
         >
           <PasswordInput
             autoComplete="new-password"

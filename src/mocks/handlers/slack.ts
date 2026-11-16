@@ -1,25 +1,8 @@
 import { http, HttpResponse } from 'msw'
-import type {
-  SlackChannelRequest,
-  SlackInstallation,
-  UnsetChannel,
-} from '../../api/slack'
-import {
-  MOCK_CHANNELS,
-  slackDeliveriesStore,
-  slackInstallationStore,
-} from '../slack-store'
+import type { SlackChannelRequest } from '../../api/slack'
+import { MOCK_CHANNELS, slackDeliveriesStore, slackInstallationStore } from '../slack-store'
 import { apiUrl } from '../url'
 import { failure } from './responses'
-
-function installationOrErr(channel: SlackChannelRequest | null = null) {
-  const current = slackInstallationStore.load()
-  if (!current) return null
-  if (!channel) return current
-  const next: SlackInstallation = { ...current, ...channel } as SlackInstallation
-  slackInstallationStore.save(next)
-  return next
-}
 
 export const slackHandlers = [
   http.get(apiUrl('/slack/installation'), () => {
@@ -43,20 +26,19 @@ export const slackHandlers = [
     if (!channel) {
       return failure(400, 'slack_channel_not_set', 'choose a channel from the list first')
     }
-    const installation = installationOrErr({
-      channel_id: channel.id,
-      channel_name: channel.name,
-    })
-    if (!installation) {
+    const current = slackInstallationStore.load()
+    if (!current) {
       return failure(404, 'slack_not_installed', 'no Slack installation')
     }
+    const installation = { ...current, channel_id: channel.id, channel_name: channel.name }
+    slackInstallationStore.save(installation)
     return HttpResponse.json(installation)
   }),
 
   http.post(apiUrl('/slack/installation/test'), () => {
     const current = slackInstallationStore.load()
     if (!current) return HttpResponse.json({ ok: false, error: 'slack_not_installed' })
-    if ((current as UnsetChannel).channel_id === '') {
+    if (current.channel_id === '') {
       return HttpResponse.json({ ok: false, error: 'slack_channel_not_set' })
     }
     if (current.state === 'needs re-authorisation') {

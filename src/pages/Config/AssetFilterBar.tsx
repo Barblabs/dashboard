@@ -13,6 +13,7 @@ import {
   LIFECYCLE_STAGE_FILTERS,
   type AssetFilters,
 } from '../../api/assets'
+import { DEFAULT_ASSET_FILTERS } from '../../api/inventory'
 import { ChevronDownIcon } from '../../components/ui/icons'
 import { exposureLabel, informationClassificationLabel } from './assetText'
 import { FilterMultiSelect } from './FilterMultiSelect'
@@ -21,15 +22,8 @@ import { pick, pickAll } from './filters'
 
 // Every advanced filter is a list of selected values; its length is how many narrow the inventory.
 // `active` (Status) is not here: it lives in the header and always holds one value.
-function countActive(filters: AssetFilters) {
-  return (
-    filters.kind.length +
-    filters.criticality.length +
-    filters.exposure.length +
-    filters.information_classification.length +
-    filters.lifecycle_stage.length +
-    filters.area.length
-  )
+function countActive({ active: _, ...advanced }: AssetFilters) {
+  return Object.values(advanced).reduce((count, values) => count + values.length, 0)
 }
 
 export function AssetFilterBar({
@@ -90,16 +84,7 @@ export function AssetFilterBar({
   // returning user sees the state that is narrowing their inventory.
   const [open, setOpen] = useState(() => activeCount > 0)
   // Resets only the advanced filters behind the disclosure; Status keeps the user's choice.
-  const clearAdvanced = () =>
-    onChange({
-      ...filters,
-      kind: [],
-      criticality: [],
-      exposure: [],
-      information_classification: [],
-      lifecycle_stage: [],
-      area: [],
-    })
+  const clearAdvanced = () => onChange({ ...DEFAULT_ASSET_FILTERS, active: filters.active })
 
   return (
     <Collapsible.Root

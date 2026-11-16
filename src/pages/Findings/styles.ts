@@ -3,8 +3,8 @@ export const LABEL = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] t
 
 export const MONO = 'font-mono text-[0.8125rem]'
 
-/** Text a Feed, the CMDB or an Agent wrote: shown as written, keeping its line breaks. */
-export const WRITTEN = 'font-body text-[0.875rem] leading-[1.5] whitespace-pre-line text-navy'
+/** Text a Feed, the CMDB or an Agent wrote: shown as written, keeping its line breaks. No colour, so callers can vary it. */
+export const WRITTEN = 'font-body text-[0.875rem] leading-[1.5] whitespace-pre-line'
 
 /*
  * Written text in a Finding's detail, read as paragraphs: kept to a measure people can read

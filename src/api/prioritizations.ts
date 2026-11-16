@@ -14,8 +14,6 @@ export const VERDICTS = [
 ] as const satisfies readonly Schemas['FeedbackRequestBody']['verdict'][]
 type Verdict = (typeof VERDICTS)[number]
 
-type TechniqueRole = 'exploitation' | 'primary_impact' | 'secondary_impact'
-
 /** The inputs a Scoring Model replaced with a default, which make a Score estimated. */
 type DataGap =
   | 'cvss_estimated'
@@ -26,7 +24,7 @@ type DataGap =
   | 'lifecycle_unknown'
   | 'information_classification_undeclared'
 
-export type Technique = Override<Schemas['TechniqueResponse'], { role: TechniqueRole }>
+export type Technique = Schemas['TechniqueResponse']
 type CriticalService = Override<Schemas['CriticalServiceResponse'], { impact: Impact; max_downtime: Downtime }>
 
 /** Set by the backend from Scoring Model 3 on, never derived here from the value. */

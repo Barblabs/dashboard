@@ -22,13 +22,6 @@ const SERVICE_NAME = 'businessContext.validation.serviceName'
 const SERVICE_NAME_TAKEN = 'businessContext.validation.serviceNameTaken'
 const UNKNOWN_CODE = 'businessContext.validation.unknownCode'
 
-export type ValidationKey =
-  | typeof TOO_LONG
-  | typeof TOO_MANY
-  | typeof SERVICE_NAME
-  | typeof SERVICE_NAME_TAKEN
-  | typeof UNKNOWN_CODE
-
 // The backend counts characters after trimming, as the user reads them.
 const text = (max: number) => z.string().refine((s) => [...s.trim()].length <= max, TOO_LONG)
 const entries = z.array(z.string()).max(LIMITS.entries, TOO_MANY)

@@ -6,7 +6,7 @@ import { connectionScopeKey } from './cmdb'
 import { listCache } from './listCache'
 import type { Loadable } from './loadable'
 
-const DEFAULT_ASSET_FILTERS: AssetFilters = {
+export const DEFAULT_ASSET_FILTERS: AssetFilters = {
   active: 'true',
   kind: [],
   criticality: [],

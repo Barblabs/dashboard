@@ -23,13 +23,19 @@ export const EXPOSURE_FILTERS = [...EXPOSURES, 'unknown'] as const
 type ExposureFilter = (typeof EXPOSURE_FILTERS)[number]
 
 /**
- * `value` is the effective Exposure: the Declaration when there is one, otherwise `imported`.
- * Either is `null` when Unknown.
+ * `value` is the effective Exposure: the Declaration when there is one, otherwise `imported`,
+ * which is `null` when Unknown. A Declaration's value, `declared_by` and `declared_at` are all
+ * set exactly when `source` is `declared`.
  */
-export type AssetExposure = Override<
-  Schemas['ExposureResponse'],
-  { value: Exposure | null; imported: Exposure | null }
->
+export type AssetExposure =
+  | Override<
+      Schemas['ExposureResponse'],
+      { source: 'imported'; value: Exposure | null; imported: Exposure | null; declared_by: null; declared_at: null }
+    >
+  | Override<
+      Schemas['ExposureResponse'],
+      { source: 'declared'; value: Exposure; imported: Exposure | null; declared_by: string; declared_at: string }
+    >
 
 export type InformationClassification = NonNullable<Schemas['InformationClassificationResponse']['value']>
 export const INFORMATION_CLASSIFICATIONS = [
@@ -100,6 +106,17 @@ export interface AssetFilters {
 
 export function assetKey(asset: Pick<Asset, 'source_id' | 'record_id'>) {
   return `${asset.source_id}/${asset.record_id}`
+}
+
+/** A value a User declares over an Asset in the triage sheet. */
+export type TriagedValue = 'exposure' | 'informationClassification'
+
+/** The triaged values the Asset lacks: an Unknown Exposure, and no Information Classification. */
+export function missingValues(asset: Pick<Asset, 'exposure' | 'information_classification'>): TriagedValue[] {
+  return [
+    ...(asset.exposure.value === null ? (['exposure'] as const) : []),
+    ...(asset.information_classification.value === null ? (['informationClassification'] as const) : []),
+  ]
 }
 
 /** Software Components not matched to a Product: threats can't be checked against them. */

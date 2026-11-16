@@ -150,7 +150,6 @@ export const es: Translations = {
       readMore_other: 'Leer {{count}} párrafos más',
       showLess: 'Mostrar menos',
       showAllReferences: 'Mostrar las {{count}} referencias',
-      opensInNewTab: '(se abre en una pestaña nueva)',
       evidence: {
         kevDateAdded: 'En KEV desde',
         kevRansomware: 'Uso por ransomware',

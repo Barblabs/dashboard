@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useValidationText } from '../../i18n/validation'
 import { z } from 'zod'
 import { useInviteUserMutation, type UserResponse } from '../../api/users'
 import { Alert } from '../../components/ui/Alert'
@@ -30,6 +31,7 @@ export function InviteDialog({ open, onClose }: { open: boolean; onClose: () => 
 
 function InviteBody({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation()
+  const validationText = useValidationText()
   const toast = useToast()
 
   const {
@@ -72,11 +74,7 @@ function InviteBody({ onClose }: { onClose: () => void }) {
       <div className="flex flex-col gap-4">
         <Field
           label={t('users.invite.email.label')}
-          error={
-            errors.email?.message
-              ? t(errors.email.message as 'users.invite.email.required')
-              : undefined
-          }
+          error={validationText(errors.email?.message)}
         >
           <Input
             type="email"

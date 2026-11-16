@@ -81,6 +81,14 @@ export function ChevronDownIcon({ size = 12, className }: IconProps) {
   )
 }
 
+export function ChevronRightIcon({ size = 14, className }: IconProps) {
+  return (
+    <Icon size={size} viewBox={16} className={className}>
+      <path d="M6 4l4 4-4 4" strokeWidth="1.75" />
+    </Icon>
+  )
+}
+
 export function PowerOffIcon({ size = 16, className }: IconProps) {
   return (
     <Icon size={size} viewBox={16} className={className}>
