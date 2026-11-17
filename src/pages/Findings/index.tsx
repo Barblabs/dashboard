@@ -15,6 +15,7 @@ import { SummaryIndicators } from './SummaryIndicators'
 import { BeforeAfterTabContent } from './BeforeAfterTab'
 import { RiskTabContent } from './RiskTab'
 import { SummaryTabContent } from './SummaryTab'
+import { ThreatsTabContent } from './ThreatsTab'
 import { hasActiveFilters, matchesFinding, parseFilters } from './filters'
 
 const FINDING_PARAM = 'finding'
@@ -59,7 +60,7 @@ export function FindingsPage() {
           <RiskTabContent />
         </TabPanel>
         <TabPanel value="threats" className="mt-6">
-          <Message>{t('placeholder.comingSoon')}</Message>
+          <ThreatsTabContent />
         </TabPanel>
       </Tabs>
     </Page>

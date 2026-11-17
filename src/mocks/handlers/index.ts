@@ -1,5 +1,6 @@
 import { areasHandlers } from './areas'
 import { assetsHandlers } from './assets'
+import { attackMatrixHandlers } from './attackMatrix'
 import { authHandlers } from './auth'
 import { businessContextHandlers } from './businessContext'
 import { cmdbHandlers } from './cmdb'
@@ -21,5 +22,6 @@ export const handlers = [
   ...prioritizationsHandlers,
   ...findingsHandlers,
   ...findingsRiskHandlers,
+  ...attackMatrixHandlers,
   ...slackHandlers,
 ]

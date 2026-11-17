@@ -48,6 +48,12 @@ async function openRiskTab() {
   return user
 }
 
+async function openThreatsTab() {
+  const user = renderApp('/findings')
+  await user.click(await screen.findByRole('tab', { name: 'Threats' }))
+  return user
+}
+
 describe('Findings', () => {
   it('shows the newest order in groups, the first to attend first', async () => {
     await renderFindings()
@@ -611,6 +617,42 @@ describe('Findings', () => {
       await openBeforeAfterTab()
 
       expect(await screen.findByText('Band composition per group')).toBeInTheDocument()
+    })
+  })
+
+  describe('threats tab', () => {
+    it('shows the coverage heading and "Inferred by the Cartógrafo"', async () => {
+      await openThreatsTab()
+      expect(await screen.findByRole('heading', { name: 'Threat coverage' })).toBeInTheDocument()
+      expect(screen.getByText('Inferred by the Cartógrafo')).toBeInTheDocument()
+    })
+
+    it('shows the coverage label with labeled and open counts', async () => {
+      await openThreatsTab()
+      expect(await screen.findByText('22 of 35 open findings have an ATT&CK label')).toBeInTheDocument()
+    })
+
+    it('shows the heatmap heading and role filter buttons', async () => {
+      await openThreatsTab()
+      expect(await screen.findByRole('heading', { name: 'Findings per tactic' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Exploitation' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Primary impact' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Secondary impact' })).toBeInTheDocument()
+    })
+
+    it('shows all 14 ATT&CK tactics in the heatmap', async () => {
+      await openThreatsTab()
+      expect(await screen.findByText('Initial Access')).toBeInTheDocument()
+      expect(screen.getByText('Impact')).toBeInTheDocument()
+      expect(screen.getByText('Reconnaissance')).toBeInTheDocument()
+    })
+
+    it('shows the top techniques table with technique IDs', async () => {
+      await openThreatsTab()
+      expect(await screen.findByRole('heading', { name: 'Top techniques' })).toBeInTheDocument()
+      expect(screen.getByText('T1190')).toBeInTheDocument()
+      expect(screen.getByText('Exploit Public-Facing Application')).toBeInTheDocument()
     })
   })
 })
