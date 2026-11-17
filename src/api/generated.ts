@@ -577,6 +577,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/news-digests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the Customer's News Digests, newest first
+         * @description The Editor writes one a day when news about attacks and Vulnerabilities is relevant to the Customer (ADR 0025).
+         */
+        get: operations["list-news-digests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/news-digests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read a News Digest: its News Items by Relevance, closest first, with why each may matter */
+        get: operations["get-news-digest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/prioritizations": {
         parameters: {
             query?: never;
@@ -1225,6 +1262,15 @@ export interface components {
             /** @description The key fields the document did not state */
             gaps: string[];
         };
+        EditorRunResponse: {
+            model: string;
+            prompt_id: string;
+            /**
+             * @description Only a verified Editor gives each News Item its why; otherwise the digest keeps the rules' order
+             * @enum {string}
+             */
+            status: "verified" | "rejected" | "refused" | "failed";
+        };
         EpssResponse: {
             /** Format: double */
             percentile: number;
@@ -1445,6 +1491,114 @@ export interface components {
             advice: string;
             attack_id: string;
             name: string;
+        };
+        NewsAttackResponse: {
+            attacker: string | null;
+            /** @description ISO 3166-1 alpha-2 */
+            countries: string[];
+            domain: string | null;
+            /** @description A code of the Business Context's concerns vocabulary, null when the item does not say */
+            kind: string | null;
+            /** @description Codes of the Business Context's sector vocabulary */
+            sectors: string[];
+            /** @description Blank when the item names no victim */
+            victim: string;
+        };
+        NewsCountsResponse: {
+            /**
+             * Format: int64
+             * @description News Items that name the Vulnerability of an open Finding
+             */
+            finding: number;
+            /**
+             * Format: int64
+             * @description News Items that name a Product its Assets run, or a technology or third party its Business Context states
+             */
+            footprint: number;
+            /**
+             * Format: int64
+             * @description News Items whose victim is the Customer itself
+             */
+            named: number;
+            /**
+             * Format: int64
+             * @description Attacks on organizations of its sector: context, not exposure
+             */
+            peer: number;
+        };
+        NewsDigestListResponse: {
+            news_digests: components["schemas"]["NewsDigestSummaryResponse"][];
+        };
+        NewsDigestResponse: {
+            /**
+             * Format: int64
+             * @description The version of the Business Context the Editor read, null when the Customer had stated none
+             */
+            business_context_version: number | null;
+            counts: components["schemas"]["NewsCountsResponse"];
+            /** Format: date-time */
+            created_at: string;
+            editor: components["schemas"]["EditorRunResponse"];
+            /** @description One per Relevance that has News Items, closest first */
+            groups: components["schemas"]["NewsGroupResponse"][];
+            id: string;
+            /** @description The Business Context states no sector, so no attack on a Peer can reach the Customer */
+            no_sectors: boolean;
+            /**
+             * Format: date-time
+             * @description It holds the News Items that became ready after since and up to until
+             */
+            since: string;
+            /** Format: date-time */
+            until: string;
+        };
+        NewsDigestSummaryResponse: {
+            counts: components["schemas"]["NewsCountsResponse"];
+            /** Format: date-time */
+            created_at: string;
+            id: string;
+            /**
+             * Format: date-time
+             * @description It holds the News Items that became ready after since and up to until
+             */
+            since: string;
+            /** Format: date-time */
+            until: string;
+        };
+        NewsGroupResponse: {
+            /** @description In the order to read them */
+            items: components["schemas"]["NewsItemResponse"][];
+            /** @enum {string} */
+            relevance: "named" | "finding" | "footprint" | "peer";
+        };
+        NewsItemResponse: {
+            /** @description The attacks it reports: the source's claim, never confirmed */
+            attacks: components["schemas"]["NewsAttackResponse"][];
+            /** @description What the why relies on from the Business Context */
+            context_evidence: components["schemas"]["ContextEvidenceResponse"][];
+            cve_ids: string[];
+            /** @description The item's own text, for an item without a summary */
+            excerpt: string | null;
+            feed: string;
+            /**
+             * @description A leak_post is the attacker's own claim
+             * @enum {string}
+             */
+            kind: "article" | "leak_post";
+            /** @description Written by code; show them as they are, they must not be missed */
+            labels: string[];
+            language: string;
+            link: string;
+            news_item_id: string;
+            /** Format: date-time */
+            published_at: string;
+            /** @description Why the rules found it relevant, written by code, closest first */
+            reasons: string[];
+            /** @description What the Reader states happened, in Spanish; null when it did not read the item */
+            summary: string | null;
+            title: string;
+            /** @description Why it may matter to the Customer, by the Editor; null when the Editor had no verified answer */
+            why: string | null;
         };
         OperationsFields: {
             /** @description Up to 25 */
@@ -3980,6 +4134,123 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "list-news-digests": {
+        parameters: {
+            query?: {
+                /** @description Page size */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NewsDigestListResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-news-digest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NewsDigestResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

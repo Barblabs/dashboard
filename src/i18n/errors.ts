@@ -28,6 +28,7 @@ const CODE_KEYS = new Map<string, ParseKeys>([
   ['agent_refused', 'businessContext.import.refused'],
   ['agent_rejected', 'businessContext.import.rejected'],
   ['agent_unavailable', 'businessContext.import.unavailable'],
+  ['news_digest_not_found', 'news.notFound'],
   ['slack_not_installed', 'slack.errors.notInstalled'],
   ['slack_needs_reauthorisation', 'slack.errors.needsReauthorisation'],
   ['slack_channel_not_set', 'slack.errors.channelNotSet'],

@@ -29,6 +29,15 @@ export function useDateFormat(style: DateStyle = 'medium'): (iso: string) => str
   }, [locale, style])
 }
 
+/** Two ISO dates as one period, saying once what they share: "Nov 16 – 17, 2026". */
+export function useDateRangeFormat(): (start: string, end: string) => string {
+  const locale = useLocale()
+  return useMemo(() => {
+    const format = new Intl.DateTimeFormat(locale, DATE_STYLES.medium)
+    return (start, end) => format.formatRange(new Date(start), new Date(end))
+  }, [locale])
+}
+
 /** A share from 0 to 1 as a whole percentage: "85%" in English, "85 %" in Spanish. */
 export function usePercentFormat(): (share: number) => string {
   const locale = useLocale()

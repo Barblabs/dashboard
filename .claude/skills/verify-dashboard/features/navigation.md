@@ -4,10 +4,10 @@
 - Every route except `/login` and `/deactivated` needs a session; without one it redirects to `/login`, and signing in returns to the page asked for
 - `/` redirects by role: platform_admin to `/tenants`, customer_admin and viewer to `/config`
 - Sidebar links by role (the active link is highlighted):
-  - customer_admin: Findings, Configuration, Business context, Notifications, Users
+  - customer_admin: Findings, News, Configuration, Business context, Notifications, Users
   - viewer: the same without Users
   - platform_admin: Tenants (`/tenants`), Dashboard (`/admin-dashboard`)
-- Notifications is a "Coming soon" placeholder (Findings is a real page, see findings.md)
+- Notifications is a "Coming soon" placeholder (Findings and News are real pages, see findings.md and news.md)
 - A route outside the role shows "Access denied" (`/forbidden`); an unknown path shows "Page not found"
 
 ## How to get to it (user POV)

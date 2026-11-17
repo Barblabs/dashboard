@@ -20,9 +20,29 @@ const PATH_LABELS = new Map<string, ParseKeys>([
 
 const CRITICAL_SERVICE = /^\/(asset|operations)\/critical_services\/\d+\/[a-z_]+$/
 
+/*
+ * The Business Context's lists, which the Editor cites one entry at a time, such as
+ * /operations/data_categories/0: each is named by its field, whatever the entry.
+ */
+const CONTEXT_LISTS = new Map<string, ParseKeys>([
+  ['/profile/sectors', 'businessContext.fields.sectors'],
+  ['/geography/countries', 'businessContext.fields.countries.label'],
+  ['/operations/data_categories', 'businessContext.fields.dataCategories'],
+  ['/operations/regulations', 'businessContext.fields.regulations'],
+  ['/operations/environments', 'businessContext.fields.environments'],
+  ['/footprint/domains', 'businessContext.fields.domains.label'],
+  ['/footprint/brands', 'businessContext.fields.brands.label'],
+  ['/footprint/technologies', 'businessContext.fields.technologies.label'],
+  ['/footprint/third_parties', 'businessContext.fields.thirdParties.label'],
+  ['/risk/concerns', 'businessContext.fields.concerns'],
+])
+
+const LIST_ENTRY = /^(.+)\/\d+$/
+
 function labelKey(path: string): ParseKeys | null {
   if (CRITICAL_SERVICE.test(path)) return 'findings.detail.evidence.criticalService'
-  return PATH_LABELS.get(path) ?? null
+  const list = LIST_ENTRY.exec(path)?.[1]
+  return PATH_LABELS.get(path) ?? (list === undefined ? null : (CONTEXT_LISTS.get(list) ?? null))
 }
 
 interface Props {

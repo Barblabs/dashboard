@@ -8,6 +8,7 @@ import { cmdbHandlers } from './cmdb'
 import { customersHandlers } from './customers'
 import { findingsHandlers } from './findings'
 import { findingsRiskHandlers } from './findingsRisk'
+import { newsDigestsHandlers } from './newsDigests'
 import { prioritizationsHandlers } from './prioritizations'
 import { slackHandlers } from './slack'
 import { usersHandlers } from './users'
@@ -21,6 +22,7 @@ export const handlers = [
   ...customersHandlers,
   ...businessContextHandlers,
   ...prioritizationsHandlers,
+  ...newsDigestsHandlers,
   ...findingsHandlers,
   ...findingsRiskHandlers,
   ...attackMatrixHandlers,
