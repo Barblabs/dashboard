@@ -439,6 +439,36 @@ const scenarios = {
     check(feedback[0]?.body?.verdict === 'should_be_earlier', `feedback request mismatch: ${JSON.stringify(feedback[0]?.body)}`)
   },
 
+  async news() {
+    await signIn('viewer')
+    await sidebarLink('News').click()
+    const groups = page.getByRole('main').getByRole('region')
+    await expect(groups.filter({ hasText: 'Attacks in your sector' })).toBeVisible()
+    const headings = await groups.getByRole('heading', { level: 2 }).allInnerTexts()
+    check(
+      JSON.stringify(headings) === JSON.stringify(['They name you', 'They mention vulnerabilities open on your assets', 'They mention technology or suppliers you use', 'Attacks in your sector']),
+      `groups out of order: ${JSON.stringify(headings)}`,
+    )
+    await shot('newest')
+    await shot('finding-and-footprint', page.getByRole('heading', { name: /PostgreSQL libpq Flaw/ }))
+    await shot('peers', groups.filter({ hasText: 'Attacks in your sector' }).getByRole('heading', { level: 2 }))
+    const credit = page.getByRole('link', { name: /^Source: Ransomware\.live/ })
+    check(await credit.count() === 2, `expected 2 Ransomware.live credits, got ${await credit.count()}`)
+    await page.getByLabel('Digest').selectOption({ index: 1 })
+    await expect(page.getByText("The Editor didn't answer")).toBeVisible()
+    check(new URL(page.url()).searchParams.has('digest'), 'the open digest is not in the URL')
+    await shot('older-without-editor')
+    // The open digest lives in the URL, so a reload lands on it.
+    await page.reload()
+    await expect(page.getByRole('heading', { name: /Leaked AWS Keys/ })).toBeVisible()
+    await page.getByRole('group', { name: 'Language' }).getByRole('button', { name: 'ES' }).click()
+    await page.getByLabel('Edición').selectOption({ index: 0 })
+    await expect(page.getByRole('heading', { name: 'Los nombran a ustedes' })).toBeVisible()
+    await shot('newest-es')
+    check(callsTo('GET', '/news-digests?limit=30').length >= 1, 'the digests were not listed')
+    check(callsTo('GET', '/news-digests/').length >= 2, 'expected the newest and the older digest to be read')
+  },
+
   async language() {
     await signIn('customer_admin')
     await expect(page.getByRole('heading', { name: 'Configuration' })).toBeVisible()
@@ -463,7 +493,7 @@ const scenarios = {
     await shot('guard-to-login')
     // Signing in returns to the page the guard turned away.
     await signIn('customer_admin', '/users')
-    for (const link of ['Findings', 'Configuration', 'Business context', 'Notifications', 'Users']) {
+    for (const link of ['Findings', 'News', 'Configuration', 'Business context', 'Notifications', 'Users']) {
       await expect(sidebarLink(link)).toBeVisible()
     }
     await sidebarLink('Notifications').click()
