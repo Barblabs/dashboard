@@ -328,7 +328,7 @@ export const en = {
         none: 'No vendor advisory names it yet.',
       },
       plan: {
-        none: 'No action plan yet. Luna writes one from what is known of this finding.',
+        none: 'No action plan yet. Luna writes them on her own, in the order of the list; if you do not want to wait, ask her now.',
         generate: 'Ask Luna for an action plan',
         regenerate: 'Ask for a new plan',
         generating: 'Luna is writing the plan. It can take a minute…',

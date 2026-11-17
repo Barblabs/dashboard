@@ -109,7 +109,7 @@ describe('Findings', () => {
     expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Production$/)
     expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^1$/)
     expect(within(dialog).getByText('Measured: no input was missing.')).toBeInTheDocument()
-    expect(within(dialog).getByText('No action plan yet. Luna writes one from what is known of this finding.')).toBeInTheDocument()
+    expect(within(dialog).getByText('No action plan yet. Luna writes them on her own, in the order of the list; if you do not want to wait, ask her now.')).toBeInTheDocument()
     const refLink = within(dialog).getByRole('link', { name: /postgresql\.org\/support\/security\/CVE-2025-1094/ })
     expect(refLink).toHaveAttribute('target', '_blank')
     expect(refLink).toHaveAttribute('rel', 'noreferrer')

@@ -330,7 +330,7 @@ export const es: Translations = {
         none: 'Aún no hay avisos de fabricantes que lo mencionen.',
       },
       plan: {
-        none: 'Aún no hay plan de acción. Luna escribe uno con lo que se sabe de este hallazgo.',
+        none: 'Aún no hay plan de acción. Luna los escribe por su cuenta, en el orden de la lista; si no quieres esperar, pídeselo ahora.',
         generate: 'Pedirle a Luna un plan de acción',
         regenerate: 'Pedir un plan nuevo',
         generating: 'Luna está escribiendo el plan. Puede tardar un minuto…',
