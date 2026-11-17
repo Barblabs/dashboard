@@ -345,4 +345,122 @@ describe('Findings', () => {
 
     expect(await screen.findByText(/No findings yet/)).toBeInTheDocument()
   })
+
+  describe('tabs', () => {
+    it('renders all 5 tabs on the Findings page', async () => {
+      renderApp('/findings')
+      const tablist = await screen.findByRole('tablist')
+      const tabs = within(tablist).getAllByRole('tab')
+      expect(tabs.map((t) => t.textContent)).toEqual([
+        'Prioritized list',
+        'Summary',
+        'Before & After',
+        'Where the risk is',
+        'Threats',
+      ])
+    })
+
+    it('shows the prioritized list by default and switches to Summary', async () => {
+      const user = renderApp('/findings')
+      await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+
+      await user.click(screen.getByRole('tab', { name: 'Summary' }))
+
+      expect(screen.getByRole('tab', { name: 'Summary' })).toHaveAttribute('aria-selected', 'true')
+      expect(await screen.findByText('Coming soon')).toBeInTheDocument()
+    })
+  })
+
+  describe('summary indicators', () => {
+    it('shows the 5 indicator cards above the tabs and keeps them on other tabs', async () => {
+      const user = renderApp('/findings')
+
+      // Indicators are always visible; wait for the query to resolve.
+      expect(await screen.findByText('23')).toBeInTheDocument()
+      expect(screen.getByText('In KEV')).toBeInTheDocument()
+      expect(screen.getByText('Critical on internet-facing')).toBeInTheDocument()
+
+      // Switch to a different tab — indicators must remain visible.
+      await user.click(await screen.findByRole('tab', { name: 'Summary' }))
+      expect(screen.getByText('23')).toBeInTheDocument()
+      expect(screen.getByText('In KEV')).toBeInTheDocument()
+    })
+  })
+
+  describe('filters', () => {
+    it('filters by band and hides empty groups', async () => {
+      await renderFindings()
+
+      const bandSelect = screen.getByRole('combobox', { name: 'Band' })
+      fireEvent.change(bandSelect, { target: { value: 'critical' } })
+
+      await waitFor(() => {
+        const groups = within(screen.getByRole('main')).queryAllByRole('region')
+        expect(groups.length).toBeGreaterThan(0)
+        groups.forEach((g) => {
+          expect(within(g).queryAllByRole('button', { name: /^Open/ }).length).toBeGreaterThan(0)
+        })
+      })
+      expect(window.location.search).toContain('band=critical')
+    })
+
+    it('shows no-results message when no findings match the filter', async () => {
+      await renderFindings()
+
+      fireEvent.change(screen.getByRole('combobox', { name: 'Band' }), {
+        target: { value: 'unbanded' },
+      })
+
+      expect(await screen.findByText('No findings match the active filters.')).toBeInTheDocument()
+    })
+
+    it('shows a chip for the active band filter and removes it', async () => {
+      const user = renderApp('/findings?band=critical')
+      await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+
+      expect(screen.getByText('Band: Critical')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'Remove filter' }))
+
+      await waitFor(() => expect(screen.queryByText('Band: Critical')).not.toBeInTheDocument())
+    })
+
+    it('shows "From the chart:" prefix when navigated with from=chart', async () => {
+      renderApp('/findings?band=critical&from=chart')
+      await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+
+      expect(screen.getByText('From the chart:')).toBeInTheDocument()
+      expect(screen.getByText('Band: Critical')).toBeInTheDocument()
+    })
+
+    it('removes the from=chart label when all chips are cleared', async () => {
+      const user = renderApp('/findings?band=critical&from=chart')
+      await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+
+      await user.click(screen.getByRole('button', { name: 'Remove filter' }))
+
+      await waitFor(() => {
+        expect(screen.queryByText('From the chart:')).not.toBeInTheDocument()
+        expect(screen.queryByText('Band: Critical')).not.toBeInTheDocument()
+      })
+    })
+
+    it('clears all filters with the clear-all button', async () => {
+      const user = renderApp('/findings?band=critical&kev=1')
+      await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+
+      // Both the chip label ("Band: Critical") and the KEV chip are shown;
+      // "KEV only" appears twice: once in the checkbox label, once in the chip.
+      expect(screen.getByText('Band: Critical')).toBeInTheDocument()
+      expect(screen.getAllByText('KEV only')).toHaveLength(2)
+
+      await user.click(screen.getByRole('button', { name: 'Clear all' }))
+
+      await waitFor(() => {
+        expect(screen.queryByText('Band: Critical')).not.toBeInTheDocument()
+        // After clearing, only the checkbox label "KEV only" remains (no chip).
+        expect(screen.getAllByText('KEV only')).toHaveLength(1)
+      })
+    })
+  })
 })
