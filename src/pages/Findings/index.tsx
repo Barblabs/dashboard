@@ -12,6 +12,7 @@ import { FindingDetail } from './FindingDetail'
 import { FilterChips, FindingsFilterBar } from './FindingsFilter'
 import { GroupPanel } from './GroupPanel'
 import { SummaryIndicators } from './SummaryIndicators'
+import { BeforeAfterTabContent } from './BeforeAfterTab'
 import { SummaryTabContent } from './SummaryTab'
 import { hasActiveFilters, matchesFinding, parseFilters } from './filters'
 
@@ -51,7 +52,7 @@ export function FindingsPage() {
           <SummaryTabContent />
         </TabPanel>
         <TabPanel value="before-after" className="mt-6">
-          <Message>{t('placeholder.comingSoon')}</Message>
+          <BeforeAfterTabContent />
         </TabPanel>
         <TabPanel value="risk" className="mt-6">
           <Message>{t('placeholder.comingSoon')}</Message>
@@ -83,6 +84,7 @@ function PrioritizedTabContent() {
     setParams((prev) => {
       const next = new URLSearchParams(prev)
       next.delete(key)
+      if (key === 'ids') next.delete('from')
       if (!hasActiveFilters(parseFilters(next))) next.delete('from')
       return next
     })
@@ -90,7 +92,7 @@ function PrioritizedTabContent() {
   const clearFilters = () =>
     setParams((prev) => {
       const next = new URLSearchParams(prev)
-      for (const k of ['band', 'exposure', 'status', 'kev', 'q', 'from']) next.delete(k)
+      for (const k of ['band', 'exposure', 'status', 'kev', 'q', 'from', 'ids']) next.delete(k)
       return next
     })
 

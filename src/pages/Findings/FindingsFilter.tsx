@@ -129,6 +129,8 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
       }),
     })
   if (filters.kev) chips.push({ key: 'kev', label: t('findings.chips.kev') })
+  if (filters.ids.size > 0)
+    chips.push({ key: 'ids', label: t('findings.chips.matrix', { count: filters.ids.size }) })
 
   const countText =
     active && filteredCount < totalCount
@@ -139,10 +141,8 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
 
   return (
     <div className="flex flex-wrap items-center gap-2 font-body text-[0.875rem]">
-      {chips.length > 0 && (
-        <span className="text-gray">
-          {filters.fromChart ? t('findings.chips.fromChart') : ''}
-        </span>
+      {filters.fromChart && chips.length > 0 && (
+        <span className="text-gray">{t('findings.chips.fromChart')}</span>
       )}
       {chips.map(({ key, label }) => (
         <span

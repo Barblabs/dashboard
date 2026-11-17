@@ -7,9 +7,11 @@ export interface FindingsFilters {
   kev: boolean
   text: string
   fromChart: boolean
+  ids: Set<string>
 }
 
 export function parseFilters(params: URLSearchParams): FindingsFilters {
+  const idsParam = params.get('ids')
   return {
     band: params.get('band') ?? '',
     exposure: params.get('exposure') ?? '',
@@ -17,15 +19,17 @@ export function parseFilters(params: URLSearchParams): FindingsFilters {
     kev: params.get('kev') === '1',
     text: params.get('q') ?? '',
     fromChart: params.get('from') === 'chart',
+    ids: idsParam ? new Set(idsParam.split(',')) : new Set(),
   }
 }
 
-export function hasActiveFilters({ band, exposure, status, kev, text }: FindingsFilters): boolean {
-  return !!(band || exposure || status || kev || text)
+export function hasActiveFilters({ band, exposure, status, kev, text, ids }: FindingsFilters): boolean {
+  return !!(band || exposure || status || kev || text || ids.size > 0)
 }
 
 export function matchesFinding(f: Finding, filters: FindingsFilters): boolean {
-  const { band, exposure, status, kev, text } = filters
+  const { band, exposure, status, kev, text, ids } = filters
+  if (ids.size > 0 && !ids.has(f.finding_id)) return false
   if (text) {
     const q = text.toLowerCase()
     if (

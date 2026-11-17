@@ -36,6 +36,12 @@ async function openSummaryTab() {
   return user
 }
 
+async function openBeforeAfterTab() {
+  const user = renderApp('/findings')
+  await user.click(await screen.findByRole('tab', { name: 'Before & After' }))
+  return user
+}
+
 describe('Findings', () => {
   it('shows the newest order in groups, the first to attend first', async () => {
     await renderFindings()
@@ -494,6 +500,42 @@ describe('Findings', () => {
         // After clearing, only the checkbox label "KEV only" remains (no chip).
         expect(screen.getAllByText('KEV only')).toHaveLength(1)
       })
+    })
+  })
+
+  describe('before & after tab', () => {
+    it('shows the movement summary cards', async () => {
+      await openBeforeAfterTab()
+
+      const subioLabel = await screen.findByText('Went up')
+      expect(subioLabel).toBeInTheDocument()
+      expect(screen.getByText('Stayed')).toBeInTheDocument()
+      expect(screen.getByText('Went down')).toBeInTheDocument()
+      // Count span is the previous sibling of the label span
+      expect(subioLabel.previousElementSibling).toHaveTextContent('6')
+    })
+
+    it('shows the movement matrix heading and group labels', async () => {
+      await openBeforeAfterTab()
+
+      expect(await screen.findByText('Movement matrix')).toBeInTheDocument()
+      // All 4 agent group headers and score group row headers appear
+      const g1Labels = screen.getAllByText('G1')
+      expect(g1Labels.length).toBeGreaterThanOrEqual(2) // column header + row header
+    })
+
+    it('shows diagonal cell for G1 (3 findings stayed in SG1→G1)', async () => {
+      await openBeforeAfterTab()
+
+      // Diagonal cell SG1→G1 should contain 3
+      const cell = await screen.findByLabelText('3 findings from score group 1 in agent group 1')
+      expect(cell).toBeInTheDocument()
+    })
+
+    it('shows the band composition heading', async () => {
+      await openBeforeAfterTab()
+
+      expect(await screen.findByText('Band composition per group')).toBeInTheDocument()
     })
   })
 })
