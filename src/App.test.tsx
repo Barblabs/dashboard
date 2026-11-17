@@ -58,13 +58,13 @@ describe('Pages by role', () => {
   it('shows a Customer Admin every customer page, in order', () => {
     renderApp('/findings')
 
-    expect(navLinks()).toEqual(['Findings', 'Configuration', 'Business context', 'Notifications', 'Users'])
+    expect(navLinks()).toEqual(['Findings', 'News', 'Configuration', 'Business context', 'Notifications', 'Users'])
   })
 
   it('shows a Viewer the customer pages without Users, and denies it the Users page', () => {
     renderApp('/users', VIEWER)
 
-    expect(navLinks()).toEqual(['Findings', 'Configuration', 'Business context', 'Notifications'])
+    expect(navLinks()).toEqual(['Findings', 'News', 'Configuration', 'Business context', 'Notifications'])
     expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
   })
 

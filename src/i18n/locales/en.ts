@@ -12,6 +12,7 @@ export const en = {
     signOut: 'Sign out',
     nav: {
       findings: 'Findings',
+      news: 'News',
       config: 'Configuration',
       'business-context': 'Business context',
       notifications: 'Notifications',
@@ -302,6 +303,80 @@ export const en = {
           should_be_later: 'Should be attended later',
         },
       },
+    },
+  },
+  news: {
+    title: 'News',
+    subtitle:
+      'News about attacks and vulnerabilities that the rules found relevant to your organization, closest to you first. A new digest arrives each day there is news for you.',
+    loading: 'Loading the news…',
+    loadingDigest: 'Loading this digest…',
+    failed: "Couldn't load the news.",
+    network: "Couldn't reach the server to load the news.",
+    notFound: 'This digest is no longer available.',
+    empty: {
+      title: 'No news yet',
+      daily:
+        'Once a day, when there is news about attacks or vulnerabilities relevant to you, a digest shows up here: news that names your organization, a CVE open on your assets, a product they run, or an attack in your sector.',
+      context:
+        'What makes news reach you is what your business context states: your sectors, domains, brands, technologies and third parties.',
+      link: 'Go to the business context',
+    },
+    period: 'News from {{period}}',
+    picker: {
+      label: 'Digest',
+      option_one: '{{period}} · {{count}} news item',
+      option_other: '{{period}} · {{count}} news items',
+      named_one: '{{count}} names you',
+      named_other: '{{count}} name you',
+    },
+    counts: 'News by relevance',
+    editorMissing: "The Editor didn't answer; the news follows the rules' order, without explanations.",
+    noSectors: {
+      text: 'Your business context states no sector, so no attack on an organization of your sector can show up here.',
+      link: 'State your sectors',
+    },
+    noItems: 'This digest has no news.',
+    relevance: {
+      named: {
+        title: 'They name you',
+        description: 'The victim is your organization: your domain or your brand, in the news or on a leak site.',
+        short: 'Name you',
+      },
+      finding: {
+        title: 'They mention vulnerabilities open on your assets',
+        description: 'They name a CVE that is still open on one of your assets.',
+        short: 'Open vulnerabilities',
+      },
+      footprint: {
+        title: 'They mention technology or suppliers you use',
+        description: 'They name a product your assets run, or a technology or third party your business context states.',
+        short: 'Technology and suppliers',
+      },
+      peer: {
+        title: 'Attacks in your sector',
+        description: 'Attacks on other organizations of your sector.',
+        context: 'Context: it does not mean you are exposed.',
+        short: 'Your sector',
+      },
+    },
+    group: {
+      size_one: '{{count}} news item',
+      size_other: '{{count}} news items',
+    },
+    item: {
+      leakPost: 'Leak-site post',
+      source: 'Source: {{name}}',
+      labels: 'Notices',
+      why: 'Why it may matter to you',
+      excerpt: 'Original text',
+      reasons: 'Why it appears',
+      attacks: 'Attacks the source reports',
+      cves: 'CVEs',
+    },
+    attack: {
+      noVictim: 'Unnamed victim',
+      attacker: 'Attacker: {{name}}',
     },
   },
   notifications: {

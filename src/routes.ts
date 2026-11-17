@@ -4,6 +4,7 @@ import { AdminDashboardPage } from './pages/AdminDashboard'
 import { BusinessContextPage } from './pages/BusinessContext'
 import { ConfigPage } from './pages/Config'
 import { FindingsPage } from './pages/Findings'
+import { NewsPage } from './pages/News'
 import { NotificationsPage } from './pages/Notifications'
 import { TenantsPage } from './pages/Tenants'
 import { UsersPage } from './pages/Users'
@@ -26,6 +27,7 @@ const PLATFORM_ADMIN: readonly Role[] = ['platform_admin']
  */
 export const PAGES = [
   { id: 'findings', Page: FindingsPage, roles: CUSTOMER_ROLES },
+  { id: 'news', Page: NewsPage, roles: CUSTOMER_ROLES },
   { id: 'config', Page: ConfigPage, roles: CUSTOMER_ROLES },
   { id: 'business-context', Page: BusinessContextPage, roles: CUSTOMER_ROLES },
   { id: 'notifications', Page: NotificationsPage, roles: CUSTOMER_ROLES },

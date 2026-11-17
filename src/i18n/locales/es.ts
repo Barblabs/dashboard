@@ -14,6 +14,7 @@ export const es: Translations = {
     signOut: 'Cerrar sesión',
     nav: {
       findings: 'Hallazgos',
+      news: 'Noticias',
       config: 'Configuración',
       'business-context': 'Contexto empresarial',
       notifications: 'Notificaciones',
@@ -304,6 +305,80 @@ export const es: Translations = {
           should_be_later: 'Debería atenderse después',
         },
       },
+    },
+  },
+  news: {
+    title: 'Noticias',
+    subtitle:
+      'Noticias sobre ataques y vulnerabilidades que las reglas encontraron relevantes para su organización, de la más cercana a la más lejana. Cada día con noticias para ustedes llega una nueva edición.',
+    loading: 'Cargando noticias…',
+    loadingDigest: 'Cargando esta edición…',
+    failed: 'No se pudieron cargar las noticias.',
+    network: 'No se pudo contactar al servidor para cargar las noticias.',
+    notFound: 'Esta edición ya no está disponible.',
+    empty: {
+      title: 'Aún no hay noticias',
+      daily:
+        'Una vez al día, cuando hay noticias sobre ataques o vulnerabilidades relevantes para ustedes, aparece aquí una edición: noticias que nombran a su organización, una CVE abierta en sus activos, un producto que corre en ellos o un ataque en su sector.',
+      context:
+        'Lo que hace que una noticia les llegue es lo que indica su contexto empresarial: sus sectores, dominios, marcas, tecnologías y terceros.',
+      link: 'Ir al contexto empresarial',
+    },
+    period: 'Noticias del {{period}}',
+    picker: {
+      label: 'Edición',
+      option_one: '{{period}} · {{count}} noticia',
+      option_other: '{{period}} · {{count}} noticias',
+      named_one: '{{count}} los nombra',
+      named_other: '{{count}} los nombran',
+    },
+    counts: 'Noticias por relevancia',
+    editorMissing: 'El Editor no respondió; las noticias van en el orden de las reglas, sin explicación.',
+    noSectors: {
+      text: 'Su contexto empresarial no indica ningún sector, así que aquí no pueden aparecer ataques a organizaciones de su sector.',
+      link: 'Indicar sus sectores',
+    },
+    noItems: 'Esta edición no tiene noticias.',
+    relevance: {
+      named: {
+        title: 'Los nombran a ustedes',
+        description: 'La víctima es su organización: su dominio o su marca, en la noticia o en un sitio de filtración.',
+        short: 'Los nombran',
+      },
+      finding: {
+        title: 'Mencionan vulnerabilidades abiertas en sus activos',
+        description: 'Nombran una CVE que sigue abierta en alguno de sus activos.',
+        short: 'Vulnerabilidades abiertas',
+      },
+      footprint: {
+        title: 'Mencionan tecnología o proveedores que usan',
+        description: 'Nombran un producto que corre en sus activos, o una tecnología o un tercero que indica su contexto empresarial.',
+        short: 'Tecnología y proveedores',
+      },
+      peer: {
+        title: 'Ataques en su sector',
+        description: 'Ataques a otras organizaciones de su sector.',
+        context: 'Contexto: no indica que ustedes estén expuestos.',
+        short: 'Su sector',
+      },
+    },
+    group: {
+      size_one: '{{count}} noticia',
+      size_other: '{{count}} noticias',
+    },
+    item: {
+      leakPost: 'Publicación en sitio de filtración',
+      source: 'Fuente: {{name}}',
+      labels: 'Avisos',
+      why: 'Por qué puede importarles',
+      excerpt: 'Texto original',
+      reasons: 'Por qué aparece',
+      attacks: 'Ataques que reporta la fuente',
+      cves: 'CVE',
+    },
+    attack: {
+      noVictim: 'Víctima sin nombre',
+      attacker: 'Atacante: {{name}}',
     },
   },
   notifications: {
