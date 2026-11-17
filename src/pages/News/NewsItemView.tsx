@@ -43,10 +43,10 @@ export function NewsItemView({ item }: { item: NewsItem }) {
             {t('news.item.leakPost')}
           </Badge>
         )}
-        <h3 id={`${id}-title`} lang={item.language} className="font-body text-[1rem] leading-[1.35] font-semibold text-navy">
+        <h3 id={`${id}-title`} className="font-body text-[1rem] leading-[1.35] font-semibold text-navy">
           {link ? (
             <a href={link.href} target="_blank" rel="noopener noreferrer" className={EXTERNAL_LINK}>
-              {item.title}
+              <span lang={item.language}>{item.title}</span>
               <span className="text-gray" aria-hidden="true">
                 {' '}
                 ↗
@@ -54,7 +54,7 @@ export function NewsItemView({ item }: { item: NewsItem }) {
               <span className="sr-only">{t('common.newTab')}</span>
             </a>
           ) : (
-            item.title
+            <span lang={item.language}>{item.title}</span>
           )}
         </h3>
         <p className={`${META} flex flex-wrap gap-x-2 text-gray`}>
