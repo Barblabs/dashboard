@@ -59,7 +59,7 @@ export function SummaryTabContent() {
             network: 'findings.resumen.network',
           }}
         >
-          {(data) => <TimeToCloseTable bands={data.bands} />}
+          {(data) => <TimeToCloseChart bands={data.bands} />}
         </QueryBoundary>
       </section>
     </div>
@@ -144,7 +144,15 @@ function TrendChart({ weeks }: { weeks: TrendPoint[] }) {
 
 type BandPoint = { band: string; median_days: number; count: number }
 
-function TimeToCloseTable({ bands }: { bands: BandPoint[] }) {
+const BAND_DOT_COLORS: Record<string, string> = {
+  critical: 'var(--color-critical)',
+  high: 'var(--color-high)',
+  medium: 'var(--color-medium)',
+  low: 'var(--color-low)',
+  unbanded: 'var(--color-gray)',
+}
+
+function TimeToCloseChart({ bands }: { bands: BandPoint[] }) {
   const { t } = useTranslation()
 
   const bandLabels: Record<string, string> = {
@@ -163,28 +171,38 @@ function TimeToCloseTable({ bands }: { bands: BandPoint[] }) {
     )
   }
 
+  const maxDays = Math.max(...bands.map((b) => b.median_days))
+
   return (
-    <table className="w-full font-body text-[0.875rem]">
-      <thead>
-        <tr className="text-left text-[0.8125rem] text-gray">
-          <th className="px-6 py-3 font-normal">{t('findings.resumen.ttcBand')}</th>
-          <th className="px-6 py-3 font-normal">{t('findings.resumen.ttcMedian')}</th>
-          <th className="px-6 py-3 font-normal">{t('findings.resumen.ttcCount')}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {bands.map((row) => (
-          <tr
-            key={row.band}
-            className="border-t border-border-panel last:border-0"
-          >
-            <td className="px-6 py-3 text-navy">{bandLabels[row.band] ?? row.band}</td>
-            <td className="px-6 py-3 tabular-nums">{row.median_days.toFixed(1)}</td>
-            <td className="px-6 py-3 tabular-nums text-gray">{row.count}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <ul className="flex flex-col gap-4 p-6">
+      {bands.map((row) => {
+        const label = bandLabels[row.band] ?? row.band
+        const days = row.median_days.toFixed(1)
+        const unit = t('findings.resumen.ttcDays')
+        return (
+          <li key={row.band} className="flex items-center gap-3 font-body text-[0.875rem]">
+            <span className="flex w-24 shrink-0 items-center justify-end gap-1.5 text-right text-gray">
+              <span
+                className="inline-block h-2.5 w-2.5 shrink-0 rounded-sm"
+                style={{ backgroundColor: BAND_DOT_COLORS[row.band] ?? 'var(--color-gray)' }}
+              />
+              {label}
+            </span>
+            <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-panel">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-navy"
+                style={{ width: `${(row.median_days / maxDays) * 100}%` }}
+                role="img"
+                aria-label={`${label}: ${days} ${unit}`}
+              />
+            </div>
+            <span className="w-16 shrink-0 tabular-nums text-navy">
+              {days} {unit}
+            </span>
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 

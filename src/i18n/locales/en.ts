@@ -368,6 +368,7 @@ export const en = {
       ttcMedian: 'Median (days)',
       ttcCount: 'Closed findings',
       ttcNoData: 'No closure data by band yet.',
+      ttcDays: 'days',
       loading: 'Loading summary…',
       failed: 'Could not load the summary.',
       network: 'Could not reach the server to load the summary.',

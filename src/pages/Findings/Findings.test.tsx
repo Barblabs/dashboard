@@ -385,20 +385,21 @@ describe('Findings', () => {
       expect(await screen.findByText('Time to close by band')).toBeInTheDocument()
     })
 
-    it('shows time-to-close rows for each band', async () => {
+    it('shows time-to-close bars for all five bands', async () => {
       await openSummaryTab()
 
-      expect(await screen.findByRole('cell', { name: 'Critical' })).toBeInTheDocument()
-      expect(screen.getByRole('cell', { name: 'High' })).toBeInTheDocument()
-      expect(screen.getByRole('cell', { name: 'Medium' })).toBeInTheDocument()
-      expect(screen.getByRole('cell', { name: 'Low' })).toBeInTheDocument()
-      expect(screen.getByRole('cell', { name: 'Unbanded' })).toBeInTheDocument()
+      // Each bar has a unique day value rendered as text to its right.
+      expect(await screen.findByText('3.5 days')).toBeInTheDocument() // critical
+      expect(screen.getByText('7.2 days')).toBeInTheDocument()         // high
+      expect(screen.getByText('14.1 days')).toBeInTheDocument()        // medium
+      expect(screen.getByText('30.5 days')).toBeInTheDocument()        // low
+      expect(screen.getByText('45.0 days')).toBeInTheDocument()        // unbanded
     })
 
-    it('shows median days for the critical band', async () => {
+    it('labels the critical bar with its band name and median days', async () => {
       await openSummaryTab()
 
-      expect(await screen.findByRole('cell', { name: '3.5' })).toBeInTheDocument()
+      expect(await screen.findByRole('img', { name: 'Critical: 3.5 days' })).toBeInTheDocument()
     })
   })
 
