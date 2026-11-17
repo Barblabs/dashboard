@@ -379,6 +379,7 @@ export const es: Translations = {
       ttcCount: 'Hallazgos cerrados',
       ttcNoData: 'Sin datos de cierre por band.',
       ttcDays: 'días',
+      ttcNoneClosed: 'Ninguno cerrado',
       loading: 'Cargando resumen…',
       failed: 'No se pudo cargar el resumen.',
       network: 'No se pudo contactar al servidor para cargar el resumen.',
