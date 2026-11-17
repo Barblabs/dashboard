@@ -3,9 +3,9 @@ import { screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiUrl } from '../../mocks/url'
-import { PLATFORM_ADMIN, renderApp, seedCustomers } from '../../test/render'
+import { PLATFORM_ADMIN, renderApp } from '../../test/render'
 import { server } from '../../test/server'
-import { MOCK_CUSTOMERS } from '../../mocks/customers-store'
+import { MOCK_CUSTOMER_STATS } from '../../mocks/handlers/adminStats'
 
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -18,84 +18,80 @@ vi.mock('recharts', () => ({
 }))
 
 async function renderDashboard() {
-  const user = renderApp('/admin-dashboard', PLATFORM_ADMIN)
-  await screen.findByText(MOCK_CUSTOMERS[2].name)
-  return user
-}
-
-function stat(label: string) {
-  const card = screen.getByText(label, { selector: 'dt' }).parentElement!
-  return within(card).getByRole('definition').textContent
+  renderApp('/admin-dashboard', PLATFORM_ADMIN)
+  await screen.findByText(MOCK_CUSTOMER_STATS[0].name)
 }
 
 describe('AdminDashboard', () => {
-  // Only Date is faked: the app's timers and promises keep running for real.
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['Date'] })
-    vi.setSystemTime(new Date('2026-11-15T12:00:00Z'))
+    vi.setSystemTime(new Date('2026-11-17T12:00:00Z'))
   })
   afterEach(() => vi.useRealTimers())
 
-  it('counts the organizations by status and those created this month', async () => {
+  it('shows the subtitle', async () => {
     await renderDashboard()
-
-    expect(stat('Organizations')).toBe('3')
-    expect(stat('Active')).toBe('2')
-    expect(stat('Deactivated')).toBe('1')
-    expect(stat('New this month')).toBe('1')
+    expect(
+      screen.getByText('BARBATTACK operations. Counts only: no assets, findings, or customer business data.'),
+    ).toBeInTheDocument()
   })
 
-  it('counts this month from when the page opened, not from when the app loaded', async () => {
-    vi.setSystemTime(new Date('2026-12-15T12:00:00Z'))
+  it('shows organization count with active/deactivated breakdown', async () => {
     await renderDashboard()
-
-    expect(stat('New this month')).toBe('0')
+    const card = screen.getByText('Organizations', { selector: 'dt' }).parentElement!
+    expect(within(card).getByRole('definition').textContent).toBe('3')
+    expect(within(card).getByText('2 active · 1 deactivated')).toBeInTheDocument()
   })
 
-  it('counts by the month in the viewer’s time zone, not in UTC', async () => {
-    const zone = process.env.TZ
-    process.env.TZ = 'America/Mexico_City'
-    try {
-      // 02:00 UTC on November 1st is still October 31st in Mexico City.
-      seedCustomers([{ ...MOCK_CUSTOMERS[0], created_at: '2026-11-01T02:00:00Z' }])
-      renderApp('/admin-dashboard', PLATFORM_ADMIN)
-      await screen.findByText(MOCK_CUSTOMERS[0].name)
-
-      expect(stat('New this month')).toBe('0')
-    } finally {
-      process.env.TZ = zone
-    }
-  })
-
-  it('shows the recent organizations list', async () => {
+  it('shows total users across all organizations', async () => {
     await renderDashboard()
-
-    const recentSection = screen
-      .getByText('Recent organizations')
-      .closest('section')!
-    expect(within(recentSection).getByText(MOCK_CUSTOMERS[0].name)).toBeInTheDocument()
-    expect(within(recentSection).getByText(MOCK_CUSTOMERS[1].name)).toBeInTheDocument()
-    expect(within(recentSection).getByText(MOCK_CUSTOMERS[2].name)).toBeInTheDocument()
+    const card = screen.getByText('Total users', { selector: 'dt' }).parentElement!
+    expect(within(card).getByRole('definition').textContent).toBe('9')
   })
 
-  it('marks each recent organization with a one-word status', async () => {
+  it('shows CMDB connected ratio', async () => {
     await renderDashboard()
-
-    const recentSection = screen.getByText('Recent organizations').closest('section')!
-    const row = (name: string) => within(recentSection).getByText(name).closest('li')!
-    expect(within(row(MOCK_CUSTOMERS[0].name)).getByText('Active')).toBeInTheDocument()
-    expect(within(row(MOCK_CUSTOMERS[2].name)).getByText('Deactivated')).toBeInTheDocument()
+    const card = screen.getByText('CMDB connected', { selector: 'dt' }).parentElement!
+    expect(within(card).getByRole('definition').textContent).toBe('2 of 3')
   })
 
-  it('renders the bar chart container', async () => {
+  it('shows failed syncs count over 30 days', async () => {
     await renderDashboard()
-    expect(screen.getByTestId('bar-chart')).toBeInTheDocument()
+    const card = screen.getByText('Failed syncs (30 days)', { selector: 'dt' }).parentElement!
+    expect(within(card).getByRole('definition').textContent).toBe('3')
   })
 
-  it('shows a network error when data cannot be loaded', async () => {
-    server.use(http.get(apiUrl('/customers'), () => HttpResponse.error()))
+  it('renders the organizations table with all orgs', async () => {
+    await renderDashboard()
+    const table = screen.getByRole('table')
+    expect(within(table).getByText(MOCK_CUSTOMER_STATS[0].name)).toBeInTheDocument()
+    expect(within(table).getByText(MOCK_CUSTOMER_STATS[1].name)).toBeInTheDocument()
+    expect(within(table).getByText(MOCK_CUSTOMER_STATS[2].name)).toBeInTheDocument()
+    expect(within(table).getAllByText('Active').length).toBeGreaterThanOrEqual(1)
+    expect(within(table).getByText('Deactivated')).toBeInTheDocument()
+  })
+
+  it('shows sync failure warning for Beta Ltd', async () => {
+    await renderDashboard()
+    const table = screen.getByRole('table')
+    const betaRow = within(table).getByText(MOCK_CUSTOMER_STATS[1].name).closest('tr')!
+    expect(within(betaRow).getByText(/Failed on/)).toBeInTheDocument()
+  })
+
+  it('renders at least two bar charts', async () => {
+    await renderDashboard()
+    expect(screen.getAllByTestId('bar-chart').length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('shows Slack alerts summary and no-alerts message', async () => {
+    await renderDashboard()
+    expect(screen.getByText('10 sent · 1 failed · 0 pending')).toBeInTheDocument()
+    expect(screen.getByText('No alerts in the last 30 days')).toBeInTheDocument()
+  })
+
+  it('shows a load error when /customers/stats fails', async () => {
+    server.use(http.get(apiUrl('/customers/stats'), () => HttpResponse.error()))
     renderApp('/admin-dashboard', PLATFORM_ADMIN)
-
-    expect(await screen.findByText('Could not reach the server to load the dashboard.')).toBeInTheDocument()
+    expect(await screen.findByText('Could not load dashboard data.')).toBeInTheDocument()
   })
 })

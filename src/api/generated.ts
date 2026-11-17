@@ -98,6 +98,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assets/findings-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Count each Asset's open Findings by Score Band
+         * @description Every Asset of the Customer with an open scored Finding, ordered as GET /assets lists them, with its open Findings counted by the Score Band of their latest Score. A Finding not scored yet is left out.
+         */
+        get: operations["get-assets-findings-summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assets/{id}/exposure": {
         parameters: {
             query?: never;
@@ -222,14 +242,20 @@ export interface paths {
          * @description Returns null when the Customer has no Connected CMDB Source.
          */
         get: operations["get-cmdb-source"];
-        /** Replace the login of the Connected CMDB Source */
+        /**
+         * Replace the login of the Connected CMDB Source
+         * @description Only a Customer Admin replaces it.
+         */
         put: operations["update-cmdb-source"];
         /**
          * Connect a CMDB Source and run its first Sync
-         * @description A failed first Sync is reported in last_sync_failure and leaves the CMDB Source connected.
+         * @description Only a Customer Admin connects it. A failed first Sync is reported in last_sync_failure and leaves the CMDB Source connected.
          */
         post: operations["connect-cmdb-source"];
-        /** Disconnect the Connected CMDB Source */
+        /**
+         * Disconnect the Connected CMDB Source
+         * @description Only a Customer Admin disconnects it. Its Assets become Inactive.
+         */
         delete: operations["disconnect-cmdb-source"];
         options?: never;
         head?: never;
@@ -245,7 +271,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Sync the Connected CMDB Source */
+        /**
+         * Sync the Connected CMDB Source
+         * @description Any User of the Customer triggers it.
+         */
         post: operations["sync-cmdb-source"];
         delete?: never;
         options?: never;
@@ -264,7 +293,7 @@ export interface paths {
         put?: never;
         /**
          * Check a CMDB Source login without storing it
-         * @description A login the CMDB rejects is a 200 with ok false and the reason.
+         * @description Only a Customer Admin checks one. A login the CMDB rejects is a 200 with ok false and the reason.
          */
         post: operations["test-cmdb-source"];
         delete?: never;
@@ -285,6 +314,66 @@ export interface paths {
         put?: never;
         /** Create a Customer and invite its first Customer Admin */
         post: operations["create-customer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers/slack-deliveries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Count each Customer's Slack messages by status
+         * @description How many Slack messages each Customer queued in the last days days, in UTC and today included, were sent, have failed for good and are still pending, by name, every Customer included: never what they say.
+         */
+        get: operations["get-customers-slack-deliveries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Count what every Customer has, by name
+         * @description Its enabled Users and how its CMDB Source last synced, for a Platform Admin to watch over Customers: never their Assets or Findings.
+         */
+        get: operations["list-customer-stats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/customers/sync-health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Count every Customer's Syncs by day
+         * @description How many Syncs of every Customer's CMDB Source succeeded and failed on each of the last days days, in UTC and today included, oldest first, with zeros for days without a Sync.
+         */
+        get: operations["get-customers-sync-health"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -342,6 +431,126 @@ export interface paths {
          * @description Its Users can sign in again and its CMDB Source is synced again, as before it was deactivated.
          */
         post: operations["reactivate-customer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/findings/attack-matrix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Count the Customer's open Findings by ATT&CK tactic and Technique
+         * @description The Cartógrafo labels a CVE with up to 5 ATT&CK Techniques, each exploiting it, its primary impact or a secondary impact; a Finding has the labels of its CVE. These labels are inferred by a model and must be shown as such. Every tactic of the stored catalog is there, in attack order; a Finding counts once in each tactic and each Technique it has, so the tactics do not add up to the Findings: coverage tells how many Findings have a labeled CVE. With role, only the labels of that role count, but coverage does not change. A Finding not scored yet is left out.
+         */
+        get: operations["get-findings-attack-matrix"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/findings/breakdown": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Count the Customer's open Findings by Score Band within each Exposure, Criticality or Area
+         * @description By exposure (the effective one) and by criticality every value is there, unknown last, so a heatmap keeps its columns. By area only the Areas with open Findings are, by name, then none for the Assets in no Area. Each Finding is counted in one group. A Finding not scored yet is left out.
+         */
+        get: operations["get-findings-breakdown"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/findings/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Count the Customer's open Findings at a glance
+         * @description Its open scored Findings by the Score Band of their latest Score, how many of them KEV lists, and how many are Critical on Internet-facing Assets. A Finding not scored yet is left out.
+         */
+        get: operations["get-findings-summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/findings/time-to-close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Measure how long closing the Customer's Findings took, by Score Band
+         * @description The scored Findings closed in the last weeks ISO weeks, in UTC and the current week included, by the Score Band of their latest Score: how many, and the median and average days from when each was last opened to its close. A Finding not scored is left out.
+         */
+        get: operations["get-findings-time-to-close"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/findings/top": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the components and CVEs with the most severe open Findings
+         * @description Each list is ordered by its open Findings' Score Bands, most Critical first, then by how many it has. A component is a Product at one version, so updating it closes its Findings. A Finding not scored yet is left out.
+         */
+        get: operations["get-findings-top"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/findings/weekly-trend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Count the Customer's Findings opened and closed each week
+         * @description One entry per ISO week, in UTC, oldest first and the current week last, with zeros for weeks where nothing happened. opened counts Findings first opened that week; closed counts Findings closed that week; open_at_end counts those still open when it ended. A Finding closed and then reopened keeps no record of that close, so it is not counted as closed, and counts as open while it was closed.
+         */
+        get: operations["get-findings-weekly-trend"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -727,6 +936,30 @@ export interface components {
             record_id: string;
             source_id: string;
         };
+        AssetFindingBandsResponse: {
+            /** Format: int64 */
+            critical: number;
+            /** Format: int64 */
+            high: number;
+            /**
+             * Format: int64
+             * @description The Asset's handle, as in GET /assets
+             */
+            id: number;
+            /** Format: int64 */
+            low: number;
+            /** Format: int64 */
+            medium: number;
+            name: string;
+            /**
+             * Format: int64
+             * @description Open Findings whose latest Score is from a Scoring Model before 3, which has no Score Bands; they get one when rescored
+             */
+            unbanded: number;
+        };
+        AssetFindingsSummaryResponse: {
+            assets: components["schemas"]["AssetFindingBandsResponse"][];
+        };
         AssetListResponse: {
             assets: components["schemas"]["AssetResponse"][];
             next_cursor: string | null;
@@ -761,6 +994,16 @@ export interface components {
             software: components["schemas"]["SoftwareResponse"][];
             source_id: string;
         };
+        AttackMatrixResponse: {
+            coverage: components["schemas"]["CoverageResponse"];
+            tactics: components["schemas"]["TacticCountResponse"][];
+            /** @description Those with the most open Findings, most first */
+            techniques: components["schemas"]["TechniqueCountResponse"][];
+        };
+        BreakdownResponse: {
+            by: string;
+            groups: components["schemas"]["GroupResponse"][];
+        };
         BusinessContextFields: {
             footprint: components["schemas"]["FootprintFields"];
             geography: components["schemas"]["GeographyFields"];
@@ -792,6 +1035,22 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        CloseTimeResponse: {
+            /**
+             * Format: double
+             * @description Null when none was closed
+             */
+            average_days: number | null;
+            /** @enum {string} */
+            band: "critical" | "high" | "medium" | "low" | "unbanded";
+            /** Format: int64 */
+            closed: number;
+            /**
+             * Format: double
+             * @description Null when none was closed
+             */
+            median_days: number | null;
+        };
         CmdbSourceResponse: {
             /** Format: date-time */
             last_sync: string | null;
@@ -807,6 +1066,18 @@ export interface components {
             /** @description Readable on its own, shown for a code the dashboard does not know */
             error: string;
         };
+        ComponentCountResponse: {
+            /**
+             * Format: int64
+             * @description Assets running it with an open Finding
+             */
+            assets: number;
+            /** Format: int64 */
+            findings: number;
+            product: string;
+            vendor: string;
+            version: string;
+        };
         ConnectRequest: {
             password: string;
             provider: string;
@@ -819,6 +1090,15 @@ export interface components {
             /** @description RFC 6901 pointer into the business_context/1 document of the version the Prioritizer read */
             path: string;
             value: string;
+        };
+        CoverageResponse: {
+            /**
+             * Format: int64
+             * @description Open Findings whose CVE has a label, whatever its role
+             */
+            labeled: number;
+            /** Format: int64 */
+            open: number;
         };
         CreateCustomerRequest: {
             /**
@@ -882,6 +1162,58 @@ export interface components {
             deactivated_at: string | null;
             id: string;
             name: string;
+        };
+        CustomerSlackDeliveriesResponse: {
+            /**
+             * Format: int64
+             * @description Failed for good: a Customer Admin can retry them
+             */
+            failed: number;
+            id: string;
+            name: string;
+            /** Format: int64 */
+            pending: number;
+            /** Format: int64 */
+            sent: number;
+        };
+        CustomerStatsListResponse: {
+            customers: components["schemas"]["CustomerStatsResponse"][];
+        };
+        CustomerStatsResponse: {
+            /** @description False for a Deactivated Customer */
+            active: boolean;
+            /** @description Whether it has a connected CMDB Source */
+            cmdb_connected: boolean;
+            /**
+             * Format: date-time
+             * @description When the latest successful Sync of its connected CMDB Source finished, null if none succeeded
+             */
+            cmdb_last_sync: string | null;
+            /**
+             * Format: date-time
+             * @description When its latest Sync finished, set only while that Sync failed
+             */
+            cmdb_last_sync_failed_at: string | null;
+            id: string;
+            name: string;
+            /**
+             * Format: int64
+             * @description Its Users who are not disabled, those still invited included
+             */
+            user_count: number;
+        };
+        CveCountResponse: {
+            /** Format: int64 */
+            assets: number;
+            cve_id: string;
+            /**
+             * Format: double
+             * @description EPSS probability, null when EPSS has no score for the CVE yet
+             */
+            epss: number | null;
+            /** Format: int64 */
+            findings: number;
+            kev: boolean;
         };
         CvssResponse: {
             /** Format: double */
@@ -1054,6 +1386,20 @@ export interface components {
             score_rank: number;
             version: string;
         };
+        FindingsSummaryResponse: {
+            /**
+             * Format: int64
+             * @description Critical open Findings on Internet-facing Assets
+             */
+            critical_internet_facing: number;
+            /**
+             * Format: int64
+             * @description Open Findings whose CVE KEV lists
+             */
+            kev: number;
+            /** Format: int64 */
+            open: number;
+        };
         FootprintFields: {
             brands: string[];
             /** @description Domain names, such as example.com; a URL keeps only its host */
@@ -1072,6 +1418,12 @@ export interface components {
             headquarters: string;
         } & {
             [key: string]: unknown;
+        };
+        GroupResponse: {
+            /** @description The Area's name when grouped by area, null otherwise */
+            name: string | null;
+            /** @description The exposure or criticality code, unknown, the Area's id as in GET /areas, or none for the Assets in no Area */
+            value: string;
         };
         HardwareResponse: {
             model: string;
@@ -1465,6 +1817,9 @@ export interface components {
         SlackChannelsResponse: {
             channels: components["schemas"]["SlackChannelResponse"][];
         };
+        SlackDeliveriesResponse: {
+            customers: components["schemas"]["CustomerSlackDeliveriesResponse"][];
+        };
         SlackFailedDeliveriesResponse: {
             deliveries: components["schemas"]["SlackFailedDeliveryResponse"][];
         };
@@ -1504,10 +1859,24 @@ export interface components {
             role: string;
             version: string;
         };
+        SyncDayResponse: {
+            /**
+             * Format: date
+             * @description The day, in UTC
+             */
+            date: string;
+            /** Format: int64 */
+            failed: number;
+            /** Format: int64 */
+            succeeded: number;
+        };
         SyncFailureResponse: {
             /** Format: date-time */
             at: string;
             error: string;
+        };
+        SyncHealthResponse: {
+            days: components["schemas"]["SyncDayResponse"][];
         };
         SyncResponse: {
             /** Format: int64 */
@@ -1522,6 +1891,19 @@ export interface components {
             skipped: number;
             /** Format: int64 */
             updated: number;
+        };
+        TacticCountResponse: {
+            /** @description ATT&CK tactic short name, such as initial-access */
+            tactic: string;
+        };
+        TechniqueCountResponse: {
+            attack_id: string;
+            /** Format: int64 */
+            findings: number;
+            name: string;
+            /** @description The roles it is labeled with on these Findings' CVEs */
+            roles: string[];
+            tactics: string[];
         };
         TechniqueResponse: {
             attack_id: string;
@@ -1541,6 +1923,14 @@ export interface components {
             error?: string;
             ok: boolean;
         };
+        TimeToCloseResponse: {
+            /** @description critical, high, medium, low, then unbanded */
+            bands: components["schemas"]["CloseTimeResponse"][];
+        };
+        TopResponse: {
+            components: components["schemas"]["ComponentCountResponse"][];
+            cves: components["schemas"]["CveCountResponse"][];
+        };
         UserListResponse: {
             users: components["schemas"]["UserResponse"][];
         };
@@ -1555,6 +1945,27 @@ export interface components {
             pending: boolean;
             /** @enum {string} */
             role: "customer_admin" | "viewer";
+        };
+        WeekResponse: {
+            /** Format: int64 */
+            closed: number;
+            /**
+             * Format: int64
+             * @description Findings open when the week ended, or open now for the current week: the backlog
+             */
+            open_at_end: number;
+            /** Format: int64 */
+            opened: number;
+            /**
+             * Format: date
+             * @description The Monday the week starts on
+             */
+            starts_on: string;
+            /** @description ISO 8601 week, such as 2026-W45 */
+            week: string;
+        };
+        WeeklyTrendResponse: {
+            weeks: components["schemas"]["WeekResponse"][];
         };
     };
     responses: never;
@@ -1895,6 +2306,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-assets-findings-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetFindingsSummaryResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -2943,6 +3401,171 @@ export interface operations {
             };
         };
     };
+    "get-customers-slack-deliveries": {
+        parameters: {
+            query?: {
+                /** @description How many days, today included */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlackDeliveriesResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "list-customer-stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerStatsListResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-customers-sync-health": {
+        parameters: {
+            query?: {
+                /** @description How many days, today included */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SyncHealthResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
     "rename-customer": {
         parameters: {
             query?: never;
@@ -3121,6 +3744,349 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-findings-attack-matrix": {
+        parameters: {
+            query?: {
+                /** @description Count only the labels of this role */
+                role?: "exploitation" | "primary_impact" | "secondary_impact";
+                /** @description How many Techniques */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttackMatrixResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-findings-breakdown": {
+        parameters: {
+            query?: {
+                by?: "exposure" | "criticality" | "area";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BreakdownResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-findings-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FindingsSummaryResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-findings-time-to-close": {
+        parameters: {
+            query?: {
+                /** @description How many weeks, the current one included */
+                weeks?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimeToCloseResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-findings-top": {
+        parameters: {
+            query?: {
+                /** @description How many of each list */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-findings-weekly-trend": {
+        parameters: {
+            query?: {
+                /** @description How many weeks, the current one included */
+                weeks?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WeeklyTrendResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
