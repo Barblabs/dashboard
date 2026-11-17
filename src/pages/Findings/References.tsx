@@ -1,19 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { linkable } from '../../components/linkable'
 import { MONO } from './styles'
-
-/*
- * URLs come from Feeds and Agents. Only http and https become links, so a `javascript:` URL
- * in a reference cannot run when clicked: it shows as text.
- */
-function linkable(url: string): URL | null {
-  try {
-    const parsed = new URL(url)
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed : null
-  } catch {
-    return null
-  }
-}
 
 /*
  * Some CVEs carry dozens of vendor errata. Past this many, the rest wait behind a toggle so the
