@@ -10,7 +10,7 @@ import { server } from '../../test/server'
 
 async function renderFindings(path = '/findings') {
   const user = renderApp(path)
-  await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+  await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
   return user
 }
 
@@ -42,13 +42,14 @@ describe('Findings', () => {
 
     const groups = within(screen.getByRole('main')).getAllByRole('region')
     expect(groups.map((g) => within(g).getByRole('heading').textContent)).toEqual([
-      'Explotadas por ransomware en el servidor web expuesto',
-      'Explotada por ransomware, en un activo interno de laboratorio',
-      'Alta probabilidad de explotación en el servidor de pagos',
+      'Fallos con exploit activo sobre servicios expuestos a internet',
+      'Explotados activamente, activos internos con servicios de pago y CI/CD',
+      'Alta probabilidad de explotación en activos de soporte y cortafuegos perimetrales',
+      'Score alto pero sin riesgo inmediato confirmado',
     ])
     expect(within(groups[0]).getByRole('button', { name: 'Open CVE-2021-41773' })).toBeInTheDocument()
-    expect(within(groups[2]).getByText(/Se suma CVE-2024-6387/)).toBeInTheDocument()
-    expect(screen.getByText(/5 findings, 3 groups/)).toBeInTheDocument()
+    expect(within(groups[2]).getByText(/CVE-2024-21762 y CVE-2024-3400/)).toBeInTheDocument()
+    expect(screen.getByText(/20 findings, 4 groups/)).toBeInTheDocument()
     expect(screen.getByText('Weighed with business context v1')).toBeInTheDocument()
   })
 
@@ -86,7 +87,7 @@ describe('Findings', () => {
       'href',
       'https://www.postgresql.org/support/security/CVE-2025-1094/',
     )
-    expect(within(dialog).getByText('By Score alone it would be #4.')).toBeInTheDocument()
+    expect(within(dialog).getByText('By Score alone it would be #14.')).toBeInTheDocument()
     expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Production$/)
     expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^1$/)
     expect(within(dialog).getByText('Measured: no input was missing.')).toBeInTheDocument()
@@ -184,7 +185,7 @@ describe('Findings', () => {
     expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Implementation$/)
     expect(within(dialog).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^0.8$/)
     // The order stays the snapshot's.
-    expect(within(dialog).getByText('By Score alone it would be #5.')).toBeInTheDocument()
+    expect(within(dialog).getByText('By Score alone it would be #17.')).toBeInTheDocument()
   })
 
   it('a closed finding shows its Score and Asset as they were placed', async () => {
@@ -319,7 +320,7 @@ describe('Findings', () => {
 
   it('records what a viewer says about where a finding should be', async () => {
     const user = renderApp('/findings', VIEWER)
-    await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+    await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
     const dialog = await openFinding(user, 'CVE-2024-6387')
 
     await user.selectOptions(within(dialog).getByLabelText('What do you say?'), 'should_be_earlier')
@@ -334,7 +335,7 @@ describe('Findings', () => {
 
   it('shows the too-long error on the note field when it exceeds 2000 characters', async () => {
     const user = renderApp('/findings', VIEWER)
-    await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+    await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
     const dialog = await openFinding(user, 'CVE-2024-6387')
 
     fireEvent.change(within(dialog).getByLabelText('Why'), { target: { value: 'a'.repeat(2001) } })
@@ -368,7 +369,7 @@ describe('Findings', () => {
 
     it('shows the prioritized list by default and switches to Summary', async () => {
       const user = renderApp('/findings')
-      await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+      await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
 
       await user.click(screen.getByRole('tab', { name: 'Summary' }))
 
@@ -448,7 +449,7 @@ describe('Findings', () => {
 
     it('shows a chip for the active band filter and removes it', async () => {
       const user = renderApp('/findings?band=critical')
-      await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+      await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
 
       expect(screen.getByText('Band: Critical')).toBeInTheDocument()
 
@@ -459,7 +460,7 @@ describe('Findings', () => {
 
     it('shows "From the chart:" prefix when navigated with from=chart', async () => {
       renderApp('/findings?band=critical&from=chart')
-      await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+      await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
 
       expect(screen.getByText('From the chart:')).toBeInTheDocument()
       expect(screen.getByText('Band: Critical')).toBeInTheDocument()
@@ -467,7 +468,7 @@ describe('Findings', () => {
 
     it('removes the from=chart label when all chips are cleared', async () => {
       const user = renderApp('/findings?band=critical&from=chart')
-      await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+      await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
 
       await user.click(screen.getByRole('button', { name: 'Remove filter' }))
 
@@ -479,7 +480,7 @@ describe('Findings', () => {
 
     it('clears all filters with the clear-all button', async () => {
       const user = renderApp('/findings?band=critical&kev=1')
-      await screen.findByRole('region', { name: 'Explotadas por ransomware en el servidor web expuesto' })
+      await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
 
       // Both the chip label ("Band: Critical") and the KEV chip are shown;
       // "KEV only" appears twice: once in the checkbox label, once in the chip.
