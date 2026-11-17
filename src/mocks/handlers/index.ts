@@ -1,9 +1,13 @@
+import { adminStatsHandlers } from './adminStats'
 import { areasHandlers } from './areas'
 import { assetsHandlers } from './assets'
+import { attackMatrixHandlers } from './attackMatrix'
 import { authHandlers } from './auth'
 import { businessContextHandlers } from './businessContext'
 import { cmdbHandlers } from './cmdb'
 import { customersHandlers } from './customers'
+import { findingsHandlers } from './findings'
+import { findingsRiskHandlers } from './findingsRisk'
 import { prioritizationsHandlers } from './prioritizations'
 import { slackHandlers } from './slack'
 import { usersHandlers } from './users'
@@ -17,5 +21,9 @@ export const handlers = [
   ...customersHandlers,
   ...businessContextHandlers,
   ...prioritizationsHandlers,
+  ...findingsHandlers,
+  ...findingsRiskHandlers,
+  ...attackMatrixHandlers,
+  ...adminStatsHandlers,
   ...slackHandlers,
 ]
