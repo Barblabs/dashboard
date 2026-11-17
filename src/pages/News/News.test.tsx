@@ -104,6 +104,14 @@ describe('News', () => {
     expect(within(within(item).getByRole('list', { name: 'CVEs' })).getByText('CVE-2025-1094')).toBeInTheDocument()
   })
 
+  it('names the business context field each piece of evidence comes from', async () => {
+    await renderNews()
+
+    const evidence = within(article('ACME Pay')).getByRole('list', { name: 'From your business context' })
+    expect(within(evidence).getByTitle('/operations/data_categories/0')).toHaveTextContent('Data it holdspayment_cards')
+    expect(within(evidence).getByTitle('/operations/regulations/0')).toHaveTextContent('Regulations and standardspci_dss')
+  })
+
   it('shows the original text of an item with no summary, marked as such', async () => {
     await renderNews()
 
