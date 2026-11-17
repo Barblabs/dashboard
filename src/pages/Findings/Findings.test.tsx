@@ -42,6 +42,12 @@ async function openBeforeAfterTab() {
   return user
 }
 
+async function openRiskTab() {
+  const user = renderApp('/findings')
+  await user.click(await screen.findByRole('tab', { name: 'Where the risk is' }))
+  return user
+}
+
 describe('Findings', () => {
   it('shows the newest order in groups, the first to attend first', async () => {
     await renderFindings()
@@ -500,6 +506,75 @@ describe('Findings', () => {
         // After clearing, only the checkbox label "KEV only" remains (no chip).
         expect(screen.getAllByText('KEV only')).toHaveLength(1)
       })
+    })
+  })
+
+  describe('risk tab', () => {
+    it('shows the heatmap heading and selector', async () => {
+      await openRiskTab()
+      expect(await screen.findByRole('heading', { name: 'Where the risk is' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Exposure', pressed: true })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Criticality' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Area' })).toBeInTheDocument()
+    })
+
+    it('shows the heatmap note about unknown assets', async () => {
+      await openRiskTab()
+      expect(await screen.findByText(/"Unknown" are assets not classified/)).toBeInTheDocument()
+    })
+
+    it('shows the exposure group columns', async () => {
+      await openRiskTab()
+      expect(await screen.findByText('Internet')).toBeInTheDocument()
+      expect(screen.getByText('Internal')).toBeInTheDocument()
+      expect(screen.getByText('Unknown')).toBeInTheDocument()
+    })
+
+    it('shows assets with most findings heading', async () => {
+      await openRiskTab()
+      expect(await screen.findByText('Assets with most findings')).toBeInTheDocument()
+    })
+
+    it('shows the top tables heading', async () => {
+      await openRiskTab()
+      expect(await screen.findByText('Components and CVEs with most findings')).toBeInTheDocument()
+      expect(await screen.findByText('Components')).toBeInTheDocument()
+      expect(await screen.findByText('CVEs')).toBeInTheDocument()
+    })
+
+    it('clicking a heatmap cell navigates to the prioritized list with band and exposure filters', async () => {
+      const user = await openRiskTab()
+      // Critical × internet_facing cell (count=5 from mock)
+      const cell = await screen.findByLabelText(/5 findings: Critical on Internet/)
+      await user.click(cell)
+      expect(await screen.findByText('Band: Critical')).toBeInTheDocument()
+      expect(screen.getByText('Exposure: Internet-facing')).toBeInTheDocument()
+      expect(screen.getByText('From the chart:')).toBeInTheDocument()
+    })
+
+    it('clicking an asset bar navigates to the prioritized list', async () => {
+      const user = await openRiskTab()
+      const assetBar = await screen.findByRole('button', { name: /web-prod-01/ })
+      await user.click(assetBar)
+      expect(await screen.findByText('Asset: web-prod-01')).toBeInTheDocument()
+      expect(screen.getByText('From the chart:')).toBeInTheDocument()
+    })
+
+    it('clicking an area heatmap cell navigates with band and area filters', async () => {
+      const user = await openRiskTab()
+      await user.click(await screen.findByRole('button', { name: 'Area' }))
+      // High × Producción cell (count=6 from mock)
+      const cell = await screen.findByLabelText(/6 findings: High on Producción/)
+      await user.click(cell)
+      expect(await screen.findByText('Band: High')).toBeInTheDocument()
+      expect(screen.getByText('Area: Producción')).toBeInTheDocument()
+      expect(screen.getByText('From the chart:')).toBeInTheDocument()
+    })
+
+    it('shows KEV badges in the CVE table', async () => {
+      await openRiskTab()
+      const kevBadges = await screen.findAllByText('Yes')
+      expect(kevBadges.length).toBeGreaterThanOrEqual(1)
     })
   })
 
