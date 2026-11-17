@@ -377,6 +377,7 @@ export const en = {
       ttcCount: 'Closed findings',
       ttcNoData: 'No closure data by band yet.',
       ttcDays: 'days',
+      ttcNoneClosed: 'None closed',
       loading: 'Loading summary…',
       failed: 'Could not load the summary.',
       network: 'Could not reach the server to load the summary.',

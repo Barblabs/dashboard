@@ -11,6 +11,7 @@ import {
   YAxis,
 } from 'recharts'
 import { useTimeToCloseQuery, useWeeklyTrendQuery } from '../../api/findingsTrend'
+import type { Schemas } from '../../api/schemas'
 import { QueryBoundary } from '../../components/QueryBoundary'
 
 const CHART_STYLE = {
@@ -142,7 +143,7 @@ function TrendChart({ weeks }: { weeks: TrendPoint[] }) {
   )
 }
 
-type BandPoint = { band: string; median_days: number; count: number }
+type BandPoint = Schemas['CloseTimeResponse']
 
 const BAND_DOT_COLORS: Record<string, string> = {
   critical: 'var(--color-critical)',
@@ -171,14 +172,17 @@ function TimeToCloseChart({ bands }: { bands: BandPoint[] }) {
     )
   }
 
-  const maxDays = Math.max(...bands.map((b) => b.median_days))
+  const maxDays = Math.max(...bands.map((b) => b.median_days ?? 0))
 
   return (
     <ul className="flex flex-col gap-4 p-6">
       {bands.map((row) => {
         const label = bandLabels[row.band] ?? row.band
-        const days = row.median_days.toFixed(1)
-        const unit = t('findings.resumen.ttcDays')
+        const value =
+          row.median_days === null
+            ? t('findings.resumen.ttcNoneClosed')
+            : `${row.median_days.toFixed(1)} ${t('findings.resumen.ttcDays')}`
+        const width = row.median_days && maxDays > 0 ? (row.median_days / maxDays) * 100 : 0
         return (
           <li key={row.band} className="flex items-center gap-3 font-body text-[0.875rem]">
             <span className="flex w-24 shrink-0 items-center justify-end gap-1.5 text-right text-gray">
@@ -191,14 +195,12 @@ function TimeToCloseChart({ bands }: { bands: BandPoint[] }) {
             <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-panel">
               <div
                 className="absolute inset-y-0 left-0 rounded-full bg-navy"
-                style={{ width: `${(row.median_days / maxDays) * 100}%` }}
+                style={{ width: `${width}%` }}
                 role="img"
-                aria-label={`${label}: ${days} ${unit}`}
+                aria-label={`${label}: ${value}`}
               />
             </div>
-            <span className="w-16 shrink-0 tabular-nums text-navy">
-              {days} {unit}
-            </span>
+            <span className="w-16 shrink-0 tabular-nums text-navy">{value}</span>
           </li>
         )
       })}

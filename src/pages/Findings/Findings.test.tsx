@@ -411,8 +411,13 @@ describe('Findings', () => {
       expect(await screen.findByText('3.5 days')).toBeInTheDocument() // critical
       expect(screen.getByText('7.2 days')).toBeInTheDocument()         // high
       expect(screen.getByText('14.1 days')).toBeInTheDocument()        // medium
-      expect(screen.getByText('30.5 days')).toBeInTheDocument()        // low
       expect(screen.getByText('45.0 days')).toBeInTheDocument()        // unbanded
+    })
+
+    it('shows a band with nothing closed yet as none closed', async () => {
+      await openSummaryTab()
+
+      expect(await screen.findByRole('img', { name: 'Low: None closed' })).toBeInTheDocument()
     })
 
     it('labels the critical bar with its band name and median days', async () => {
