@@ -30,6 +30,12 @@ async function openFinding(user: ReturnType<typeof renderApp>, cve: string) {
   return screen.findByRole('dialog', { name: cve })
 }
 
+async function openSummaryTab() {
+  const user = renderApp('/findings')
+  await user.click(await screen.findByRole('tab', { name: 'Summary' }))
+  return user
+}
+
 describe('Findings', () => {
   it('shows the newest order in groups, the first to attend first', async () => {
     await renderFindings()
@@ -367,7 +373,32 @@ describe('Findings', () => {
       await user.click(screen.getByRole('tab', { name: 'Summary' }))
 
       expect(screen.getByRole('tab', { name: 'Summary' })).toHaveAttribute('aria-selected', 'true')
-      expect(await screen.findByText('Coming soon')).toBeInTheDocument()
+      expect(await screen.findByText('Weekly trend')).toBeInTheDocument()
+    })
+  })
+
+  describe('summary tab', () => {
+    it('shows the weekly trend chart heading and time-to-close heading', async () => {
+      await openSummaryTab()
+
+      expect(await screen.findByText('Weekly trend')).toBeInTheDocument()
+      expect(await screen.findByText('Time to close by band')).toBeInTheDocument()
+    })
+
+    it('shows time-to-close rows for each band', async () => {
+      await openSummaryTab()
+
+      expect(await screen.findByRole('cell', { name: 'Critical' })).toBeInTheDocument()
+      expect(screen.getByRole('cell', { name: 'High' })).toBeInTheDocument()
+      expect(screen.getByRole('cell', { name: 'Medium' })).toBeInTheDocument()
+      expect(screen.getByRole('cell', { name: 'Low' })).toBeInTheDocument()
+      expect(screen.getByRole('cell', { name: 'Unbanded' })).toBeInTheDocument()
+    })
+
+    it('shows median days for the critical band', async () => {
+      await openSummaryTab()
+
+      expect(await screen.findByRole('cell', { name: '3.5' })).toBeInTheDocument()
     })
   })
 

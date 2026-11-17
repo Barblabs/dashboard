@@ -12,6 +12,7 @@ import { FindingDetail } from './FindingDetail'
 import { FilterChips, FindingsFilterBar } from './FindingsFilter'
 import { GroupPanel } from './GroupPanel'
 import { SummaryIndicators } from './SummaryIndicators'
+import { SummaryTabContent } from './SummaryTab'
 import { hasActiveFilters, matchesFinding, parseFilters } from './filters'
 
 const FINDING_PARAM = 'finding'
@@ -47,7 +48,7 @@ export function FindingsPage() {
           <PrioritizedTabContent />
         </TabPanel>
         <TabPanel value="summary" className="mt-6">
-          <Message>{t('placeholder.comingSoon')}</Message>
+          <SummaryTabContent />
         </TabPanel>
         <TabPanel value="before-after" className="mt-6">
           <Message>{t('placeholder.comingSoon')}</Message>
