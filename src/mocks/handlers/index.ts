@@ -1,3 +1,4 @@
+import { adminStatsHandlers } from './adminStats'
 import { areasHandlers } from './areas'
 import { assetsHandlers } from './assets'
 import { attackMatrixHandlers } from './attackMatrix'
@@ -23,5 +24,6 @@ export const handlers = [
   ...findingsHandlers,
   ...findingsRiskHandlers,
   ...attackMatrixHandlers,
+  ...adminStatsHandlers,
   ...slackHandlers,
 ]
