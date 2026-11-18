@@ -85,6 +85,7 @@ apiClient.interceptors.request.use(async (config) => {
     throw error
   }
   if (token) config.headers.Authorization = `Bearer ${token}`
+  config.headers.set('User-Agent', false)
   return config
 })
 
