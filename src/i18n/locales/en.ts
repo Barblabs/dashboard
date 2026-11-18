@@ -6,6 +6,7 @@ export const en = {
     newTab: '(opens in a new tab)',
     showPassword: 'Show password',
     hidePassword: 'Hide password',
+    chartError: 'This section could not be displayed.',
   },
   sidebar: {
     superAdmin: 'Super Admin',
@@ -376,6 +377,7 @@ export const en = {
       ttcMedian: 'Median (days)',
       ttcCount: 'Closed findings',
       ttcNoData: 'No closure data by band yet.',
+      ttcNone: 'None closed in this period',
       ttcDays: 'days',
       ttcNoneClosed: 'None closed',
       loading: 'Loading summary…',
@@ -762,6 +764,10 @@ export const en = {
     forbidden: {
       title: 'Access denied',
       message: 'You do not have permission to view this page.',
+    },
+    unexpectedError: {
+      title: 'Something went wrong',
+      message: 'An unexpected error occurred. Try refreshing the page.',
     },
   },
   config: {

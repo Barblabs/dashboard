@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { useAttackMatrixQuery } from '../../api/attackMatrix'
 import type { TacticCount, TechniqueCount } from '../../api/attackMatrix'
+import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
 
 // ── constants ─────────────────────────────────────────────────────────────────
@@ -75,9 +76,15 @@ export function ThreatsTabContent() {
       >
         {(data) => (
           <>
-            <CoverageCard labeled={data.coverage.labeled} open={data.coverage.open} />
-            <HeatmapCard tactics={sortTactics(data.tactics)} role={role} onRoleChange={setRole} />
-            <TopTechniquesCard techniques={data.techniques} />
+            <ChartErrorBoundary>
+              <CoverageCard labeled={data.coverage.labeled} open={data.coverage.open} />
+            </ChartErrorBoundary>
+            <ChartErrorBoundary>
+              <HeatmapCard tactics={sortTactics(data.tactics)} role={role} onRoleChange={setRole} />
+            </ChartErrorBoundary>
+            <ChartErrorBoundary>
+              <TopTechniquesCard techniques={data.techniques} />
+            </ChartErrorBoundary>
           </>
         )}
       </QueryBoundary>

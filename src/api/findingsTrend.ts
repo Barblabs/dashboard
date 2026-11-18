@@ -2,17 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from './client'
 import type { Schemas } from './schemas'
 
-interface WeeklyTrendPoint {
-  week: string
-  opened: number
-  closed: number
-  backlog: number
-}
-
-export interface WeeklyTrendResponse {
-  weeks: WeeklyTrendPoint[]
-}
-
+export type CloseTimeBand = Schemas['CloseTimeResponse']
+export type WeeklyTrendPoint = Schemas['WeekResponse']
+export type WeeklyTrendResponse = Schemas['WeeklyTrendResponse']
 export type TimeToCloseResponse = Schemas['TimeToCloseResponse']
 
 export function useWeeklyTrendQuery() {

@@ -10,8 +10,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import type { CloseTimeBand, WeeklyTrendPoint } from '../../api/findingsTrend'
 import { useTimeToCloseQuery, useWeeklyTrendQuery } from '../../api/findingsTrend'
-import type { Schemas } from '../../api/schemas'
+import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
 
 const CHART_STYLE = {
@@ -34,47 +35,49 @@ export function SummaryTabContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="rounded-xl border border-border-panel bg-white p-6">
-        <h2 className="mb-4 font-title text-[1rem] text-navy">{t('findings.resumen.trendTitle')}</h2>
-        <QueryBoundary
-          query={trendQuery}
-          keys={{
-            loading: 'findings.resumen.loading',
-            failed: 'findings.resumen.failed',
-            network: 'findings.resumen.network',
-          }}
-        >
-          {(data) => <TrendChart weeks={data.weeks} />}
-        </QueryBoundary>
-      </section>
+      <ChartErrorBoundary>
+        <section className="rounded-xl border border-border-panel bg-white p-6">
+          <h2 className="mb-4 font-title text-[1rem] text-navy">{t('findings.resumen.trendTitle')}</h2>
+          <QueryBoundary
+            query={trendQuery}
+            keys={{
+              loading: 'findings.resumen.loading',
+              failed: 'findings.resumen.failed',
+              network: 'findings.resumen.network',
+            }}
+          >
+            {(data) => <TrendChart weeks={data.weeks} />}
+          </QueryBoundary>
+        </section>
+      </ChartErrorBoundary>
 
-      <section className="rounded-xl border border-border-panel bg-white">
-        <div className="border-b border-border-panel px-6 py-4">
-          <h2 className="font-title text-[1rem] text-navy">{t('findings.resumen.ttcTitle')}</h2>
-        </div>
-        <QueryBoundary
-          query={ttcQuery}
-          keys={{
-            loading: 'findings.resumen.loading',
-            failed: 'findings.resumen.failed',
-            network: 'findings.resumen.network',
-          }}
-        >
-          {(data) => <TimeToCloseChart bands={data.bands} />}
-        </QueryBoundary>
-      </section>
+      <ChartErrorBoundary>
+        <section className="rounded-xl border border-border-panel bg-white">
+          <div className="border-b border-border-panel px-6 py-4">
+            <h2 className="font-title text-[1rem] text-navy">{t('findings.resumen.ttcTitle')}</h2>
+          </div>
+          <QueryBoundary
+            query={ttcQuery}
+            keys={{
+              loading: 'findings.resumen.loading',
+              failed: 'findings.resumen.failed',
+              network: 'findings.resumen.network',
+            }}
+          >
+            {(data) => <TimeToCloseChart bands={data.bands} />}
+          </QueryBoundary>
+        </section>
+      </ChartErrorBoundary>
     </div>
   )
 }
 
-type TrendPoint = { week: string; opened: number; closed: number; backlog: number }
-
-function TrendChart({ weeks }: { weeks: TrendPoint[] }) {
+function TrendChart({ weeks }: { weeks: WeeklyTrendPoint[] }) {
   const { t } = useTranslation()
 
   const data = weeks.map((w) => ({
     ...w,
-    label: formatWeekLabel(w.week),
+    label: formatWeekLabel(w.starts_on),
   }))
 
   return (
@@ -113,7 +116,7 @@ function TrendChart({ weeks }: { weeks: TrendPoint[] }) {
             formatter={(value: string) => {
               if (value === 'opened') return t('findings.resumen.trendOpened')
               if (value === 'closed') return t('findings.resumen.trendClosed')
-              if (value === 'backlog') return t('findings.resumen.trendBacklog')
+              if (value === 'open_at_end') return t('findings.resumen.trendBacklog')
               return value
             }}
           />
@@ -132,7 +135,7 @@ function TrendChart({ weeks }: { weeks: TrendPoint[] }) {
           <Line
             yAxisId="backlog"
             type="monotone"
-            dataKey="backlog"
+            dataKey="open_at_end"
             stroke="var(--color-critical)"
             strokeWidth={2}
             dot={false}
@@ -143,8 +146,6 @@ function TrendChart({ weeks }: { weeks: TrendPoint[] }) {
   )
 }
 
-type BandPoint = Schemas['CloseTimeResponse']
-
 const BAND_DOT_COLORS: Record<string, string> = {
   critical: 'var(--color-critical)',
   high: 'var(--color-high)',
@@ -153,7 +154,7 @@ const BAND_DOT_COLORS: Record<string, string> = {
   unbanded: 'var(--color-gray)',
 }
 
-function TimeToCloseChart({ bands }: { bands: BandPoint[] }) {
+function TimeToCloseChart({ bands }: { bands: CloseTimeBand[] }) {
   const { t } = useTranslation()
 
   const bandLabels: Record<string, string> = {
@@ -172,17 +173,13 @@ function TimeToCloseChart({ bands }: { bands: BandPoint[] }) {
     )
   }
 
-  const maxDays = Math.max(...bands.map((b) => b.median_days ?? 0))
+  const maxDays = Math.max(...bands.map((b) => b.median_days ?? 0), 1)
+  const unit = t('findings.resumen.ttcDays')
 
   return (
     <ul className="flex flex-col gap-4 p-6">
       {bands.map((row) => {
         const label = bandLabels[row.band] ?? row.band
-        const value =
-          row.median_days === null
-            ? t('findings.resumen.ttcNoneClosed')
-            : `${row.median_days.toFixed(1)} ${t('findings.resumen.ttcDays')}`
-        const width = row.median_days && maxDays > 0 ? (row.median_days / maxDays) * 100 : 0
         return (
           <li key={row.band} className="flex items-center gap-3 font-body text-[0.875rem]">
             <span className="flex w-24 shrink-0 items-center justify-end gap-1.5 text-right text-gray">
@@ -192,15 +189,28 @@ function TimeToCloseChart({ bands }: { bands: BandPoint[] }) {
               />
               {label}
             </span>
-            <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-panel">
-              <div
-                className="absolute inset-y-0 left-0 rounded-full bg-navy"
-                style={{ width: `${width}%` }}
-                role="img"
-                aria-label={`${label}: ${value}`}
-              />
-            </div>
-            <span className="w-16 shrink-0 tabular-nums text-navy">{value}</span>
+            {row.median_days !== null ? (
+              <>
+                <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-panel">
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full bg-navy"
+                    style={{ width: `${(row.median_days / maxDays) * 100}%` }}
+                    role="img"
+                    aria-label={`${label}: ${row.median_days.toFixed(1)} ${unit}`}
+                  />
+                </div>
+                <span className="w-16 shrink-0 tabular-nums text-navy">
+                  {row.median_days.toFixed(1)} {unit}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="flex-1 font-body text-[0.75rem] italic text-gray">
+                  {t('findings.resumen.ttcNone')}
+                </span>
+                <span className="w-16 shrink-0 text-gray">—</span>
+              </>
+            )}
           </li>
         )
       })}

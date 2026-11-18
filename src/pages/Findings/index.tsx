@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { useCurrentOrderQuery, type CurrentOrder } from '../../api/prioritizations'
 import { Page } from '../../components/Page'
+import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Message } from '../../components/ui/Message'
 import { Modal } from '../../components/ui/Modal'
@@ -37,7 +38,7 @@ export function FindingsPage() {
 
   return (
     <Page title={t('findings.title')} subtitle={t('findings.subtitle')}>
-      <SummaryIndicators />
+      <ChartErrorBoundary><SummaryIndicators /></ChartErrorBoundary>
       <Tabs value={tab} onValueChange={changeTab}>
         <TabList label={t('findings.tabs.label')}>
           <Tab value="prioritized">{t('findings.tabs.prioritized')}</Tab>
@@ -48,7 +49,7 @@ export function FindingsPage() {
         </TabList>
 
         <TabPanel value="prioritized" className="mt-6">
-          <PrioritizedTabContent />
+          <ChartErrorBoundary><PrioritizedTabContent /></ChartErrorBoundary>
         </TabPanel>
         <TabPanel value="summary" className="mt-6">
           <SummaryTabContent />

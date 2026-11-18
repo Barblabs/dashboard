@@ -13,6 +13,7 @@ import type {
   ComponentCount,
   CveCount,
 } from '../../api/findingsRisk'
+import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Message } from '../../components/ui/Message'
 
@@ -52,9 +53,9 @@ export function RiskTabContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <HeatmapCard by={by} onByChange={setBy} />
-      <AssetBarsCard />
-      <TopTablesCard />
+      <ChartErrorBoundary><HeatmapCard by={by} onByChange={setBy} /></ChartErrorBoundary>
+      <ChartErrorBoundary><AssetBarsCard /></ChartErrorBoundary>
+      <ChartErrorBoundary><TopTablesCard /></ChartErrorBoundary>
     </div>
   )
 }

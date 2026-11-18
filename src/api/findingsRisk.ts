@@ -5,6 +5,7 @@ import type { Override } from './schemas'
 
 export type BreakdownBy = 'exposure' | 'criticality' | 'area'
 
+// Band counts come from an embedded Go struct not reflected in the OpenAPI spec.
 export type BreakdownGroup = Override<
   Schemas['GroupResponse'],
   {
@@ -16,24 +17,17 @@ export type BreakdownGroup = Override<
   }
 >
 
-export interface BreakdownResponse {
-  by: string
-  groups: BreakdownGroup[]
-}
+export type BreakdownResponse = Override<
+  Schemas['BreakdownResponse'],
+  { groups: BreakdownGroup[] }
+>
 
 export type AssetFindingBands = Schemas['AssetFindingBandsResponse']
-
-export interface AssetFindingsSummaryResponse {
-  assets: AssetFindingBands[]
-}
+export type AssetFindingsSummaryResponse = Schemas['AssetFindingsSummaryResponse']
 
 export type ComponentCount = Schemas['ComponentCountResponse']
 export type CveCount = Schemas['CveCountResponse']
-
-export interface TopResponse {
-  components: ComponentCount[]
-  cves: CveCount[]
-}
+export type TopResponse = Schemas['TopResponse']
 
 export function useBreakdownQuery(by: BreakdownBy) {
   return useQuery({
