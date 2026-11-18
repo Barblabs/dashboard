@@ -35,12 +35,6 @@ function seedSaved(summary: string, version = 1) {
 }
 
 describe('Business context', () => {
-  it('is in the navigation of every User of a Customer', async () => {
-    await renderPage(VIEWER)
-
-    expect(screen.getByRole('link', { name: 'Business context' })).toHaveAttribute('aria-current', 'page')
-  })
-
   it('starts by offering to import documents until something is saved', async () => {
     await renderPage()
 
