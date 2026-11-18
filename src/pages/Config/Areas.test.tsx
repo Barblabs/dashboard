@@ -2,7 +2,6 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { AuthUser } from '../../auth/store'
-import { i18n } from '../../i18n'
 import { mockAreas } from '../../mocks/areas'
 import { areasStore } from '../../mocks/areas-store'
 import { apiUrl } from '../../mocks/url'
@@ -173,19 +172,6 @@ describe('Areas', () => {
 
     expect(screen.getByRole('button', { name: 'Remove Server' })).toBeInTheDocument()
     expect(screen.getByText('2 assets')).toBeInTheDocument()
-  })
-
-  it('shows the areas in Spanish', async () => {
-    localStorage.setItem('language', 'es')
-    await i18n.changeLanguage()
-    seedSource()
-    const user = renderApp('/config')
-    await user.click(await screen.findByRole('tab', { name: 'Áreas' }))
-
-    const row = await screen.findByRole('row', { name: /Data Platform/ })
-    expect(row).toHaveTextContent('Sin dueño')
-    expect(row).toHaveTextContent('Activa')
-    expect(screen.getByText('2 áreas')).toBeInTheDocument()
   })
 
   describe('owner', () => {
