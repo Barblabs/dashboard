@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router'
+import { useTranslation } from 'react-i18next'
+import { StatusPage } from './components/StatusPage'
 import { returnToState } from './auth/returnTo'
 import { restoreSession } from './auth/session'
 import { useAuthStore, useCurrentUser, type Role } from './auth/store'
@@ -92,6 +94,17 @@ function AppLayout() {
   )
 }
 
+function RouteErrorPage() {
+  const { t } = useTranslation()
+  return (
+    <StatusPage
+      code={500}
+      title={t('status.unexpectedError.title')}
+      message={t('status.unexpectedError.message')}
+    />
+  )
+}
+
 function createAppRouter() {
   return createBrowserRouter([
     { path: 'login', element: <LoginPage /> },
@@ -106,6 +119,7 @@ function createAppRouter() {
             ...PAGES.map(({ id, Page, roles }) => ({
               path: id,
               element: <RoleGuard roles={roles}><Page /></RoleGuard>,
+              errorElement: <RouteErrorPage />,
             })),
             { path: 'forbidden', element: <ForbiddenPage /> },
             { path: '*', element: <NotFoundPage /> },

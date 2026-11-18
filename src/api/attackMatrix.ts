@@ -3,6 +3,7 @@ import { api } from './client'
 import type { Schemas } from './schemas'
 import type { Override } from './schemas'
 
+// Band counts come from an embedded Go struct not reflected in the OpenAPI spec.
 export type TacticCount = Override<
   Schemas['TacticCountResponse'],
   {
@@ -15,13 +16,11 @@ export type TacticCount = Override<
 >
 
 export type TechniqueCount = Schemas['TechniqueCountResponse']
-type CoverageData = Schemas['CoverageResponse']
 
-export interface AttackMatrixData {
-  coverage: CoverageData
-  tactics: TacticCount[]
-  techniques: TechniqueCount[]
-}
+export type AttackMatrixData = Override<
+  Schemas['AttackMatrixResponse'],
+  { tactics: TacticCount[] }
+>
 
 export function useAttackMatrixQuery(role: string) {
   return useQuery({

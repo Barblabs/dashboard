@@ -242,20 +242,14 @@ export interface paths {
          * @description Returns null when the Customer has no Connected CMDB Source.
          */
         get: operations["get-cmdb-source"];
-        /**
-         * Replace the login of the Connected CMDB Source
-         * @description Only a Customer Admin replaces it.
-         */
+        /** Replace the login of the Connected CMDB Source */
         put: operations["update-cmdb-source"];
         /**
          * Connect a CMDB Source and run its first Sync
-         * @description Only a Customer Admin connects it. A failed first Sync is reported in last_sync_failure and leaves the CMDB Source connected.
+         * @description A failed first Sync is reported in last_sync_failure and leaves the CMDB Source connected.
          */
         post: operations["connect-cmdb-source"];
-        /**
-         * Disconnect the Connected CMDB Source
-         * @description Only a Customer Admin disconnects it. Its Assets become Inactive.
-         */
+        /** Disconnect the Connected CMDB Source */
         delete: operations["disconnect-cmdb-source"];
         options?: never;
         head?: never;
@@ -271,10 +265,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Sync the Connected CMDB Source
-         * @description Any User of the Customer triggers it.
-         */
+        /** Sync the Connected CMDB Source */
         post: operations["sync-cmdb-source"];
         delete?: never;
         options?: never;
@@ -293,7 +284,7 @@ export interface paths {
         put?: never;
         /**
          * Check a CMDB Source login without storing it
-         * @description Only a Customer Admin checks one. A login the CMDB rejects is a 200 with ok false and the reason.
+         * @description A login the CMDB rejects is a 200 with ok false and the reason.
          */
         post: operations["test-cmdb-source"];
         delete?: never;

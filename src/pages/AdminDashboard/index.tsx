@@ -11,6 +11,7 @@ import { useCustomersQuery, type CustomerResponse } from '../../api/customers'
 import { Page } from '../../components/Page'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge } from '../../components/ui/Badge'
+import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { Message } from '../../components/ui/Message'
 import { useDateFormat, useLocale, useRelativeTime } from '../../i18n/format'
 
@@ -56,11 +57,11 @@ export function AdminDashboardPage() {
 
   return (
     <Page title={t('adminDashboard.title')} subtitle={t('adminDashboard.subtitle')}>
-      <StatsSection />
-      <OrgsTableSection />
-      <SyncChartSection />
-      <SlackSection />
-      <MonthlyChartSection />
+      <ChartErrorBoundary><StatsSection /></ChartErrorBoundary>
+      <ChartErrorBoundary><OrgsTableSection /></ChartErrorBoundary>
+      <ChartErrorBoundary><SyncChartSection /></ChartErrorBoundary>
+      <ChartErrorBoundary><SlackSection /></ChartErrorBoundary>
+      <ChartErrorBoundary><MonthlyChartSection /></ChartErrorBoundary>
     </Page>
   )
 }

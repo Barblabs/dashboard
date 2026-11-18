@@ -6,17 +6,9 @@ export type CustomerStats = Schemas['CustomerStatsResponse']
 export type SyncDay = Schemas['SyncDayResponse']
 export type CustomerSlackDeliveries = Schemas['CustomerSlackDeliveriesResponse']
 
-export interface CustomerStatsListResponse {
-  customers: CustomerStats[]
-}
-
-export interface SyncHealthResponse {
-  days: SyncDay[]
-}
-
-export interface SlackDeliveriesResponse {
-  customers: CustomerSlackDeliveries[]
-}
+export type CustomerStatsListResponse = Schemas['CustomerStatsListResponse']
+export type SyncHealthResponse = Schemas['SyncHealthResponse']
+export type SlackDeliveriesResponse = Schemas['SlackDeliveriesResponse']
 
 export function useCustomersStatsQuery() {
   return useQuery({

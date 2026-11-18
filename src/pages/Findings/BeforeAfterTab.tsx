@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { useCurrentOrderQuery } from '../../api/prioritizations'
 import type { PriorityGroup } from '../../api/prioritizations'
+import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Message } from '../../components/ui/Message'
 import { BAND_COLORS, BANDS, buildMatrix } from './beforeAfterAlgorithm'
@@ -18,7 +19,9 @@ export function BeforeAfterTabContent() {
     >
       {(order) =>
         order ? (
-          <BeforeAfterContent data={buildMatrix(order.prioritization)} />
+          <ChartErrorBoundary>
+            <BeforeAfterContent data={buildMatrix(order.prioritization)} />
+          </ChartErrorBoundary>
         ) : (
           <Message>{t('findings.empty')}</Message>
         )
@@ -35,55 +38,63 @@ function BeforeAfterContent({ data }: { data: MatrixData }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="rounded-xl border border-border-panel bg-white p-6">
-        <div className="grid grid-cols-4 divide-x divide-border-panel text-center">
-          <div className="flex flex-col gap-1 px-4 py-2">
-            <span className="font-title text-[2rem] leading-none text-navy">{subio}</span>
-            <span className="font-body text-[0.875rem] text-gray">{t('findings.beforeAfter.subio')}</span>
+      <ChartErrorBoundary>
+        <section className="rounded-xl border border-border-panel bg-white p-6">
+          <div className="grid grid-cols-4 divide-x divide-border-panel text-center">
+            <div className="flex flex-col gap-1 px-4 py-2">
+              <span className="font-title text-[2rem] leading-none text-navy">{subio}</span>
+              <span className="font-body text-[0.875rem] text-gray">{t('findings.beforeAfter.subio')}</span>
+            </div>
+            <div className="flex flex-col gap-1 px-4 py-2">
+              <span className="font-title text-[2rem] leading-none text-navy">{seMantuvo}</span>
+              <span className="font-body text-[0.875rem] text-gray">{t('findings.beforeAfter.seMantuvo')}</span>
+            </div>
+            <div className="flex flex-col gap-1 px-4 py-2">
+              <span className="font-title text-[2rem] leading-none text-navy">{bajo}</span>
+              <span className="font-body text-[0.875rem] text-gray">{t('findings.beforeAfter.bajo')}</span>
+            </div>
+            <div className="flex flex-col gap-1 px-4 py-2">
+              <span className="font-title text-[2rem] leading-none text-navy">
+                {t('findings.beforeAfter.matchPct', { pct: matchPct })}
+              </span>
+              <span className="font-body text-[0.875rem] text-gray">{t('findings.beforeAfter.match')}</span>
+            </div>
           </div>
-          <div className="flex flex-col gap-1 px-4 py-2">
-            <span className="font-title text-[2rem] leading-none text-navy">{seMantuvo}</span>
-            <span className="font-body text-[0.875rem] text-gray">{t('findings.beforeAfter.seMantuvo')}</span>
-          </div>
-          <div className="flex flex-col gap-1 px-4 py-2">
-            <span className="font-title text-[2rem] leading-none text-navy">{bajo}</span>
-            <span className="font-body text-[0.875rem] text-gray">{t('findings.beforeAfter.bajo')}</span>
-          </div>
-          <div className="flex flex-col gap-1 px-4 py-2">
-            <span className="font-title text-[2rem] leading-none text-navy">
-              {t('findings.beforeAfter.matchPct', { pct: matchPct })}
-            </span>
-            <span className="font-body text-[0.875rem] text-gray">{t('findings.beforeAfter.match')}</span>
-          </div>
-        </div>
-      </section>
+        </section>
+      </ChartErrorBoundary>
 
-      <section className="rounded-xl border border-border-panel bg-white p-6">
-        <h2 className="mb-5 font-title text-[1rem] text-navy">
-          {t('findings.beforeAfter.matrixTitle')}
-        </h2>
-        <MatrixGrid groups={groups} matrix={matrix} cellIds={cellIds} rankRanges={rankRanges} N={N} />
-      </section>
+      <ChartErrorBoundary>
+        <section className="rounded-xl border border-border-panel bg-white p-6">
+          <h2 className="mb-5 font-title text-[1rem] text-navy">
+            {t('findings.beforeAfter.matrixTitle')}
+          </h2>
+          <MatrixGrid groups={groups} matrix={matrix} cellIds={cellIds} rankRanges={rankRanges} N={N} />
+        </section>
+      </ChartErrorBoundary>
 
       {topChanges.length > 0 && (
+        <ChartErrorBoundary>
+          <section className="rounded-xl border border-border-panel bg-white">
+            <div className="border-b border-border-panel px-6 py-4">
+              <h2 className="font-title text-[1rem] text-navy">
+                {t('findings.beforeAfter.topChangesTitle')}
+              </h2>
+            </div>
+            <TopChangesTable topChanges={topChanges} groups={groups} rankRanges={rankRanges} />
+          </section>
+        </ChartErrorBoundary>
+      )}
+
+      <ChartErrorBoundary>
         <section className="rounded-xl border border-border-panel bg-white">
           <div className="border-b border-border-panel px-6 py-4">
             <h2 className="font-title text-[1rem] text-navy">
-              {t('findings.beforeAfter.topChangesTitle')}
+              {t('findings.beforeAfter.bandTitle')}
             </h2>
           </div>
-          <TopChangesTable topChanges={topChanges} groups={groups} rankRanges={rankRanges} />
+          <BandComposition groups={groups} bandByGroup={bandByGroup} />
         </section>
-      )}
-
-      <section className="rounded-xl border border-border-panel bg-white">
-        <div className="border-b border-border-panel px-6 py-4">
-          <h2 className="font-title text-[1rem] text-navy">
-            {t('findings.beforeAfter.bandTitle')}
-          </h2>
-        </div>
-        <BandComposition groups={groups} bandByGroup={bandByGroup} />
-      </section>
+      </ChartErrorBoundary>
     </div>
   )
 }

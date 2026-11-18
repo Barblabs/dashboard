@@ -404,20 +404,20 @@ describe('Findings', () => {
       expect(await screen.findByText('Time to close by band')).toBeInTheDocument()
     })
 
-    it('shows time-to-close bars for all five bands', async () => {
+    it('shows time-to-close bars for bands that have closures', async () => {
       await openSummaryTab()
 
-      // Each bar has a unique day value rendered as text to its right.
       expect(await screen.findByText('3.5 days')).toBeInTheDocument() // critical
-      expect(screen.getByText('7.2 days')).toBeInTheDocument()         // high
-      expect(screen.getByText('14.1 days')).toBeInTheDocument()        // medium
-      expect(screen.getByText('45.0 days')).toBeInTheDocument()        // unbanded
+      expect(screen.getByText('7.2 days')).toBeInTheDocument()
+      expect(screen.getByText('14.1 days')).toBeInTheDocument()
+      expect(screen.getByText('45.0 days')).toBeInTheDocument()
     })
 
-    it('shows a band with nothing closed yet as none closed', async () => {
+    it('shows — and none-closed text for a band with no closures', async () => {
       await openSummaryTab()
 
-      expect(await screen.findByRole('img', { name: 'Low: None closed' })).toBeInTheDocument()
+      expect(await screen.findByText('—')).toBeInTheDocument()
+      expect(screen.getByText('None closed in this period')).toBeInTheDocument()
     })
 
     it('labels the critical bar with its band name and median days', async () => {

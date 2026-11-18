@@ -8,6 +8,7 @@ export const es: Translations = {
     newTab: '(abre en una nueva pestaña)',
     showPassword: 'Mostrar contraseña',
     hidePassword: 'Ocultar contraseña',
+    chartError: 'No se pudo mostrar esta sección.',
   },
   sidebar: {
     superAdmin: 'Super Admin',
@@ -378,6 +379,7 @@ export const es: Translations = {
       ttcMedian: 'Mediana (días)',
       ttcCount: 'Hallazgos cerrados',
       ttcNoData: 'Sin datos de cierre por band.',
+      ttcNone: 'Ninguno cerrado en el periodo',
       ttcDays: 'días',
       ttcNoneClosed: 'Ninguno cerrado',
       loading: 'Cargando resumen…',
@@ -764,6 +766,10 @@ export const es: Translations = {
     forbidden: {
       title: 'Acceso denegado',
       message: 'No tienes permiso para ver esta página.',
+    },
+    unexpectedError: {
+      title: 'Algo salió mal',
+      message: 'Ocurrió un error inesperado. Intenta recargar la página.',
     },
   },
   config: {
