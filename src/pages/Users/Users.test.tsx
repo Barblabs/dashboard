@@ -1,0 +1,266 @@
+import { screen, waitFor, within } from '@testing-library/react'
+import { http, HttpResponse } from 'msw'
+import type { UserEvent } from '@testing-library/user-event'
+import { describe, expect, it } from 'vitest'
+import { apiUrl } from '../../mocks/url'
+import { renderApp, seedUsers } from '../../test/render'
+import { holdRequests, server } from '../../test/server'
+import { inviteBody } from '../../mocks/handlers/users'
+import { MOCK_USERS } from '../../mocks/users-store'
+
+const ADMIN = MOCK_USERS[0]
+const VIEWER = MOCK_USERS[1]
+
+async function submitInvite(user: UserEvent, email: string) {
+  await user.click(screen.getByRole('button', { name: 'Invite user' }))
+  await user.type(screen.getByLabelText('Email'), email)
+  await user.click(screen.getByRole('button', { name: 'Send invitation' }))
+}
+
+// Invites and waits for the dialog to close, as it does once the invitation succeeds.
+async function inviteUser(user: UserEvent, email: string) {
+  await submitInvite(user, email)
+  await waitFor(() => expect(screen.queryByRole('heading', { name: 'Invite user' })).not.toBeInTheDocument())
+}
+
+async function renderUsers() {
+  const user = renderApp('/users')
+  await screen.findByText(ADMIN.email)
+  return user
+}
+
+describe('Users', () => {
+  it('shows the list of users with email and role badges', async () => {
+    await renderUsers()
+
+    expect(screen.getByText(ADMIN.email)).toBeInTheDocument()
+    expect(screen.getByText(VIEWER.email)).toBeInTheDocument()
+    const adminRow = screen.getByText(ADMIN.email).closest('tr')!
+    const viewerRow = screen.getByText(VIEWER.email).closest('tr')!
+    expect(within(adminRow).getByText('Admin')).toBeInTheDocument()
+    expect(within(viewerRow).getByText('Viewer')).toBeInTheDocument()
+    expect(screen.getByText(/3 users/)).toBeInTheDocument()
+  })
+
+  it('shows a counter for a single user in the singular', async () => {
+    seedUsers([ADMIN])
+    await renderUsers()
+
+    expect(screen.getByText('1 user')).toBeInTheDocument()
+  })
+
+  it('tells a search that matches nothing apart from having no users', async () => {
+    const user = await renderUsers()
+
+    await user.type(screen.getByPlaceholderText('Search by email…'), 'nobody@')
+
+    expect(screen.getByText('No user matches the search.')).toBeInTheDocument()
+    expect(screen.queryByText('No users yet.')).not.toBeInTheDocument()
+  })
+
+  it('shows the counter with disabled count when applicable', async () => {
+    const disabled = {
+      ...VIEWER,
+      id: 'user-disabled',
+      email: 'old@acme.example',
+      disabled_at: '2026-06-01T00:00:00Z',
+    }
+    seedUsers([ADMIN, VIEWER, disabled])
+    await renderUsers()
+
+    expect(screen.getByText('3 users · 1 disabled')).toBeInTheDocument()
+  })
+
+  it('shows a disabled user with no action buttons', async () => {
+    const disabled = {
+      ...VIEWER,
+      id: 'user-disabled',
+      email: 'old@acme.example',
+      disabled_at: '2026-06-01T00:00:00Z',
+    }
+    seedUsers([ADMIN, VIEWER, disabled])
+    await renderUsers()
+
+    expect(screen.getByText('old@acme.example')).toBeInTheDocument()
+    expect(screen.getByText('Disabled')).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Disable' })).toHaveLength(2)
+  })
+
+  it('marks a user whose invitation has not been sent yet as pending', async () => {
+    const pending = { ...VIEWER, id: 'user-pending', email: 'invited@acme.example', pending: true }
+    seedUsers([ADMIN, VIEWER, pending])
+    await renderUsers()
+
+    const pendingRow = screen.getByText(pending.email).closest('tr')!
+    expect(within(pendingRow).getByText('Invitation pending')).toBeInTheDocument()
+    expect(screen.getAllByText('Invitation pending')).toHaveLength(1)
+  })
+
+  it('shows a user who is both disabled and pending as disabled only', async () => {
+    const both = {
+      ...VIEWER,
+      id: 'user-both',
+      email: 'gone@acme.example',
+      disabled_at: '2026-06-01T00:00:00Z',
+      pending: true,
+    }
+    seedUsers([ADMIN, both])
+    await renderUsers()
+
+    expect(screen.getByText('Disabled')).toBeInTheDocument()
+    expect(screen.queryByText('Invitation pending')).not.toBeInTheDocument()
+  })
+
+  it('invites a new user, confirms the invitation was sent, and lists them', async () => {
+    const user = await renderUsers()
+
+    await inviteUser(user, 'new@acme.example')
+
+    const toasts = screen.getByRole('region', { name: 'Notifications' })
+    expect(await within(toasts).findByText('Invitation sent to new@acme.example.')).toBeInTheDocument()
+    const row = screen.getByText('new@acme.example').closest('tr')!
+    expect(within(row).queryByText('Invitation pending')).not.toBeInTheDocument()
+  })
+
+  it('warns when the invitation email has not gone out yet, and lists the user as pending', async () => {
+    server.use(
+      http.post(apiUrl('/users'), async ({ request }) => {
+        const { email, role } = inviteBody.parse(await request.json())
+        return HttpResponse.json(
+          { id: 'user-new', email, role, created_at: '2026-11-12T00:00:00Z', disabled_at: null, pending: true },
+          { status: 201 },
+        )
+      }),
+    )
+    const user = await renderUsers()
+
+    await inviteUser(user, 'new@acme.example')
+
+    const toasts = screen.getByRole('region', { name: 'Notifications' })
+    expect(
+      await within(toasts).findByText(
+        "User created. The invitation email to new@acme.example hasn't gone out yet; it will be retried automatically.",
+      ),
+    ).toBeInTheDocument()
+    const row = screen.getByText('new@acme.example').closest('tr')!
+    expect(within(row).getByText('Invitation pending')).toBeInTheDocument()
+  })
+
+  it('still reports the invitation when the dialog was closed before it finished', async () => {
+    const release = holdRequests('post', '/users')
+    const user = await renderUsers()
+
+    await submitInvite(user, 'new@acme.example')
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Invite user' })).not.toBeInTheDocument())
+    release()
+
+    const toasts = screen.getByRole('region', { name: 'Notifications' })
+    expect(await within(toasts).findByText('Invitation sent to new@acme.example.')).toBeInTheDocument()
+  })
+
+  it('pressing Enter in the email field sends the invitation', async () => {
+    const user = await renderUsers()
+
+    await user.click(screen.getByRole('button', { name: 'Invite user' }))
+    await user.type(screen.getByLabelText('Email'), 'new@acme.example{Enter}')
+
+    expect(await screen.findByText('new@acme.example')).toBeInTheDocument()
+  })
+
+  it('invite fails with email_taken and shows the error', async () => {
+    const user = await renderUsers()
+
+    await submitInvite(user, ADMIN.email)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'A user with this email already exists.',
+    )
+    expect(screen.getByRole('heading', { name: 'Invite user' })).toBeInTheDocument()
+  })
+
+  it('reopening the invite dialog after a failed invite shows it clean', async () => {
+    const user = await renderUsers()
+
+    await submitInvite(user, ADMIN.email)
+    await screen.findByRole('alert')
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: 'Invite user' }))
+
+    expect(screen.getByLabelText('Email')).toHaveValue('')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('changes a user role via the edit modal and the badge updates', async () => {
+    const user = await renderUsers()
+
+    const viewerRow = screen.getByText(VIEWER.email).closest('tr')!
+    await user.click(within(viewerRow).getByRole('button', { name: 'Edit role' }))
+
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Role' }), 'Admin')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(await within(viewerRow).findByText('Admin')).toBeInTheDocument()
+  })
+
+  it('role change fails with last_customer_admin and shows the error', async () => {
+    seedUsers([ADMIN])
+    const user = await renderUsers()
+
+    const adminRow = screen.getByText(ADMIN.email).closest('tr')!
+    await user.click(within(adminRow).getByRole('button', { name: 'Edit role' }))
+
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Role' }), 'Viewer')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Cannot remove the last admin of your organization.',
+    )
+  })
+
+  it('disabling shows confirmation modal and updates the row on confirm', async () => {
+    const user = await renderUsers()
+
+    const viewerRow = screen.getByText(VIEWER.email).closest('tr')!
+    await user.click(within(viewerRow).getByRole('button', { name: 'Disable' }))
+
+    expect(screen.getByText('This user will no longer be able to sign in. Continue?')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Yes, disable' }))
+
+    expect(await screen.findByText('Disabled')).toBeInTheDocument()
+    expect(screen.queryByText('This user will no longer be able to sign in. Continue?')).not.toBeInTheDocument()
+  })
+
+  it('disable fails with last_customer_admin and shows the error', async () => {
+    seedUsers([ADMIN])
+    const user = await renderUsers()
+
+    await user.click(screen.getByRole('button', { name: 'Disable' }))
+    await user.click(screen.getByRole('button', { name: 'Yes, disable' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Cannot remove the last admin of your organization.',
+    )
+  })
+
+  it('cancelling the disable modal keeps the user active', async () => {
+    const user = await renderUsers()
+
+    const viewerRow = screen.getByText(VIEWER.email).closest('tr')!
+    await user.click(within(viewerRow).getByRole('button', { name: 'Disable' }))
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    expect(screen.queryByText('This user will no longer be able to sign in. Continue?')).not.toBeInTheDocument()
+    expect(screen.queryByText('Disabled')).not.toBeInTheDocument()
+  })
+
+  it('shows a network error when the user list cannot be loaded', async () => {
+    server.use(http.get(apiUrl('/users'), () => HttpResponse.error()))
+    renderApp('/users')
+
+    expect(await screen.findByText('Could not reach the server to load the users.')).toBeInTheDocument()
+  })
+})

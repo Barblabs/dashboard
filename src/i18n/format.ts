@@ -1,0 +1,72 @@
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+
+/** What a table cell or read-only field shows when it has no value. */
+export const EMPTY = '-'
+
+/** The language the UI is shown in, as the locale every `Intl` formatter takes. */
+export function useLocale(): string {
+  const { i18n } = useTranslation()
+  return i18n.resolvedLanguage ?? i18n.language
+}
+
+/*
+ * `medium` spells the month ("Nov 11, 2026"), for tables; `numeric` is the browser's
+ * default short date ("11/11/2026").
+ */
+const DATE_STYLES = {
+  medium: { dateStyle: 'medium' },
+  numeric: {},
+} as const satisfies Record<string, Intl.DateTimeFormatOptions>
+
+export type DateStyle = keyof typeof DATE_STYLES
+
+export function useDateFormat(style: DateStyle = 'medium'): (iso: string) => string {
+  const locale = useLocale()
+  return useMemo(() => {
+    const format = new Intl.DateTimeFormat(locale, DATE_STYLES[style])
+    return (iso) => format.format(new Date(iso))
+  }, [locale, style])
+}
+
+/** Two ISO dates as one period, saying once what they share: "Nov 16 – 17, 2026". */
+export function useDateRangeFormat(): (start: string, end: string) => string {
+  const locale = useLocale()
+  return useMemo(() => {
+    const format = new Intl.DateTimeFormat(locale, DATE_STYLES.medium)
+    return (start, end) => format.formatRange(new Date(start), new Date(end))
+  }, [locale])
+}
+
+/** A share from 0 to 1 as a whole percentage: "85%" in English, "85 %" in Spanish. */
+export function usePercentFormat(): (share: number) => string {
+  const locale = useLocale()
+  return useMemo(() => {
+    const format = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 })
+    return (share) => format.format(share)
+  }, [locale])
+}
+
+/** Joins names the way the UI's language does: "A and B" in English, "A y B" in Spanish. */
+export function useListFormat(): (items: string[]) => string {
+  const locale = useLocale()
+  return useMemo(() => {
+    const format = new Intl.ListFormat(locale, { type: 'conjunction' })
+    return (items) => format.format(items)
+  }, [locale])
+}
+
+/** How long ago an ISO date was, in minutes under an hour and in hours after that. */
+export function useRelativeTime(): (iso: string) => string {
+  const { t } = useTranslation()
+  const locale = useLocale()
+  return useMemo(() => {
+    const format = new Intl.RelativeTimeFormat(locale, { style: 'short' })
+    return (iso) => {
+      const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
+      if (minutes < 1) return t('time.lessThanAMinute')
+      if (minutes < 60) return format.format(-minutes, 'minute')
+      return format.format(-Math.floor(minutes / 60), 'hour')
+    }
+  }, [locale, t])
+}

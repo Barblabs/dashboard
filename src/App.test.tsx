@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { renderApp } from './test/render'
+import { PLATFORM_ADMIN, renderApp, VIEWER } from './test/render'
 
 function nav() {
   return within(screen.getByRole('navigation'))
@@ -47,5 +47,71 @@ describe('Navigation', () => {
     renderApp('/forbidden')
 
     expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
+  })
+})
+
+function navLinks() {
+  return nav().getAllByRole('link').map((link) => link.textContent)
+}
+
+describe('Pages by role', () => {
+  it('shows a Customer Admin every customer page, in order', () => {
+    renderApp('/findings')
+
+    expect(navLinks()).toEqual(['Findings', 'News', 'Configuration', 'Business context', 'Notifications', 'Users'])
+  })
+
+  it('shows a Viewer the customer pages without Users, and denies it the Users page', () => {
+    renderApp('/users', VIEWER)
+
+    expect(navLinks()).toEqual(['Findings', 'News', 'Configuration', 'Business context', 'Notifications'])
+    expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
+  })
+
+  it('opens the tenants for a Platform Admin and shows only its pages', async () => {
+    renderApp('/', PLATFORM_ADMIN)
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Organizations' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/tenants')
+    expect(navLinks()).toEqual(['Tenants', 'Dashboard'])
+  })
+
+  it('denies a Platform Admin the customer pages', () => {
+    renderApp('/config', PLATFORM_ADMIN)
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
+  })
+})
+
+describe('returnTo after sign-in', () => {
+  it('sends a customer_admin to their home after a platform_admin signed out from /tenants', async () => {
+    const user = renderApp('/tenants', PLATFORM_ADMIN)
+    await screen.findByRole('heading', { level: 1, name: 'Organizations' })
+
+    await user.click(screen.getByRole('button', { name: 'Sign out' }))
+    await screen.findByRole('heading', { level: 1, name: 'Test mode' })
+
+    await user.click(screen.getByRole('button', { name: 'Admin (customer_admin)' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/config')
+  })
+
+  it('returns a customer_admin to /users when their session expired there', async () => {
+    const user = renderApp('/users', null)
+
+    await user.click(await screen.findByRole('button', { name: 'Admin (customer_admin)' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Users' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/users')
+  })
+
+  it('sends a viewer to their home when returnTo is /users, which only admins can open', async () => {
+    const user = renderApp('/users', null)
+
+    await user.click(await screen.findByRole('button', { name: 'Viewer (viewer)' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/config')
   })
 })

@@ -2,9 +2,9 @@ import type { ParseKeys, TFunction } from 'i18next'
 import { ApiError, errorCode, type BackendFailure } from '../api/client'
 
 /*
- * Stable failure codes from barbackend's /cmdb API, whether they arrive in
- * a result body or an HTTP error. A Map, not an object literal: a code like
- * "constructor" must not hit the prototype.
+ * Stable failure codes from barbackend, whether they arrive in a result body or an
+ * HTTP error. A Map, not an object literal: a code like "constructor" must not hit
+ * the prototype.
  */
 const CODE_KEYS = new Map<string, ParseKeys>([
   ['unreachable', 'config.errors.unreachable'],
@@ -19,6 +19,22 @@ const CODE_KEYS = new Map<string, ParseKeys>([
   ['sync_in_progress', 'config.errors.syncInProgress'],
   ['sync_failed', 'config.errors.syncFailed'],
   ['internal_error', 'config.errors.internalError'],
+  ['email_taken', 'users.invite.emailTaken'],
+  ['user_not_found', 'users.errors.userNotFound'],
+  ['last_customer_admin', 'users.errors.lastCustomerAdmin'],
+  ['customer_name_taken', 'tenants.errors.nameTaken'],
+  ['business_context_stale', 'businessContext.save.stale'],
+  ['invalid_document', 'businessContext.import.invalidDocument'],
+  ['agent_refused', 'businessContext.import.refused'],
+  ['agent_rejected', 'businessContext.import.rejected'],
+  ['agent_unavailable', 'businessContext.import.unavailable'],
+  ['news_digest_not_found', 'news.notFound'],
+  ['slack_not_installed', 'slack.errors.notInstalled'],
+  ['slack_needs_reauthorisation', 'slack.errors.needsReauthorisation'],
+  ['slack_channel_not_set', 'slack.errors.channelNotSet'],
+  ['slack_error', 'slack.errors.slackError'],
+  ['slack_unavailable', 'slack.errors.unavailable'],
+  ['invalid_state', 'slack.errors.invalidState'],
 ])
 
 interface RequestErrorKeys {
@@ -31,7 +47,7 @@ type MessageValues = { user?: string }
 
 export function translatedOrBackendMessage(
   { code, error }: BackendFailure,
-  t: TFunction<'translation'>,
+  t: TFunction,
   fallback: ParseKeys,
   values: MessageValues = {},
 ): string {
@@ -40,12 +56,26 @@ export function translatedOrBackendMessage(
   return error || t(fallback)
 }
 
+/** Passing a query or mutation's `error`, null until it fails, yields null until then. */
 export function requestErrorText(
   error: Error,
-  t: TFunction<'translation'>,
+  t: TFunction,
+  keys: RequestErrorKeys,
+  values?: MessageValues,
+): string
+export function requestErrorText(
+  error: Error | null,
+  t: TFunction,
+  keys: RequestErrorKeys,
+  values?: MessageValues,
+): string | null
+export function requestErrorText(
+  error: Error | null,
+  t: TFunction,
   keys: RequestErrorKeys,
   values: MessageValues = {},
-): string {
+): string | null {
+  if (!error) return null
   if (error instanceof ApiError && error.failure.kind === 'network') {
     return t(keys.network ?? keys.fallback)
   }

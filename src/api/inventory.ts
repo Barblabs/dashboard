@@ -1,30 +1,70 @@
 import { useState } from 'react'
-import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, queryOptions, useQuery, type QueryClient } from '@tanstack/react-query'
 import type { Asset, AssetFilters, AssetsPage } from './assets'
 import { api, errorCode } from './client'
 import { connectionScopeKey } from './cmdb'
+import { listCache } from './listCache'
+import type { Loadable } from './loadable'
+import { everyOf } from './schemas'
 
-const DEFAULT_ASSET_FILTERS: AssetFilters = { active: 'true', kind: null, criticality: null }
+export const DEFAULT_ASSET_FILTERS: AssetFilters = {
+  active: 'true',
+  kind: [],
+  criticality: [],
+  exposure: [],
+  information_classification: [],
+  lifecycle_stage: [],
+  area: [],
+}
 
 const ASSETS_PAGE_SIZE = 50
 
+// The backend's maximum: reading the whole inventory takes as few requests as possible.
+const MAX_ASSETS_PAGE_SIZE = 200
+
 // The backend rejects a cursor sent with other filters, so every page request repeats them.
-function assetsPath(filters: AssetFilters, cursor: string | null) {
-  const params = new URLSearchParams({ limit: String(ASSETS_PAGE_SIZE), active: filters.active })
-  if (filters.kind) params.set('kind', filters.kind)
-  if (filters.criticality) params.set('criticality', filters.criticality)
+function assetsPath(filters: AssetFilters, cursor: string | null, limit: number) {
+  const params = new URLSearchParams({ limit: String(limit), active: filters.active })
+  for (const kind of filters.kind) params.append('kind', kind)
+  for (const criticality of filters.criticality) params.append('criticality', criticality)
+  for (const exposure of filters.exposure) params.append('exposure', exposure)
+  for (const classification of filters.information_classification) {
+    params.append('information_classification', classification)
+  }
+  for (const stage of filters.lifecycle_stage) params.append('lifecycle_stage', stage)
+  for (const area of filters.area) params.append('area', String(area))
   if (cursor) params.set('cursor', cursor)
   return `/assets?${params}`
 }
 
-// The inventory comes from the connected CMDB, so it is dropped on disconnect.
+/** Every Asset matching the filters, one page of the backend's maximum size at a time. */
+export async function* allAssetPages(filters: Partial<AssetFilters>): AsyncGenerator<Asset[]> {
+  const complete = { ...DEFAULT_ASSET_FILTERS, ...filters }
+  let cursor: string | null = null
+  do {
+    const page: AssetsPage = await api.get<AssetsPage>(assetsPath(complete, cursor, MAX_ASSETS_PAGE_SIZE))
+    yield page.assets
+    cursor = page.next_cursor
+  } while (cursor !== null)
+}
+
+const ASSETS_KEY = [...connectionScopeKey, 'assets'] as const
+
+const inventoryPages = listCache<Asset>(ASSETS_KEY, 'assets')
+
+/** Shows a changed Asset in the inventory pages that hold it, without waiting for their refetch. */
+export function showAssetInInventory(queryClient: QueryClient, asset: Asset) {
+  inventoryPages.replace(queryClient, asset)
+}
+
+export function invalidateInventory(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({ queryKey: ASSETS_KEY })
+}
+
 function assetsQuery(filters: AssetFilters, cursor: string | null) {
   return queryOptions({
-    queryKey: [...connectionScopeKey, 'assets', filters, cursor],
-    queryFn: () => api.get<AssetsPage>(assetsPath(filters, cursor)),
-    // An unreadable inventory shows its error right away instead of staying on
-    // "Loading" for several seconds while it retries.
-    retry: false,
+    queryKey: [...ASSETS_KEY, filters, cursor],
+    queryFn: () => api.get<AssetsPage>(assetsPath(filters, cursor, ASSETS_PAGE_SIZE)),
     // Keeps the current page on screen while the next one loads, instead of flashing "Loading".
     placeholderData: keepPreviousData,
   })
@@ -36,24 +76,26 @@ interface Listing {
   cursors: string[]
 }
 
-// Every filter is compared, so a new one counts without touching this check.
-function isFiltered(filters: AssetFilters) {
-  const keys = Object.keys(DEFAULT_ASSET_FILTERS) as (keyof AssetFilters)[]
-  return keys.some((key) => filters[key] !== DEFAULT_ASSET_FILTERS[key])
+// Lists are compared by content: each change builds a new one, so a cleared list still equals the default.
+function sameFilter(a: string | readonly unknown[], b: string | readonly unknown[]) {
+  if (typeof a === 'string' || typeof b === 'string') return a === b
+  return a.length === b.length && a.every((value, i) => value === b[i])
 }
 
-export type InventoryStatus =
-  | { state: 'loading' }
-  | { state: 'failed'; error: Error; retry: () => void }
-  | {
-      state: 'ready'
-      assets: Asset[]
-      total: number
-      /** Tells "nothing matches the filters" apart from an empty inventory. */
-      filtered: boolean
-      /** The assets shown belong to the previous page while the requested one loads. */
-      navigating: boolean
-    }
+// Every filter is compared: `everyOf` fails `tsc` until a new one is listed here.
+const FILTER_KEYS = everyOf<keyof AssetFilters>()([
+  'active',
+  'kind',
+  'criticality',
+  'exposure',
+  'information_classification',
+  'lifecycle_stage',
+  'area',
+])
+
+function isFiltered(filters: AssetFilters) {
+  return FILTER_KEYS.some((key) => !sameFilter(filters[key], DEFAULT_ASSET_FILTERS[key]))
+}
 
 export interface Pager {
   page: number
@@ -63,7 +105,11 @@ export interface Pager {
 }
 
 export interface Inventory {
-  status: InventoryStatus
+  query: Loadable<AssetsPage>
+  /** Tells "nothing matches the filters" apart from an empty inventory. */
+  filtered: boolean
+  /** The assets shown belong to the previous page while the requested one loads. */
+  navigating: boolean
   filters: AssetFilters
   filterBy: (filters: AssetFilters) => void
   /** `null` while the whole inventory fits in one page. */
@@ -86,18 +132,6 @@ export function useInventory(): Inventory {
   const navigating = query.isPlaceholderData
   const nextCursor = query.data?.next_cursor ?? null
 
-  const status: InventoryStatus = query.isPending
-    ? { state: 'loading' }
-    : query.isError
-      ? { state: 'failed', error: query.error, retry: () => void query.refetch() }
-      : {
-          state: 'ready',
-          assets: query.data.assets,
-          total: query.data.total,
-          filtered: isFiltered(listing.filters),
-          navigating,
-        }
-
   const pager: Pager | null =
     page > 1 || nextCursor !== null
       ? {
@@ -115,7 +149,9 @@ export function useInventory(): Inventory {
       : null
 
   return {
-    status,
+    query,
+    filtered: isFiltered(listing.filters),
+    navigating,
     filters: listing.filters,
     // A cursor is only valid with the filters that produced it, so new filters start at page one.
     filterBy: (filters) => setListing({ filters, cursors: [] }),

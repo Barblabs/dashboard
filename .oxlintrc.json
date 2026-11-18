@@ -16,6 +16,7 @@
     "react/only-export-components": ["warn", { "allowConstantExport": true }],
     "react/react-in-jsx-scope": "off",
     "react/incompatible-library": "off",
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }]
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "typescript/no-deprecated": "error"
   }
 }

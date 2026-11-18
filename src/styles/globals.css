@@ -35,11 +35,24 @@
   --font-body:  'Work Sans', sans-serif;
   --font-mono:  'IBM Plex Mono', monospace;
 
+  /* Stacking order: floating < dialog < popover < toast */
+  --z-floating: 10;
+  --z-dialog:   40;
+  --z-popover:  50;
+  --z-toast:    60;
+
   /* Motion. Opacity-only, so it stays on under prefers-reduced-motion. */
   --animate-fade-in: fade-in 200ms ease-out;
 
   @keyframes fade-in {
     from { opacity: 0; }
+  }
+
+  /* Scales too, so it is only used behind motion-safe, with fade-in as its reduced-motion fallback. */
+  --animate-pop-in: pop-in 200ms ease-out;
+
+  @keyframes pop-in {
+    from { opacity: 0; scale: 0.9; }
   }
 }
 

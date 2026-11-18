@@ -1,57 +1,154 @@
-import { lazy, Suspense, useState } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createBrowserRouter, Navigate, Outlet } from 'react-router'
-import { RouterProvider } from 'react-router/dom'
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
+import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router'
+import { useTranslation } from 'react-i18next'
+import { StatusPage } from './components/StatusPage'
+import { returnToState } from './auth/returnTo'
+import { restoreSession } from './auth/session'
+import { useAuthStore, useCurrentUser, type Role } from './auth/store'
+import { tokens } from './auth/tokenSource'
+import { RestoringSession, ServerUnreachable } from './components/SessionScreens'
 import { Sidebar } from './components/Sidebar'
-import { ConfigPage } from './pages/Config'
-import { FindingsPage } from './pages/Findings'
+import { ToastProvider } from './components/ui/Toast'
+import { DeactivatedPage } from './pages/Deactivated'
 import { ForbiddenPage } from './pages/Forbidden'
+import { LoginPage } from './pages/Login'
 import { NotFoundPage } from './pages/NotFound'
-import { NotificationsPage } from './pages/Notifications'
+import { homePath, PAGES } from './routes'
 import './i18n'
 
-// The dynamic import behind DEV keeps the devtools out of the production build.
 const ReactQueryDevtools = import.meta.env.DEV
   ? lazy(() =>
       import('@tanstack/react-query-devtools').then((m) => ({ default: m.ReactQueryDevtools })),
     )
   : null
 
-const DEFAULT_PATH = '/config'
-
-function createAppRouter() {
-  return createBrowserRouter([
-    {
-      element: <AppLayout />,
-      children: [
-        { index: true, element: <Navigate to={DEFAULT_PATH} replace /> },
-        { path: 'findings', element: <FindingsPage /> },
-        { path: 'config', element: <ConfigPage /> },
-        { path: 'notifications', element: <NotificationsPage /> },
-        { path: 'forbidden', element: <ForbiddenPage /> },
-        { path: '*', element: <NotFoundPage /> },
-      ],
-    },
-  ])
+function AuthGuard() {
+  const status = useAuthStore((s) => s.session.status)
+  const location = useLocation()
+  if (status === 'deactivated') return <Navigate to="/deactivated" replace />
+  if (status !== 'signedIn') return <Navigate to="/login" replace state={returnToState(location)} />
+  return <Outlet />
 }
 
+/*
+ * Cached data belongs to the session that fetched it. Clearing it here, outside every
+ * route, covers each way a session ends, including from pages no guard wraps.
+ * Being an effect, it runs after the guards have unmounted the pages that used it.
+ */
+function useClearCacheWhenSignedOut() {
+  const queryClient = useQueryClient()
+  const signedOut = useAuthStore((s) => s.session.status === 'signedOut')
+  useEffect(() => {
+    if (signedOut) queryClient.clear()
+  }, [signedOut, queryClient])
+}
+
+// Entering `restoring`, on startup or on a retry, is what starts a restoration.
+function useRestoreSession() {
+  const restoring = useAuthStore((s) => s.session.status === 'restoring')
+  useEffect(() => {
+    if (restoring) void restoreSession()
+  }, [restoring])
+}
+
+// The tokens are shared by every tab: once another tab forgets them, this session is over too.
+function useEndSessionWhenForgottenElsewhere() {
+  const endSession = useAuthStore((s) => s.endSession)
+  useEffect(() => tokens.onForgottenElsewhere(endSession), [endSession])
+}
+
+/*
+ * Until restoring settles no route is rendered, so no guard redirects: a reload stays on
+ * the page it was on.
+ */
+function SessionScope({ children }: { children: ReactNode }) {
+  useClearCacheWhenSignedOut()
+  useRestoreSession()
+  useEndSessionWhenForgottenElsewhere()
+  const status = useAuthStore((s) => s.session.status)
+  if (status === 'restoring') return <RestoringSession />
+  if (status === 'unreachable') return <ServerUnreachable />
+  return <>{children}</>
+}
+
+function RoleGuard({ roles, children }: { roles: readonly Role[]; children: ReactNode }) {
+  const user = useCurrentUser()
+  if (!user || !roles.includes(user.role)) return <Navigate to="/forbidden" replace />
+  return <>{children}</>
+}
+
+function DefaultRedirect() {
+  const user = useCurrentUser()
+  if (!user) return null
+  return <Navigate to={homePath(user.role)} replace />
+}
+
+// The page scrolls inside its main, so the sidebar and anything sticky in a page stay in view.
 function AppLayout() {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen">
       <Sidebar />
       <Outlet />
     </div>
   )
 }
 
+function RouteErrorPage() {
+  const { t } = useTranslation()
+  return (
+    <StatusPage
+      code={500}
+      title={t('status.unexpectedError.title')}
+      message={t('status.unexpectedError.message')}
+    />
+  )
+}
+
+function createAppRouter() {
+  return createBrowserRouter([
+    { path: 'login', element: <LoginPage /> },
+    { path: 'deactivated', element: <DeactivatedPage /> },
+    {
+      element: <AuthGuard />,
+      children: [
+        {
+          element: <AppLayout />,
+          children: [
+            { index: true, element: <DefaultRedirect /> },
+            ...PAGES.map(({ id, Page, roles }) => ({
+              path: id,
+              element: <RoleGuard roles={roles}><Page /></RoleGuard>,
+              errorElement: <RouteErrorPage />,
+            })),
+            { path: 'forbidden', element: <ForbiddenPage /> },
+            { path: '*', element: <NotFoundPage /> },
+          ],
+        },
+      ],
+    },
+  ])
+}
+
+/*
+ * A failed query shows its error right away instead of staying on "Loading" for several
+ * seconds while it retries; every error screen offers its own retry.
+ */
+function createQueryClient() {
+  return new QueryClient({ defaultOptions: { queries: { retry: false } } })
+}
+
 export function App() {
-  // One client and router per mount: every test starts with an empty cache and the current URL.
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(createQueryClient)
   const [router] = useState(createAppRouter)
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ToastProvider>
+        <SessionScope>
+          <RouterProvider router={router} />
+        </SessionScope>
+      </ToastProvider>
       {ReactQueryDevtools && (
         <Suspense fallback={null}>
           <ReactQueryDevtools />

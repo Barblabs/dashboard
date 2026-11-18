@@ -1,9 +1,10 @@
-import { cleanup, screen, waitFor } from '@testing-library/react'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { i18n } from '../../i18n'
-import { apiUrl } from '../../test/mocks/url'
-import { renderApp, seedSource } from '../../test/render'
+import { mockAssets } from '../../mocks/assets'
+import { apiUrl } from '../../mocks/url'
+import { renderApp, seedSource, VIEWER } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
 
 type User = ReturnType<typeof renderApp>
@@ -55,7 +56,7 @@ describe('Configuration', () => {
     expect(await screen.findByText('iTop connected')).toBeInTheDocument()
     expect(screen.getByText('http://10.0.0.5:8000')).toBeInTheDocument()
     expect(screen.getByText('barb-reader')).toBeInTheDocument()
-    expect(await screen.findByRole('cell', { name: /prod-api-01/ })).toBeInTheDocument()
+    expect(await screen.findByRole('option', { name: /prod-api-01/ })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Choose your CMDB' })).not.toBeInTheDocument()
   })
 
@@ -162,8 +163,10 @@ describe('Configuration', () => {
     expect(
       screen.getByText('Last sync: less than a minute ago'),
     ).toBeInTheDocument()
-    expect(await screen.findByRole('cell', { name: /prod-api-01/ })).toBeInTheDocument()
-    expect(screen.getAllByRole('row')).toHaveLength(5)
+    expect(await screen.findByRole('option', { name: /prod-api-01/ })).toBeInTheDocument()
+    expect(within(screen.getByRole('listbox')).getAllByRole('option')).toHaveLength(
+      mockAssets.filter((a) => a.active).length,
+    )
   })
 
   it('manual sync updates the last sync time', async () => {
@@ -427,13 +430,21 @@ describe('Configuration', () => {
     expect(assetRequests).toBe(0)
   })
 
-  it('shows the CMDB list right away when the source cannot be read', async () => {
+  // An unreadable source says nothing about the connection, so the page must not offer a new one.
+  it('shows the error right away when the source cannot be read, and retries on demand', async () => {
     server.use(http.get(apiUrl('/cmdb/source'), () => new HttpResponse(null, { status: 500 })))
-    renderApp()
+    const user = renderApp()
 
     expect(
-      await screen.findByRole('heading', { name: 'Choose your CMDB' }, { timeout: 1000 }),
+      await screen.findByText('Could not load the CMDB connection.', undefined, { timeout: 1000 }),
     ).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Choose your CMDB' })).not.toBeInTheDocument()
+
+    server.resetHandlers()
+    seedSource()
+    await user.click(screen.getByRole('button', { name: 'Retry' }))
+
+    expect(await screen.findByText('iTop connected')).toBeInTheDocument()
   })
 
   it('sends the provider with the login when testing and connecting', async () => {
@@ -497,7 +508,7 @@ describe('Configuration', () => {
     await user.click(screen.getByRole('button', { name: 'Connect and sync' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      `${text}`,
+      text,
     )
     expect(screen.queryByText('iTop connected')).not.toBeInTheDocument()
   })
@@ -534,6 +545,23 @@ describe('Configuration', () => {
     expect(screen.queryByRole('button', { name: 'Update credentials' })).not.toBeInTheDocument()
   })
 
+  // Losing the source to a failed refresh would hide the connection and its sync failure.
+  it('keeps the connection on screen when a failed sync cannot refresh it either', async () => {
+    const user = await renderConnected()
+    server.use(
+      http.post(apiUrl('/cmdb/source/sync'), () =>
+        HttpResponse.json({ code: 'sync_failed', error: 'sync failed' }, { status: 502 }),
+      ),
+      http.get(apiUrl('/cmdb/source'), () => new HttpResponse(null, { status: 500 })),
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Sync now' }))
+
+    expect(await screen.findByText('The sync failed.')).toBeInTheDocument()
+    expect(screen.getByText('iTop connected')).toBeInTheDocument()
+    expect(screen.queryByText('Could not load the CMDB connection.')).not.toBeInTheDocument()
+  })
+
   it('shows the failure recorded on the latest sync', async () => {
     seedSource({
       last_sync: TWO_HOURS_AGO,
@@ -544,6 +572,29 @@ describe('Configuration', () => {
     expect(
       await screen.findByText('Last sync failed 5 min. ago: iTop timed out'),
     ).toBeInTheDocument()
+  })
+
+  describe('viewer (read-only)', () => {
+    it('sees the connected CMDB info and the inventory but no action buttons', async () => {
+      seedSource({ last_sync: TWO_HOURS_AGO })
+      renderApp('/config', VIEWER)
+
+      expect(await screen.findByText('iTop connected')).toBeInTheDocument()
+      expect(screen.getByText('http://10.0.0.5:8000')).toBeInTheDocument()
+      expect(await screen.findByRole('option', { name: /prod-api-01/ })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Disconnect' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Edit connection' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Sync now' })).not.toBeInTheDocument()
+    })
+
+    it('sees a not-connected message and no connect button when there is no CMDB', async () => {
+      renderApp('/config', VIEWER)
+
+      expect(
+        await screen.findByText('No CMDB is configured for your organization.'),
+      ).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Select' })).not.toBeInTheDocument()
+    })
   })
 
   it('a disconnect refused while a sync commits shows why and keeps the source', async () => {

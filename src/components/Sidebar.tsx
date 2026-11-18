@@ -1,27 +1,43 @@
 import { useTranslation } from 'react-i18next'
-import { NavLink } from 'react-router'
+import { NavLink, useNavigate } from 'react-router'
+import { signOut } from '../auth/signOut'
+import { useCurrentUser } from '../auth/store'
 import { chooseLanguage, LANGUAGES } from '../i18n'
-
-const NAV_ITEMS = ['findings', 'config', 'notifications'] as const
+import { useLocale } from '../i18n/format'
+import { pagePath, pagesFor } from '../routes'
+import { Wordmark } from './Wordmark'
 
 export function Sidebar() {
   const { t } = useTranslation()
+  const user = useCurrentUser()
+  const navigate = useNavigate()
+  const pages = user ? pagesFor(user.role) : []
+
+  function handleSignOut() {
+    signOut()
+    void navigate('/login', { replace: true })
+  }
 
   return (
     <aside className="flex min-h-screen w-[232px] shrink-0 flex-col justify-between bg-navy px-5 py-7">
       <div className="flex flex-col gap-8">
         <div className="flex items-center gap-3">
           <img src="/castle-logo.svg" alt="" className="size-10 shrink-0" aria-hidden="true" />
-          <span className="font-title text-[1.1875rem] leading-[1.2] whitespace-nowrap">
-            <span className="text-white">BARB</span>
-            <span className="text-cyan">ATTACK</span>
-          </span>
+          <div className="flex flex-col gap-0.5">
+            <Wordmark />
+            {user?.role === 'platform_admin' && (
+              <span className="font-body text-[0.75rem] font-semibold uppercase tracking-wider text-nav-text-dim">
+                {t('sidebar.superAdmin')}
+              </span>
+            )}
+          </div>
         </div>
+
         <nav className="flex flex-col gap-1">
-          {NAV_ITEMS.map((id) => (
+          {pages.map(({ id }) => (
             <NavLink
               key={id}
-              to={`/${id}`}
+              to={pagePath(id)}
               className={({ isActive }) =>
                 `flex h-11 items-center gap-3 rounded-md px-3 font-body text-[0.9375rem] transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan ${
                   isActive ? 'bg-nav-active-bg font-semibold text-white' : 'font-medium text-nav-text'
@@ -40,10 +56,31 @@ export function Sidebar() {
           ))}
         </nav>
       </div>
+
       <div className="flex flex-col gap-3">
         <LanguageSwitcher />
+        {user && (
+          <div className="flex flex-col gap-2 border-t border-white/10 pt-3">
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <p className="truncate font-body text-[0.8125rem] leading-[1.4] text-nav-text">
+                {user.email}
+              </p>
+              <p className="font-body text-[0.8125rem] leading-[1.4] text-nav-text-dim">
+                {t(`sidebar.user.role.${user.role}`)}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="cursor-pointer rounded-md bg-critical px-3 py-1.5 font-body text-[0.8125rem] font-semibold text-white transition-opacity duration-150 ease-[ease] hover:opacity-88 focus-visible:outline-2 focus-visible:outline-cyan"
+            >
+              {t('sidebar.signOut')}
+            </button>
+          </div>
+        )}
         <p className="font-body text-[0.8125rem] leading-[1.4] text-nav-text-dim">
-          {t('sidebar.footer.course')}<br />
+          {t('sidebar.footer.course')}
+          <br />
           {t('sidebar.footer.stage')}
         </p>
       </div>
@@ -52,12 +89,13 @@ export function Sidebar() {
 }
 
 function LanguageSwitcher() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const locale = useLocale()
 
   return (
     <div role="group" aria-label={t('sidebar.language.label')} className="flex gap-1">
       {LANGUAGES.map((language) => {
-        const active = i18n.resolvedLanguage === language
+        const active = locale === language
         return (
           <button
             key={language}

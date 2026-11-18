@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { ParseKeys } from 'i18next'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useValidationText } from '../../i18n/validation'
 import { z } from 'zod'
 import {
   useConnectMutation,
@@ -9,9 +10,11 @@ import {
   useUpdateLoginMutation,
   type CmdbLogin,
 } from '../../api/cmdb'
+import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Input } from '../../components/ui/Input'
+import { PasswordInput } from '../../components/ui/PasswordInput'
 import { Panel, PanelTitle } from '../../components/ui/Panel'
 import { translatedOrBackendMessage, requestErrorText } from '../../i18n/errors'
 
@@ -29,7 +32,7 @@ const credentialsSchema = z.object({
 
 type Credentials = z.infer<typeof credentialsSchema>
 
-export type ItopFormMode = 'connect' | 'update'
+type ItopFormMode = 'connect' | 'update'
 
 interface Props {
   mode: ItopFormMode
@@ -58,10 +61,6 @@ const COPY = {
   },
 } as const satisfies Record<ItopFormMode, Record<string, ParseKeys>>
 
-const RESULT = 'animate-fade-in rounded-md px-4 py-3 font-body text-[0.875rem] leading-[1.4]'
-const RESULT_OK = `${RESULT} border border-nav-active-bg bg-nav-active-bg/6 text-nav-active-bg`
-const RESULT_ERROR = `${RESULT} border border-critical bg-critical/5 text-critical`
-
 export function ItopForm({
   mode,
   initialValues,
@@ -71,6 +70,7 @@ export function ItopForm({
   titleId,
 }: Props) {
   const { t } = useTranslation()
+  const validationText = useValidationText()
   const testMutation = useTestLoginMutation(PROVIDER)
   const connectMutation = useConnectMutation(PROVIDER)
   const updateMutation = useUpdateLoginMutation()
@@ -100,10 +100,6 @@ export function ItopForm({
   })
 
   const handleSave = handleSubmit((login) => saveMutation.mutate(login, { onSuccess: onSaved }))
-
-  function errorText(message: string | undefined) {
-    return message && t(message as ParseKeys)
-  }
 
   function resultOf(): { ok: boolean; text: string } | null {
     if (saveMutation.isError) {
@@ -142,20 +138,16 @@ export function ItopForm({
     <Panel className={`gap-5 ${className}`}>
       <div className="flex items-baseline justify-between gap-3">
         <PanelTitle id={titleId}>{t(copy.title)}</PanelTitle>
-        <button
-          type="button"
-          className="cursor-pointer p-0 font-body text-[0.875rem] whitespace-nowrap text-gray underline underline-offset-2 hover:text-navy focus-ring"
-          onClick={onBack}
-        >
+        <Button variant="link" size="sm" onClick={onBack}>
           {t(copy.back)}
-        </button>
+        </Button>
       </div>
 
       <div className="flex flex-col gap-4">
         <Field
           label={t('config.form.url.label')}
           help={t('config.form.url.help')}
-          error={errorText(errors.url?.message)}
+          error={validationText(errors.url?.message)}
         >
           <Input
             type="url"
@@ -169,7 +161,7 @@ export function ItopForm({
         <Field
           label={t('config.form.user.label')}
           help={t('config.form.user.help')}
-          error={errorText(errors.user?.message)}
+          error={validationText(errors.user?.message)}
         >
           <Input
             type="text"
@@ -183,10 +175,9 @@ export function ItopForm({
         <Field
           label={t('config.form.password.label')}
           help={t('config.form.password.help')}
-          error={errorText(errors.password?.message)}
+          error={validationText(errors.password?.message)}
         >
-          <Input
-            type="password"
+          <PasswordInput
             autoComplete="new-password"
             disabled={busy}
             {...register('password', { onChange: () => clearErrors('password') })}
@@ -195,12 +186,9 @@ export function ItopForm({
       </div>
 
       {result && (
-        <div
-          role={result.ok ? 'status' : 'alert'}
-          className={result.ok ? RESULT_OK : RESULT_ERROR}
-        >
+        <Alert tone={result.ok ? 'success' : 'error'} className="animate-fade-in">
           <span aria-hidden="true">{result.ok ? '✓' : '✗'}</span> {result.text}
-        </div>
+        </Alert>
       )}
 
       <div className="flex flex-wrap gap-3">
