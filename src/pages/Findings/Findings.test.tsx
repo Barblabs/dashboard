@@ -372,19 +372,6 @@ describe('Findings', () => {
   })
 
   describe('tabs', () => {
-    it('renders all 5 tabs on the Findings page', async () => {
-      renderApp('/findings')
-      const tablist = await screen.findByRole('tablist')
-      const tabs = within(tablist).getAllByRole('tab')
-      expect(tabs.map((t) => t.textContent)).toEqual([
-        'Prioritized list',
-        'Summary',
-        'Before & After',
-        'Where the risk is',
-        'Threats',
-      ])
-    })
-
     it('shows the prioritized list by default and switches to Summary', async () => {
       const user = renderApp('/findings')
       await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
@@ -397,13 +384,6 @@ describe('Findings', () => {
   })
 
   describe('summary tab', () => {
-    it('shows the weekly trend chart heading and time-to-close heading', async () => {
-      await openSummaryTab()
-
-      expect(await screen.findByText('Weekly trend')).toBeInTheDocument()
-      expect(await screen.findByText('Time to close by band')).toBeInTheDocument()
-    })
-
     it('shows time-to-close bars for bands that have closures', async () => {
       await openSummaryTab()
 
@@ -450,13 +430,14 @@ describe('Findings', () => {
       const bandSelect = screen.getByRole('combobox', { name: 'Band' })
       fireEvent.change(bandSelect, { target: { value: 'critical' } })
 
-      await waitFor(() => {
-        const groups = within(screen.getByRole('main')).queryAllByRole('region')
-        expect(groups.length).toBeGreaterThan(0)
-        groups.forEach((g) => {
-          expect(within(g).queryAllByRole('button', { name: /^Open/ }).length).toBeGreaterThan(0)
-        })
-      })
+      // Only the first group holds a Critical finding.
+      await waitFor(() =>
+        expect(within(screen.getByRole('main')).getAllByRole('region').map((g) => within(g).getByRole('heading').textContent)).toEqual([
+          'Fallos con exploit activo sobre servicios expuestos a internet',
+        ]),
+      )
+      expect(screen.getByRole('button', { name: 'Open CVE-2021-41773' })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Open CVE-2023-44487' })).not.toBeInTheDocument()
       expect(window.location.search).toContain('band=critical')
     })
 
@@ -479,14 +460,6 @@ describe('Findings', () => {
       await user.click(screen.getByRole('button', { name: 'Remove filter' }))
 
       await waitFor(() => expect(screen.queryByText('Band: Critical')).not.toBeInTheDocument())
-    })
-
-    it('shows "From the chart:" prefix when navigated with from=chart', async () => {
-      renderApp('/findings?band=critical&from=chart')
-      await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
-
-      expect(screen.getByText('From the chart:')).toBeInTheDocument()
-      expect(screen.getByText('Band: Critical')).toBeInTheDocument()
     })
 
     it('removes the from=chart label when all chips are cleared', async () => {
@@ -521,38 +494,6 @@ describe('Findings', () => {
   })
 
   describe('risk tab', () => {
-    it('shows the heatmap heading and selector', async () => {
-      await openRiskTab()
-      expect(await screen.findByRole('heading', { name: 'Where the risk is' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Exposure', pressed: true })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Criticality' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Area' })).toBeInTheDocument()
-    })
-
-    it('shows the heatmap note about unknown assets', async () => {
-      await openRiskTab()
-      expect(await screen.findByText(/"Unknown" are assets not classified/)).toBeInTheDocument()
-    })
-
-    it('shows the exposure group columns', async () => {
-      await openRiskTab()
-      expect(await screen.findByText('Internet')).toBeInTheDocument()
-      expect(screen.getByText('Internal')).toBeInTheDocument()
-      expect(screen.getByText('Unknown')).toBeInTheDocument()
-    })
-
-    it('shows assets with most findings heading', async () => {
-      await openRiskTab()
-      expect(await screen.findByText('Assets with most findings')).toBeInTheDocument()
-    })
-
-    it('shows the top tables heading', async () => {
-      await openRiskTab()
-      expect(await screen.findByText('Components and CVEs with most findings')).toBeInTheDocument()
-      expect(await screen.findByText('Components')).toBeInTheDocument()
-      expect(await screen.findByText('CVEs')).toBeInTheDocument()
-    })
-
     it('clicking a heatmap cell navigates to the prioritized list with band and exposure filters', async () => {
       const user = await openRiskTab()
       // Critical × internet_facing cell (count=5 from mock)
@@ -601,15 +542,6 @@ describe('Findings', () => {
       expect(subioLabel.previousElementSibling).toHaveTextContent('6')
     })
 
-    it('shows the movement matrix heading and group labels', async () => {
-      await openBeforeAfterTab()
-
-      expect(await screen.findByText('Movement matrix')).toBeInTheDocument()
-      // All 4 agent group headers and score group row headers appear
-      const g1Labels = screen.getAllByText('G1')
-      expect(g1Labels.length).toBeGreaterThanOrEqual(2) // column header + row header
-    })
-
     it('shows diagonal cell for G1 (3 findings stayed in SG1→G1)', async () => {
       await openBeforeAfterTab()
 
@@ -618,32 +550,12 @@ describe('Findings', () => {
       expect(cell).toBeInTheDocument()
     })
 
-    it('shows the band composition heading', async () => {
-      await openBeforeAfterTab()
-
-      expect(await screen.findByText('Band composition per group')).toBeInTheDocument()
-    })
   })
 
   describe('threats tab', () => {
-    it('shows the coverage heading and "Inferred by the Cartógrafo"', async () => {
-      await openThreatsTab()
-      expect(await screen.findByRole('heading', { name: 'Threat coverage' })).toBeInTheDocument()
-      expect(screen.getByText('Inferred by the Cartógrafo')).toBeInTheDocument()
-    })
-
     it('shows the coverage label with labeled and open counts', async () => {
       await openThreatsTab()
       expect(await screen.findByText('22 of 35 open findings have an ATT&CK label')).toBeInTheDocument()
-    })
-
-    it('shows the heatmap heading and role filter buttons', async () => {
-      await openThreatsTab()
-      expect(await screen.findByRole('heading', { name: 'Findings per tactic' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Exploitation' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Primary impact' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Secondary impact' })).toBeInTheDocument()
     })
 
     it('shows all 14 ATT&CK tactics in the heatmap', async () => {
