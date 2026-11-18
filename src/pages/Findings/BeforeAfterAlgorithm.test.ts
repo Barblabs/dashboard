@@ -74,64 +74,37 @@ describe('buildMatrix', () => {
       g(4, ['m', 'n', 'o', 'p']),
     ]
 
-    it('matrix rows sum to group size', () => {
+    it('counts every finding in the cell of its score group and agent group', () => {
       const r = buildMatrix(p(findings, groups))
-      for (let sg = 0; sg < 4; sg++) {
-        const rowSum = r.matrix[sg].reduce((acc, v) => acc + v, 0)
-        expect(rowSum).toBe(4)
-      }
+      expect(r.matrix).toEqual([
+        [3, 1, 0, 0],
+        [1, 3, 0, 0],
+        [0, 0, 4, 0],
+        [0, 0, 0, 4],
+      ])
+      expect(r.cellIds[0][1]).toEqual(['d'])
+      expect(r.cellIds[1][0]).toEqual(['e'])
     })
 
-    it('diagonal cells match stayed count', () => {
+    it('counts what went up, stayed and went down', () => {
       const r = buildMatrix(p(findings, groups))
-      expect(r.matrix[0][0]).toBe(3) // a,b,c stayed in SG1→G1
-      expect(r.matrix[1][1]).toBe(3) // f,g,h stayed in SG2→G2
-      expect(r.matrix[2][2]).toBe(4) // i,j,k,l stayed
-      expect(r.matrix[3][3]).toBe(4) // m,n,o,p stayed
-    })
-
-    it('off-diagonal cells capture movements', () => {
-      const r = buildMatrix(p(findings, groups))
-      expect(r.matrix[0][1]).toBe(1) // d: SG1→G2
-      expect(r.matrix[1][0]).toBe(1) // e: SG2→G1
-    })
-
-    it('subio and bajo counts are correct', () => {
-      const r = buildMatrix(p(findings, groups))
-      expect(r.subio).toBe(1) // e (SG2 → G1, ag < sg)
-      expect(r.bajo).toBe(1)  // d (SG1 → G2, ag > sg)
+      expect(r.subio).toBe(1)
+      expect(r.bajo).toBe(1)
       expect(r.seMantuvo).toBe(14)
-      expect(r.subio + r.bajo + r.seMantuvo).toBe(16)
     })
+  })
 
-    it('weighted subio equals weighted bajo', () => {
-      const r = buildMatrix(p(findings, groups))
-      let weightedSubio = 0
-      let weightedBajo = 0
-      for (let sg = 0; sg < 4; sg++) {
-        for (let ag = 0; ag < 4; ag++) {
-          const count = r.matrix[sg][ag]
-          if (count === 0) continue
-          if (ag < sg) weightedSubio += count * (sg - ag)
-          if (ag > sg) weightedBajo += count * (ag - sg)
-        }
-      }
-      expect(weightedSubio).toBe(weightedBajo)
-    })
+  it('lists the biggest moves first, then by score group', () => {
+    const findings = [f('d', 4, 3), f('c', 3, 2), f('b', 2, 1), f('a', 1, 4)]
+    const groups = [g(1, ['b']), g(2, ['c']), g(3, ['d']), g(4, ['a'])]
+    const r = buildMatrix(p(findings, groups))
 
-    it('cellIds captures correct finding IDs', () => {
-      const r = buildMatrix(p(findings, groups))
-      expect(r.cellIds[0][1]).toEqual(['d']) // d in SG1 col G2
-      expect(r.cellIds[1][0]).toEqual(['e']) // e in SG2 col G1
-    })
-
-    it('topChanges sorted by delta desc', () => {
-      const r = buildMatrix(p(findings, groups))
-      expect(r.topChanges).toHaveLength(2)
-      for (let i = 0; i < r.topChanges.length - 1; i++) {
-        expect(r.topChanges[i].delta).toBeGreaterThanOrEqual(r.topChanges[i + 1].delta)
-      }
-    })
+    expect(r.topChanges.map((c) => [c.findingId, c.delta])).toEqual([
+      ['a', 3],
+      ['b', 1],
+      ['c', 1],
+      ['d', 1],
+    ])
   })
 
   describe('N=8 — one swap per pair', () => {
@@ -162,24 +135,6 @@ describe('buildMatrix', () => {
       expect(r.matrix[0]).toHaveLength(8)
     })
 
-    it('total = subio + seMantuvo + bajo', () => {
-      const r = buildMatrix(p(findings, groups))
-      expect(r.subio + r.seMantuvo + r.bajo).toBe(16)
-    })
-
-    it('weighted invariant holds', () => {
-      const r = buildMatrix(p(findings, groups))
-      let ws = 0, wb = 0
-      for (let sg = 0; sg < 8; sg++) {
-        for (let ag = 0; ag < 8; ag++) {
-          const c = r.matrix[sg][ag]
-          if (ag < sg) ws += c * (sg - ag)
-          if (ag > sg) wb += c * (ag - sg)
-        }
-      }
-      expect(ws).toBe(wb)
-    })
-
     it('rank ranges are correct', () => {
       const r = buildMatrix(p(findings, groups))
       expect(r.rankRanges[0]).toEqual([1, 2])
@@ -195,18 +150,8 @@ describe('buildMatrix', () => {
       const groups = [g(1, ['x', 'y']), g(2, ['z'])]
       const r = buildMatrix(p(findings, groups))
 
-      expect(r.total).toBe(3)
-      expect(r.subio + r.seMantuvo + r.bajo).toBe(3)
       // x and y stay in G1; z stays in G2
       expect(r.seMantuvo).toBe(3)
-    })
-
-    it('total always equals subio + seMantuvo + bajo regardless of tie order', () => {
-      // All three share rank=5; sort is non-deterministic among ties
-      const findings = [f('p', 5, 2), f('q', 5, 1), f('r', 5, 2)]
-      const groups = [g(1, ['p', 'q']), g(2, ['r'])]
-      const r = buildMatrix(p(findings, groups))
-      expect(r.subio + r.seMantuvo + r.bajo).toBe(r.total)
     })
   })
 })
