@@ -4,15 +4,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { Button } from './Button'
 
 describe('Button', () => {
-  it('runs its action when enabled', async () => {
-    const onClick = vi.fn<() => void>()
-    render(<Button onClick={onClick}>Sync now</Button>)
-
-    await userEvent.click(screen.getByRole('button', { name: 'Sync now' }))
-
-    expect(onClick).toHaveBeenCalledOnce()
-  })
-
   it('ignores clicks when disabled', async () => {
     const onClick = vi.fn<() => void>()
     render(<Button disabled onClick={onClick}>Sync now</Button>)

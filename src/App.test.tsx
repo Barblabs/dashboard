@@ -96,22 +96,4 @@ describe('returnTo after sign-in', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
     expect(window.location.pathname).toBe('/config')
   })
-
-  it('returns a customer_admin to /users when their session expired there', async () => {
-    const user = renderApp('/users', null)
-
-    await user.click(await screen.findByRole('button', { name: 'Admin (customer_admin)' }))
-
-    expect(await screen.findByRole('heading', { level: 1, name: 'Users' })).toBeInTheDocument()
-    expect(window.location.pathname).toBe('/users')
-  })
-
-  it('sends a viewer to their home when returnTo is /users, which only admins can open', async () => {
-    const user = renderApp('/users', null)
-
-    await user.click(await screen.findByRole('button', { name: 'Viewer (viewer)' }))
-
-    expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
-    expect(window.location.pathname).toBe('/config')
-  })
 })

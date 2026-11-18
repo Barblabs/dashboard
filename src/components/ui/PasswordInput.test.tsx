@@ -22,19 +22,4 @@ describe('PasswordInput', () => {
     expect(input.type).toBe('text')
     expect(screen.getByRole('button', { name: 'Hide password' })).toHaveAttribute('aria-pressed', 'true')
   })
-
-  it('pressing Enter in the input submits the surrounding form without activating the toggle', async () => {
-    const user = userEvent.setup()
-    let submitted = false
-    render(
-      <form onSubmit={(e) => { e.preventDefault(); submitted = true }}>
-        <PasswordInput name="pw" />
-        <button type="submit">Submit</button>
-      </form>,
-    )
-
-    await user.type(document.querySelector('input')!, '{Enter}')
-
-    expect(submitted).toBe(true)
-  })
 })

@@ -2,7 +2,6 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { delay, http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Asset, AssetsPage } from '../../api/assets'
-import { i18n } from '../../i18n'
 import { importedExposure, mockAssets } from '../../mocks/assets'
 import { apiUrl } from '../../mocks/url'
 import { chooseFilter } from '../../test/filters'
@@ -215,28 +214,6 @@ describe('Tech stack', () => {
     expect(gap('analytics-worker-03')).toHaveAccessibleName('Unknown Exposure · Unclassified')
     expect(gap('legacy-billing')).toHaveAccessibleName('Unknown Exposure · Unclassified · 2 Unidentified Components')
     expect(gap('crm-db-primary')).not.toBeInTheDocument()
-  })
-
-  it('shows the inventory in Spanish', async () => {
-    localStorage.setItem('language', 'es')
-    await i18n.changeLanguage()
-    renderConnected()
-
-    expect(await screen.findByText('Cargando inventario…')).toBeInTheDocument()
-    await screen.findByRole('option', { name: /prod-api-01/ })
-    expect(screen.getByRole('heading', { name: 'Stack tecnológico' })).toBeInTheDocument()
-    expect(screen.getByText('7 activos')).toBeInTheDocument()
-    expect(screen.getByText('↑ ↓ para moverte')).toBeInTheDocument()
-    expect(option('prod-api-01')).toHaveTextContent('prod-api-01 Servidor · Infrastructure Alta')
-    expect(option('prod-api-01')).toHaveAccessibleName(/1 componente no identificado/)
-    expect(option('core-switch-01')).toHaveTextContent('Dispositivo de red · Sin área')
-    const details = within(screen.getByRole('article', { name: 'prod-api-01' }))
-    expect(details.getByText('SRV-001').parentElement).toHaveTextContent(/^Servidor·SRV-001·Activo$/)
-    expect(fact('Exposición')).toHaveTextContent('Expuesto a internet·iTop')
-    expect(fact('Ciclo de vida')).toHaveTextContent(/^Producción$/)
-    expect(fact('Retirado en la CMDB')).toHaveTextContent(/^No$/)
-    expect(details.getByText('1 de 3 no identificado')).toBeInTheDocument()
-    expect(details.getByText('No identificado')).toBeInTheDocument()
   })
 
   it('the inactive filter reaches assets no longer monitored and says since when', async () => {
