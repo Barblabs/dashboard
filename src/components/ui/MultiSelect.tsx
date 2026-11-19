@@ -66,7 +66,7 @@ export function MultiSelect({
           <Combobox.Input
             id={id}
             placeholder={value.length > 0 ? '' : placeholder}
-            className="h-7 min-w-24 flex-1 bg-transparent px-1 font-body text-[0.9375rem] text-navy outline-none placeholder:text-gray"
+            className="h-7 min-w-24 flex-1 bg-transparent px-1 font-body text-base md:text-[0.9375rem] text-navy outline-none placeholder:text-gray"
           />
         </Combobox.Chips>
       </Combobox.InputGroup>

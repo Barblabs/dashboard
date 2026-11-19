@@ -102,7 +102,7 @@ export function TagField({ name, label, placeholder, hideLabel, suggestions, can
                     add(text)
                   }
                 }}
-                className="h-7 min-w-24 flex-1 bg-transparent px-1 font-body text-[0.9375rem] text-navy outline-none placeholder:text-gray"
+                className="h-7 min-w-24 flex-1 bg-transparent px-1 font-body text-base md:text-[0.9375rem] text-navy outline-none placeholder:text-gray"
               />
             }
           />

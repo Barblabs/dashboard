@@ -15,7 +15,7 @@ export function Textarea({ className = '', id, name, value, defaultValue, disabl
       defaultValue={defaultValue}
       disabled={disabled}
       autoFocus={autoFocus}
-      className={`${FIELD_SURFACE} resize-y px-3 py-2.5 text-[0.9375rem] leading-[1.5] focus:border-navy data-disabled:cursor-not-allowed data-disabled:bg-panel data-disabled:text-gray data-invalid:border-critical aria-invalid:border-critical ${className}`}
+      className={`${FIELD_SURFACE} resize-y px-3 py-2.5 text-base md:text-[0.9375rem] leading-[1.5] focus:border-navy data-disabled:cursor-not-allowed data-disabled:bg-panel data-disabled:text-gray data-invalid:border-critical aria-invalid:border-critical ${className}`}
     />
   )
 }
