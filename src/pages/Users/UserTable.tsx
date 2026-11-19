@@ -7,6 +7,7 @@ import { BanIcon, PencilIcon } from '../../components/ui/icons'
 import { Message } from '../../components/ui/Message'
 import { SearchField } from '../../components/ui/SearchField'
 import { CELL, HEADER_CELL } from '../../components/ui/table'
+import { useWideLayout } from '../../components/ui/useWideLayout'
 
 type UserStatus = 'disabled' | 'pending' | 'active'
 
@@ -32,6 +33,7 @@ export function UserTable({
 }) {
   const { t } = useTranslation()
   const currentUser = useCurrentUser()
+  const wide = useWideLayout()
   const [search, setSearch] = useState('')
 
   const disabledCount = users.filter((u) => userStatus(u) === 'disabled').length
@@ -53,7 +55,7 @@ export function UserTable({
 
       {filtered.length === 0 ? (
         <Message>{users.length === 0 ? t('users.empty') : t('users.noMatches')}</Message>
-      ) : (
+      ) : wide ? (
         <div className="overflow-hidden rounded-lg border border-border-panel">
           <table className="w-full border-collapse text-[0.875rem]">
             <thead>
@@ -65,51 +67,20 @@ export function UserTable({
             </thead>
             <tbody className="bg-white">
               {filtered.map((user) => {
-                const status = userStatus(user)
-                const isDisabled = status === 'disabled'
                 const isSelf = user.email === currentUser?.email
                 return (
                   <tr
                     key={user.id}
-                    className={`[&:last-child>td]:border-0 ${isDisabled ? 'opacity-50' : ''}`}
+                    className={`[&:last-child>td]:border-0 ${userStatus(user) === 'disabled' ? 'opacity-50' : ''}`}
                   >
                     <td className={CELL}>
-                      <div className="flex flex-wrap items-center gap-2 font-body">
-                        {/* An email has no break points: without this it widens the table and pushes the actions out of view. */}
-                        <span className="min-w-0 wrap-anywhere">{user.email}</span>
-                        {isSelf && <Badge variant="caps">{t('users.you')}</Badge>}
-                        {status !== 'active' && (
-                          <Badge variant={STATUS_BADGE[status]}>{t(`users.status.${status}`)}</Badge>
-                        )}
-                      </div>
+                      <UserIdentity user={user} isSelf={isSelf} />
                     </td>
                     <td className={CELL}>
-                      <Badge variant={user.role === 'customer_admin' ? 'solid' : 'outline'}>
-                        {t(`users.role.${user.role}`)}
-                      </Badge>
+                      <RoleBadge user={user} />
                     </td>
                     <td className={`${CELL} text-right`}>
-                      {!isDisabled && (
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            aria-label={t('users.actions.editRole')}
-                            className="cursor-pointer rounded-md p-1.5 text-gray transition-colors hover:bg-panel hover:text-navy focus-ring"
-                            onClick={() => onEditRole(user)}
-                          >
-                            <PencilIcon />
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={t('users.actions.disable')}
-                            disabled={isSelf}
-                            className="cursor-pointer rounded-md p-1.5 text-critical transition-colors hover:bg-critical/10 focus-ring disabled:cursor-not-allowed disabled:opacity-30"
-                            onClick={() => onDisable(user)}
-                          >
-                            <BanIcon />
-                          </button>
-                        </div>
-                      )}
+                      <UserActions user={user} isSelf={isSelf} onEditRole={onEditRole} onDisable={onDisable} />
                     </td>
                   </tr>
                 )
@@ -117,7 +88,84 @@ export function UserTable({
             </tbody>
           </table>
         </div>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {filtered.map((user) => {
+            const isSelf = user.email === currentUser?.email
+            return (
+              <li
+                key={user.id}
+                className={`flex flex-col gap-3 rounded-lg border border-border-panel bg-white p-4 text-[0.875rem] text-navy ${userStatus(user) === 'disabled' ? 'opacity-50' : ''}`}
+              >
+                <UserIdentity user={user} isSelf={isSelf} />
+                <div className="flex items-center justify-between gap-2">
+                  <RoleBadge user={user} />
+                  <UserActions user={user} isSelf={isSelf} onEditRole={onEditRole} onDisable={onDisable} />
+                </div>
+              </li>
+            )
+          })}
+        </ul>
       )}
     </>
+  )
+}
+
+function UserIdentity({ user, isSelf }: { user: UserResponse; isSelf: boolean }) {
+  const { t } = useTranslation()
+  const status = userStatus(user)
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 font-body">
+      {/* An email has no break points: without this it widens the table and pushes the actions out of view. */}
+      <span className="min-w-0 wrap-anywhere">{user.email}</span>
+      {isSelf && <Badge variant="caps">{t('users.you')}</Badge>}
+      {status !== 'active' && <Badge variant={STATUS_BADGE[status]}>{t(`users.status.${status}`)}</Badge>}
+    </div>
+  )
+}
+
+function RoleBadge({ user }: { user: UserResponse }) {
+  const { t } = useTranslation()
+
+  return (
+    <Badge variant={user.role === 'customer_admin' ? 'solid' : 'outline'}>{t(`users.role.${user.role}`)}</Badge>
+  )
+}
+
+function UserActions({
+  user,
+  isSelf,
+  onEditRole,
+  onDisable,
+}: {
+  user: UserResponse
+  isSelf: boolean
+  onEditRole: (user: UserResponse) => void
+  onDisable: (user: UserResponse) => void
+}) {
+  const { t } = useTranslation()
+  if (userStatus(user) === 'disabled') return null
+
+  return (
+    <div className="flex items-center justify-end gap-1">
+      <button
+        type="button"
+        aria-label={t('users.actions.editRole')}
+        className="cursor-pointer rounded-md p-1.5 text-gray transition-colors hover:bg-panel hover:text-navy focus-ring"
+        onClick={() => onEditRole(user)}
+      >
+        <PencilIcon />
+      </button>
+      <button
+        type="button"
+        aria-label={t('users.actions.disable')}
+        disabled={isSelf}
+        className="cursor-pointer rounded-md p-1.5 text-critical transition-colors hover:bg-critical/10 focus-ring disabled:cursor-not-allowed disabled:opacity-30"
+        onClick={() => onDisable(user)}
+      >
+        <BanIcon />
+      </button>
+    </div>
   )
 }
