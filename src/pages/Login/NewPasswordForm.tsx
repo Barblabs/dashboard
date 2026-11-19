@@ -49,7 +49,7 @@ export function NewPasswordForm() {
     <form
       noValidate
       onSubmit={(e) => { void handleSubmit(onSubmit)(e) }}
-      className="flex w-[420px] flex-col gap-[18px] rounded-xl border border-border-panel bg-white px-8 pb-7 pt-8"
+      className="flex w-full max-w-[420px] flex-col gap-[18px] rounded-xl border border-border-panel bg-white px-5 pt-6 pb-6 md:px-8 md:pt-8 md:pb-7"
     >
       <div className="flex flex-col gap-1.5">
         <h1 className="font-title text-[1.625rem] leading-[1.15] text-navy">

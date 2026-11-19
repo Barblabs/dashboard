@@ -12,8 +12,8 @@ interface Props {
 
 export function SearchField({ label, value, onChange, counter }: Props) {
   return (
-    <div className="flex items-center gap-4">
-      <div className="relative flex-1">
+    <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
+      <div className="relative md:flex-1">
         <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray" />
         <Input
           type="search"

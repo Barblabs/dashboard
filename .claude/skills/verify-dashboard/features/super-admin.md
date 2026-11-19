@@ -4,7 +4,7 @@
 - `/tenants` (sidebar "Tenants", heading "Organizations"), platform_admin only: cards with name, created date, status; search box; counter ("3 organizations · 1 deactivated")
 - "New organization" two-step dialog: "Organization name", "Next", then "Admin email", "Create and send invitation"; a taken name shows "An organization with this name already exists."
 - Per card: "Rename" (dialog "Rename organization"), "Deactivate" (dialog "Deactivate organization" / "Yes, deactivate"), "Reactivate" (immediate)
-- `/admin-dashboard` (sidebar "Dashboard"): stat cards Organizations / Active / Deactivated / New this month, chart "New organizations per month", "Recent organizations"; read only
+- `/admin-dashboard` (sidebar "Dashboard"): stat cards Organizations / Active / Deactivated / New this month, chart "New organizations per month", the "Organizations" table; read only
 
 ## How to get to it (user POV)
 Sign in as platform_admin; it lands on `/tenants`.
