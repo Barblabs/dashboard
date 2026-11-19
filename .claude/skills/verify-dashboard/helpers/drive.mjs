@@ -70,7 +70,7 @@ async function signIn(role, landing = HOME[role]) {
   await page.getByRole('button', { name: ROLE_BUTTON[role] }).click()
   await page.waitForURL(`**${landing}`)
 }
-// Signing in again after this returns to the page signed out from, whatever the role; pass
+// Signing in again after this returns to the page signed out from if the new role can open it; pass
 // `{ fresh: true }` to open / so the next sign-in lands on its role's home (reopening /login keeps it).
 async function signOut({ fresh = false } = {}) {
   await page.getByRole('button', { name: 'Sign out' }).click()
