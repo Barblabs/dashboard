@@ -117,6 +117,18 @@ async function connect() {
   await expect(assetList()).toBeVisible()
 }
 
+async function checkNoSidewaysScroll(label) {
+  const { scrollWidth, clientWidth } = await page.getByRole('main').evaluate((el) => ({ scrollWidth: el.scrollWidth, clientWidth: el.clientWidth }))
+  steps.push({ label: `${label} main width`, scrollWidth, clientWidth })
+  check(scrollWidth === clientWidth, `${label}: main scrolls sideways (${scrollWidth} > ${clientWidth})`)
+}
+
+async function checkOnScreen(name, locator, width) {
+  const box = await locator.boundingBox()
+  check(box && box.x >= 0 && box.x + box.width <= width, `${name} not fully on screen: ${JSON.stringify(box)}`)
+  return box
+}
+
 const scenarios = {
   async mobile() {
     await page.setViewportSize({ width: 390, height: 844 })
@@ -191,14 +203,68 @@ const scenarios = {
     check(!(await menu.isVisible()), 'menu button visible at 1280px')
     await shot('desktop-unchanged')
   },
+  async 'phone-stacking'() {
+    await page.setViewportSize({ width: 390, height: 844 })
+    const main = page.getByRole('main')
+    await signIn('customer_admin')
+    await expect(page.getByRole('heading', { name: 'Choose your CMDB' })).toBeVisible()
+    const stepsTitle = await page.getByRole('heading', { name: 'Connect CMDB' }).boundingBox()
+    const choice = await page.getByRole('heading', { name: 'Choose your CMDB' }).boundingBox()
+    check(choice.y > stepsTitle.y + stepsTitle.height && Math.abs(choice.x - stepsTitle.x) < 30, `the steps panel is not stacked above the CMDB choice: ${JSON.stringify({ stepsTitle, choice })}`)
+    await checkNoSidewaysScroll('config choose')
+    await shot('config-choose-stacked')
+    await checkOnScreen('Select', page.getByRole('button', { name: 'Select' }), 390)
+    await shot('config-choose-select', page.getByRole('button', { name: 'Select' }))
+
+    await page.getByRole('button', { name: 'Select' }).click()
+    await expect(page.getByLabel('iTop address (IP or URL)')).toBeVisible()
+    await checkNoSidewaysScroll('config itop form')
+    await shot('itop-form', page.getByLabel('iTop address (IP or URL)'))
+    await page.reload()
+    await connect()
+
+    await checkNoSidewaysScroll('config connected')
+    for (const name of ['Disconnect', 'Edit connection', 'Sync now']) await checkOnScreen(name, page.getByRole('button', { name }), 390)
+    const sync = page.getByRole('button', { name: 'Sync now' })
+    await shot('connected-bar', page.getByText('iTop connected'))
+    const syncsBefore = callsTo('POST', '/cmdb/source/sync').length
+    await sync.click()
+    await expect(page.getByText('Sync complete.')).toBeVisible()
+    check(callsTo('POST', '/cmdb/source/sync').length === syncsBefore + 1, 'Sync now on a phone did not POST /cmdb/source/sync')
+
+    const triage = page.getByRole('button', { name: 'Triage them' })
+    const triageText = await page.getByText(/Assets? needs? triage\./).boundingBox()
+    const triageBox = await checkOnScreen('Triage them', triage, 390)
+    check(triageText && triageBox.y >= triageText.y + triageText.height, `Triage them is not under the banner text: ${JSON.stringify({ triageText, triageBox })}`)
+    await shot('triage-banner', triage)
+
+    await page.getByRole('button', { name: 'Menu' }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Sign out' }).click()
+    await page.waitForURL('**/login')
+    await goto('/')
+    await page.waitForURL('**/login')
+    await signIn('platform_admin')
+    const search = page.getByRole('searchbox', { name: 'Search by name…' })
+    const counter = page.getByText('3 organizations · 1 deactivated')
+    await expect(counter).toBeVisible()
+    await checkNoSidewaysScroll('/tenants')
+    const mainBox = await main.boundingBox()
+    const searchBox = await search.boundingBox()
+    const counterBox = await counter.boundingBox()
+    // main has 16px side padding on phones.
+    check(searchBox && Math.abs(searchBox.width - (mainBox.width - 32)) <= 1, `search is not full width: ${searchBox?.width} of ${mainBox.width}`)
+    check(counterBox && counterBox.y >= searchBox.y + searchBox.height, 'the organizations count is not on its own line under the search')
+    await shot('tenants-toolbar')
+
+    await page.setViewportSize({ width: 1280, height: 900 })
+    const wideSearch = await search.boundingBox()
+    const wideCounter = await counter.boundingBox()
+    check(wideCounter.y < wideSearch.y + wideSearch.height && wideCounter.x > wideSearch.x + wideSearch.width, 'at 1280px the count is not beside the search')
+    await shot('tenants-desktop')
+  },
   async 'phone-cards'() {
     await page.setViewportSize({ width: 390, height: 844 })
     const main = page.getByRole('main')
-    async function checkNoSidewaysScroll(label) {
-      const { scrollWidth, clientWidth } = await main.evaluate((el) => ({ scrollWidth: el.scrollWidth, clientWidth: el.clientWidth }))
-      steps.push({ label: `${label} main width`, scrollWidth, clientWidth })
-      check(scrollWidth === clientWidth, `${label}: main scrolls sideways (${scrollWidth} > ${clientWidth})`)
-    }
     const card = (text) => main.getByRole('listitem').filter({ hasText: text })
 
     await signIn('customer_admin')
