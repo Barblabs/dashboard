@@ -8,24 +8,31 @@ const BACKDROP =
 
 // Opacity always animates; the slide only when the user allows motion.
 const POPUP =
-  'fixed top-0 right-0 z-dialog flex h-full w-[min(28rem,100vw)] flex-col bg-white shadow-2xl outline-none transition-[opacity,translate] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] data-ending-style:opacity-0 data-starting-style:opacity-0 motion-safe:data-ending-style:translate-x-6 motion-safe:data-starting-style:translate-x-6'
+  'fixed top-0 z-dialog flex h-full flex-col bg-white shadow-2xl outline-none transition-[opacity,translate] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] data-ending-style:opacity-0 data-starting-style:opacity-0'
+
+const SIDES = {
+  right:
+    'right-0 w-[min(28rem,100vw)] motion-safe:data-ending-style:translate-x-6 motion-safe:data-starting-style:translate-x-6',
+  left: 'left-0 w-[min(18rem,calc(100vw-3rem))] motion-safe:data-ending-style:-translate-x-6 motion-safe:data-starting-style:-translate-x-6',
+}
 
 interface SheetProps {
   open: boolean
   onClose: () => void
+  side?: keyof typeof SIDES
   children: ReactNode
 }
 
 /**
- * A panel from the right edge, for working through items beside the page rather than over it.
+ * A panel from one edge, for working through items beside the page rather than over it.
  * Like a Modal, its content unmounts once closed.
  */
-export function Sheet({ open, onClose, children }: SheetProps) {
+export function Sheet({ open, onClose, side = 'right', children }: SheetProps) {
   return (
     <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
       <Dialog.Portal>
         <Dialog.Backdrop className={BACKDROP} />
-        <Dialog.Popup className={POPUP}>{children}</Dialog.Popup>
+        <Dialog.Popup className={`${POPUP} ${SIDES[side]}`}>{children}</Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>
   )
