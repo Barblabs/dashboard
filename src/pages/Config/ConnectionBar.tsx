@@ -8,7 +8,7 @@ export const CONNECTION_DETAIL = 'min-w-0 text-[0.8125rem] wrap-anywhere md:over
 /** A row under the bar's header; each adds its border and background colour. */
 export const CONNECTION_STRIP = 'flex animate-fade-in flex-wrap items-center gap-4 border-t px-6 py-3.5'
 
-export const CONNECTION_STRIP_TEXT = 'flex-1 font-body text-[0.875rem] leading-[1.4]'
+export const CONNECTION_STRIP_TEXT = 'flex-[1_1_16rem] font-body text-[0.875rem] leading-[1.4]'
 
 interface ConnectionBarProps {
   badge: string
