@@ -5,6 +5,12 @@ import { i18n } from '../i18n'
 import { useAuthStore } from '../auth/store'
 import { server } from './server'
 
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }))
 // With no saved choice, the detector falls back to jsdom's language (en-US): the suite runs in English.
 afterEach(async () => {
