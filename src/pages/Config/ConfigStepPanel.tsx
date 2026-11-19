@@ -10,7 +10,7 @@ export function ConfigStepPanel({ activeStep }: Props) {
   const { t } = useTranslation()
 
   return (
-    <aside className="flex w-[280px] shrink-0 flex-col gap-4 rounded-xl bg-navy p-6">
+    <aside className="flex w-full shrink-0 flex-col gap-4 rounded-xl bg-navy p-6 md:w-[280px]">
       <h2 className="font-title text-[1.375rem] leading-[1.2] text-white">{t('config.steps.title')}</h2>
       <p className="font-body text-[0.9375rem] leading-[1.4] text-nav-text">
         {t('config.steps.description')}
