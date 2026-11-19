@@ -18,3 +18,4 @@ User-facing features of the dashboard. Each file lists what to drive and the end
 | [users.md](users.md) | Invite, change role, disable, last-admin protection |
 | [super-admin.md](super-admin.md) | Organizations (create, rename, deactivate) and the super admin dashboard |
 | [language-switcher.md](language-switcher.md) | ES/EN toggle in the sidebar, persisted |
+| [mobile-layout.md](mobile-layout.md) | Phone top bar and drawer navigation, full-width pages, desktop sidebar unchanged |

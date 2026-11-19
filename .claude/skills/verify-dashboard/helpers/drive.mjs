@@ -117,6 +117,79 @@ async function connect() {
 }
 
 const scenarios = {
+  async mobile() {
+    await page.setViewportSize({ width: 390, height: 844 })
+    const menu = page.getByRole('button', { name: 'Menu', includeHidden: true })
+    const drawer = page.getByRole('dialog')
+    const drawerLink = (name) => drawer.getByRole('link', { name, exact: true })
+    async function checkMainFillsWidth(label) {
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+      const box = await page.getByRole('main').boundingBox()
+      steps.push({ label: `${label} main box`, box })
+      check(box && box.x === 0 && box.width === 390, `${label}: main is ${JSON.stringify(box)}, expected x 0 and width 390`)
+    }
+
+    await signIn('customer_admin')
+    check(!(await page.getByRole('complementary').isVisible()), 'sidebar column visible at 390px')
+    await checkMainFillsWidth('/config')
+    await shot('top-bar')
+
+    await menu.click()
+    await expect(drawer).toBeVisible()
+    check((await menu.getAttribute('aria-expanded')) === 'true', 'menu not aria-expanded while open')
+    for (const text of ['Findings', 'Sign out', 'admin@barbattack.example', 'Admin']) {
+      await expect(drawer.getByText(text, { exact: true }).first()).toBeVisible()
+    }
+    await expect(drawer.getByRole('group', { name: 'Language' })).toBeVisible()
+    await shot('drawer-open')
+
+    await page.keyboard.press('Escape')
+    await expect(drawer).toBeHidden()
+    check(await menu.evaluate((el) => el === document.activeElement), 'focus not back on menu after Escape')
+    check((await menu.getAttribute('aria-expanded')) === 'false', 'menu still aria-expanded after Escape')
+
+    await menu.click()
+    await expect(drawer).toBeVisible()
+    await page.mouse.click(380, 400)
+    await expect(drawer).toBeHidden()
+    check(await menu.evaluate((el) => el === document.activeElement), 'focus not back on menu after backdrop tap')
+
+    for (const [name, pathname] of [['Findings', '/findings'], ['News', '/news'], ['Business context', '/business-context'], ['Notifications', '/notifications'], ['Users', '/users'], ['Configuration', '/config']]) {
+      await menu.click()
+      await drawerLink(name).click()
+      await page.waitForURL(`**${pathname}`)
+      await expect(drawer).toBeHidden()
+      check(await menu.evaluate((el) => el === document.activeElement), `focus not back on menu after choosing ${name}`)
+      await checkMainFillsWidth(pathname)
+      await shot(pathname.slice(1))
+    }
+    await goto('/no-such-page')
+    await checkMainFillsWidth('404')
+    await shot('not-found')
+
+    await menu.click()
+    await drawer.getByRole('button', { name: 'Sign out' }).click()
+    await page.waitForURL('**/login')
+    await goto('/')
+    await page.waitForURL('**/login')
+    await signIn('platform_admin')
+    await menu.click()
+    await expect(drawer.getByText('Super Admin', { exact: true }).first()).toBeVisible()
+    await shot('super-admin-drawer')
+    for (const [name, pathname] of [['Dashboard', '/admin-dashboard'], ['Tenants', '/tenants']]) {
+      if (pathname === '/tenants') await menu.click()
+      await drawerLink(name).click()
+      await page.waitForURL(`**${pathname}`)
+      await expect(drawer).toBeHidden()
+      await checkMainFillsWidth(pathname)
+      await shot(pathname.slice(1))
+    }
+
+    await page.setViewportSize({ width: 1280, height: 900 })
+    check(await page.getByRole('complementary').isVisible(), 'sidebar column hidden at 1280px')
+    check(!(await menu.isVisible()), 'menu button visible at 1280px')
+    await shot('desktop-unchanged')
+  },
   async connect() {
     await signIn('customer_admin')
     await shot('selector')
