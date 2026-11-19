@@ -5,7 +5,7 @@ import type { Finding } from '../../api/prioritizations'
 import { failure } from '../../mocks/handlers/responses'
 import { prioritizationsStore } from '../../mocks/prioritizations-store'
 import { apiUrl } from '../../mocks/url'
-import { renderApp, VIEWER } from '../../test/render'
+import { onPhone, renderApp, VIEWER } from '../../test/render'
 import { server } from '../../test/server'
 
 async function renderFindings(path = '/findings') {
@@ -296,6 +296,28 @@ describe('Findings', () => {
     expect(within(dialog).getByText('Classification multiplier').nextElementSibling).toHaveTextContent(/^Unclassified$/)
     expect(within(dialog).getByText('Estimated: some inputs were missing and took a default.')).toBeInTheDocument()
     expect(within(dialog).getByText('Information Classification undeclared')).toBeInTheDocument()
+  })
+
+  it('on a phone shows each finding as a card that opens when tapped anywhere', async () => {
+    onPhone()
+    const user = await renderFindings()
+
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    const card = screen.getByRole('button', { name: 'Open CVE-2025-1094' }).closest('li')!
+    await user.click(within(card).getByText('PostgreSQL 15.6'))
+
+    expect(await screen.findByRole('dialog', { name: 'CVE-2025-1094' })).toBeInTheDocument()
+  })
+
+  it('on a phone opens a finding card from the keyboard', async () => {
+    onPhone()
+    const user = await renderFindings()
+
+    const open = screen.getByRole('button', { name: 'Open CVE-2025-1094' })
+    while (document.activeElement !== open) await user.tab()
+    await user.keyboard('{Enter}')
+
+    expect(await screen.findByRole('dialog', { name: 'CVE-2025-1094' })).toBeInTheDocument()
   })
 
   it('opens the finding a link names', async () => {

@@ -10,6 +10,7 @@ import {
 import { Badge } from '../../components/ui/Badge'
 import { Panel, PanelTitle } from '../../components/ui/Panel'
 import { CELL, HEADER_CELL } from '../../components/ui/table'
+import { useWideLayout } from '../../components/ui/useWideLayout'
 import { scorePoints } from './score'
 import { ScoreBandBadge } from './ScoreBandBadge'
 import { MONO, WRITTEN } from './styles'
@@ -22,6 +23,7 @@ interface Props {
 
 export function GroupPanel({ order, group, onOpen }: Props) {
   const { t } = useTranslation()
+  const wide = useWideLayout()
   const findings = group.finding_ids
     .map((id) => order.prioritization.findings.find((f) => f.finding_id === id))
     .filter((f): f is Finding => f !== undefined)
@@ -39,33 +41,40 @@ export function GroupPanel({ order, group, onOpen }: Props) {
         <p className={`${WRITTEN} max-w-[60rem] text-gray`}>{group.reason}</p>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-[0.875rem]">
-          <thead>
-            <tr className="border-b-2 border-border-row">
-              <th className={HEADER_CELL}>{t('findings.columns.cve')}</th>
-              <th className={HEADER_CELL}>{t('findings.columns.asset')}</th>
-              <th className={HEADER_CELL}>{t('findings.columns.component')}</th>
-              <th className={HEADER_CELL}>{t('findings.columns.score')}</th>
-              <th className={HEADER_CELL} title={t('findings.scoreRankHelp')}>
-                {t('findings.columns.scoreRank')}
-              </th>
-              <th className={HEADER_CELL}>{t('findings.columns.status')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {findings.map((finding) => (
-              <FindingRow key={finding.finding_id} order={order} finding={finding} onOpen={onOpen} />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {wide ? (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-[0.875rem]">
+            <thead>
+              <tr className="border-b-2 border-border-row">
+                <th className={HEADER_CELL}>{t('findings.columns.cve')}</th>
+                <th className={HEADER_CELL}>{t('findings.columns.asset')}</th>
+                <th className={HEADER_CELL}>{t('findings.columns.component')}</th>
+                <th className={HEADER_CELL}>{t('findings.columns.score')}</th>
+                <th className={HEADER_CELL} title={t('findings.scoreRankHelp')}>
+                  {t('findings.columns.scoreRank')}
+                </th>
+                <th className={HEADER_CELL}>{t('findings.columns.status')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {findings.map((finding) => (
+                <FindingRow key={finding.finding_id} order={order} finding={finding} onOpen={onOpen} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {findings.map((finding) => (
+            <FindingCard key={finding.finding_id} order={order} finding={finding} onOpen={onOpen} />
+          ))}
+        </ul>
+      )}
     </Panel>
   )
 }
 
 function FindingRow({ order, finding, onOpen }: { order: CurrentOrder; finding: Finding; onOpen: (id: string) => void }) {
-  const { t } = useTranslation()
   const closed = finding.closed_at !== null
 
   return (
@@ -75,17 +84,7 @@ function FindingRow({ order, finding, onOpen }: { order: CurrentOrder; finding: 
       className={`cursor-pointer transition-colors duration-150 hover:bg-row-hover ${closed ? 'text-gray' : ''}`}
     >
       <td className={CELL}>
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation()
-            onOpen(finding.finding_id)
-          }}
-          aria-label={t('findings.open', { cve: finding.cve_id })}
-          className={`focus-ring cursor-pointer rounded-xs font-semibold underline-offset-2 hover:underline ${MONO} ${closed ? 'text-gray line-through' : 'text-navy'}`}
-        >
-          {finding.cve_id}
-        </button>
+        <OpenButton finding={finding} onOpen={onOpen} />
       </td>
       <td className={CELL}>{finding.asset_name}</td>
       <td className={`${CELL} ${MONO}`}>
@@ -100,6 +99,57 @@ function FindingRow({ order, finding, onOpen }: { order: CurrentOrder; finding: 
         <FindingBadges order={order} finding={finding} />
       </td>
     </tr>
+  )
+}
+
+function FindingCard({ order, finding, onOpen }: { order: CurrentOrder; finding: Finding; onOpen: (id: string) => void }) {
+  const { t } = useTranslation()
+  const closed = finding.closed_at !== null
+
+  return (
+    <li
+      onClick={() => onOpen(finding.finding_id)}
+      className={`flex cursor-pointer flex-col gap-2 rounded-lg border border-border-row p-4 text-[0.875rem] transition-colors duration-150 hover:bg-row-hover ${closed ? 'text-gray' : 'text-navy'}`}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <OpenButton finding={finding} onOpen={onOpen} />
+        <span className={`flex items-center gap-2 ${MONO}`}>
+          {scorePoints(currentScore(finding))}
+          <ScoreBandBadge band={currentScoreDetails(finding).band} />
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={`${MONO} text-gray`} title={t('findings.scoreRankHelp')}>
+          {t('findings.columns.scoreRank')} #{finding.score_rank}
+        </span>
+        <FindingBadges order={order} finding={finding} />
+      </div>
+      <div className="flex flex-col gap-0.5">
+        <span>{finding.asset_name}</span>
+        <span className={`${MONO} text-gray`}>
+          {finding.component} {finding.version}
+        </span>
+      </div>
+    </li>
+  )
+}
+
+function OpenButton({ finding, onOpen }: { finding: Finding; onOpen: (id: string) => void }) {
+  const { t } = useTranslation()
+  const closed = finding.closed_at !== null
+
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation()
+        onOpen(finding.finding_id)
+      }}
+      aria-label={t('findings.open', { cve: finding.cve_id })}
+      className={`focus-ring cursor-pointer rounded-xs font-semibold underline-offset-2 hover:underline ${MONO} ${closed ? 'text-gray line-through' : 'text-navy'}`}
+    >
+      {finding.cve_id}
+    </button>
   )
 }
 
