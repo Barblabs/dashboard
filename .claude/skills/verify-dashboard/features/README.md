@@ -19,5 +19,5 @@ User-facing features of the dashboard. Each file lists what to drive and the end
 | [super-admin.md](super-admin.md) | Organizations (create, rename, deactivate) and the super admin dashboard |
 | [language-switcher.md](language-switcher.md) | ES/EN toggle in the sidebar, persisted |
 | [mobile-layout.md](mobile-layout.md) | Phone top bar and drawer navigation, full-width pages, input text that does not zoom, full-screen Finding detail, tab fade, Fab safe areas; desktop unchanged |
-| [phone-cards.md](phone-cards.md) | Findings, Users and Admin dashboard Organizations as cards on phones, no sideways scroll; tables from 768px |
+| [phone-cards.md](phone-cards.md) | Findings, Users, Areas and Admin dashboard Organizations as cards on phones, no sideways scroll; tables from 768px |
 | [phone-stacking.md](phone-stacking.md) | Config setup, connected bar, triage banner, search fields and Cognito sign-in stacked on phones; side by side from 768px |

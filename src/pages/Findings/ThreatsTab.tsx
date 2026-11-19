@@ -140,9 +140,9 @@ function HeatmapCard({
     <section className="rounded-xl border border-border-panel bg-white">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-panel px-6 py-4">
         <h2 className="font-title text-[1rem] text-navy">{t('findings.threats.heatmapTitle')}</h2>
-        <div className="flex items-center gap-2 font-body text-[0.875rem]">
+        <div className="flex flex-wrap items-center gap-2 font-body text-[0.875rem]">
           <span className="text-gray">{t('findings.threats.roleLabel')}</span>
-          <div className="flex gap-1" role="group" aria-label={t('findings.threats.roleLabel')}>
+          <div className="flex flex-wrap gap-1" role="group" aria-label={t('findings.threats.roleLabel')}>
             {([
               { key: '', label: t('findings.threats.roleAll') },
               { key: 'exploitation', label: t('findings.threats.roleExploitation') },
@@ -279,7 +279,9 @@ function TopTechniquesCard({ techniques }: { techniques: TechniqueCount[] }) {
       {techniques.length === 0 ? (
         <p className="p-6 font-body text-[0.875rem] text-gray">{t('findings.threats.topEmpty')}</p>
       ) : (
-        <TechniquesTable techniques={techniques} />
+        <div className="overflow-x-auto">
+          <TechniquesTable techniques={techniques} />
+        </div>
       )}
     </section>
   )
@@ -297,7 +299,7 @@ function TechniquesTable({ techniques }: { techniques: TechniqueCount[] }) {
   const maxFindings = Math.max(...techniques.map((tc) => tc.findings), 1)
 
   return (
-    <table className="w-full border-collapse font-body text-[0.875rem]">
+    <table className="w-full min-w-[40rem] border-collapse font-body text-[0.875rem]">
       <thead>
         <tr className="text-left text-[0.75rem] font-normal text-gray">
           <th className="px-4 py-2 font-normal">{t('findings.threats.topId')}</th>
@@ -317,7 +319,7 @@ function TechniquesTable({ techniques }: { techniques: TechniqueCount[] }) {
               {tc.roles.map((r) => (
                 <span
                   key={r}
-                  className="mr-1 inline-block rounded bg-panel px-1.5 py-0.5 font-body text-[0.75rem] text-navy"
+                  className="mr-1 inline-block rounded bg-panel px-1.5 py-0.5 font-body text-[0.75rem] whitespace-nowrap text-navy"
                 >
                   {roleLabels[r] ?? r}
                 </span>
