@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, useNavigate } from 'react-router'
 import { signOut } from '../auth/signOut'
@@ -5,9 +6,40 @@ import { useCurrentUser } from '../auth/store'
 import { chooseLanguage, LANGUAGES } from '../i18n'
 import { useLocale } from '../i18n/format'
 import { pagePath, pagesFor } from '../routes'
+import { MenuIcon } from './ui/icons'
+import { Sheet } from './ui/Sheet'
 import { Wordmark } from './Wordmark'
 
 export function Sidebar() {
+  const { t } = useTranslation()
+  const [drawerOpen, setDrawerOpen] = useState(false)
+
+  return (
+    <>
+      <aside className="hidden min-h-dvh w-[232px] shrink-0 md:flex">
+        <SidebarContent />
+      </aside>
+      <header className="flex h-14 shrink-0 items-center gap-3 bg-navy px-3 md:hidden">
+        <button
+          type="button"
+          aria-label={t('sidebar.menu')}
+          aria-expanded={drawerOpen}
+          onClick={() => setDrawerOpen(true)}
+          className="cursor-pointer rounded-md p-2 text-white transition-colors duration-150 ease-[ease] hover:bg-white/6 focus-visible:outline-2 focus-visible:outline-cyan"
+        >
+          <MenuIcon />
+        </button>
+        <img src="/castle-logo.svg" alt="" className="size-8 shrink-0" aria-hidden="true" />
+        <Wordmark />
+      </header>
+      <Sheet open={drawerOpen} onClose={() => setDrawerOpen(false)} side="left">
+        <SidebarContent onNavigate={() => setDrawerOpen(false)} />
+      </Sheet>
+    </>
+  )
+}
+
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useTranslation()
   const user = useCurrentUser()
   const navigate = useNavigate()
@@ -19,7 +51,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="flex min-h-screen w-[232px] shrink-0 flex-col justify-between bg-navy px-5 py-7">
+    <div className="flex flex-1 flex-col justify-between gap-8 overflow-y-auto bg-navy px-5 py-7">
       <div className="flex flex-col gap-8">
         <div className="flex items-center gap-3">
           <img src="/castle-logo.svg" alt="" className="size-10 shrink-0" aria-hidden="true" />
@@ -38,6 +70,7 @@ export function Sidebar() {
             <NavLink
               key={id}
               to={pagePath(id)}
+              onClick={onNavigate}
               className={({ isActive }) =>
                 `flex h-11 items-center gap-3 rounded-md px-3 font-body text-[0.9375rem] transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan ${
                   isActive ? 'bg-nav-active-bg font-semibold text-white' : 'font-medium text-nav-text'
@@ -84,7 +117,7 @@ export function Sidebar() {
           {t('sidebar.footer.stage')}
         </p>
       </div>
-    </aside>
+    </div>
   )
 }
 

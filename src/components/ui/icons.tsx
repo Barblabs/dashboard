@@ -40,6 +40,14 @@ export function PencilIcon({ size = 14, className }: IconProps) {
   )
 }
 
+export function MenuIcon({ size = 20, className }: IconProps) {
+  return (
+    <Icon size={size} viewBox={20} className={className}>
+      <path d="M3 5h14M3 10h14M3 15h14" strokeWidth="1.6" />
+    </Icon>
+  )
+}
+
 export function CloseIcon({ size = 10, className }: IconProps) {
   return (
     <Icon size={size} viewBox={12} className={className}>

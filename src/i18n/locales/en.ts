@@ -10,6 +10,7 @@ export const en = {
   },
   sidebar: {
     superAdmin: 'Super Admin',
+    menu: 'Menu',
     signOut: 'Sign out',
     nav: {
       findings: 'Findings',

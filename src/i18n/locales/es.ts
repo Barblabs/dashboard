@@ -12,6 +12,7 @@ export const es: Translations = {
   },
   sidebar: {
     superAdmin: 'Super Admin',
+    menu: 'Menú',
     signOut: 'Cerrar sesión',
     nav: {
       findings: 'Hallazgos',

@@ -1,4 +1,4 @@
-import { cleanup, screen, within } from '@testing-library/react'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { i18n } from '../i18n'
 import { renderApp } from '../test/render'
@@ -61,5 +61,19 @@ describe('Language', () => {
 
     expect(nav().getByText('Configuración')).toBeInTheDocument()
     expect(document.documentElement.lang).toBe('es')
+  })
+})
+
+describe('Phone menu', () => {
+  it('opens the chosen page and closes the drawer', async () => {
+    const user = renderApp('/findings')
+    const menu = screen.getByRole('button', { name: 'Menu' })
+
+    await user.click(menu)
+    await user.click(within(screen.getByRole('dialog')).getByRole('link', { name: 'Configuration' }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(menu).toHaveAttribute('aria-expanded', 'false')
   })
 })
