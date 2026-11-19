@@ -887,7 +887,7 @@ const scenarios = {
     await shot('duplicate-refused')
     await page.keyboard.press('Escape')
     await sidebarLink('Dashboard').click()
-    await expect(page.getByRole('heading', { name: 'Recent organizations' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Organizations', level: 2, exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'New organizations per month' })).toBeVisible()
     await shot('dashboard')
     steps.push({ label: 'dashboard stat cards', text: await page.getByRole('main').innerText() })
