@@ -19,7 +19,7 @@ export function Sidebar() {
       <aside className="hidden min-h-dvh w-[232px] shrink-0 md:flex">
         <SidebarContent />
       </aside>
-      <header className="flex h-14 shrink-0 items-center gap-3 bg-navy px-3 md:hidden">
+      <header className="flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-3 bg-navy px-3 pt-[env(safe-area-inset-top)] md:hidden">
         <button
           type="button"
           aria-label={t('sidebar.menu')}
