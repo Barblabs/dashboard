@@ -88,7 +88,7 @@ export function SlackInstallationBar({ installation, readOnly = false }: Props) 
       {/* The Security Team channel must be picked before deliveries can flow; once set,
           an admin can change it at any time. A reader only sees the choice or the wait. */}
       <div className="flex flex-wrap items-center gap-4 border-t border-border-panel px-6 py-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex min-w-0 basis-full flex-col gap-1 md:flex-1">
           <span className="font-body text-[0.8125rem] font-semibold text-navy">
             {t('slack.channels.label')}
           </span>
@@ -101,7 +101,7 @@ export function SlackInstallationBar({ installation, readOnly = false }: Props) 
             {channelSet ? `#${installation.channel_name}` : t('slack.channels.viewer')}
           </p>
         ) : (
-          <div className="flex w-64 shrink-0 flex-col gap-1.5">
+          <div className="flex w-full shrink-0 flex-col gap-1.5 md:w-64">
             <Select
               aria-label={t('slack.channels.label')}
               disabled={channelsQuery.isLoading || setChannelMutation.isPending}

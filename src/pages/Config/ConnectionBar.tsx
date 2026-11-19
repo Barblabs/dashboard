@@ -26,7 +26,7 @@ export function ConnectionBar({ badge, details, actions, children }: ConnectionB
   return (
     <div className="flex flex-col overflow-hidden rounded-lg border border-border-panel">
       <div className="flex flex-wrap items-center gap-4 bg-white px-6 py-4">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+        <div className="flex min-w-0 basis-full flex-wrap items-center gap-2 md:flex-1">
           <Badge variant="solid">
             <span className="size-[7px] shrink-0 rounded-full bg-cyan" />
             {badge}
