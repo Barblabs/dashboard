@@ -31,6 +31,7 @@ function expect(locator) {
 const evidenceDir = path.join(process.env.EVIDENCE_DIR ?? path.join(verifyHome, 'evidence'), `${scenarioName}-${new Date().toISOString().replace(/[:.]/g, '-')}`)
 mkdirSync(evidenceDir, { recursive: true })
 const steps = []
+const consoleErrors = []
 const apiCalls = []
 const externalRequests = []
 let context
@@ -255,6 +256,133 @@ const scenarios = {
     await goto('/users')
     await expect(main.getByRole('table')).toBeVisible()
     await shot('users-table-desktop')
+  },
+  async phone() {
+    const results = {}
+    const devices = [
+      { device: 'phone', expected: { field: '16px', select: '16px' } },
+      { device: 'desktop', expected: { field: '15px', select: '14px' } },
+    ]
+    for (const { device, expected } of devices) {
+      if (device === 'desktop') {
+        await context.close()
+        context = await openContext(DESKTOP)
+        page = await context.newPage()
+        watch(page)
+        await page.goto(`${FRONT}/login`)
+      }
+      const viewport = page.viewportSize()
+
+      async function checkFieldFonts(label) {
+        const fonts = await page.evaluate(() =>
+          [...document.querySelectorAll('input, textarea, select')]
+            .filter((el) => !['checkbox', 'radio', 'file', 'hidden'].includes(el.type) && el.offsetWidth > 2 && !el.closest('[aria-hidden="true"]'))
+            .map((el) => ({ tag: el.tagName.toLowerCase(), type: el.type, name: el.getAttribute('aria-label') ?? el.labels?.[0]?.innerText ?? el.placeholder ?? el.name, fontSize: getComputedStyle(el).fontSize })),
+        )
+        steps.push({ label: `${device} ${label} field fonts`, fonts })
+        check(fonts.length > 0, `${device} ${label}: no fields found`)
+        for (const f of fonts) {
+          const want = f.tag === 'select' ? expected.select : expected.field
+          check(f.fontSize === want, `${device} ${label}: ${f.tag} "${f.name}" is ${f.fontSize}, expected ${want}`)
+        }
+      }
+
+      async function checkLastRowClearsFab(label, fabName, addRow) {
+        const fab = page.getByRole('button', { name: fabName })
+        await expect(fab).toBeVisible()
+        const pageMain = page.getByRole('main')
+        for (let n = 1; n <= 15 && !(await pageMain.evaluate((el) => el.scrollHeight > el.clientHeight + 200)); n++) {
+          await addRow(n)
+        }
+        check(await pageMain.evaluate((el) => el.scrollHeight > el.clientHeight), `${device} ${label}: the page never got long enough to scroll`)
+        const gap = await page.getByRole('main').evaluate((main) => {
+          main.scrollTop = main.scrollHeight
+          const content = [...main.children].filter((el) => getComputedStyle(el).position !== 'fixed')
+          const contentBottom = Math.max(...content.map((el) => el.getBoundingClientRect().bottom))
+          const fabTop = [...main.children].find((el) => getComputedStyle(el).position === 'fixed').getBoundingClientRect().top
+          return { contentBottom, fabTop }
+        })
+        steps.push({ label: `${device} ${label} last row vs Fab`, ...gap })
+        check(gap.contentBottom <= gap.fabTop, `${device} ${label}: last row ends at ${gap.contentBottom}, Fab starts at ${gap.fabTop}`)
+        await shot(`${device}-${label}-bottom`)
+      }
+
+      await signIn('customer_admin')
+      await page.getByRole('button', { name: 'Select' }).click()
+      await expect(page.getByLabel('Password', { exact: true })).toBeVisible()
+      await checkFieldFonts('itop-form')
+      await shot(`${device}-itop-form`)
+
+      await goto('/business-context')
+      await page.getByRole('button', { name: 'Import documents' }).first().click()
+      await expect(page.getByRole('dialog', { name: 'Import documents' })).toBeVisible()
+      await checkFieldFonts('business-context-import')
+      await page.keyboard.press('Escape')
+      await page.getByRole('button', { name: 'Fill it in by hand' }).click()
+      for (const step of ['Profile', 'Location', 'Operations', 'Digital footprint', 'Risk']) {
+        await page.getByRole('tab', { name: new RegExp(step) }).click()
+        await checkFieldFonts(`business-context-${step}`)
+      }
+      await shot(`${device}-business-context`)
+
+      await goto('/users')
+      await expect(page.getByText('viewer@acme.example')).toBeVisible()
+      await checkFieldFonts('users')
+      await checkLastRowClearsFab('users', 'Invite user', async (n) => {
+        await page.getByRole('button', { name: 'Invite user' }).click()
+        const invite = page.getByRole('dialog', { name: 'Invite user' })
+        await invite.getByLabel('Email').fill(`phone${n}@acme.example`)
+        await invite.getByRole('button', { name: 'Send invitation' }).click()
+        await expect(invite).toBeHidden()
+        await expect(page.getByRole('main').getByText(`phone${n}@acme.example`, { exact: true })).toBeVisible()
+      })
+
+      await goto('/findings')
+      const tabs = page.getByRole('main').getByRole('tablist').first()
+      await expect(tabs).toBeVisible()
+      const fade = await tabs.evaluate((el) => ({ overflowing: el.scrollWidth > el.clientWidth, end: el.hasAttribute('data-overflow-end'), mask: getComputedStyle(el).maskImage }))
+      steps.push({ label: `${device} findings tab list`, ...fade })
+      check(fade.end === fade.overflowing, `${device}: tab list overflowing ${fade.overflowing} but end fade ${fade.end}`)
+      await shot(`${device}-findings-tabs`)
+      if (fade.overflowing) {
+        await tabs.evaluate((el) => { el.scrollLeft = el.scrollWidth })
+        await page.waitForFunction((el) => el.hasAttribute('data-overflow-start') && !el.hasAttribute('data-overflow-end'), await tabs.elementHandle())
+        await shot(`${device}-findings-tabs-scrolled`)
+      }
+
+      await page.getByRole('button', { name: 'Open CVE-2021-41773' }).click()
+      const detail = page.getByRole('dialog')
+      await expect(detail.getByRole('heading', { name: 'Score' })).toBeVisible()
+      await shot(`${device}-finding-detail`)
+      const box = await detail.boundingBox()
+      const why = await detail.getByRole('heading', { name: 'Why it is here' }).boundingBox()
+      const radius = await detail.evaluate((el) => getComputedStyle(el).borderTopLeftRadius)
+      steps.push({ label: `${device} finding detail`, box, radius, whyTop: why?.y, viewport })
+      const fullScreen = box.x === 0 && box.y === 0 && box.width === viewport.width && box.height === viewport.height
+      check(fullScreen === (device === 'phone'), `${device}: detail box ${JSON.stringify(box)} vs viewport ${JSON.stringify(viewport)}`)
+      check((radius === '0px') === (device === 'phone'), `${device}: detail corner radius ${radius}`)
+      check(why && why.y + why.height <= viewport.height, `${device}: "Why it is here" starts below the first screen (${JSON.stringify(why)})`)
+      await detail.getByRole('button', { name: 'Close' }).first().click()
+      await expect(detail).toBeHidden()
+
+      await (device === 'phone' ? page.getByRole('button', { name: 'Menu', includeHidden: true }).click().then(() => page.getByRole('dialog').getByRole('button', { name: 'Sign out' }).click()) : signOut())
+      await page.waitForURL('**/login')
+      await goto('/')
+      await page.waitForURL('**/login')
+      await signIn('platform_admin')
+      await expect(page.getByRole('searchbox')).toBeVisible()
+      await checkFieldFonts('tenants')
+      await checkLastRowClearsFab('tenants', 'New organization', async (n) => {
+        await page.getByRole('button', { name: 'New organization' }).click()
+        await page.getByLabel('Organization name').fill(`Phone ${n} SA`)
+        await page.getByRole('button', { name: 'Next' }).click()
+        await page.getByRole('textbox', { name: 'Admin email' }).fill(`admin@phone${n}.example`)
+        await page.getByRole('button', { name: 'Create and send invitation' }).click()
+        await expect(page.getByTestId('customer-card').filter({ hasText: `Phone ${n} SA` })).toBeVisible()
+      })
+      results[device] = 'ok'
+    }
+    steps.push({ label: 'devices', results })
   },
   async connect() {
     await signIn('customer_admin')
@@ -773,36 +901,47 @@ if (!scenarios[scenarioName]) {
 
 const executablePath = execFileSync('node', [path.join(here, 'find-browser.mjs')]).toString().trim()
 const browser = await chromium.launch({ executablePath, headless: !headed })
-// Fresh context = empty localStorage = fresh mock data and no session; English forced so selectors below are stable.
-context = await browser.newContext({ locale: 'en-US', viewport: { width: 1280, height: 900 } })
+const PHONE = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }
+const DESKTOP = { viewport: { width: 1280, height: 900 } }
 // Nothing outside the dev server, the mocked API base and the web fonts may be reached (Slack's consent page, for one).
 const ALLOWED = [FRONT, API, 'https://fonts.googleapis.com/', 'https://fonts.gstatic.com/']
-await context.route((url) => !ALLOWED.some((origin) => url.href.startsWith(origin)), (route) => {
-  externalRequests.push(route.request().url())
-  return route.abort()
-})
-// The dev-only React Query Devtools button floats bottom-right, over dialog and sheet footers.
-await context.addInitScript(() => {
-  addEventListener('DOMContentLoaded', () => {
-    const style = document.createElement('style')
-    style.textContent = '.tsqd-open-btn-container { display: none !important; }'
-    document.head.append(style)
+
+// Fresh context = empty localStorage = fresh mock data and no session; English forced so selectors below are stable.
+async function openContext(device) {
+  const next = await browser.newContext({ locale: 'en-US', ...device })
+  await next.route((url) => !ALLOWED.some((origin) => url.href.startsWith(origin)), (route) => {
+    externalRequests.push(route.request().url())
+    return route.abort()
   })
-})
+  // The dev-only React Query Devtools button floats bottom-right, over dialog and sheet footers.
+  await next.addInitScript(() => {
+    addEventListener('DOMContentLoaded', () => {
+      const style = document.createElement('style')
+      style.textContent = '.tsqd-open-btn-container { display: none !important; }'
+      document.head.append(style)
+    })
+  })
+  return next
+}
+
+function watch(target) {
+  target.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()))
+  target.on('pageerror', (e) => consoleErrors.push(String(e)))
+  // MSW answers inside the browser, but Playwright still sees each call; this is the side-effect record.
+  target.on('response', async (response) => {
+    const request = response.request()
+    if (!request.url().startsWith(API)) return
+    const url = new URL(request.url())
+    let body = null
+    try { body = request.postDataJSON() } catch { body = request.postData() ? '<non-JSON body>' : null }
+    if (body && typeof body === 'object' && 'password' in body) body = { ...body, password: '<redacted>' }
+    apiCalls.push({ method: request.method(), path: url.pathname + url.search, status: response.status(), servedByMock: response.fromServiceWorker(), body })
+  })
+}
+
+context = await openContext(scenarioName === 'phone' ? PHONE : DESKTOP)
 page = await context.newPage()
-const consoleErrors = []
-page.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()))
-page.on('pageerror', (e) => consoleErrors.push(String(e)))
-// MSW answers inside the browser, but Playwright still sees each call; this is the side-effect record.
-page.on('response', async (response) => {
-  const request = response.request()
-  if (!request.url().startsWith(API)) return
-  const url = new URL(request.url())
-  let body = null
-  try { body = request.postDataJSON() } catch { body = request.postData() ? '<non-JSON body>' : null }
-  if (body && typeof body === 'object' && 'password' in body) body = { ...body, password: '<redacted>' }
-  apiCalls.push({ method: request.method(), path: url.pathname + url.search, status: response.status(), servedByMock: response.fromServiceWorker(), body })
-})
+watch(page)
 
 let failure = null
 try {

@@ -56,7 +56,7 @@ export function UserTable({
       {filtered.length === 0 ? (
         <Message>{users.length === 0 ? t('users.empty') : t('users.noMatches')}</Message>
       ) : wide ? (
-        <div className="overflow-hidden rounded-lg border border-border-panel">
+        <div className="shrink-0 overflow-hidden rounded-lg border border-border-panel">
           <table className="w-full border-collapse text-[0.875rem]">
             <thead>
               <tr className="border-b border-border-panel bg-panel">

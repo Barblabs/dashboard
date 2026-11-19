@@ -24,14 +24,12 @@ export function TenantsPage() {
   const deactivateDialog = useDialogTarget<CustomerResponse>()
 
   return (
-    <Page title={t('tenants.title')}>
+    <Page title={t('tenants.title')} floatingAction={<Fab label={t('tenants.create.button')} onClick={() => setCreateOpen(true)} />}>
       <QueryBoundary query={customersQuery} keys={KEYS}>
         {({ customers }) => (
           <CustomerGrid customers={customers} onRename={renameDialog.show} onDeactivate={deactivateDialog.show} />
         )}
       </QueryBoundary>
-
-      <Fab label={t('tenants.create.button')} onClick={() => setCreateOpen(true)} />
 
       <CreateDialog open={createOpen} onClose={() => setCreateOpen(false)} />
       <RenameDialog dialog={renameDialog} />

@@ -5,7 +5,7 @@ import { ChevronDownIcon } from './icons'
 
 // The native arrow can't be positioned, so it is hidden and drawn as an icon with its own inset.
 const SELECT =
-  `${FIELD_SURFACE} cursor-pointer appearance-none py-2 pr-9 pl-3 text-[0.875rem] focus:border-navy disabled:cursor-not-allowed disabled:bg-panel disabled:text-gray aria-invalid:border-critical`
+  `${FIELD_SURFACE} cursor-pointer appearance-none py-2 pr-9 pl-3 text-base md:text-[0.875rem] focus:border-navy disabled:cursor-not-allowed disabled:bg-panel disabled:text-gray aria-invalid:border-critical`
 
 /*
  * Rendered through Base UI's field control, like Input: inside a Field its label and help
