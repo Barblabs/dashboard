@@ -24,12 +24,10 @@ export function UsersPage() {
   const disableDialog = useDialogTarget<UserResponse>()
 
   return (
-    <Page title={t('users.title')}>
+    <Page title={t('users.title')} floatingAction={<Fab label={t('users.invite.button')} onClick={() => setInviteOpen(true)} />}>
       <QueryBoundary query={usersQuery} keys={KEYS}>
         {({ users }) => <UserTable users={users} onEditRole={roleDialog.show} onDisable={disableDialog.show} />}
       </QueryBoundary>
-
-      <Fab label={t('users.invite.button')} onClick={() => setInviteOpen(true)} />
 
       <InviteDialog open={inviteOpen} onClose={() => setInviteOpen(false)} />
       <ChangeRoleDialog dialog={roleDialog} />
