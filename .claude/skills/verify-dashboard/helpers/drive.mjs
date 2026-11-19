@@ -70,7 +70,7 @@ async function signIn(role, landing = HOME[role]) {
   await page.getByRole('button', { name: ROLE_BUTTON[role] }).click()
   await page.waitForURL(`**${landing}`)
 }
-// Signing in again after this returns to the page signed out from, whatever the role; pass
+// Signing in again after this returns to the page signed out from if the new role can open it; pass
 // `{ fresh: true }` to open / so the next sign-in lands on its role's home (reopening /login keeps it).
 async function signOut({ fresh = false } = {}) {
   await page.getByRole('button', { name: 'Sign out' }).click()
@@ -537,6 +537,8 @@ const scenarios = {
     await page.getByLabel('Status').selectOption('all')
     await expect(page.getByText('8 assets')).toBeVisible()
     await shot('all-statuses', assetList())
+    await filters.getByRole('button', { name: /^Filters/ }).click()
+    await expect(filters.getByRole('combobox', { name: 'Type' })).toBeVisible()
     await choose('Type', 'Server', 'Virtual Machine')
     await expect(assetOption('core-switch-01')).toBeHidden()
     await expect(page.getByText('7 assets')).toBeVisible()
@@ -744,8 +746,8 @@ const scenarios = {
   async findings() {
     await signIn('customer_admin')
     await sidebarLink('Findings').click()
-    await expect(page.getByText('5 findings, 3 groups')).toBeVisible()
-    for (const n of [1, 2, 3]) await expect(page.getByText(`Group ${n}`, { exact: true })).toBeVisible()
+    await expect(page.getByText('20 findings, 4 groups')).toBeVisible()
+    for (const n of [1, 2, 3, 4]) await expect(page.getByText(`Group ${n}`, { exact: true })).toBeVisible()
     await shot('order')
     await page.getByRole('button', { name: 'Open CVE-2021-41773' }).click()
     const detail = page.getByRole('dialog')
@@ -760,7 +762,7 @@ const scenarios = {
     await expect(detail.getByText(/^Written by Luna/)).toBeVisible(15000)
     await shot('plan', detail.getByText(/^Written by Luna/))
     await detail.getByLabel('What do you say?').selectOption({ label: 'Should be attended earlier' })
-    await detail.getByLabel('Why').fill('Customer-facing and exploited in the wild.')
+    await detail.getByRole('textbox', { name: 'Why', exact: true }).fill('Customer-facing and exploited in the wild.')
     await detail.getByRole('button', { name: 'Send' }).click()
     await expect(detail.getByText('Saved.')).toBeVisible()
     await shot('feedback', detail.getByText('Saved.'))
