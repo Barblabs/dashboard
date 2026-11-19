@@ -6,6 +6,7 @@ import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { useDialogTarget } from '../../components/ui/useDialogTarget'
+import { useWideLayout } from '../../components/ui/useWideLayout'
 import { useDateFormat } from '../../i18n/format'
 import { AreaOwnerDialog } from './AreaOwnerDialog'
 import { FilterSelect } from './FilterSelect'
@@ -42,6 +43,31 @@ interface AreaRowsProps {
 
 function AreaRows({ areas, onEditOwner }: AreaRowsProps) {
   const { t } = useTranslation()
+  const wide = useWideLayout()
+
+  if (!wide) {
+    return (
+      <ul className="flex animate-fade-in flex-col gap-3 p-4">
+        {areas.map((area) => (
+          <li
+            key={area.id}
+            className={`flex flex-col gap-3 rounded-lg border border-border-panel bg-white p-4 text-[0.875rem] text-navy ${area.active ? '' : '*:opacity-50'}`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <AreaName area={area} />
+              </div>
+              <AreaStatus area={area} />
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <AreaOwner area={area} />
+              {onEditOwner && <OwnerButton area={area} onEditOwner={onEditOwner} />}
+            </div>
+          </li>
+        ))}
+      </ul>
+    )
+  }
 
   return (
     <div className="animate-fade-in overflow-x-auto">
@@ -61,26 +87,17 @@ function AreaRows({ areas, onEditOwner }: AreaRowsProps) {
               className={`hover:bg-row-hover ${area.active ? '' : '*:opacity-50'}`}
             >
               <td className={CELL}>
-                <span className="block font-medium">{area.name}</span>
-                <span className="mt-0.5 block font-mono text-[0.6875rem] text-gray">
-                  {area.record_id}
-                </span>
+                <AreaName area={area} />
               </td>
               <td className={CELL}>
-                {area.owner_email ? (
-                  <span className="font-mono text-[0.8125rem]">{area.owner_email}</span>
-                ) : (
-                  <span className="text-gray italic">{t('config.areas.noOwner')}</span>
-                )}
+                <AreaOwner area={area} />
               </td>
               <td className={CELL}>
                 <AreaStatus area={area} />
               </td>
               {onEditOwner && (
                 <td className={`${CELL} text-right`}>
-                  <Button variant="link" size="sm" onClick={() => onEditOwner(area)}>
-                    {area.owner_email ? t('config.areas.owner.edit') : t('config.areas.owner.set')}
-                  </Button>
+                  <OwnerButton area={area} onEditOwner={onEditOwner} />
                 </td>
               )}
             </tr>
@@ -88,6 +105,35 @@ function AreaRows({ areas, onEditOwner }: AreaRowsProps) {
         </tbody>
       </table>
     </div>
+  )
+}
+
+function AreaName({ area }: { area: Area }) {
+  return (
+    <>
+      <span className="block font-medium">{area.name}</span>
+      <span className="mt-0.5 block font-mono text-[0.6875rem] text-gray">{area.record_id}</span>
+    </>
+  )
+}
+
+function AreaOwner({ area }: { area: Area }) {
+  const { t } = useTranslation()
+
+  return area.owner_email ? (
+    <span className="min-w-0 font-mono text-[0.8125rem] wrap-anywhere">{area.owner_email}</span>
+  ) : (
+    <span className="text-gray italic">{t('config.areas.noOwner')}</span>
+  )
+}
+
+function OwnerButton({ area, onEditOwner }: { area: Area; onEditOwner: (area: Area) => void }) {
+  const { t } = useTranslation()
+
+  return (
+    <Button variant="link" size="sm" onClick={() => onEditOwner(area)}>
+      {area.owner_email ? t('config.areas.owner.edit') : t('config.areas.owner.set')}
+    </Button>
   )
 }
 

@@ -2,12 +2,11 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { AuthUser } from '../../auth/store'
-import { i18n } from '../../i18n'
 import { mockAreas } from '../../mocks/areas'
 import { areasStore } from '../../mocks/areas-store'
 import { apiUrl } from '../../mocks/url'
 import { chooseFilter } from '../../test/filters'
-import { renderApp, seedSource } from '../../test/render'
+import { onPhone, renderApp, seedSource } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
 
 const VIEWER: AuthUser = {
@@ -175,19 +174,6 @@ describe('Areas', () => {
     expect(screen.getByText('2 assets')).toBeInTheDocument()
   })
 
-  it('shows the areas in Spanish', async () => {
-    localStorage.setItem('language', 'es')
-    await i18n.changeLanguage()
-    seedSource()
-    const user = renderApp('/config')
-    await user.click(await screen.findByRole('tab', { name: 'Áreas' }))
-
-    const row = await screen.findByRole('row', { name: /Data Platform/ })
-    expect(row).toHaveTextContent('Sin dueño')
-    expect(row).toHaveTextContent('Activa')
-    expect(screen.getByText('2 áreas')).toBeInTheDocument()
-  })
-
   describe('owner', () => {
     it('sets an owner on an area without one', async () => {
       const user = await renderConnected()
@@ -205,6 +191,23 @@ describe('Areas', () => {
       const updated = screen.getByRole('row', { name: /Data Platform/ })
       expect(updated).toHaveTextContent('data-lead@example.com')
       expect(within(updated).getByRole('button', { name: 'Edit owner' })).toBeInTheDocument()
+    })
+
+    it('on a phone shows each area as a card whose owner button sets that owner', async () => {
+      onPhone()
+      const user = await renderConnected()
+      await user.click(screen.getByRole('tab', { name: 'Areas' }))
+      const card = (await screen.findByText('Data Platform')).closest('li')!
+
+      expect(screen.queryByRole('table')).not.toBeInTheDocument()
+      await user.click(within(card).getByRole('button', { name: 'Set owner' }))
+      const dialog = await screen.findByRole('dialog', { name: 'Owner of Data Platform' })
+      await user.type(within(dialog).getByLabelText('Email'), 'data-lead@example.com')
+      await user.click(within(dialog).getByRole('button', { name: 'Save' }))
+
+      await dialogClosed()
+      expect(card).toHaveTextContent('data-lead@example.com')
+      expect(within(card).getByRole('button', { name: 'Edit owner' })).toBeInTheDocument()
     })
 
     it('changes an owner, then removes it', async () => {

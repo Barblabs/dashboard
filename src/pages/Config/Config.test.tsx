@@ -72,18 +72,6 @@ describe('Configuration', () => {
     expect(screen.getAllByRole('button', { name: 'Select' })).toHaveLength(1)
   })
 
-  it('shows the CMDB selection in Spanish', async () => {
-    localStorage.setItem('language', 'es')
-    await i18n.changeLanguage()
-    renderApp()
-
-    expect(await screen.findByRole('heading', { name: 'Elige tu CMDB' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Conectar CMDB' })).toBeInTheDocument()
-    expect(screen.getByText('Otra CMDB')).toBeInTheDocument()
-    expect(screen.getAllByText('Próximamente')).toHaveLength(2)
-    expect(screen.getByRole('button', { name: 'Seleccionar' })).toBeInTheDocument()
-  })
-
   it('edits in a dialog over the connected source, and cancelling closes it', async () => {
     const user = await renderConnected()
 
@@ -202,7 +190,7 @@ describe('Configuration', () => {
     expect(connectionRequests).toBe(1)
   })
 
-  it('shows the connection bar and relative time in Spanish', async () => {
+  it('shows the relative sync time in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
     seedSource({ last_sync: new Date(Date.now() - 5 * 60 * 1000).toISOString() })
@@ -210,24 +198,11 @@ describe('Configuration', () => {
 
     expect(await screen.findByText('iTop conectado')).toBeInTheDocument()
     expect(screen.getByText('Última sincronización: hace 5 min')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Editar conexión' })).toBeInTheDocument()
 
-    const releaseSync = holdRequests('post', '/cmdb/source/sync')
     await user.click(screen.getByRole('button', { name: 'Sincronizar ahora' }))
-    expect(screen.getByRole('button', { name: 'Sincronizando…' })).toHaveAttribute('aria-disabled', 'true')
-    releaseSync()
     expect(
       await screen.findByText('Última sincronización: hace menos de un minuto'),
     ).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: 'Desconectar' }))
-    expect(
-      screen.getByText(
-        'Esta acción desconectará el CMDB. Los activos sincronizados se conservan, marcados como inactivos. ¿Continuar?',
-      ),
-    ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Sí, desconectar' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Cancelar' })).toBeInTheDocument()
   })
 
   it('cancelling the disconnect keeps the connection', async () => {

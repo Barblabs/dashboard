@@ -13,7 +13,7 @@ const WIDTH = {
   md: 'w-[min(36rem,calc(100vw-2rem))]',
   lg: 'w-[min(40rem,calc(100vw-2rem))]',
   // A whole record to read rather than a form: a fixed size, inside which its content scrolls.
-  xl: 'w-[min(68rem,calc(100vw-2rem))] h-[min(54rem,calc(100vh-4rem))] overflow-hidden',
+  xl: 'w-[min(68rem,calc(100vw-2rem))] h-[min(54rem,calc(100vh-4rem))] overflow-hidden max-md:top-0 max-md:left-0 max-md:h-dvh max-md:w-full max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-none max-md:pt-[env(safe-area-inset-top)] max-md:pb-[env(safe-area-inset-bottom)]',
 }
 
 export type ModalWidth = keyof typeof WIDTH

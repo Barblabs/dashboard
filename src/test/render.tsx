@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { vi } from 'vitest'
 import { App } from '../App'
 import type { AuthUser } from '../auth/store'
 import { useAuthStore } from '../auth/store'
@@ -53,6 +54,15 @@ export function renderApp(path = '/', user: AuthUser | null = DEFAULT_TEST_USER)
   const testUser = userEvent.setup()
   render(<App />)
   return testUser
+}
+
+export function onPhone() {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: false,
+    media: query,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }))
 }
 
 export function seedSource(overrides: Partial<CmdbSource> = {}) {

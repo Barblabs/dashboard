@@ -231,7 +231,7 @@ function TopChangesTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse font-body text-[0.875rem]">
+      <table className="w-full min-w-[44rem] border-collapse font-body text-[0.875rem]">
         <thead>
           <tr className="border-b border-border-panel text-left text-[0.75rem] font-normal text-gray">
             <th className="px-6 py-3 font-normal">{t('findings.beforeAfter.topChangesCve')}</th>
@@ -252,7 +252,7 @@ function TopChangesTable({
                 key={c.findingId}
                 className="border-b border-border-panel last:border-0 hover:bg-panel"
               >
-                <td className="px-6 py-3 font-mono text-[0.8125rem] text-navy">{c.cveId}</td>
+                <td className="px-6 py-3 font-mono text-[0.8125rem] whitespace-nowrap text-navy">{c.cveId}</td>
                 <td className="px-4 py-3 text-navy">{c.component}</td>
                 <td className="px-4 py-3 tabular-nums text-navy">
                   {t('findings.beforeAfter.groupLabel', { n: c.scoreGroup })}{' '}

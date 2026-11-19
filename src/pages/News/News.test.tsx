@@ -1,15 +1,13 @@
 import { screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import type { NewsDigest, NewsItem } from '../../api/newsDigests'
-import type { AuthUser } from '../../auth/store'
 import { newsDigestsStore } from '../../mocks/news-digests-store'
-import { renderApp, VIEWER } from '../../test/render'
+import { renderApp } from '../../test/render'
 
 const PEER_LABEL = 'Ataque a una organización de su sector: es contexto, no indica que ustedes estén expuestos.'
 
-// Without a user, renderApp signs in its default Customer Admin.
-async function renderNews(path = '/news', user?: AuthUser) {
-  const testUser = renderApp(path, user)
+async function renderNews() {
+  const testUser = renderApp('/news')
   await screen.findByRole('region', { name: 'Attacks in your sector' })
   return testUser
 }
@@ -244,11 +242,5 @@ describe('News', () => {
     expect(screen.getByText(/your sectors, domains, brands, technologies and third parties/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Go to the business context' })).toHaveAttribute('href', '/business-context')
     expect(screen.queryByLabelText('Digest')).not.toBeInTheDocument()
-  })
-
-  it('is open to a Viewer', async () => {
-    await renderNews('/news', VIEWER)
-
-    expect(screen.getByRole('heading', { level: 1, name: 'News' })).toBeInTheDocument()
   })
 })

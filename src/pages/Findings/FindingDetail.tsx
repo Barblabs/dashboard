@@ -288,14 +288,17 @@ function Rail({ order, finding }: { order: CurrentOrder; finding: Finding }) {
         </span>
       </div>
 
-      <dl className="flex flex-col">
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3 md:flex md:flex-col md:gap-0">
         {signals.map((s) => (
-          <div key={s.label} className="flex items-baseline justify-between gap-3 border-b border-border-row py-2 last:border-b-0">
+          <div
+            key={s.label}
+            className="flex flex-col gap-0.5 md:flex-row md:items-baseline md:justify-between md:gap-3 md:border-b md:border-border-row md:py-2 md:last:border-b-0"
+          >
             <dt className={`${META} flex items-center gap-2 text-gray`}>
               <span className={`size-1.5 shrink-0 rounded-full ${TONE_DOT[s.tone]}`} aria-hidden="true" />
               {s.label}
             </dt>
-            <dd className="text-right">
+            <dd className="md:text-right">
               <span className={`${META} font-semibold ${s.tone === 'quiet' ? 'text-gray' : 'text-navy'}`}>{s.value}</span>
               {s.note && <span className="block font-body text-[0.6875rem] text-gray">{s.note}</span>}
             </dd>

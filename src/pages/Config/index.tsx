@@ -77,7 +77,7 @@ function ConfigBody({ source, readOnly }: { source: CmdbSource | null; readOnly:
   }
 
   return (
-    <div className="flex items-start gap-[22px]">
+    <div className="flex flex-col gap-[22px] md:flex-row md:items-start">
       <ConfigStepPanel activeStep={connecting ? 2 : 1} />
       {connecting ? (
         <ItopForm

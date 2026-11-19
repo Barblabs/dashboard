@@ -1,13 +1,44 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Tabs as BaseTabs } from '@base-ui/react/tabs'
 
 export const Tabs = BaseTabs.Root
 
+function useOverflow() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [overflow, setOverflow] = useState({ start: false, end: false })
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return undefined
+    const update = () => {
+      const start = el.scrollLeft > 0
+      const end = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+      setOverflow((prev) => (prev.start === start && prev.end === end ? prev : { start, end }))
+    }
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(el)
+    for (const tab of el.children) observer.observe(tab)
+    el.addEventListener('scroll', update, { passive: true })
+    return () => {
+      observer.disconnect()
+      el.removeEventListener('scroll', update)
+    }
+  }, [])
+
+  return { ref, overflow }
+}
+
 export function TabList({ label, children }: { label?: string; children: ReactNode }) {
+  const { ref, overflow } = useOverflow()
+
   return (
     <BaseTabs.List
+      ref={ref}
       aria-label={label}
-      className="relative flex gap-1 overflow-x-auto border-b border-border-panel px-4"
+      data-overflow-start={overflow.start || undefined}
+      data-overflow-end={overflow.end || undefined}
+      className="relative flex gap-1 overflow-x-auto border-b border-border-panel px-4 [--fade-end:0px] [--fade-start:0px] [mask-image:linear-gradient(to_right,transparent,black_var(--fade-start),black_calc(100%-var(--fade-end)),transparent)] data-overflow-end:[--fade-end:2.5rem] data-overflow-start:[--fade-start:2.5rem]"
     >
       {children}
       <BaseTabs.Indicator className="absolute bottom-[-1px] left-0 h-0.5 w-(--active-tab-width) translate-x-(--active-tab-left) bg-cyan transition-[translate,width] duration-200 ease-out" />

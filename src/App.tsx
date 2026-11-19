@@ -87,7 +87,7 @@ function DefaultRedirect() {
 // The page scrolls inside its main, so the sidebar and anything sticky in a page stay in view.
 function AppLayout() {
   return (
-    <div className="flex h-screen">
+    <div className="flex h-dvh flex-col md:flex-row">
       <Sidebar />
       <Outlet />
     </div>

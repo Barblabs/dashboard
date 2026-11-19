@@ -3,7 +3,7 @@ import { http, HttpResponse } from 'msw'
 import type { UserEvent } from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { apiUrl } from '../../mocks/url'
-import { renderApp, seedUsers } from '../../test/render'
+import { onPhone, renderApp, seedUsers } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
 import { inviteBody } from '../../mocks/handlers/users'
 import { MOCK_USERS } from '../../mocks/users-store'
@@ -232,6 +232,18 @@ describe('Users', () => {
 
     expect(await screen.findByText('Disabled')).toBeInTheDocument()
     expect(screen.queryByText('This user will no longer be able to sign in. Continue?')).not.toBeInTheDocument()
+  })
+
+  it('on a phone shows each user as a card whose Disable button disables that user', async () => {
+    onPhone()
+    const user = await renderUsers()
+
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    const viewerCard = screen.getByText(VIEWER.email).closest('li')!
+    await user.click(within(viewerCard).getByRole('button', { name: 'Disable' }))
+    await user.click(screen.getByRole('button', { name: 'Yes, disable' }))
+
+    expect(await within(viewerCard).findByText('Disabled')).toBeInTheDocument()
   })
 
   it('disable fails with last_customer_admin and shows the error', async () => {

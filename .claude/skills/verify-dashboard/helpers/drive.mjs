@@ -31,6 +31,7 @@ function expect(locator) {
 const evidenceDir = path.join(process.env.EVIDENCE_DIR ?? path.join(verifyHome, 'evidence'), `${scenarioName}-${new Date().toISOString().replace(/[:.]/g, '-')}`)
 mkdirSync(evidenceDir, { recursive: true })
 const steps = []
+const consoleErrors = []
 const apiCalls = []
 const externalRequests = []
 let context
@@ -69,7 +70,7 @@ async function signIn(role, landing = HOME[role]) {
   await page.getByRole('button', { name: ROLE_BUTTON[role] }).click()
   await page.waitForURL(`**${landing}`)
 }
-// Signing in again after this returns to the page signed out from, whatever the role; pass
+// Signing in again after this returns to the page signed out from if the new role can open it; pass
 // `{ fresh: true }` to open / so the next sign-in lands on its role's home (reopening /login keeps it).
 async function signOut({ fresh = false } = {}) {
   await page.getByRole('button', { name: 'Sign out' }).click()
@@ -97,7 +98,7 @@ const ITOP = { url: 'http://10.0.0.5:8000', user: 'barb-reader', password: 'not-
 async function fillItop(login = ITOP) {
   await page.getByLabel('iTop address (IP or URL)').fill(login.url)
   await page.getByLabel('User', { exact: true }).fill(login.user)
-  await page.getByLabel('Password').fill(login.password)
+  await page.getByLabel('Password', { exact: true }).fill(login.password)
 }
 
 // The tech stack is a listbox of Assets beside the selected Asset's record.
@@ -116,7 +117,339 @@ async function connect() {
   await expect(assetList()).toBeVisible()
 }
 
+async function checkNoSidewaysScroll(label) {
+  const { scrollWidth, clientWidth } = await page.getByRole('main').evaluate((el) => ({ scrollWidth: el.scrollWidth, clientWidth: el.clientWidth }))
+  steps.push({ label: `${label} main width`, scrollWidth, clientWidth })
+  check(scrollWidth === clientWidth, `${label}: main scrolls sideways (${scrollWidth} > ${clientWidth})`)
+}
+
+async function checkOnScreen(name, locator, width) {
+  const box = await locator.boundingBox()
+  check(box && box.x >= 0 && box.x + box.width <= width, `${name} not fully on screen: ${JSON.stringify(box)}`)
+  return box
+}
+
 const scenarios = {
+  async mobile() {
+    await page.setViewportSize({ width: 390, height: 844 })
+    const menu = page.getByRole('button', { name: 'Menu', includeHidden: true })
+    const drawer = page.getByRole('dialog')
+    const drawerLink = (name) => drawer.getByRole('link', { name, exact: true })
+    async function checkMainFillsWidth(label) {
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+      const box = await page.getByRole('main').boundingBox()
+      steps.push({ label: `${label} main box`, box })
+      check(box && box.x === 0 && box.width === 390, `${label}: main is ${JSON.stringify(box)}, expected x 0 and width 390`)
+    }
+
+    await signIn('customer_admin')
+    check(!(await page.getByRole('complementary').isVisible()), 'sidebar column visible at 390px')
+    await checkMainFillsWidth('/config')
+    await shot('top-bar')
+
+    await menu.click()
+    await expect(drawer).toBeVisible()
+    check((await menu.getAttribute('aria-expanded')) === 'true', 'menu not aria-expanded while open')
+    for (const text of ['Findings', 'Sign out', 'admin@barbattack.example', 'Admin']) {
+      await expect(drawer.getByText(text, { exact: true }).first()).toBeVisible()
+    }
+    await expect(drawer.getByRole('group', { name: 'Language' })).toBeVisible()
+    await shot('drawer-open')
+
+    await page.keyboard.press('Escape')
+    await expect(drawer).toBeHidden()
+    check(await menu.evaluate((el) => el === document.activeElement), 'focus not back on menu after Escape')
+    check((await menu.getAttribute('aria-expanded')) === 'false', 'menu still aria-expanded after Escape')
+
+    await menu.click()
+    await expect(drawer).toBeVisible()
+    await page.mouse.click(380, 400)
+    await expect(drawer).toBeHidden()
+    check(await menu.evaluate((el) => el === document.activeElement), 'focus not back on menu after backdrop tap')
+
+    for (const [name, pathname] of [['Findings', '/findings'], ['News', '/news'], ['Business context', '/business-context'], ['Notifications', '/notifications'], ['Users', '/users'], ['Configuration', '/config']]) {
+      await menu.click()
+      await drawerLink(name).click()
+      await page.waitForURL(`**${pathname}`)
+      await expect(drawer).toBeHidden()
+      check(await menu.evaluate((el) => el === document.activeElement), `focus not back on menu after choosing ${name}`)
+      await checkMainFillsWidth(pathname)
+      await shot(pathname.slice(1))
+    }
+    await goto('/no-such-page')
+    await checkMainFillsWidth('404')
+    await shot('not-found')
+
+    await menu.click()
+    await drawer.getByRole('button', { name: 'Sign out' }).click()
+    await page.waitForURL('**/login')
+    await goto('/')
+    await page.waitForURL('**/login')
+    await signIn('platform_admin')
+    await menu.click()
+    await expect(drawer.getByText('Super Admin', { exact: true }).first()).toBeVisible()
+    await shot('super-admin-drawer')
+    for (const [name, pathname] of [['Dashboard', '/admin-dashboard'], ['Tenants', '/tenants']]) {
+      if (pathname === '/tenants') await menu.click()
+      await drawerLink(name).click()
+      await page.waitForURL(`**${pathname}`)
+      await expect(drawer).toBeHidden()
+      await checkMainFillsWidth(pathname)
+      await shot(pathname.slice(1))
+    }
+
+    await page.setViewportSize({ width: 1280, height: 900 })
+    check(await page.getByRole('complementary').isVisible(), 'sidebar column hidden at 1280px')
+    check(!(await menu.isVisible()), 'menu button visible at 1280px')
+    await shot('desktop-unchanged')
+  },
+  async 'phone-stacking'() {
+    await page.setViewportSize({ width: 390, height: 844 })
+    const main = page.getByRole('main')
+    await signIn('customer_admin')
+    await expect(page.getByRole('heading', { name: 'Choose your CMDB' })).toBeVisible()
+    const stepsTitle = await page.getByRole('heading', { name: 'Connect CMDB' }).boundingBox()
+    const choice = await page.getByRole('heading', { name: 'Choose your CMDB' }).boundingBox()
+    check(choice.y > stepsTitle.y + stepsTitle.height && Math.abs(choice.x - stepsTitle.x) < 30, `the steps panel is not stacked above the CMDB choice: ${JSON.stringify({ stepsTitle, choice })}`)
+    await checkNoSidewaysScroll('config choose')
+    await shot('config-choose-stacked')
+    await checkOnScreen('Select', page.getByRole('button', { name: 'Select' }), 390)
+    await shot('config-choose-select', page.getByRole('button', { name: 'Select' }))
+
+    await page.getByRole('button', { name: 'Select' }).click()
+    await expect(page.getByLabel('iTop address (IP or URL)')).toBeVisible()
+    await checkNoSidewaysScroll('config itop form')
+    await shot('itop-form', page.getByLabel('iTop address (IP or URL)'))
+    await page.reload()
+    await connect()
+
+    await checkNoSidewaysScroll('config connected')
+    for (const name of ['Disconnect', 'Edit connection', 'Sync now']) await checkOnScreen(name, page.getByRole('button', { name }), 390)
+    const sync = page.getByRole('button', { name: 'Sync now' })
+    await shot('connected-bar', page.getByText('iTop connected'))
+    const syncsBefore = callsTo('POST', '/cmdb/source/sync').length
+    await sync.click()
+    await expect(page.getByText('Sync complete.')).toBeVisible()
+    check(callsTo('POST', '/cmdb/source/sync').length === syncsBefore + 1, 'Sync now on a phone did not POST /cmdb/source/sync')
+
+    const triage = page.getByRole('button', { name: 'Triage them' })
+    const triageText = await page.getByText(/Assets? needs? triage\./).boundingBox()
+    const triageBox = await checkOnScreen('Triage them', triage, 390)
+    check(triageText && triageBox.y >= triageText.y + triageText.height, `Triage them is not under the banner text: ${JSON.stringify({ triageText, triageBox })}`)
+    await shot('triage-banner', triage)
+
+    await page.getByRole('button', { name: 'Menu' }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Sign out' }).click()
+    await page.waitForURL('**/login')
+    await goto('/')
+    await page.waitForURL('**/login')
+    await signIn('platform_admin')
+    const search = page.getByRole('searchbox', { name: 'Search by name…' })
+    const counter = page.getByText('3 organizations · 1 deactivated')
+    await expect(counter).toBeVisible()
+    await checkNoSidewaysScroll('/tenants')
+    const mainBox = await main.boundingBox()
+    const searchBox = await search.boundingBox()
+    const counterBox = await counter.boundingBox()
+    // main has 16px side padding on phones.
+    check(searchBox && Math.abs(searchBox.width - (mainBox.width - 32)) <= 1, `search is not full width: ${searchBox?.width} of ${mainBox.width}`)
+    check(counterBox && counterBox.y >= searchBox.y + searchBox.height, 'the organizations count is not on its own line under the search')
+    await shot('tenants-toolbar')
+
+    await page.setViewportSize({ width: 1280, height: 900 })
+    const wideSearch = await search.boundingBox()
+    const wideCounter = await counter.boundingBox()
+    check(wideCounter.y < wideSearch.y + wideSearch.height && wideCounter.x > wideSearch.x + wideSearch.width, 'at 1280px the count is not beside the search')
+    await shot('tenants-desktop')
+  },
+  async 'phone-cards'() {
+    await page.setViewportSize({ width: 390, height: 844 })
+    const main = page.getByRole('main')
+    const card = (text) => main.getByRole('listitem').filter({ hasText: text })
+
+    await signIn('customer_admin')
+    await goto('/findings')
+    const firstGroup = page.getByRole('region').first()
+    await expect(firstGroup.getByRole('button', { name: 'Open CVE-2021-41773' })).toBeVisible()
+    check((await main.getByRole('table').count()) === 0, 'findings: a table is rendered at 390px')
+    await checkNoSidewaysScroll('/findings')
+    await shot('findings-cards', firstGroup)
+    const findingCard = card('CVE-2021-41773')
+    await findingCard.getByText('By Score').click()
+    await expect(page.getByRole('dialog', { name: 'CVE-2021-41773' })).toBeVisible()
+    check(page.url().includes('finding='), 'tapping a finding card did not put the finding in the URL')
+    await shot('finding-opened-from-card')
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog', { name: 'CVE-2021-41773' })).toBeHidden()
+
+    await goto('/users')
+    await expect(page.getByText('3 users')).toBeVisible()
+    check((await main.getByRole('table').count()) === 0, 'users: a table is rendered at 390px')
+    await checkNoSidewaysScroll('/users')
+    await shot('users-cards')
+    const viewerCard = card('viewer@acme.example')
+    const disable = viewerCard.getByRole('button', { name: 'Disable' })
+    const box = await disable.boundingBox()
+    check(box && box.x >= 0 && box.x + box.width <= 390, `disable button not fully on screen: ${JSON.stringify(box)}`)
+    await disable.click()
+    await page.getByRole('dialog', { name: 'Disable user' }).getByRole('button', { name: 'Yes, disable' }).click()
+    await expect(viewerCard.getByText('Disabled')).toBeVisible()
+    check(callsTo('POST', '/users/').some((c) => c.path.endsWith('/disable') && c.status === 200), 'no successful POST /users/:id/disable')
+    await shot('user-disabled-from-card')
+
+    await page.getByRole('button', { name: 'Menu' }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Sign out' }).click()
+    await page.waitForURL('**/login')
+    await goto('/')
+    await page.waitForURL('**/login')
+    await signIn('platform_admin')
+    await goto('/admin-dashboard')
+    const orgs = page.getByRole('heading', { name: 'Organizations', level: 2, exact: true })
+    await expect(orgs).toBeVisible()
+    await expect(page.getByText(/^Failed on /).first()).toBeVisible()
+    check((await main.getByRole('table').count()) === 0, 'admin dashboard: a table is rendered at 390px')
+    await checkNoSidewaysScroll('/admin-dashboard')
+    await shot('orgs-cards', orgs)
+
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await expect(main.getByRole('table')).toBeVisible()
+    await shot('orgs-table-desktop', orgs)
+    await signOut({ fresh: true })
+    await signIn('customer_admin')
+    await goto('/findings')
+    await expect(main.getByRole('table').first()).toBeVisible()
+    await shot('findings-table-desktop')
+    await goto('/users')
+    await expect(main.getByRole('table')).toBeVisible()
+    await shot('users-table-desktop')
+  },
+  async phone() {
+    const results = {}
+    const devices = [
+      { device: 'phone', expected: { field: '16px', select: '16px' } },
+      { device: 'desktop', expected: { field: '15px', select: '14px' } },
+    ]
+    for (const { device, expected } of devices) {
+      if (device === 'desktop') {
+        await context.close()
+        context = await openContext(DESKTOP)
+        page = await context.newPage()
+        watch(page)
+        await page.goto(`${FRONT}/login`)
+      }
+      const viewport = page.viewportSize()
+
+      async function checkFieldFonts(label) {
+        const fonts = await page.evaluate(() =>
+          [...document.querySelectorAll('input, textarea, select')]
+            .filter((el) => !['checkbox', 'radio', 'file', 'hidden'].includes(el.type) && el.offsetWidth > 2 && !el.closest('[aria-hidden="true"]'))
+            .map((el) => ({ tag: el.tagName.toLowerCase(), type: el.type, name: el.getAttribute('aria-label') ?? el.labels?.[0]?.innerText ?? el.placeholder ?? el.name, fontSize: getComputedStyle(el).fontSize })),
+        )
+        steps.push({ label: `${device} ${label} field fonts`, fonts })
+        check(fonts.length > 0, `${device} ${label}: no fields found`)
+        for (const f of fonts) {
+          const want = f.tag === 'select' ? expected.select : expected.field
+          check(f.fontSize === want, `${device} ${label}: ${f.tag} "${f.name}" is ${f.fontSize}, expected ${want}`)
+        }
+      }
+
+      async function checkLastRowClearsFab(label, fabName, addRow) {
+        const fab = page.getByRole('button', { name: fabName })
+        await expect(fab).toBeVisible()
+        const pageMain = page.getByRole('main')
+        for (let n = 1; n <= 15 && !(await pageMain.evaluate((el) => el.scrollHeight > el.clientHeight + 200)); n++) {
+          await addRow(n)
+        }
+        check(await pageMain.evaluate((el) => el.scrollHeight > el.clientHeight), `${device} ${label}: the page never got long enough to scroll`)
+        const gap = await page.getByRole('main').evaluate((main) => {
+          main.scrollTop = main.scrollHeight
+          const content = [...main.children].filter((el) => getComputedStyle(el).position !== 'fixed')
+          const contentBottom = Math.max(...content.map((el) => el.getBoundingClientRect().bottom))
+          const fabTop = [...main.children].find((el) => getComputedStyle(el).position === 'fixed').getBoundingClientRect().top
+          return { contentBottom, fabTop }
+        })
+        steps.push({ label: `${device} ${label} last row vs Fab`, ...gap })
+        check(gap.contentBottom <= gap.fabTop, `${device} ${label}: last row ends at ${gap.contentBottom}, Fab starts at ${gap.fabTop}`)
+        await shot(`${device}-${label}-bottom`)
+      }
+
+      await signIn('customer_admin')
+      await page.getByRole('button', { name: 'Select' }).click()
+      await expect(page.getByLabel('Password', { exact: true })).toBeVisible()
+      await checkFieldFonts('itop-form')
+      await shot(`${device}-itop-form`)
+
+      await goto('/business-context')
+      await page.getByRole('button', { name: 'Import documents' }).first().click()
+      await expect(page.getByRole('dialog', { name: 'Import documents' })).toBeVisible()
+      await checkFieldFonts('business-context-import')
+      await page.keyboard.press('Escape')
+      await page.getByRole('button', { name: 'Fill it in by hand' }).click()
+      for (const step of ['Profile', 'Location', 'Operations', 'Digital footprint', 'Risk']) {
+        await page.getByRole('tab', { name: new RegExp(step) }).click()
+        await checkFieldFonts(`business-context-${step}`)
+      }
+      await shot(`${device}-business-context`)
+
+      await goto('/users')
+      await expect(page.getByText('viewer@acme.example')).toBeVisible()
+      await checkFieldFonts('users')
+      await checkLastRowClearsFab('users', 'Invite user', async (n) => {
+        await page.getByRole('button', { name: 'Invite user' }).click()
+        const invite = page.getByRole('dialog', { name: 'Invite user' })
+        await invite.getByLabel('Email').fill(`phone${n}@acme.example`)
+        await invite.getByRole('button', { name: 'Send invitation' }).click()
+        await expect(invite).toBeHidden()
+        await expect(page.getByRole('main').getByText(`phone${n}@acme.example`, { exact: true })).toBeVisible()
+      })
+
+      await goto('/findings')
+      const tabs = page.getByRole('main').getByRole('tablist').first()
+      await expect(tabs).toBeVisible()
+      const fade = await tabs.evaluate((el) => ({ overflowing: el.scrollWidth > el.clientWidth, end: el.hasAttribute('data-overflow-end'), mask: getComputedStyle(el).maskImage }))
+      steps.push({ label: `${device} findings tab list`, ...fade })
+      check(fade.end === fade.overflowing, `${device}: tab list overflowing ${fade.overflowing} but end fade ${fade.end}`)
+      await shot(`${device}-findings-tabs`)
+      if (fade.overflowing) {
+        await tabs.evaluate((el) => { el.scrollLeft = el.scrollWidth })
+        await page.waitForFunction((el) => el.hasAttribute('data-overflow-start') && !el.hasAttribute('data-overflow-end'), await tabs.elementHandle())
+        await shot(`${device}-findings-tabs-scrolled`)
+      }
+
+      await page.getByRole('button', { name: 'Open CVE-2021-41773' }).click()
+      const detail = page.getByRole('dialog')
+      await expect(detail.getByRole('heading', { name: 'Score' })).toBeVisible()
+      await shot(`${device}-finding-detail`)
+      const box = await detail.boundingBox()
+      const why = await detail.getByRole('heading', { name: 'Why it is here' }).boundingBox()
+      const radius = await detail.evaluate((el) => getComputedStyle(el).borderTopLeftRadius)
+      steps.push({ label: `${device} finding detail`, box, radius, whyTop: why?.y, viewport })
+      const fullScreen = box.x === 0 && box.y === 0 && box.width === viewport.width && box.height === viewport.height
+      check(fullScreen === (device === 'phone'), `${device}: detail box ${JSON.stringify(box)} vs viewport ${JSON.stringify(viewport)}`)
+      check((radius === '0px') === (device === 'phone'), `${device}: detail corner radius ${radius}`)
+      check(why && why.y + why.height <= viewport.height, `${device}: "Why it is here" starts below the first screen (${JSON.stringify(why)})`)
+      await detail.getByRole('button', { name: 'Close' }).first().click()
+      await expect(detail).toBeHidden()
+
+      await (device === 'phone' ? page.getByRole('button', { name: 'Menu', includeHidden: true }).click().then(() => page.getByRole('dialog').getByRole('button', { name: 'Sign out' }).click()) : signOut())
+      await page.waitForURL('**/login')
+      await goto('/')
+      await page.waitForURL('**/login')
+      await signIn('platform_admin')
+      await expect(page.getByRole('searchbox')).toBeVisible()
+      await checkFieldFonts('tenants')
+      await checkLastRowClearsFab('tenants', 'New organization', async (n) => {
+        await page.getByRole('button', { name: 'New organization' }).click()
+        await page.getByLabel('Organization name').fill(`Phone ${n} SA`)
+        await page.getByRole('button', { name: 'Next' }).click()
+        await page.getByRole('textbox', { name: 'Admin email' }).fill(`admin@phone${n}.example`)
+        await page.getByRole('button', { name: 'Create and send invitation' }).click()
+        await expect(page.getByTestId('customer-card').filter({ hasText: `Phone ${n} SA` })).toBeVisible()
+      })
+      results[device] = 'ok'
+    }
+    steps.push({ label: 'devices', results })
+  },
   async connect() {
     await signIn('customer_admin')
     await shot('selector')
@@ -153,7 +486,7 @@ const scenarios = {
     const dialog = page.getByRole('dialog', { name: 'Edit iTop connection' })
     await expect(dialog).toBeVisible()
     await dialog.getByLabel('User', { exact: true }).fill('barb-reader-2')
-    await dialog.getByLabel('Password').fill('not-a-real-secret')
+    await dialog.getByLabel('Password', { exact: true }).fill('not-a-real-secret')
     await shot('edit-dialog')
     await dialog.getByRole('button', { name: 'Save changes' }).click()
     await expect(dialog).toBeHidden()
@@ -204,6 +537,8 @@ const scenarios = {
     await page.getByLabel('Status').selectOption('all')
     await expect(page.getByText('8 assets')).toBeVisible()
     await shot('all-statuses', assetList())
+    await filters.getByRole('button', { name: /^Filters/ }).click()
+    await expect(filters.getByRole('combobox', { name: 'Type' })).toBeVisible()
     await choose('Type', 'Server', 'Virtual Machine')
     await expect(assetOption('core-switch-01')).toBeHidden()
     await expect(page.getByText('7 assets')).toBeVisible()
@@ -411,8 +746,8 @@ const scenarios = {
   async findings() {
     await signIn('customer_admin')
     await sidebarLink('Findings').click()
-    await expect(page.getByText('5 findings, 3 groups')).toBeVisible()
-    for (const n of [1, 2, 3]) await expect(page.getByText(`Group ${n}`, { exact: true })).toBeVisible()
+    await expect(page.getByText('20 findings, 4 groups')).toBeVisible()
+    for (const n of [1, 2, 3, 4]) await expect(page.getByText(`Group ${n}`, { exact: true })).toBeVisible()
     await shot('order')
     await page.getByRole('button', { name: 'Open CVE-2021-41773' }).click()
     const detail = page.getByRole('dialog')
@@ -427,7 +762,7 @@ const scenarios = {
     await expect(detail.getByText(/^Written by Luna/)).toBeVisible(15000)
     await shot('plan', detail.getByText(/^Written by Luna/))
     await detail.getByLabel('What do you say?').selectOption({ label: 'Should be attended earlier' })
-    await detail.getByLabel('Why').fill('Customer-facing and exploited in the wild.')
+    await detail.getByRole('textbox', { name: 'Why', exact: true }).fill('Customer-facing and exploited in the wild.')
     await detail.getByRole('button', { name: 'Send' }).click()
     await expect(detail.getByText('Saved.')).toBeVisible()
     await shot('feedback', detail.getByText('Saved.'))
@@ -620,7 +955,7 @@ const scenarios = {
     await shot('duplicate-refused')
     await page.keyboard.press('Escape')
     await sidebarLink('Dashboard').click()
-    await expect(page.getByRole('heading', { name: 'Recent organizations' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Organizations', level: 2, exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'New organizations per month' })).toBeVisible()
     await shot('dashboard')
     steps.push({ label: 'dashboard stat cards', text: await page.getByRole('main').innerText() })
@@ -634,36 +969,47 @@ if (!scenarios[scenarioName]) {
 
 const executablePath = execFileSync('node', [path.join(here, 'find-browser.mjs')]).toString().trim()
 const browser = await chromium.launch({ executablePath, headless: !headed })
-// Fresh context = empty localStorage = fresh mock data and no session; English forced so selectors below are stable.
-context = await browser.newContext({ locale: 'en-US', viewport: { width: 1280, height: 900 } })
+const PHONE = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }
+const DESKTOP = { viewport: { width: 1280, height: 900 } }
 // Nothing outside the dev server, the mocked API base and the web fonts may be reached (Slack's consent page, for one).
 const ALLOWED = [FRONT, API, 'https://fonts.googleapis.com/', 'https://fonts.gstatic.com/']
-await context.route((url) => !ALLOWED.some((origin) => url.href.startsWith(origin)), (route) => {
-  externalRequests.push(route.request().url())
-  return route.abort()
-})
-// The dev-only React Query Devtools button floats bottom-right, over dialog and sheet footers.
-await context.addInitScript(() => {
-  addEventListener('DOMContentLoaded', () => {
-    const style = document.createElement('style')
-    style.textContent = '.tsqd-open-btn-container { display: none !important; }'
-    document.head.append(style)
+
+// Fresh context = empty localStorage = fresh mock data and no session; English forced so selectors below are stable.
+async function openContext(device) {
+  const next = await browser.newContext({ locale: 'en-US', ...device })
+  await next.route((url) => !ALLOWED.some((origin) => url.href.startsWith(origin)), (route) => {
+    externalRequests.push(route.request().url())
+    return route.abort()
   })
-})
+  // The dev-only React Query Devtools button floats bottom-right, over dialog and sheet footers.
+  await next.addInitScript(() => {
+    addEventListener('DOMContentLoaded', () => {
+      const style = document.createElement('style')
+      style.textContent = '.tsqd-open-btn-container { display: none !important; }'
+      document.head.append(style)
+    })
+  })
+  return next
+}
+
+function watch(target) {
+  target.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()))
+  target.on('pageerror', (e) => consoleErrors.push(String(e)))
+  // MSW answers inside the browser, but Playwright still sees each call; this is the side-effect record.
+  target.on('response', async (response) => {
+    const request = response.request()
+    if (!request.url().startsWith(API)) return
+    const url = new URL(request.url())
+    let body = null
+    try { body = request.postDataJSON() } catch { body = request.postData() ? '<non-JSON body>' : null }
+    if (body && typeof body === 'object' && 'password' in body) body = { ...body, password: '<redacted>' }
+    apiCalls.push({ method: request.method(), path: url.pathname + url.search, status: response.status(), servedByMock: response.fromServiceWorker(), body })
+  })
+}
+
+context = await openContext(scenarioName === 'phone' ? PHONE : DESKTOP)
 page = await context.newPage()
-const consoleErrors = []
-page.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()))
-page.on('pageerror', (e) => consoleErrors.push(String(e)))
-// MSW answers inside the browser, but Playwright still sees each call; this is the side-effect record.
-page.on('response', async (response) => {
-  const request = response.request()
-  if (!request.url().startsWith(API)) return
-  const url = new URL(request.url())
-  let body = null
-  try { body = request.postDataJSON() } catch { body = request.postData() ? '<non-JSON body>' : null }
-  if (body && typeof body === 'object' && 'password' in body) body = { ...body, password: '<redacted>' }
-  apiCalls.push({ method: request.method(), path: url.pathname + url.search, status: response.status(), servedByMock: response.fromServiceWorker(), body })
-})
+watch(page)
 
 let failure = null
 try {

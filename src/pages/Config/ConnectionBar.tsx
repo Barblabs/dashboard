@@ -3,12 +3,12 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 
 /** One fact about the connection beside the badge; each adds its font and colour. */
-export const CONNECTION_DETAIL = 'overflow-hidden text-[0.8125rem] text-ellipsis whitespace-nowrap'
+export const CONNECTION_DETAIL = 'min-w-0 text-[0.8125rem] wrap-anywhere md:overflow-hidden md:text-ellipsis md:whitespace-nowrap'
 
 /** A row under the bar's header; each adds its border and background colour. */
 export const CONNECTION_STRIP = 'flex animate-fade-in flex-wrap items-center gap-4 border-t px-6 py-3.5'
 
-export const CONNECTION_STRIP_TEXT = 'flex-1 font-body text-[0.875rem] leading-[1.4]'
+export const CONNECTION_STRIP_TEXT = 'flex-[1_1_16rem] font-body text-[0.875rem] leading-[1.4]'
 
 interface ConnectionBarProps {
   badge: string
@@ -26,7 +26,7 @@ export function ConnectionBar({ badge, details, actions, children }: ConnectionB
   return (
     <div className="flex flex-col overflow-hidden rounded-lg border border-border-panel">
       <div className="flex flex-wrap items-center gap-4 bg-white px-6 py-4">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+        <div className="flex min-w-0 basis-full flex-wrap items-center gap-2 md:flex-1">
           <Badge variant="solid">
             <span className="size-[7px] shrink-0 rounded-full bg-cyan" />
             {badge}
@@ -39,7 +39,7 @@ export function ConnectionBar({ badge, details, actions, children }: ConnectionB
             </Fragment>
           ))}
         </div>
-        {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
+        {actions && <div className="flex flex-wrap gap-2 md:shrink-0">{actions}</div>}
       </div>
       {children}
     </div>
