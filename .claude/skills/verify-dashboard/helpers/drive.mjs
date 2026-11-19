@@ -98,7 +98,7 @@ const ITOP = { url: 'http://10.0.0.5:8000', user: 'barb-reader', password: 'not-
 async function fillItop(login = ITOP) {
   await page.getByLabel('iTop address (IP or URL)').fill(login.url)
   await page.getByLabel('User', { exact: true }).fill(login.user)
-  await page.getByLabel('Password').fill(login.password)
+  await page.getByLabel('Password', { exact: true }).fill(login.password)
 }
 
 // The tech stack is a listbox of Assets beside the selected Asset's record.
@@ -420,7 +420,7 @@ const scenarios = {
     const dialog = page.getByRole('dialog', { name: 'Edit iTop connection' })
     await expect(dialog).toBeVisible()
     await dialog.getByLabel('User', { exact: true }).fill('barb-reader-2')
-    await dialog.getByLabel('Password').fill('not-a-real-secret')
+    await dialog.getByLabel('Password', { exact: true }).fill('not-a-real-secret')
     await shot('edit-dialog')
     await dialog.getByRole('button', { name: 'Save changes' }).click()
     await expect(dialog).toBeHidden()
