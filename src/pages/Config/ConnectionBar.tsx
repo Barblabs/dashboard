@@ -3,7 +3,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 
 /** One fact about the connection beside the badge; each adds its font and colour. */
-export const CONNECTION_DETAIL = 'overflow-hidden text-[0.8125rem] text-ellipsis whitespace-nowrap'
+export const CONNECTION_DETAIL = 'min-w-0 text-[0.8125rem] wrap-anywhere md:overflow-hidden md:text-ellipsis md:whitespace-nowrap'
 
 /** A row under the bar's header; each adds its border and background colour. */
 export const CONNECTION_STRIP = 'flex animate-fade-in flex-wrap items-center gap-4 border-t px-6 py-3.5'
@@ -39,7 +39,7 @@ export function ConnectionBar({ badge, details, actions, children }: ConnectionB
             </Fragment>
           ))}
         </div>
-        {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
+        {actions && <div className="flex flex-wrap gap-2 md:shrink-0">{actions}</div>}
       </div>
       {children}
     </div>
