@@ -386,39 +386,41 @@ function ComponentsTable({ components }: { components: ComponentCount[] }) {
       <p className="border-b border-border-panel px-4 py-2 font-title text-[0.875rem] font-semibold text-navy">
         {t('findings.risk.topComponentsTitle')}
       </p>
-      <table className="w-full border-collapse font-body text-[0.875rem]">
-        <thead>
-          <tr className="text-left text-[0.75rem] font-normal text-gray">
-            <th className="px-4 py-2 font-normal">{t('findings.risk.topComponent')}</th>
-            <th className="px-4 py-2 font-normal">{t('findings.risk.topVersion')}</th>
-            <th className="px-4 py-2 text-right font-normal">{t('findings.risk.topFindings')}</th>
-            <th className="px-4 py-2 text-right font-normal">{t('findings.risk.topAssets')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {components.map((c) => (
-            <tr key={`${c.vendor}:${c.product}:${c.version}`} className="border-t border-border-panel hover:bg-panel">
-              <td className="px-4 py-2 text-navy">
-                <span className="font-semibold">{c.product}</span>
-                <span className="ml-1 text-[0.75rem] text-gray">{c.vendor}</span>
-              </td>
-              <td className="px-4 py-2 font-mono text-[0.8125rem] text-gray">{c.version}</td>
-              <td className="px-4 py-2 text-right">
-                <div className="flex items-center justify-end gap-2">
-                  <div className="h-1.5 w-12 overflow-hidden rounded-full bg-panel">
-                    <div
-                      className="h-full rounded-full bg-navy"
-                      style={{ width: `${(c.findings / maxFindings) * 100}%` }}
-                    />
-                  </div>
-                  <span className="w-5 tabular-nums font-semibold text-navy">{c.findings}</span>
-                </div>
-              </td>
-              <td className="px-4 py-2 tabular-nums text-right text-gray">{c.assets}</td>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse font-body text-[0.875rem]">
+          <thead>
+            <tr className="text-left text-[0.75rem] font-normal text-gray">
+              <th className="px-4 py-2 font-normal">{t('findings.risk.topComponent')}</th>
+              <th className="px-4 py-2 font-normal">{t('findings.risk.topVersion')}</th>
+              <th className="px-4 py-2 text-right font-normal">{t('findings.risk.topFindings')}</th>
+              <th className="px-4 py-2 text-right font-normal">{t('findings.risk.topAssets')}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {components.map((c) => (
+              <tr key={`${c.vendor}:${c.product}:${c.version}`} className="border-t border-border-panel hover:bg-panel">
+                <td className="px-4 py-2 text-navy">
+                  <span className="font-semibold">{c.product}</span>
+                  <span className="ml-1 text-[0.75rem] text-gray">{c.vendor}</span>
+                </td>
+                <td className="px-4 py-2 font-mono text-[0.8125rem] text-gray">{c.version}</td>
+                <td className="px-4 py-2 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <div className="h-1.5 w-12 overflow-hidden rounded-full bg-panel">
+                      <div
+                        className="h-full rounded-full bg-navy"
+                        style={{ width: `${(c.findings / maxFindings) * 100}%` }}
+                      />
+                    </div>
+                    <span className="w-5 tabular-nums font-semibold text-navy">{c.findings}</span>
+                  </div>
+                </td>
+                <td className="px-4 py-2 tabular-nums text-right text-gray">{c.assets}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
@@ -435,38 +437,40 @@ function CvesTable({ cves }: { cves: CveCount[] }) {
       <p className="border-b border-border-panel px-4 py-2 font-title text-[0.875rem] font-semibold text-navy">
         {t('findings.risk.topCvesTitle')}
       </p>
-      <table className="w-full border-collapse font-body text-[0.875rem]">
-        <thead>
-          <tr className="text-left text-[0.75rem] font-normal text-gray">
-            <th className="px-4 py-2 font-normal">{t('findings.risk.topCve')}</th>
-            <th className="px-4 py-2 font-normal">{t('findings.risk.topKev')}</th>
-            <th className="px-4 py-2 font-normal">{t('findings.risk.topEpss')}</th>
-            <th className="px-4 py-2 text-right font-normal">{t('findings.risk.topFindings')}</th>
-            <th className="px-4 py-2 text-right font-normal">{t('findings.risk.topAssets')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cves.map((c) => (
-            <tr key={c.cve_id} className="border-t border-border-panel hover:bg-panel">
-              <td className="px-4 py-2 font-mono text-[0.8125rem] font-semibold text-navy">{c.cve_id}</td>
-              <td className="px-4 py-2">
-                <span
-                  className={`rounded px-1.5 py-0.5 font-body text-[0.75rem] font-semibold ${
-                    c.kev ? 'bg-[#D7263D] text-white' : 'bg-panel text-gray'
-                  }`}
-                >
-                  {c.kev ? t('findings.risk.topKevYes') : t('findings.risk.topKevNo')}
-                </span>
-              </td>
-              <td className="px-4 py-2 tabular-nums text-gray">
-                {c.epss !== null ? `${(c.epss * 100).toFixed(1)}%` : '—'}
-              </td>
-              <td className="px-4 py-2 tabular-nums text-right font-semibold text-navy">{c.findings}</td>
-              <td className="px-4 py-2 tabular-nums text-right text-gray">{c.assets}</td>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse font-body text-[0.875rem]">
+          <thead>
+            <tr className="text-left text-[0.75rem] font-normal text-gray">
+              <th className="px-4 py-2 font-normal">{t('findings.risk.topCve')}</th>
+              <th className="px-4 py-2 font-normal">{t('findings.risk.topKev')}</th>
+              <th className="px-4 py-2 font-normal">{t('findings.risk.topEpss')}</th>
+              <th className="px-4 py-2 text-right font-normal">{t('findings.risk.topFindings')}</th>
+              <th className="px-4 py-2 text-right font-normal">{t('findings.risk.topAssets')}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {cves.map((c) => (
+              <tr key={c.cve_id} className="border-t border-border-panel hover:bg-panel">
+                <td className="px-4 py-2 font-mono text-[0.8125rem] font-semibold whitespace-nowrap text-navy">{c.cve_id}</td>
+                <td className="px-4 py-2">
+                  <span
+                    className={`rounded px-1.5 py-0.5 font-body text-[0.75rem] font-semibold ${
+                      c.kev ? 'bg-[#D7263D] text-white' : 'bg-panel text-gray'
+                    }`}
+                  >
+                    {c.kev ? t('findings.risk.topKevYes') : t('findings.risk.topKevNo')}
+                  </span>
+                </td>
+                <td className="px-4 py-2 tabular-nums text-gray">
+                  {c.epss !== null ? `${(c.epss * 100).toFixed(1)}%` : '—'}
+                </td>
+                <td className="px-4 py-2 tabular-nums text-right font-semibold text-navy">{c.findings}</td>
+                <td className="px-4 py-2 tabular-nums text-right text-gray">{c.assets}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
