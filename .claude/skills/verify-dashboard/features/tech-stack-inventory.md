@@ -1,7 +1,7 @@
 # Tech stack inventory
 
 ## Sub-features
-- "Tech stack" heading with the total ("N assets"), filters (group "Filter assets"): Status (Active default / Inactive / All), then Type, Criticality, Exposure, Information Classification and Area as multi-selects with removable chips (Criticality and Exposure also offer Unknown, sent as `unknown`; Information Classification offers Unclassified, sent as `unclassified`; Area lists every Area from `GET /areas?active=all`, Inactive ones as "<name> (inactive)", sent as ids, and is disabled until they load); several values are sent as repeated keys
+- "Tech stack" heading with the total ("N assets"), filters (group "Filter assets"): Status (Active default / Inactive / All) always shown, then a "Filters" disclosure ("Filters · N" and a "Clear" button while any is set; closed unless a filter is already set) holding Type, Criticality, Exposure, Information Classification, Lifecycle Stage and Area as multi-selects with removable chips (Criticality and Exposure also offer Unknown, sent as `unknown`; Information Classification offers Unclassified, sent as `unclassified`; Area lists every Area from `GET /areas?active=all`, Inactive ones as "<name> (inactive)", sent as ids, and is disabled until they load); Lifecycle Stage offers Production, Implementation, In stock and Unknown, sent as `lifecycle_stage`; several values are sent as repeated keys
 - Triage banner under the filters (see asset-triage.md)
 - An asset list (listbox "Tech stack": name, type, area or "No Area", criticality, an orange dot when the asset has a gap) beside the selected asset's record; the first asset is selected, clicking or ↑ ↓ / Home / End moves the selection
 - Record (article named after the asset): type, record id, status, criticality, Lifecycle Stage, Exposure and Information Classification buttons (open the triage sheet), owner (with "Declared" badge), area, hardware, retired, Software Components with an "Unidentified" badge and "N of M unidentified"
@@ -12,7 +12,7 @@
 Connected view of `/config`, CMDB tab, "Tech stack" tab (default). customer_admin and viewer both see it.
 
 ## Driving it with Playwright
-`node drive.mjs inventory` ("Status" is a native select: `selectOption`; "Type", "Criticality", "Exposure", "Information Classification" and "Area" are comboboxes whose list stays open between picks, so click the options then press Escape, and remove a chip with the "Remove <value>" button; helpers `assetList()`, `assetOption(name)`, `assetRecord(name)`). Not covered: pagination, because the MSW assets handler never returns `next_cursor`.
+`node drive.mjs inventory` ("Status" is a native select: `selectOption`; open the disclosure first with the button named `/^Filters/` (it stays open after that); "Type", "Criticality", "Exposure", "Information Classification" and "Area" are comboboxes whose list stays open between picks, so click the options then press Escape, and remove a chip with the "Remove <value>" button; helpers `assetList()`, `assetOption(name)`, `assetRecord(name)`). Not covered: pagination, because the MSW assets handler never returns `next_cursor`; the Lifecycle Stage filter and "Clear".
 
 ## Gotchas
 - The fixtures are `src/mocks/assets.ts`: 8 assets, 7 active (`erp-app-02` is inactive), 2 servers (`prod-api-01`, `crm-db-primary`); `prod-api-01` has the unidentified `internal-billing-agent`.

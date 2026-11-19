@@ -537,6 +537,8 @@ const scenarios = {
     await page.getByLabel('Status').selectOption('all')
     await expect(page.getByText('8 assets')).toBeVisible()
     await shot('all-statuses', assetList())
+    await filters.getByRole('button', { name: /^Filters/ }).click()
+    await expect(filters.getByRole('combobox', { name: 'Type' })).toBeVisible()
     await choose('Type', 'Server', 'Virtual Machine')
     await expect(assetOption('core-switch-01')).toBeHidden()
     await expect(page.getByText('7 assets')).toBeVisible()
