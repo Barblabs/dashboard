@@ -37,13 +37,13 @@ function TriageBanner({ onTriage }: { onTriage: (sheet: AssetTriageTarget) => vo
     )
   }
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-md border border-high bg-high/10 px-4 py-2.5 font-body text-[0.8125rem] text-navy">
-      <p className="min-w-0 flex-1 leading-[1.4]">
+    <div className="flex flex-col gap-3 rounded-md border border-high bg-high/10 px-4 py-2.5 font-body text-[0.8125rem] text-navy md:flex-row md:flex-wrap md:items-center">
+      <p className="min-w-0 leading-[1.4] md:flex-1">
         <strong className="font-semibold">{t('config.triage.banner.count', { count: pending.length })}</strong>{' '}
         <span className="text-gray">{t('config.triage.banner.detail')}</span>
       </p>
       {canEdit && (
-        <Button size="sm" onClick={() => onTriage({ mode: 'queue', assets: pending })}>
+        <Button size="sm" className="self-start md:self-auto" onClick={() => onTriage({ mode: 'queue', assets: pending })}>
           {t('config.triage.banner.action')}
         </Button>
       )}
