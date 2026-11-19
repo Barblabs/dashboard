@@ -13,6 +13,7 @@ import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge } from '../../components/ui/Badge'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { Message } from '../../components/ui/Message'
+import { useWideLayout } from '../../components/ui/useWideLayout'
 import { useDateFormat, useLocale, useRelativeTime } from '../../i18n/format'
 
 // ── monthly chart helpers ─────────────────────────────────────────────────────
@@ -126,8 +127,7 @@ function syncFailed(c: CustomerStats) {
 
 function OrgsTable({ customers }: { customers: CustomerStats[] }) {
   const { t } = useTranslation()
-  const relativeTime = useRelativeTime()
-  const formatDate = useDateFormat()
+  const wide = useWideLayout()
 
   return (
     <section className="rounded-xl border border-border-panel bg-white">
@@ -136,7 +136,7 @@ function OrgsTable({ customers }: { customers: CustomerStats[] }) {
       </div>
       {customers.length === 0 ? (
         <p className="p-6 font-body text-[0.875rem] text-gray">{t('adminDashboard.orgsTable.empty')}</p>
-      ) : (
+      ) : wide ? (
         <table className="w-full border-collapse font-body text-[0.875rem]">
           <thead>
             <tr className="text-left text-[0.75rem] font-normal text-gray">
@@ -152,41 +152,92 @@ function OrgsTable({ customers }: { customers: CustomerStats[] }) {
               <tr key={c.id} className="border-t border-border-panel hover:bg-panel">
                 <td className="px-6 py-3 font-semibold text-navy">{c.name}</td>
                 <td className="px-4 py-3">
-                  <Badge variant={c.active ? 'outline' : 'muted'}>
-                    {c.active
-                      ? t('adminDashboard.orgsTable.statusActive')
-                      : t('adminDashboard.orgsTable.statusDeactivated')}
-                  </Badge>
+                  <OrgStatus customer={c} />
                 </td>
                 <td className="px-4 py-3 tabular-nums text-gray">{c.user_count}</td>
                 <td className="px-4 py-3">
-                  <span className="flex items-center gap-1.5">
-                    <span
-                      className={`h-2 w-2 shrink-0 rounded-full ${c.cmdb_connected ? 'bg-[var(--color-low)]' : 'bg-panel'}`}
-                    />
-                    <span className={c.cmdb_connected ? 'text-navy' : 'text-gray'}>
-                      {c.cmdb_connected
-                        ? t('adminDashboard.orgsTable.cmdbConnected')
-                        : t('adminDashboard.orgsTable.cmdbNone')}
-                    </span>
-                  </span>
+                  <CmdbState customer={c} />
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-gray">
-                    {c.cmdb_last_sync ? relativeTime(c.cmdb_last_sync) : t('adminDashboard.orgsTable.noSync')}
-                  </span>
-                  {syncFailed(c) && c.cmdb_last_sync_failed_at && (
-                    <span className="mt-0.5 block font-body text-[0.75rem] text-[var(--color-critical)]">
-                      {t('adminDashboard.orgsTable.syncFailedAt', { date: formatDate(c.cmdb_last_sync_failed_at) })}
-                    </span>
-                  )}
+                  <LastSync customer={c} />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      ) : (
+        <ul className="font-body text-[0.875rem]">
+          {customers.map((c) => (
+            <li key={c.id} className="flex flex-col gap-3 border-t border-border-panel px-4 py-4 first:border-t-0">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="min-w-0 font-semibold wrap-anywhere text-navy">{c.name}</span>
+                <OrgStatus customer={c} />
+              </div>
+              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+                <dt className="text-[0.75rem] text-gray">{t('adminDashboard.orgsTable.users')}</dt>
+                <dd className="tabular-nums text-gray">{c.user_count}</dd>
+                <dt className="text-[0.75rem] text-gray">{t('adminDashboard.orgsTable.cmdb')}</dt>
+                <dd>
+                  <CmdbState customer={c} />
+                </dd>
+                <dt className="text-[0.75rem] text-gray">{t('adminDashboard.orgsTable.lastSync')}</dt>
+                <dd>
+                  <LastSync customer={c} />
+                </dd>
+              </dl>
+            </li>
+          ))}
+        </ul>
       )}
     </section>
+  )
+}
+
+function OrgStatus({ customer }: { customer: CustomerStats }) {
+  const { t } = useTranslation()
+
+  return (
+    <Badge variant={customer.active ? 'outline' : 'muted'}>
+      {customer.active
+        ? t('adminDashboard.orgsTable.statusActive')
+        : t('adminDashboard.orgsTable.statusDeactivated')}
+    </Badge>
+  )
+}
+
+function CmdbState({ customer }: { customer: CustomerStats }) {
+  const { t } = useTranslation()
+
+  return (
+    <span className="flex items-center gap-1.5">
+      <span
+        className={`h-2 w-2 shrink-0 rounded-full ${customer.cmdb_connected ? 'bg-[var(--color-low)]' : 'bg-panel'}`}
+      />
+      <span className={customer.cmdb_connected ? 'text-navy' : 'text-gray'}>
+        {customer.cmdb_connected
+          ? t('adminDashboard.orgsTable.cmdbConnected')
+          : t('adminDashboard.orgsTable.cmdbNone')}
+      </span>
+    </span>
+  )
+}
+
+function LastSync({ customer }: { customer: CustomerStats }) {
+  const { t } = useTranslation()
+  const relativeTime = useRelativeTime()
+  const formatDate = useDateFormat()
+
+  return (
+    <>
+      <span className="text-gray">
+        {customer.cmdb_last_sync ? relativeTime(customer.cmdb_last_sync) : t('adminDashboard.orgsTable.noSync')}
+      </span>
+      {syncFailed(customer) && customer.cmdb_last_sync_failed_at && (
+        <span className="mt-0.5 block font-body text-[0.75rem] text-[var(--color-critical)]">
+          {t('adminDashboard.orgsTable.syncFailedAt', { date: formatDate(customer.cmdb_last_sync_failed_at) })}
+        </span>
+      )}
+    </>
   )
 }
 
