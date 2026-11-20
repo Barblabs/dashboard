@@ -3,7 +3,7 @@ import type { ClosedFinding } from '../../api/findingCloses'
 import { useDateFormat } from '../../i18n/format'
 
 /** A past day waits for the next Sync, since no timer reopens the Finding (ADR 0035). */
-function reopenPassed(reopenAt: string): boolean {
+export function reopenPassed(reopenAt: string): boolean {
   return new Date(reopenAt).getTime() <= Date.now()
 }
 

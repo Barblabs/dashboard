@@ -119,6 +119,7 @@ export const es: Translations = {
       beforeAfter: 'Antes y después',
       risk: 'Dónde está el riesgo',
       threats: 'Amenazas',
+      closed: 'Cerrados',
     },
     indicators: {
       open: 'Abiertas',
@@ -251,6 +252,17 @@ export const es: Translations = {
       reopensOn: 'Se reabre después del {{date}}',
       reopensNextSync: 'Se reabrirá en la próxima sincronización',
       onItsOwn: 'Este hallazgo se cerró automáticamente; se reabrirá solo si vuelve a aparecer.',
+    },
+    closedList: {
+      loading: 'Cargando hallazgos cerrados…',
+      failed: 'No se pudieron cargar los hallazgos cerrados.',
+      network: 'No se pudo contactar al servidor para cargar los hallazgos cerrados.',
+      empty: 'No hay hallazgos cerrados a mano',
+      intro: 'Los hallazgos que alguien cerró a mano, del cierre más reciente al más antiguo. Los que se cerraron solos no salen aquí.',
+      reason: 'Motivo',
+      closed: 'Cerrado',
+      reopensOn: 'Se reabre el',
+      actions: 'Acciones',
     },
     errors: {
       notFound: 'Este hallazgo ya no existe.',

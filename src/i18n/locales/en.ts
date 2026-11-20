@@ -117,6 +117,7 @@ export const en = {
       beforeAfter: 'Before & After',
       risk: 'Where the risk is',
       threats: 'Threats',
+      closed: 'Closed',
     },
     indicators: {
       open: 'Open',
@@ -249,6 +250,17 @@ export const en = {
       reopensOn: 'Reopens after {{date}}',
       reopensNextSync: 'Will reopen at the next sync',
       onItsOwn: 'This finding closed automatically; it will reopen on its own if it shows up again.',
+    },
+    closedList: {
+      loading: 'Loading closed findings…',
+      failed: "Couldn't load the closed findings.",
+      network: "Couldn't reach the server to load the closed findings.",
+      empty: 'No findings closed by hand',
+      intro: 'Findings a user closed by hand, newest close first. Those that closed on their own are not listed.',
+      reason: 'Reason',
+      closed: 'Closed',
+      reopensOn: 'Reopens on',
+      actions: 'Actions',
     },
     errors: {
       notFound: 'This finding no longer exists.',
