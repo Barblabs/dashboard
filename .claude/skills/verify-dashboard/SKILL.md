@@ -38,6 +38,7 @@ node drive.mjs <scenario> [--headed]
 |---|---|---|
 | `navigation` | features/navigation.md, features/sign-in-and-roles.md | login guard and return to the asked page, per-role menu and redirects, placeholder, 403, 404, sign out |
 | `findings` | features/findings.md | order summary and groups, detail modal kept in the URL across a reload, Luna action plan, feedback |
+| `finding-closes` | features/findings.md | Feedback takes three verdicts and a required Why, close by hand as postponed for 30 days, counted closed at once, Closed tab, reopen from its row |
 | `news` | features/news.md | newest digest's groups in order, Ransomware.live credit, earlier digest kept in the URL across a reload, the note when the Editor did not answer, Spanish |
 | `connect` | features/connect-cmdb.md | rejected user error, test connection, connect, still connected after a reload |
 | `sync-edit-disconnect` | features/manage-connection.md | sync, edit dialog, disconnect confirm |
@@ -59,7 +60,7 @@ Each run uses a fresh browser context (empty storage, so the mock data starts fr
 
 The driver also hides the dev-only React Query Devtools button (it floats bottom-right over sheet and dialog footers and swallows clicks), and aborts every request outside the dev server, the mock API base and Google Fonts, recording it in `externalRequests`.
 
-Mock data persists in the context's localStorage, one key per resource: `barbattack_mock_role` (the session), `barbattack_cmdb_source`, `barbattack_mock_assets`, `barbattack_mock_areas`, `barbattack_mock_users`, `barbattack_mock_customers`, `barbattack_mock_business_context`, `barbattack_mock_prioritizations`, `barbattack_mock_news_digests`, `barbattack_slack_installation`, `barbattack_slack_deliveries`. CMDB user `admin` is always rejected with `missing_rest_profile`.
+Mock data persists in the context's localStorage, one key per resource: `barbattack_mock_role` (the session), `barbattack_cmdb_source`, `barbattack_mock_assets`, `barbattack_mock_areas`, `barbattack_mock_users`, `barbattack_mock_customers`, `barbattack_mock_business_context`, `barbattack_mock_prioritizations`, `barbattack_mock_closed_findings`, `barbattack_mock_news_digests`, `barbattack_slack_installation`, `barbattack_slack_deliveries`. CMDB user `admin` is always rejected with `missing_rest_profile`.
 
 ## Evidence
 

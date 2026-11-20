@@ -766,12 +766,70 @@ const scenarios = {
     await detail.getByRole('button', { name: 'Send' }).click()
     await expect(detail.getByText('Saved.')).toBeVisible()
     await shot('feedback', detail.getByText('Saved.'))
-    await detail.getByRole('button', { name: 'Close' }).first().click()
+    await detail.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(detail).toBeHidden()
     const plans = callsTo('POST', '/prioritizations/').filter((c) => c.path.endsWith('/plans'))
     const feedback = callsTo('POST', '/prioritizations/').filter((c) => c.path.endsWith('/feedback'))
     check(plans.length === 1, 'expected one plan request')
     check(feedback[0]?.body?.verdict === 'should_be_earlier', `feedback request mismatch: ${JSON.stringify(feedback[0]?.body)}`)
+  },
+
+  // A viewer closes a Finding by hand as postponed from its Feedback, sees it counted as closed
+  // at once, finds it in the Closed tab and reopens it from there.
+  async 'finding-closes'() {
+    await signIn('viewer')
+    await sidebarLink('Findings').click()
+    await expect(page.getByText('20 findings, 4 groups')).toBeVisible()
+    await expect(page.getByText('23', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Open CVE-2024-6387' }).click()
+    const detail = page.getByRole('dialog', { name: 'CVE-2024-6387' })
+    await expect(detail.getByRole('heading', { name: 'Feedback' })).toBeVisible()
+
+    const verdicts = await detail.getByLabel('What do you say?').locator('option').allTextContents()
+    check(JSON.stringify(verdicts) === JSON.stringify(['It applies', 'Should be attended earlier', 'Should be attended later']), `verdicts: ${verdicts}`)
+    check(await detail.getByRole('button', { name: 'Send' }).isDisabled(), 'Send is enabled with no why')
+    await shot('feedback-form', detail.getByRole('button', { name: 'Close the finding' }))
+
+    await detail.getByRole('button', { name: 'Close the finding' }).click()
+    const close = page.getByRole('dialog', { name: 'Close CVE-2024-6387' })
+    await expect(close).toBeVisible()
+    await close.getByRole('radio', { name: 'Postponed' }).click()
+    await close.getByRole('button', { name: 'In 30 days' }).click()
+    await close.getByRole('textbox', { name: 'Why' }).fill('Next maintenance window.')
+    await shot('close-dialog')
+    await close.getByRole('button', { name: 'Close finding' }).click()
+    await expect(close).toBeHidden()
+    await expect(detail.getByRole('button', { name: 'Reopen' })).toBeVisible()
+    await expect(detail.getByText('Next maintenance window.').first()).toBeVisible()
+    await shot('detail-closed')
+
+    await detail.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(detail).toBeHidden()
+    await expect(page.getByText('22', { exact: true })).toBeVisible()
+    const row = page.getByRole('row').filter({ has: page.getByRole('button', { name: 'Open CVE-2024-6387' }) })
+    await expect(row.getByText('Closed', { exact: true })).toBeVisible()
+    await shot('list-closed', row)
+
+    await tab('Closed').click()
+    const closedRow = page.getByRole('row').filter({ hasText: 'CVE-2024-6387' })
+    await expect(closedRow.getByText('Postponed')).toBeVisible()
+    await expect(closedRow.getByRole('cell', { name: /2026|2027/ }).last()).toBeVisible()
+    // The table scrolls inside its panel: the row's last button must sit inside it, not past its edge.
+    const panelBox = await page.getByRole('table').locator('..').boundingBox()
+    const reopenBox = await closedRow.getByRole('button', { name: 'Reopen CVE-2024-6387' }).boundingBox()
+    check(reopenBox && panelBox && reopenBox.x + reopenBox.width <= panelBox.x + panelBox.width, 'Reopen is past the edge of the table')
+    await shot('closed-tab')
+    await closedRow.getByRole('button', { name: 'Reopen CVE-2024-6387' }).click()
+    const confirm = page.getByRole('dialog', { name: 'Reopen CVE-2024-6387?' })
+    await confirm.getByRole('button', { name: 'Yes, reopen' }).click()
+    await expect(page.getByText('No findings closed by hand')).toBeVisible()
+    await shot('closed-tab-empty')
+
+    const [closed] = callsTo('POST', '/findings/').filter((c) => c.path.endsWith('/close'))
+    check(closed?.body?.reason === 'postponed' && closed.body.note === 'Next maintenance window.', `close request mismatch: ${JSON.stringify(closed?.body)}`)
+    check(/T00:00:00[+-]\d{2}:\d{2}$/.test(closed.body.reopen_at ?? ''), `reopen_at is not a start of day with its offset: ${closed.body.reopen_at}`)
+    check(callsTo('POST', '/findings/').filter((c) => c.path.endsWith('/reopen')).length === 1, 'expected one reopen request')
+    check(callsTo('GET', '/findings/summary').length >= 2, 'the counts were not fetched again after the close')
   },
 
   async news() {
