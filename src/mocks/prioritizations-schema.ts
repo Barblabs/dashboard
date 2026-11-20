@@ -1,7 +1,7 @@
 import { z, type ZodType } from 'zod'
 import { ASSET_KINDS, SOFTWARE_ROLES } from '../api/assets'
 import { DOWNTIMES, IMPACTS } from '../api/businessContext'
-import { DATA_GAPS, VERDICTS, type Prioritization } from '../api/prioritizations'
+import { DATA_GAPS, RECORDED_VERDICTS, type Prioritization } from '../api/prioritizations'
 
 // What the prioritizations store holds, checked as it is read: see `localStore`.
 
@@ -132,7 +132,7 @@ const feedback = z.strictObject({
   id: z.string(),
   finding_id: z.string(),
   author_id: z.string(),
-  verdict: z.enum(VERDICTS),
+  verdict: z.enum(RECORDED_VERDICTS),
   note: z.string(),
   via_analista: z.boolean(),
   created_at: z.string(),

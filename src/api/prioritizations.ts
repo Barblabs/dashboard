@@ -5,14 +5,17 @@ import { api } from './client'
 import { connectionScopeKey } from './cmdb'
 import type { Override, Schemas } from './schemas'
 
+/** What a User can say about where a Finding is in the order (ADR 0035). */
 export const VERDICTS = [
   'applies',
-  'does_not_apply',
-  'remediated',
   'should_be_earlier',
   'should_be_later',
 ] as const satisfies readonly Schemas['FeedbackRequestBody']['verdict'][]
 type Verdict = (typeof VERDICTS)[number]
+
+/** Feedback recorded before ADR 0035 may still say the Finding did not apply or was fixed. */
+export const RECORDED_VERDICTS = [...VERDICTS, 'does_not_apply', 'remediated'] as const
+type RecordedVerdict = (typeof RECORDED_VERDICTS)[number]
 
 /** The inputs a Scoring Model replaced with a default, which make a Score estimated. */
 export const DATA_GAPS = [
@@ -63,7 +66,7 @@ export type Finding = Override<
 >
 export type PriorityGroup = Schemas['PriorityGroupResponse']
 export type ActionPlan = Schemas['PlanResponse']
-export type Feedback = Override<Schemas['FeedbackResponse'], { verdict: Verdict }>
+export type Feedback = Override<Schemas['FeedbackResponse'], { verdict: RecordedVerdict }>
 type PrioritizationList = Schemas['PrioritizationListResponse']
 export type Prioritization = Override<
   Schemas['PrioritizationResponse'],

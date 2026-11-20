@@ -386,6 +386,38 @@ describe('Findings', () => {
     expect(within(dialog).getByText('The note can have up to 2000 characters.')).toBeInTheDocument()
   })
 
+  it('feedback only says where a finding should be', async () => {
+    const user = await renderFindings()
+    const dialog = await openFinding(user, 'CVE-2024-6387')
+
+    const verdicts = within(within(dialog).getByLabelText('What do you say?')).getAllByRole('option')
+    expect(verdicts.map((o) => o.textContent)).toEqual([
+      'It applies',
+      'Should be attended earlier',
+      'Should be attended later',
+    ])
+  })
+
+  it('still shows feedback recorded before it could only be about the order', async () => {
+    const [newest, ...older] = prioritizationsStore.load()
+    const finding = newest.findings.find((f) => f.cve_id === 'CVE-2024-6387')!
+    const recorded = (verdict: 'does_not_apply' | 'remediated') => ({
+      id: verdict,
+      finding_id: finding.finding_id,
+      author_id: 'someone',
+      verdict,
+      note: `Said ${verdict}.`,
+      via_analista: false,
+      created_at: '2026-11-01T10:00:00Z',
+    })
+    prioritizationsStore.save([{ ...newest, feedback: [recorded('does_not_apply'), recorded('remediated')] }, ...older])
+    const user = await renderFindings()
+    const dialog = await openFinding(user, 'CVE-2024-6387')
+
+    expect(within(dialog).getByText('It does not apply', { selector: 'span' })).toBeInTheDocument()
+    expect(within(dialog).getByText('Already remediated', { selector: 'span' })).toBeInTheDocument()
+  })
+
   it('says there is nothing yet before the first prioritization', async () => {
     prioritizationsStore.save([])
     renderApp('/findings')

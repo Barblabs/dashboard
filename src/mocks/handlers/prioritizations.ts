@@ -10,7 +10,7 @@ const planBody = z.object({ finding_id: z.string() }) satisfies ZodType<Schemas[
 const feedbackBody = z.object({
   finding_id: z.string(),
   verdict: z.enum(VERDICTS),
-  note: z.string().optional(),
+  note: z.string().max(2000).refine((note) => note.trim() !== ''),
 }) satisfies ZodType<Schemas['FeedbackRequestBody']>
 
 function find(id: string) {
@@ -96,7 +96,7 @@ export const prioritizationsHandlers = [
       finding_id: body.finding_id,
       author_id: 'mock-user',
       verdict: body.verdict,
-      note: body.note ?? '',
+      note: body.note,
       via_analista: false,
       created_at: new Date().toISOString(),
     }
