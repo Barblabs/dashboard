@@ -5,8 +5,8 @@ import type { Finding } from '../../api/prioritizations'
 import { failure } from '../../mocks/handlers/responses'
 import { prioritizationsStore } from '../../mocks/prioritizations-store'
 import { apiUrl } from '../../mocks/url'
-import { onPhone, renderApp, VIEWER } from '../../test/render'
-import { server } from '../../test/server'
+import { onPhone, renderApp, seedSource, VIEWER } from '../../test/render'
+import { holdRequests, server } from '../../test/server'
 
 async function renderFindings(path = '/findings') {
   const user = renderApp(path)
@@ -442,6 +442,22 @@ describe('Findings', () => {
       await user.click(await screen.findByRole('tab', { name: 'Summary' }))
       expect(screen.getByText('23')).toBeInTheDocument()
       expect(screen.getByText('In KEV')).toBeInTheDocument()
+    })
+
+    it('forgets the counts of a CMDB once it is disconnected', async () => {
+      seedSource()
+      const user = renderApp('/findings')
+      expect(await screen.findByText('23')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('link', { name: 'Configuration' }))
+      await user.click(await screen.findByRole('button', { name: 'Disconnect' }))
+      await user.click(screen.getByRole('button', { name: 'Yes, disconnect' }))
+      await screen.findByRole('heading', { name: 'Choose your CMDB' })
+
+      holdRequests('get', '/findings/summary')
+      await user.click(screen.getByRole('link', { name: 'Findings' }))
+      expect(await screen.findByText('Critical on internet-facing')).toBeInTheDocument()
+      expect(screen.queryByText('23')).not.toBeInTheDocument()
     })
   })
 

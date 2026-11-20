@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from './client'
+import { findingsStatsScopeKey } from './findingsSummary'
 import type { Schemas } from './schemas'
 import type { Override } from './schemas'
 
@@ -31,21 +32,21 @@ export type TopResponse = Schemas['TopResponse']
 
 export function useBreakdownQuery(by: BreakdownBy) {
   return useQuery({
-    queryKey: ['findings-breakdown', by],
+    queryKey: [...findingsStatsScopeKey, 'breakdown', by],
     queryFn: () => api.get<BreakdownResponse>(`/findings/breakdown?by=${by}`),
   })
 }
 
 export function useAssetFindingsSummaryQuery() {
   return useQuery({
-    queryKey: ['assets-findings-summary'],
+    queryKey: [...findingsStatsScopeKey, 'assets-summary'],
     queryFn: () => api.get<AssetFindingsSummaryResponse>('/assets/findings-summary'),
   })
 }
 
 export function useFindingsTopQuery() {
   return useQuery({
-    queryKey: ['findings-top'],
+    queryKey: [...findingsStatsScopeKey, 'top'],
     queryFn: () => api.get<TopResponse>('/findings/top?limit=10'),
   })
 }

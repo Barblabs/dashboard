@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from './client'
+import { findingsStatsScopeKey } from './findingsSummary'
 import type { Schemas } from './schemas'
 import type { Override } from './schemas'
 
@@ -24,7 +25,7 @@ export type AttackMatrixData = Override<
 
 export function useAttackMatrixQuery(role: string) {
   return useQuery({
-    queryKey: ['findings-attack-matrix', role],
+    queryKey: [...findingsStatsScopeKey, 'attack-matrix', role],
     queryFn: () => {
       const params = new URLSearchParams({ limit: '10' })
       if (role) params.set('role', role)
