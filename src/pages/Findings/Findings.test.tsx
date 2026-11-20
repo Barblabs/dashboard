@@ -398,6 +398,19 @@ describe('Findings', () => {
     ])
   })
 
+  it('sends no feedback until its why says something', async () => {
+    const user = await renderFindings()
+    const dialog = await openFinding(user, 'CVE-2024-6387')
+    const send = within(dialog).getByRole('button', { name: 'Send' })
+
+    expect(send).toBeDisabled()
+    await user.type(within(dialog).getByLabelText('Why'), '   ')
+    expect(send).toBeDisabled()
+    await user.type(within(dialog).getByLabelText('Why'), 'Ok')
+    expect(send).toBeEnabled()
+    expect(within(dialog).getByText('5 / 2000')).toBeInTheDocument()
+  })
+
   it('still shows feedback recorded before it could only be about the order', async () => {
     const [newest, ...older] = prioritizationsStore.load()
     const finding = newest.findings.find((f) => f.cve_id === 'CVE-2024-6387')!
@@ -416,6 +429,17 @@ describe('Findings', () => {
 
     expect(within(dialog).getByText('It does not apply', { selector: 'span' })).toBeInTheDocument()
     expect(within(dialog).getByText('Already remediated', { selector: 'span' })).toBeInTheDocument()
+  })
+
+  it('says why the backend turned feedback away', async () => {
+    server.use(http.post(apiUrl('/prioritizations/:id/feedback'), () => failure(400, 'invalid_request', 'validation failed')))
+    const user = await renderFindings()
+    const dialog = await openFinding(user, 'CVE-2024-6387')
+
+    await user.type(within(dialog).getByLabelText('Why'), 'Corre la nómina.')
+    await user.click(within(dialog).getByRole('button', { name: 'Send' }))
+
+    expect(await within(dialog).findByText('The request is incomplete. Check the fields.')).toBeInTheDocument()
   })
 
   it('says there is nothing yet before the first prioritization', async () => {

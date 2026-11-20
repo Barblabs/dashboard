@@ -203,6 +203,12 @@ export const en = {
       plan: 'Plan',
     },
     open: 'Open {{cve}}',
+    why: {
+      label: 'Why',
+      required: 'Say why.',
+      tooLong: 'The note can have up to 2000 characters.',
+      count: '{{count}} / 2000',
+    },
     detail: {
       placed: 'Placed {{date}}',
       closedOn: 'Closed {{date}}',
@@ -350,13 +356,12 @@ export const en = {
       feedback: {
         empty: 'Nobody has said anything about this finding yet.',
         verdict: 'What do you say?',
-        note: 'Why',
         submit: 'Send',
         sending: 'Sending…',
         sent: 'Saved.',
         failed: "Couldn't save your feedback.",
-        noteTooLong: 'The note can have up to 2000 characters.',
-        orderHint: 'Saying it should go earlier or later has the Prioritizer place it again in its next round.',
+        orderHint:
+          'With earlier or later, the Prioritizer places the finding again in its next round and reads the Why. "It applies" is only recorded.',
         viaAnalista: 'Via the Analista',
         verdicts: {
           applies: 'It applies',

@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { useValidationText } from '../../i18n/validation'
 import { z } from 'zod'
 import {
   useRecordFeedbackMutation,
@@ -14,24 +13,21 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
 import { Select } from '../../components/ui/Select'
-import { Textarea } from '../../components/ui/Textarea'
 import { requestErrorText } from '../../i18n/errors'
 import { useDateFormat } from '../../i18n/format'
 import { WRITTEN } from './styles'
-
-/** As long as the backend takes. */
-const MAX_NOTE = 2000
+import { hasWhy, whySchema } from './why'
+import { WhyField } from './WhyField'
 
 const feedbackSchema = z.object({
   verdict: z.enum(VERDICTS),
-  note: z.string().max(MAX_NOTE, 'findings.detail.feedback.noteTooLong'),
+  note: whySchema,
 })
 type FeedbackFields = z.infer<typeof feedbackSchema>
 
 /** What Users said about the Finding, on any Prioritization of the chain, and a form to add to it. */
 export function FeedbackSection({ order, finding }: { order: CurrentOrder; finding: Finding }) {
   const { t } = useTranslation()
-  const validationText = useValidationText()
   const formatDate = useDateFormat()
   const record = useRecordFeedbackMutation(order.prioritization.id)
   const said = order.prioritization.feedback.filter((f) => f.finding_id === finding.finding_id)
@@ -39,11 +35,13 @@ export function FeedbackSection({ order, finding }: { order: CurrentOrder; findi
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<FeedbackFields>({
     resolver: zodResolver(feedbackSchema),
     defaultValues: { verdict: 'applies', note: '' },
   })
+  const note = watch('note')
 
   const onSubmit = handleSubmit((data) =>
     record.mutate({ findingId: finding.finding_id, ...data }, { onSuccess: () => reset() }),
@@ -83,18 +81,18 @@ export function FeedbackSection({ order, finding }: { order: CurrentOrder; findi
             ))}
           </Select>
         </Field>
-        <Field
-          label={t('findings.detail.feedback.note')}
-          error={validationText(errors.note?.message)}
-        >
-          <Textarea rows={3} disabled={record.isPending} {...register('note')} />
-        </Field>
+        <WhyField
+          registration={register('note')}
+          value={note}
+          error={errors.note?.message}
+          disabled={record.isPending}
+        />
         {record.isSuccess && <Alert tone="success">{t('findings.detail.feedback.sent')}</Alert>}
         {record.error && (
           <Alert tone="error">{requestErrorText(record.error, t, { fallback: 'findings.detail.feedback.failed' })}</Alert>
         )}
         <div>
-          <Button type="submit" size="sm" loading={record.isPending}>
+          <Button type="submit" size="sm" loading={record.isPending} disabled={!hasWhy(note)}>
             {record.isPending ? t('findings.detail.feedback.sending') : t('findings.detail.feedback.submit')}
           </Button>
         </div>

@@ -205,6 +205,12 @@ export const es: Translations = {
       plan: 'Plan',
     },
     open: 'Abrir {{cve}}',
+    why: {
+      label: 'Por qué',
+      required: 'Di por qué.',
+      tooLong: 'La nota puede tener hasta 2000 caracteres.',
+      count: '{{count}} / 2000',
+    },
     detail: {
       placed: 'Colocado {{date}}',
       closedOn: 'Cerrado {{date}}',
@@ -352,13 +358,12 @@ export const es: Translations = {
       feedback: {
         empty: 'Nadie ha dicho nada de este hallazgo todavía.',
         verdict: '¿Qué opinas?',
-        note: 'Por qué',
         submit: 'Enviar',
         sending: 'Enviando…',
         sent: 'Guardado.',
         failed: 'No se pudo guardar tu retroalimentación.',
-        noteTooLong: 'La nota puede tener hasta 2000 caracteres.',
-        orderHint: 'Decir que debería ir antes o después hace que el Priorizador lo vuelva a colocar en su siguiente ronda.',
+        orderHint:
+          'Con "antes" o "después", el Priorizador vuelve a colocar el hallazgo en su siguiente ronda y lee el "Por qué". "Sí aplica" solo queda registrado.',
         viaAnalista: 'Vía el Analista',
         verdicts: {
           applies: 'Sí aplica',
