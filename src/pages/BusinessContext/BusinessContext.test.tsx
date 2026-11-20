@@ -92,7 +92,8 @@ describe('Business context', () => {
     ])
     expect(stored.context.footprint.domains).toEqual(['shoes.example'])
     expect(stored.context.risk.appetite).toBe('cautious')
-  })
+    // Types through every section: alone it takes about 4 s, past the 5 s default when the whole suite runs.
+  }, 15_000)
 
   it('refuses an entry that is not a domain', async () => {
     const user = await fillByHand()
