@@ -123,7 +123,12 @@ export function findingInformationClassification(asset: FindingAsset): Informati
 
 /** Refetches the Findings after a change that rescores them. */
 export function invalidatePrioritizations(queryClient: QueryClient) {
-  void queryClient.invalidateQueries({ queryKey: PRIORITIZATIONS_KEY })
+  void refetchPrioritizations(queryClient)
+}
+
+/** Like `invalidatePrioritizations`, for a caller that waits until the Findings show the change. */
+export function refetchPrioritizations(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: PRIORITIZATIONS_KEY })
 }
 
 /** Whether the newest Prioritization is the one that placed the Finding. */

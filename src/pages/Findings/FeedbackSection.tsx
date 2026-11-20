@@ -25,8 +25,15 @@ const feedbackSchema = z.object({
 })
 type FeedbackFields = z.infer<typeof feedbackSchema>
 
+interface Props {
+  order: CurrentOrder
+  finding: Finding
+  /** Opens the close by hand, for a User who would have said it does not apply or is fixed; absent once closed. */
+  onCloseFinding?: () => void
+}
+
 /** What Users said about the Finding, on any Prioritization of the chain, and a form to add to it. */
-export function FeedbackSection({ order, finding }: { order: CurrentOrder; finding: Finding }) {
+export function FeedbackSection({ order, finding, onCloseFinding }: Props) {
   const { t } = useTranslation()
   const formatDate = useDateFormat()
   const record = useRecordFeedbackMutation(order.prioritization.id)
@@ -81,6 +88,14 @@ export function FeedbackSection({ order, finding }: { order: CurrentOrder; findi
             ))}
           </Select>
         </Field>
+        {onCloseFinding && (
+          <p className="font-body text-[0.8125rem] text-gray">
+            {t('findings.detail.feedback.closeInstead')}{' '}
+            <Button variant="link" size="sm" className="underline" onClick={onCloseFinding}>
+              {t('findings.detail.feedback.closeLink')}
+            </Button>
+          </p>
+        )}
         <WhyField
           registration={register('note')}
           value={note}

@@ -14,12 +14,15 @@ import {
 } from '../../api/prioritizations'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { ChevronRightIcon } from '../../components/ui/icons'
+import { ChevronRightIcon, CloseIcon } from '../../components/ui/icons'
+import { useDialogTarget } from '../../components/ui/useDialogTarget'
 import { EMPTY, useDateFormat, useLocale, usePercentFormat } from '../../i18n/format'
 import { informationClassificationLabel } from '../Config/assetText'
 import { ActionPlanSection } from './ActionPlanSection'
+import { CloseAction, CloseNote } from './CloseStatus'
 import { Evidence } from './Evidence'
 import { FeedbackSection } from './FeedbackSection'
+import { CloseFindingDialog, ReopenFindingDialog, type FindingRef } from './FindingCloseDialogs'
 import { FindingBadges } from './GroupPanel'
 import { References } from './References'
 import { scorePoints } from './score'
@@ -57,6 +60,8 @@ export function FindingDetail({ order, finding, onClose, closeButton }: Props) {
   const { t } = useTranslation()
   const idPrefix = useId()
   const column = useRef<HTMLDivElement>(null)
+  const closeDialog = useDialogTarget<FindingRef>()
+  const reopenDialog = useDialogTarget<FindingRef>()
   const group = order.prioritization.groups.find((g) => g.position === finding.group)
   const { details } = finding
 
@@ -105,7 +110,17 @@ export function FindingDetail({ order, finding, onClose, closeButton }: Props) {
     score: <ScoreDetails finding={finding} />,
     advisories: <Advisories details={details} />,
     references: <References urls={details.references} />,
-    feedback: <FeedbackSection order={order} finding={finding} />,
+    feedback: (
+      <FeedbackSection
+        order={order}
+        finding={finding}
+        onCloseFinding={
+          finding.closed_at === null
+            ? () => closeDialog.show({ id: finding.finding_id, cve: finding.cve_id })
+            : undefined
+        }
+      />
+    ),
   }
 
   // Narrow screens stack the rail over the column and scroll both together; from md up each scrolls on its own.
@@ -138,9 +153,12 @@ export function FindingDetail({ order, finding, onClose, closeButton }: Props) {
           <span className={`${LABEL} truncate`}>
             {group && t('findings.detail.why.group', { position: group.position, title: group.title })}
           </span>
-          <Button ref={closeButton} variant="secondary" size="sm" onClick={onClose}>
-            {t('common.close')}
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            <CloseAction finding={finding} onCloseFinding={closeDialog.show} onReopenFinding={reopenDialog.show} />
+            <Button ref={closeButton} variant="secondary" size="sm" aria-label={t('common.close')} onClick={onClose}>
+              <CloseIcon size={12} />
+            </Button>
+          </div>
         </div>
 
         <article className="flex flex-col gap-10 px-6 pt-2 pb-16 md:px-8">
@@ -154,6 +172,9 @@ export function FindingDetail({ order, finding, onClose, closeButton }: Props) {
           ))}
         </article>
       </div>
+
+      <CloseFindingDialog dialog={closeDialog} />
+      <ReopenFindingDialog dialog={reopenDialog} />
     </div>
   )
 }
@@ -310,6 +331,7 @@ function Rail({ order, finding }: { order: CurrentOrder; finding: Finding }) {
         {t('findings.detail.placed', { date: formatDate(finding.placed_at) })}
         {finding.closed_at && ` · ${t('findings.detail.closedOn', { date: formatDate(finding.closed_at) })}`}
       </p>
+      <CloseNote finding={finding} />
     </>
   )
 }
