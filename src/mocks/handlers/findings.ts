@@ -1,7 +1,7 @@
 import { delay, http, HttpResponse } from 'msw'
 import { z, type ZodType } from 'zod'
 import { CLOSE_REASONS, closesUntil, type ClosedFinding } from '../../api/findingCloses'
-import type { Finding, HistoryEntry, Prioritization } from '../../api/prioritizations'
+import type { Finding, HistoryEntry, OrderRange, Prioritization, PriorityGroup } from '../../api/prioritizations'
 import type { Known, Schemas } from '../../api/schemas'
 import { assetsStore } from '../assets-store'
 import { closedFindingsStore } from '../closed-findings-store'
@@ -68,6 +68,13 @@ function closedByHand(finding: Finding, close: z.infer<typeof closeBody>): Close
   return { ...base, reason, reopen_at: new Date(reopen_at ?? Date.now()).toISOString() }
 }
 
+/** The places, Finding by Finding from 1, the group at `position` takes in the order. */
+function orderOf(groups: PriorityGroup[], position: number): OrderRange {
+  const before = groups.filter((g) => g.position < position).reduce((n, g) => n + g.finding_ids.length, 0)
+  const size = groups.find((g) => g.position === position)?.finding_ids.length ?? 1
+  return { from: before + 1, to: before + size }
+}
+
 /** How the oldest round that holds the Finding placed it, for a Finding with no story of its own in the store. */
 function placedByOldest(finding: Finding): HistoryEntry[] {
   for (const p of prioritizationsStore.load().toReversed()) {
@@ -82,6 +89,10 @@ function placedByOldest(finding: Finding): HistoryEntry[] {
         group_now: group.position,
         rank_before: null,
         rank_now: finding.score_rank,
+        order_before: null,
+        order_now: orderOf(p.groups, group.position),
+        score_before: null,
+        score_now: finding.score,
         title: group.title,
         reason: group.reason,
         evidence: group.evidence
@@ -89,7 +100,6 @@ function placedByOldest(finding: Finding): HistoryEntry[] {
           .map(({ path, value }) => ({ path, value })),
         changes: [],
         band: null,
-        score: null,
         feedback: [],
         groups_appeared: [],
         groups_gone: [],
@@ -117,16 +127,20 @@ function historyOf(finding: Finding): HistoryEntry[] {
     group_now: null,
     rank_before: last.rank_now,
     rank_now: null,
+    order_before: last.order_now,
+    order_now: null,
+    score_before: last.score_now,
+    score_now: null,
     title: '',
     reason: '',
     evidence: [],
     changes: [],
     band: null,
-    score: null,
     feedback: [],
     groups_appeared: [],
     groups_gone: [],
-    close_reason: close?.reason ?? null,
+    // One that closed on its own did so at a Sync that no longer saw it vulnerable.
+    close_reason: close?.reason ?? 'no_longer_affected',
   }
   return [left, ...stored]
 }

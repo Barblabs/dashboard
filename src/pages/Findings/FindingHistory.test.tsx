@@ -40,12 +40,15 @@ const ENTRY: HistoryEntry = {
   group_now: 2,
   rank_before: null,
   rank_now: 14,
+  order_before: null,
+  order_now: { from: 5, to: 9 },
+  score_before: null,
+  score_now: 0.31,
   title: 'A group',
   reason: '',
   evidence: [],
   changes: [],
   band: null,
-  score: null,
   feedback: [],
   groups_appeared: [],
   groups_gone: [],
@@ -86,7 +89,13 @@ describe('A finding’s prioritization history', () => {
     expect(
       climb.getByText('A user asked to attend it earlier: “ci-01 guarda los secretos de despliegue a producción.”'),
     ).toBeInTheDocument()
-    expect(climb.getByText('By Score alone: #15 → #17')).toBeInTheDocument()
+    // What changed already says how the Score moved, so the comparison leaves it out.
+    expect(climb.getByText('By Score alone #17 · In the prioritization #1–#5')).toBeInTheDocument()
+    expect(climb.getByText('Ahead of the Score')).toBeInTheDocument()
+    expect(within(entries[0]).getByText('Score 19 · By Score alone #17 · In the prioritization #5–#9')).toBeInTheDocument()
+    expect(within(entries[2]).getByText('Score 15 · By Score alone #15 · In the prioritization #10–#15')).toBeInTheDocument()
+    // Where the two orders agree there is nothing to mark.
+    expect(within(entries[2]).queryByText(/the Score$/)).not.toBeInTheDocument()
 
     // The newest reason is the one the detail reads first; older ones open on demand.
     expect(within(entries[0]).queryByRole('button', { name: 'Why it was placed there' })).not.toBeInTheDocument()
@@ -104,6 +113,66 @@ describe('A finding’s prioritization history', () => {
 
     expect(await within(history).findByText('Looked at again; still in Group 2')).toBeInTheDocument()
     expect(within(history).getByText('Looked at again with no identifiable change')).toBeInTheDocument()
+  })
+
+  it('compares where its Score alone puts it with the places its group takes in the order', async () => {
+    answerHistory([
+      {
+        ...ENTRY,
+        kind: 'placed_again',
+        group_before: 2,
+        group_now: 1,
+        rank_before: 6,
+        rank_now: 3,
+        order_before: { from: 2, to: 4 },
+        order_now: { from: 1, to: 1 },
+        score_before: 0.42,
+        score_now: 0.58,
+      },
+      { ...ENTRY, prioritization_id: 'older', rank_now: 2, order_now: { from: 5, to: 9 }, score_now: 0.42 },
+    ])
+    const { user, dialog } = await openFinding('CVE-2025-1094')
+    const history = await openHistory(user, dialog)
+
+    // A group of one takes a single place; a Score that moved under the threshold still shows both values.
+    expect(await within(history).findByText('Score 42 → 58 · By Score alone #3 · In the prioritization #1')).toBeInTheDocument()
+    expect(within(history).getByText('Ahead of the Score')).toBeInTheDocument()
+    expect(within(history).getByText('Score 42 · By Score alone #2 · In the prioritization #5–#9')).toBeInTheDocument()
+    expect(within(history).getByText('Behind the Score')).toBeInTheDocument()
+    // The place before reads in the entry below; it is not repeated.
+    expect(history).not.toHaveTextContent(/#2–#4|It was at/)
+  })
+
+  it('tells where a finding that left the order was, and why a Sync closed it only while it stays closed', async () => {
+    const left = {
+      ...ENTRY,
+      kind: 'left' as const,
+      group_before: 2,
+      group_now: null,
+      rank_before: 14,
+      rank_now: null,
+      order_before: { from: 4, to: 6 },
+      order_now: null,
+      score_before: 0.42,
+      score_now: null,
+      title: '',
+    }
+    answerHistory([
+      { ...left, close_reason: 'component_removed' },
+      { ...ENTRY, prioritization_id: 'placed-again', created_at: '2026-11-10T09:00:00Z' },
+      { ...left, prioritization_id: 'older-left', created_at: '2026-11-09T09:00:00Z' },
+      { ...ENTRY, prioritization_id: 'first', created_at: '2026-11-08T09:00:00Z' },
+    ])
+    const { user, dialog } = await openFinding('CVE-2025-1094')
+    const history = await openHistory(user, dialog)
+
+    const entries = (await within(history).findAllByRole('listitem')).filter((li) => li.parentElement?.tagName === 'OL')
+    expect(entries[0]).toHaveTextContent('Left the priority order')
+    expect(within(entries[0]).getByText('It was at: Group 2 · #4–#6 · Score 42')).toBeInTheDocument()
+    expect(within(entries[0]).getByText('Closed: The component was removed')).toBeInTheDocument()
+    expect(within(entries[0]).queryByText(/By Score alone/)).not.toBeInTheDocument()
+    expect(entries[2]).toHaveTextContent('Left the priority order')
+    expect(entries[2]).not.toHaveTextContent('Closed:')
   })
 
   it('shows its reason as plain text, never as markup', async () => {

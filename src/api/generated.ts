@@ -606,7 +606,7 @@ export interface paths {
         };
         /**
          * Tell how the Customer's order placed one Finding, and why each change
-         * @description One entry per Prioritization where the Finding's place changed, newest first: placed, placed_again when a round placed it again, moved when other groups moved it, left when it closed. Each gives the Finding's group and its rank by Score alone before and now, and the Prioritizer's justification as it wrote it. placed_again also says what changed in the Finding. It calls no Agent. Empty for a Finding no Prioritization held.
+         * @description One entry per Prioritization where the Finding's place changed, newest first: placed, placed_again when a round placed it again, moved when other groups moved it, left when it closed. Each gives, before and now, the Finding's group, where that group sits in the Prioritizer's order Finding by Finding, its rank by Score alone and its Score, so the two orders compare, and the Prioritizer's justification as it wrote it. placed_again also says what changed in the Finding. It calls no Agent. Empty for a Finding no Prioritization held.
          */
         get: operations["get-finding-history"];
         put?: never;
@@ -1585,6 +1585,8 @@ export interface components {
             groups_gone: string[];
             /** @enum {string} */
             kind: "placed" | "placed_again" | "moved" | "left";
+            order_before: components["schemas"]["OrderResponse"] | null;
+            order_now: components["schemas"]["OrderResponse"] | null;
             prioritization_id: string;
             /**
              * Format: int64
@@ -1598,7 +1600,16 @@ export interface components {
             rank_now: number | null;
             /** @description The Prioritizer's reason for the part of the group that holds it, as it wrote it when it last placed the Finding; render it as plain text */
             reason: string;
-            score: components["schemas"]["ScoreChangeResponse"] | null;
+            /**
+             * Format: double
+             * @description Its Score as the Prioritizer read it before; null for placed
+             */
+            score_before: number | null;
+            /**
+             * Format: double
+             * @description Its Score as the Prioritizer read it now; null for left
+             */
+            score_now: number | null;
             /** @description The title of its Priority Group; empty for left */
             title: string;
         };
@@ -1786,6 +1797,15 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        OrderResponse: {
+            /**
+             * Format: int64
+             * @description From 1
+             */
+            from: number;
+            /** Format: int64 */
+            to: number;
+        };
         OwnerResponse: {
             email: string;
             source: string;
@@ -1916,12 +1936,6 @@ export interface components {
             version: number;
         } & {
             [key: string]: unknown;
-        };
-        ScoreChangeResponse: {
-            /** Format: double */
-            from: number;
-            /** Format: double */
-            to: number;
         };
         ScoreResponse: {
             /**

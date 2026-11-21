@@ -194,6 +194,17 @@ export const HISTORY_CHANGES = [
 ] as const
 type HistoryChange = (typeof HISTORY_CHANGES)[number]
 
+/** Why a Sync closed a Finding on its own; a left entry may also give a reason a User closed it by hand for. */
+export const SYNC_CLOSE_REASONS = [
+  'no_longer_affected',
+  'component_removed',
+  'asset_inactive',
+  'vulnerability_rejected',
+] as const
+
+/** The range of places, Finding by Finding from 1, its group takes in the order: a group is attended at once. */
+export type OrderRange = Schemas['OrderResponse']
+
 // The spec types these vocabularies as plain strings.
 export type HistoryEntry = Override<
   Schemas['HistoryEntryResponse'],

@@ -5,6 +5,7 @@ import { localStore } from './localStore'
 // What GET /findings/{id}/history answers for the Findings with a story to tell, checked as it is read: see `localStore`.
 
 const band = z.enum(['critical', 'high', 'medium', 'low'])
+const order = z.strictObject({ from: z.number().int(), to: z.number().int() })
 
 const historyEntry = z.strictObject({
   prioritization_id: z.string(),
@@ -14,12 +15,15 @@ const historyEntry = z.strictObject({
   group_now: z.number().int().nullable(),
   rank_before: z.number().int().nullable(),
   rank_now: z.number().int().nullable(),
+  order_before: order.nullable(),
+  order_now: order.nullable(),
+  score_before: z.number().nullable(),
+  score_now: z.number().nullable(),
   title: z.string(),
   reason: z.string(),
   evidence: z.array(z.strictObject({ path: z.string(), value: z.string() })),
   changes: z.array(z.enum(HISTORY_CHANGES)),
   band: z.strictObject({ from: band, to: band }).nullable(),
-  score: z.strictObject({ from: z.number(), to: z.number() }).nullable(),
   feedback: z.array(
     z.strictObject({ verdict: z.enum(['should_be_earlier', 'should_be_later']), note: z.string(), created_at: z.string() }),
   ),
@@ -42,7 +46,6 @@ const none = {
   evidence: [],
   changes: [],
   band: null,
-  score: null,
   feedback: [],
   groups_appeared: [],
   groups_gone: [],
@@ -62,6 +65,10 @@ const HISTORIES: Record<string, HistoryEntry[]> = {
       group_now: 2,
       rank_before: 17,
       rank_now: 17,
+      order_before: { from: 1, to: 5 },
+      order_now: { from: 5, to: 9 },
+      score_before: 0.19,
+      score_now: 0.19,
       title: G2,
       reason:
         'CVE-2024-23897 está en KEV desde 2024-08-19 sobre Jenkins en ci-01, que publica a producción; su criticidad declarada es low, pero un atacante que lea archivos del controlador obtiene sus credenciales.',
@@ -77,13 +84,16 @@ const HISTORIES: Record<string, HistoryEntry[]> = {
       group_now: 1,
       rank_before: 15,
       rank_now: 17,
+      order_before: { from: 10, to: 15 },
+      order_now: { from: 1, to: 5 },
+      score_before: 0.15,
+      score_now: 0.19,
       title: 'Explotados activamente sobre la cadena de publicación',
       reason:
         'CVE-2024-23897 sube al primer grupo: entró a KEV el 2024-08-19 y el equipo de plataforma pidió atenderlo antes porque ci-01 guarda los secretos de despliegue.',
       evidence: [{ path: '/kev/date_added', value: '2024-08-19' }],
       changes: ['kev_listed', 'band_changed', 'score_moved', 'feedback'],
       band: { from: 'low', to: 'medium' },
-      score: { from: 0.15, to: 0.19 },
       feedback: [
         {
           verdict: 'should_be_earlier',
@@ -101,6 +111,10 @@ const HISTORIES: Record<string, HistoryEntry[]> = {
       group_now: 3,
       rank_before: null,
       rank_now: 15,
+      order_before: null,
+      order_now: { from: 10, to: 15 },
+      score_before: null,
+      score_now: 0.15,
       title: G3,
       reason: 'CVE-2024-23897 afecta a Jenkins en ci-01, un activo interno de criticidad low sin servicios críticos declarados.',
     },
@@ -116,12 +130,15 @@ const HISTORIES: Record<string, HistoryEntry[]> = {
       group_now: 1,
       rank_before: 3,
       rank_now: 1,
+      order_before: { from: 5, to: 8 },
+      order_now: { from: 1, to: 4 },
+      score_before: 0.91,
+      score_now: 0.98,
       title: G1,
       reason:
         'CVE-2021-41773 y CVE-2021-42013 están en KEV sobre Apache 2.4.49 en web-01, expuesto a internet, con uso confirmado por ransomware; una sola actualización de Apache los corrige juntos.',
       evidence: [{ path: '/kev/known_ransomware_campaign_use', value: 'Known' }],
       changes: ['ransomware_use', 'labeled', 'score_moved', 'business_context'],
-      score: { from: 0.91, to: 0.98 },
     },
     {
       ...none,
@@ -132,6 +149,10 @@ const HISTORIES: Record<string, HistoryEntry[]> = {
       group_now: 2,
       rank_before: null,
       rank_now: 3,
+      order_before: null,
+      order_now: { from: 5, to: 8 },
+      score_before: null,
+      score_now: 0.91,
       title: 'Explotados activamente sobre activos expuestos',
       reason: 'CVE-2021-41773 está en KEV sobre Apache 2.4.49 en web-01, expuesto a internet.',
     },
@@ -147,11 +168,14 @@ const HISTORIES: Record<string, HistoryEntry[]> = {
       group_now: 2,
       rank_before: 14,
       rank_now: 14,
+      order_before: { from: 5, to: 8 },
+      order_now: { from: 5, to: 9 },
+      score_before: 0.3079,
+      score_now: 0.3079,
       title: G2,
       reason:
         'CVE-2025-1094 tiene EPSS 0.9003 sobre PostgreSQL 15.6 en pg-prod-01, de criticidad high, que corre Pagos en línea; no está en KEV y el activo es interno.',
       evidence: [{ path: '/epss/probability', value: '0.9003' }],
-      score: { from: 0.3079, to: 0.3079 },
     },
     {
       ...none,
@@ -162,6 +186,10 @@ const HISTORIES: Record<string, HistoryEntry[]> = {
       group_now: 2,
       rank_before: null,
       rank_now: 14,
+      order_before: null,
+      order_now: { from: 5, to: 8 },
+      score_before: null,
+      score_now: 0.3079,
       title: G2,
       reason: 'CVE-2025-1094 tiene EPSS 0.9003 sobre PostgreSQL 15.6 en pg-prod-01, que corre Pagos en línea.',
       evidence: [{ path: '/epss/probability', value: '0.9003' }],
