@@ -4,19 +4,10 @@ import { useAttackMatrixQuery } from '../../api/attackMatrix'
 import type { TacticCount, TechniqueCount } from '../../api/attackMatrix'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
+import { BAND_COLORS, BANDS, type Band } from './bands'
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
-const BANDS = ['critical', 'high', 'medium', 'low', 'unbanded'] as const
-type Band = (typeof BANDS)[number]
-
-const BAND_COLORS: Record<Band, string> = {
-  critical: 'var(--color-critical)',
-  high: 'var(--color-high)',
-  medium: 'var(--color-medium)',
-  low: 'var(--color-low)',
-  unbanded: 'var(--color-gray)',
-}
 
 const TACTIC_ORDER = [
   'reconnaissance',

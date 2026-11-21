@@ -7,8 +7,10 @@ import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Message } from '../../components/ui/Message'
 import { Modal } from '../../components/ui/Modal'
-import { BAND_COLORS, BANDS, buildMatrix } from './beforeAfterAlgorithm'
-import type { Band, MatrixData, TopChange } from './beforeAfterAlgorithm'
+import { buildMatrix } from './beforeAfterAlgorithm'
+import type { MatrixData, TopChange } from './beforeAfterAlgorithm'
+import { BandLegend } from './BandLegend'
+import { BAND_COLORS, BANDS, type Band } from './bands'
 import { FindingDetail } from './FindingDetail'
 
 export function BeforeAfterTabContent() {
@@ -324,50 +326,54 @@ function BandComposition({
   bandByGroup: Record<Band, number>[]
 }) {
   const { t } = useTranslation()
+  const present = BANDS.filter((band) => bandByGroup.some((counts) => counts[band] > 0))
 
   return (
-    <ul className="flex flex-col gap-4 p-6">
-      {groups.map((g, idx) => {
-        const counts = bandByGroup[idx]
-        const total = g.finding_ids.length
+    <div className="flex flex-col gap-4 p-6">
+      <BandLegend bands={present} />
+      <ul className="flex flex-col gap-4">
+        {groups.map((g, idx) => {
+          const counts = bandByGroup[idx]
+          const total = g.finding_ids.length
 
-        const segments: { band: Band; left: number; width: number }[] = []
-        let offset = 0
-        for (const band of BANDS) {
-          const count = counts[band]
-          if (count > 0) {
-            const width = (count / total) * 100
-            segments.push({ band, left: offset, width })
-            offset += width
+          const segments: { band: Band; left: number; width: number }[] = []
+          let offset = 0
+          for (const band of BANDS) {
+            const count = counts[band]
+            if (count > 0) {
+              const width = (count / total) * 100
+              segments.push({ band, left: offset, width })
+              offset += width
+            }
           }
-        }
 
-        return (
-          <li key={g.position} className="flex items-center gap-3 font-body text-[0.875rem]">
-            <span className="w-8 shrink-0 text-right font-semibold text-navy">
-              {t('findings.beforeAfter.groupLabel', { n: g.position })}
-            </span>
-            <div
-              className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-panel"
-              role="img"
-              aria-label={`${t('findings.beforeAfter.groupLabel', { n: g.position })}: ${segments.map((s) => `${counts[s.band]} ${s.band}`).join(', ')}`}
-            >
-              {segments.map(({ band, left, width }) => (
-                <div
-                  key={band}
-                  className="absolute inset-y-0"
-                  style={{
-                    left: `${left}%`,
-                    width: `${width}%`,
-                    backgroundColor: BAND_COLORS[band],
-                  }}
-                />
-              ))}
-            </div>
-            <span className="w-8 shrink-0 tabular-nums text-right text-navy">{total}</span>
-          </li>
-        )
-      })}
-    </ul>
+          return (
+            <li key={g.position} className="flex items-center gap-3 font-body text-[0.875rem]">
+              <span className="w-8 shrink-0 text-right font-semibold text-navy">
+                {t('findings.beforeAfter.groupLabel', { n: g.position })}
+              </span>
+              <div
+                className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-panel"
+                role="img"
+                aria-label={`${t('findings.beforeAfter.groupLabel', { n: g.position })}: ${segments.map((s) => `${counts[s.band]} ${t(`findings.filter.bandValues.${s.band}`)}`).join(', ')}`}
+              >
+                {segments.map(({ band, left, width }) => (
+                  <div
+                    key={band}
+                    className="absolute inset-y-0"
+                    style={{
+                      left: `${left}%`,
+                      width: `${width}%`,
+                      backgroundColor: BAND_COLORS[band],
+                    }}
+                  />
+                ))}
+              </div>
+              <span className="w-8 shrink-0 tabular-nums text-right text-navy">{total}</span>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
   )
 }

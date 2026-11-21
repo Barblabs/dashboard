@@ -15,20 +15,12 @@ import type {
 } from '../../api/findingsRisk'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
+import { BandLegend } from './BandLegend'
+import { BAND_COLORS, BANDS, type Band } from './bands'
 import { Message } from '../../components/ui/Message'
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
-const BANDS = ['critical', 'high', 'medium', 'low', 'unbanded'] as const
-type Band = (typeof BANDS)[number]
-
-const BAND_COLORS: Record<Band, string> = {
-  critical: 'var(--color-critical)',
-  high: 'var(--color-high)',
-  medium: 'var(--color-medium)',
-  low: 'var(--color-low)',
-  unbanded: 'var(--color-gray)',
-}
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -307,42 +299,45 @@ function AssetBars({ assets }: { assets: AssetFindingBands[] }) {
   }
 
   return (
-    <ul className="flex flex-col gap-3 p-6">
-      {data.map((row) => (
-        <li
-          key={row.name}
-          className="flex cursor-pointer items-center gap-3 font-body text-[0.875rem]"
-          role="button"
-          tabIndex={0}
-          aria-label={t('findings.risk.assetBarLabel', { name: row.name, total: row.total })}
-          onClick={() => openAsset(row.name)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              openAsset(row.name)
-            }
-          }}
-        >
-          <span className="w-32 shrink-0 truncate text-right text-navy">{row.name}</span>
-          <div className="relative h-5 flex-1 overflow-hidden rounded bg-panel" style={{ maxWidth: `${(row.total / maxTotal) * 100}%` }}>
-            {BANDS.filter((b) => row[b] > 0).reduce<{ segments: { band: Band; left: number; pct: number }[]; offset: number }>(
-              ({ segments, offset }, band) => {
-                const pct = (row[band] / row.total) * 100
-                return { segments: [...segments, { band, left: offset, pct }], offset: offset + pct }
-              },
-              { segments: [], offset: 0 },
-            ).segments.map(({ band, left, pct }) => (
-              <div
-                key={band}
-                className="absolute inset-y-0"
-                style={{ left: `${left}%`, width: `${pct}%`, backgroundColor: BAND_COLORS[band] }}
-              />
-            ))}
-          </div>
-          <span className="w-8 shrink-0 tabular-nums text-right font-semibold text-navy">{row.total}</span>
-        </li>
-      ))}
-    </ul>
+    <div className="flex flex-col gap-4 p-6">
+      <BandLegend bands={BANDS.filter((b) => data.some((row) => row[b] > 0))} />
+      <ul className="flex flex-col gap-3">
+        {data.map((row) => (
+          <li
+            key={row.name}
+            className="flex cursor-pointer items-center gap-3 font-body text-[0.875rem]"
+            role="button"
+            tabIndex={0}
+            aria-label={t('findings.risk.assetBarLabel', { name: row.name, total: row.total })}
+            onClick={() => openAsset(row.name)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                openAsset(row.name)
+              }
+            }}
+          >
+            <span className="w-32 shrink-0 truncate text-right text-navy">{row.name}</span>
+            <div className="relative h-5 flex-1 overflow-hidden rounded bg-panel" style={{ maxWidth: `${(row.total / maxTotal) * 100}%` }}>
+              {BANDS.filter((b) => row[b] > 0).reduce<{ segments: { band: Band; left: number; pct: number }[]; offset: number }>(
+                ({ segments, offset }, band) => {
+                  const pct = (row[band] / row.total) * 100
+                  return { segments: [...segments, { band, left: offset, pct }], offset: offset + pct }
+                },
+                { segments: [], offset: 0 },
+              ).segments.map(({ band, left, pct }) => (
+                <div
+                  key={band}
+                  className="absolute inset-y-0"
+                  style={{ left: `${left}%`, width: `${pct}%`, backgroundColor: BAND_COLORS[band] }}
+                />
+              ))}
+            </div>
+            <span className="w-8 shrink-0 tabular-nums text-right font-semibold text-navy">{row.total}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 

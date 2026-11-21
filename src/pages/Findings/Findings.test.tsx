@@ -685,6 +685,13 @@ describe('Findings', () => {
   })
 
   describe('risk tab', () => {
+    it('tells what each colour of the asset bars means', async () => {
+      await openRiskTab()
+      const assets = (await screen.findByRole('heading', { name: 'Assets with most findings' })).closest('section')!
+
+      const legend = await within(assets).findByRole('list', { name: 'Risk level' })
+      expect(within(legend).getByText('Critical')).toBeInTheDocument()
+    })
     it('clicking a heatmap cell navigates to the prioritized list with band and exposure filters', async () => {
       const user = await openRiskTab()
       // Critical × internet_facing cell (count=5 from mock)
@@ -731,6 +738,14 @@ describe('Findings', () => {
       expect(screen.getByText('Went down')).toBeInTheDocument()
       // Count span is the previous sibling of the label span
       expect(subioLabel.previousElementSibling).toHaveTextContent('6')
+    })
+
+    it('tells what each colour of the composition per group means', async () => {
+      await openBeforeAfterTab()
+      const composition = (await screen.findByRole('heading', { name: 'Risk level composition per group' })).closest('section')!
+
+      const legend = within(composition).getByRole('list', { name: 'Risk level' })
+      expect(within(legend).getAllByRole('listitem').length).toBeGreaterThan(1)
     })
 
     it('shows diagonal cell for G1 (3 findings stayed in SG1→G1)', async () => {
