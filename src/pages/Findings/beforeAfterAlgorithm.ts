@@ -1,15 +1,7 @@
 import { currentScoreDetails } from '../../api/prioritizations'
 import type { Prioritization, PriorityGroup } from '../../api/prioritizations'
+import type { Band } from './bands'
 
-export type Band = 'critical' | 'high' | 'medium' | 'low' | 'unbanded'
-export const BANDS: readonly Band[] = ['critical', 'high', 'medium', 'low', 'unbanded']
-export const BAND_COLORS: Record<Band, string> = {
-  critical: 'var(--color-critical)',
-  high: 'var(--color-high)',
-  medium: 'var(--color-medium)',
-  low: 'var(--color-low)',
-  unbanded: 'var(--color-gray)',
-}
 
 export interface TopChange {
   findingId: string
@@ -19,7 +11,6 @@ export interface TopChange {
   agentGroup: number
   delta: number
   agentGroupTitle: string
-  agentGroupReason: string
 }
 
 export interface MatrixData {
@@ -81,7 +72,6 @@ export function buildMatrix(p: Prioritization): MatrixData {
         agentGroup: ag,
         delta: Math.abs(sg - ag),
         agentGroupTitle: agGroup.title,
-        agentGroupReason: agGroup.reason,
       })
     }
   }

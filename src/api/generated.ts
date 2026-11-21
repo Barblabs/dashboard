@@ -597,6 +597,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/findings/{id}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tell how the Customer's order placed one Finding, and why each change
+         * @description One entry per Prioritization where the Finding's place changed, newest first: placed, placed_again when a round placed it again, moved when other groups moved it, left when it closed. Each gives, before and now, the Finding's group, where that group sits in the Prioritizer's order Finding by Finding, its rank by Score alone and its Score, so the two orders compare, and the Prioritizer's justification as it wrote it. placed_again also says what changed in the Finding. It calls no Agent. Empty for a Finding no Prioritization held.
+         */
+        get: operations["get-finding-history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/findings/{id}/reopen": {
         parameters: {
             query?: never;
@@ -1059,6 +1079,10 @@ export interface components {
             tactics: components["schemas"]["TacticCountResponse"][];
             /** @description Those with the most open Findings, most first */
             techniques: components["schemas"]["TechniqueCountResponse"][];
+        };
+        BandChangeResponse: {
+            from: string;
+            to: string;
         };
         BreakdownResponse: {
             by: string;
@@ -1530,6 +1554,80 @@ export interface components {
             model: string;
             vendor: string;
         };
+        HistoryEntryResponse: {
+            band: components["schemas"]["BandChangeResponse"] | null;
+            /** @description For placed_again, what changed in the Finding since it was last placed: kev_listed, ransomware_use, labeled, band_changed, score_moved, feedback, business_context. Empty when none of the rules applies */
+            changes: string[];
+            /** @description For the newest entry when it is left and the Finding is still closed, why it closed */
+            close_reason: string | null;
+            /**
+             * Format: date-time
+             * @description When that Prioritization was made
+             */
+            created_at: string;
+            /** @description What that reason cites of this Finding */
+            evidence: components["schemas"]["HistoryEvidenceResponse"][];
+            /** @description For placed_again, what Users said directly about where it should be since it was last placed */
+            feedback: components["schemas"]["HistoryFeedbackResponse"][];
+            /**
+             * Format: int64
+             * @description Position of its Priority Group in the Prioritization before, from 1; null for placed
+             */
+            group_before: number | null;
+            /**
+             * Format: int64
+             * @description Position of its Priority Group in this one, from 1; null for left
+             */
+            group_now: number | null;
+            /** @description For moved, the titles of the groups above it now that were not above it before */
+            groups_appeared: string[];
+            /** @description For moved, the titles of the groups above it before that are not now */
+            groups_gone: string[];
+            /** @enum {string} */
+            kind: "placed" | "placed_again" | "moved" | "left";
+            order_before: components["schemas"]["OrderResponse"] | null;
+            order_now: components["schemas"]["OrderResponse"] | null;
+            prioritization_id: string;
+            /**
+             * Format: int64
+             * @description Where its Score alone put it before, 1 the highest; null for placed
+             */
+            rank_before: number | null;
+            /**
+             * Format: int64
+             * @description Where its Score alone puts it now; null for left
+             */
+            rank_now: number | null;
+            /** @description The Prioritizer's reason for the part of the group that holds it, as it wrote it when it last placed the Finding; render it as plain text */
+            reason: string;
+            /**
+             * Format: double
+             * @description Its Score as the Prioritizer read it before; null for placed
+             */
+            score_before: number | null;
+            /**
+             * Format: double
+             * @description Its Score as the Prioritizer read it now; null for left
+             */
+            score_now: number | null;
+            /** @description The title of its Priority Group; empty for left */
+            title: string;
+        };
+        HistoryEvidenceResponse: {
+            /** @description RFC 6901 pointer into what the Prioritizer read of the Finding */
+            path: string;
+            value: string;
+        };
+        HistoryFeedbackResponse: {
+            /** Format: date-time */
+            created_at: string;
+            note: string;
+            /** @enum {string} */
+            verdict: "should_be_earlier" | "should_be_later";
+        };
+        HistoryResponse: {
+            entries: components["schemas"]["HistoryEntryResponse"][];
+        };
         InformationClassificationResponse: {
             /**
              * Format: date-time
@@ -1698,6 +1796,15 @@ export interface components {
             regulations: ("gdpr" | "uk_gdpr" | "lfpdppp" | "lgpdppso" | "lgpd" | "habeas_data_co" | "ley_21719_cl" | "ley_25326_ar" | "ccpa" | "pipeda" | "pci_dss" | "sox" | "glba" | "cnbv" | "banxico" | "ley_fintech" | "cnsf" | "lfpiorpi" | "dora" | "nydfs_500" | "swift_csp" | "sec_cyber" | "hipaa" | "hitrust" | "nom_024_ssa3" | "nom_151" | "nis2" | "nerc_cip" | "iec_62443" | "tisax" | "cmmc" | "fedramp" | "fisma" | "ferpa" | "coppa" | "iso_27001" | "iso_27701" | "iso_22301" | "soc_2" | "nist_csf" | "nist_800_53" | "cis_controls" | "cobit")[];
         } & {
             [key: string]: unknown;
+        };
+        OrderResponse: {
+            /**
+             * Format: int64
+             * @description From 1
+             */
+            from: number;
+            /** Format: int64 */
+            to: number;
         };
         OwnerResponse: {
             email: string;
@@ -4302,6 +4409,73 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-finding-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoryResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -7,6 +7,7 @@ import {
   currentAsset,
   currentScoreDetails,
   findingInformationClassification,
+  useFindingHistoryQuery,
   type CurrentOrder,
   type Finding,
   type FindingAsset,
@@ -23,6 +24,7 @@ import { ActionPlanSection } from './ActionPlanSection'
 import { CloseAction, CloseNote } from './CloseStatus'
 import { FeedbackSection } from './FeedbackSection'
 import { CloseFindingDialog, ReopenFindingDialog, type FindingRef } from './FindingCloseDialogs'
+import { FindingHistory } from './FindingHistory'
 import { FindingBadges } from './GroupPanel'
 import { References } from './References'
 import { scorePoints } from './score'
@@ -37,10 +39,11 @@ interface Props {
   closeButton?: RefObject<HTMLButtonElement | null>
 }
 
-type SectionId = 'plan' | 'threats' | 'vulnerability' | 'asset' | 'score' | 'advisories' | 'references'
+type SectionId = 'plan' | 'history' | 'threats' | 'vulnerability' | 'asset' | 'score' | 'advisories' | 'references'
 
 const SECTION_TITLES: Record<SectionId, ParseKeys> = {
   plan: 'findings.detail.sections.plan',
+  history: 'findings.detail.sections.history',
   threats: 'findings.detail.sections.threats',
   vulnerability: 'findings.detail.sections.vulnerability',
   asset: 'findings.detail.sections.asset',
@@ -53,7 +56,7 @@ const SECTION_TITLES: Record<SectionId, ParseKeys> = {
  * Everything known of one Finding: why it has its place, what a User says about it, and what
  * to do about it. The facts that decide how urgent it is stay in a rail that never scrolls
  * away; the column reads the reason, then the decision, then the Action Plan, and keeps the
- * technical detail folded until it is asked for.
+ * history of its place and the technical detail folded until they are asked for.
  */
 export function FindingDetail({ order, finding, onClose, closeButton }: Props) {
   const { t } = useTranslation()
@@ -65,18 +68,21 @@ export function FindingDetail({ order, finding, onClose, closeButton }: Props) {
   const plan = order.prioritization.plans.find((p) => p.finding_id === finding.finding_id)
   const planSources = new Set(plan?.output.sources)
   const references = details.references.filter((url) => !planSources.has(url))
+  const historyCount = useFindingHistoryQuery(finding.finding_id).data?.length
 
   const folded: SectionId[] = [
     'threats',
     'vulnerability',
     'asset',
     'score',
+    'history',
     'advisories',
     ...(references.length > 0 ? (['references'] as const) : []),
   ]
   const sectionId = (id: string) => `${idPrefix}-${id}`
 
   const counts: Partial<Record<SectionId, number>> = {
+    history: historyCount,
     threats: details.techniques.length,
     advisories: details.advisories.length,
     references: references.length,
@@ -87,6 +93,8 @@ export function FindingDetail({ order, finding, onClose, closeButton }: Props) {
 
   const content: Record<SectionId, ReactNode> = {
     plan: <ActionPlanSection order={order} finding={finding} />,
+    // With no group to read first, the newest entry offers its reason too.
+    history: <FindingHistory findingId={finding.finding_id} newestReasonShown={group !== undefined} />,
     threats: <Threats details={details} />,
     vulnerability: <Vulnerability details={details} planMitigation={plan?.output.mitigation} />,
     asset: <AssetDetails finding={finding} />,

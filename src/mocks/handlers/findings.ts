@@ -1,10 +1,11 @@
 import { delay, http, HttpResponse } from 'msw'
 import { z, type ZodType } from 'zod'
 import { CLOSE_REASONS, closesUntil, type ClosedFinding } from '../../api/findingCloses'
-import type { Finding, Prioritization } from '../../api/prioritizations'
+import type { Finding, HistoryEntry, OrderRange, Prioritization, PriorityGroup } from '../../api/prioritizations'
 import type { Known, Schemas } from '../../api/schemas'
 import { assetsStore } from '../assets-store'
 import { closedFindingsStore } from '../closed-findings-store'
+import { findingHistoryStore } from '../finding-history-store'
 import { prioritizationsStore } from '../prioritizations-store'
 import { apiUrl } from '../url'
 import { mockCaller } from './auth'
@@ -67,6 +68,83 @@ function closedByHand(finding: Finding, close: z.infer<typeof closeBody>): Close
   return { ...base, reason, reopen_at: new Date(reopen_at ?? Date.now()).toISOString() }
 }
 
+/** The places, Finding by Finding from 1, the group at `position` takes in the order. */
+function orderOf(groups: PriorityGroup[], position: number): OrderRange {
+  const before = groups.filter((g) => g.position < position).reduce((n, g) => n + g.finding_ids.length, 0)
+  const size = groups.find((g) => g.position === position)?.finding_ids.length ?? 1
+  return { from: before + 1, to: before + size }
+}
+
+/** How the oldest round that holds the Finding placed it, for a Finding with no story of its own in the store. */
+function placedByOldest(finding: Finding): HistoryEntry[] {
+  for (const p of prioritizationsStore.load().toReversed()) {
+    const group = p.groups.find((g) => g.finding_ids.includes(finding.finding_id))
+    if (!group) continue
+    return [
+      {
+        prioritization_id: p.id,
+        created_at: p.created_at,
+        kind: 'placed',
+        group_before: null,
+        group_now: group.position,
+        rank_before: null,
+        rank_now: finding.score_rank,
+        order_before: null,
+        order_now: orderOf(p.groups, group.position),
+        score_before: null,
+        score_now: finding.score,
+        title: group.title,
+        reason: group.reason,
+        evidence: group.evidence
+          .filter((e) => e.finding_id === finding.finding_id)
+          .map(({ path, value }) => ({ path, value })),
+        changes: [],
+        band: null,
+        feedback: [],
+        groups_appeared: [],
+        groups_gone: [],
+        close_reason: null,
+      },
+    ]
+  }
+  return []
+}
+
+/*
+ * The Finding's history, newest first. A closed Finding leaves the order at the next round;
+ * the mock tells it at once, so closing one shows in its history without waiting.
+ */
+function historyOf(finding: Finding): HistoryEntry[] {
+  const stored = findingHistoryStore.load()[finding.finding_id] ?? placedByOldest(finding)
+  const [last] = stored
+  if (finding.closed_at === null || !last || last.kind === 'left') return stored
+  const close = closedFindingsStore.load().find((c) => c.id === finding.finding_id)
+  const left: HistoryEntry = {
+    prioritization_id: `closed-${finding.finding_id}`,
+    created_at: finding.closed_at,
+    kind: 'left',
+    group_before: last.group_now,
+    group_now: null,
+    rank_before: last.rank_now,
+    rank_now: null,
+    order_before: last.order_now,
+    order_now: null,
+    score_before: last.score_now,
+    score_now: null,
+    title: '',
+    reason: '',
+    evidence: [],
+    changes: [],
+    band: null,
+    feedback: [],
+    groups_appeared: [],
+    groups_gone: [],
+    // One that closed on its own did so at a Sync that no longer saw it vulnerable.
+    close_reason: close?.reason ?? 'no_longer_affected',
+  }
+  return [left, ...stored]
+}
+
 export const findingsHandlers = [
   http.post(apiUrl('/findings/:id/close'), async ({ params, request }) => {
     const body = await parsedBody(request, closeBody)
@@ -110,6 +188,17 @@ export const findingsHandlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
+  // barbackend reads the path's UUID before the caller, and the caller before the Finding.
+  http.get(apiUrl('/findings/:id/history'), ({ params }) => {
+    const id = String(params.id)
+    if (!z.uuid().safeParse(id).success) return failure(400, 'invalid_request', 'id must be a UUID')
+    const refused = refusedCaller()
+    if (refused) return refused
+    const finding = findFinding(id)
+    if (!finding) return failure(404, 'finding_not_found', 'finding not found')
+    return HttpResponse.json({ entries: historyOf(finding) })
+  }),
+
   http.get(apiUrl('/findings/closed'), () => {
     const refused = refusedCaller()
     if (refused) return refused
@@ -135,14 +224,15 @@ export const findingsHandlers = [
     await delay()
     return HttpResponse.json({
       weeks: [
-        { week: '2026-W38', starts_on: '2026-09-15', opened: 4, closed: 2, open_at_end: 18 },
-        { week: '2026-W39', starts_on: '2026-09-22', opened: 3, closed: 3, open_at_end: 18 },
-        { week: '2026-W40', starts_on: '2026-09-29', opened: 5, closed: 1, open_at_end: 22 },
-        { week: '2026-W41', starts_on: '2026-10-06', opened: 2, closed: 4, open_at_end: 20 },
-        { week: '2026-W42', starts_on: '2026-10-13', opened: 6, closed: 2, open_at_end: 24 },
-        { week: '2026-W43', starts_on: '2026-10-20', opened: 1, closed: 5, open_at_end: 20 },
-        { week: '2026-W44', starts_on: '2026-10-27', opened: 3, closed: 1, open_at_end: 22 },
-        { week: '2026-W45', starts_on: '2026-11-03', opened: 2, closed: 1, open_at_end: 23 },
+        // Nothing before the first Sync, two weeks in: the chart starts there.
+        { week: '2026-W38', starts_on: '2026-09-15', opened: 0, closed: 0, open_at_end: 0 },
+        { week: '2026-W39', starts_on: '2026-09-22', opened: 0, closed: 0, open_at_end: 0 },
+        { week: '2026-W40', starts_on: '2026-09-29', opened: 12, closed: 0, open_at_end: 12 },
+        { week: '2026-W41', starts_on: '2026-10-06', opened: 4, closed: 1, open_at_end: 15 },
+        { week: '2026-W42', starts_on: '2026-10-13', opened: 6, closed: 2, open_at_end: 19 },
+        { week: '2026-W43', starts_on: '2026-10-20', opened: 2, closed: 3, open_at_end: 18 },
+        { week: '2026-W44', starts_on: '2026-10-27', opened: 4, closed: 1, open_at_end: 21 },
+        { week: '2026-W45', starts_on: '2026-11-03', opened: 3, closed: 1, open_at_end: 23 },
       ],
     })
   }),

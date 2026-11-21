@@ -780,6 +780,100 @@ const scenarios = {
     check(feedback[0]?.body?.verdict === 'should_be_earlier', `feedback request mismatch: ${JSON.stringify(feedback[0]?.body)}`)
   },
 
+  // The detail's folded history, right under the Score, lists every change of the Finding's
+  // place, newest first, and its reason says nothing of the moves.
+  async 'finding-history'() {
+    await signIn('customer_admin')
+    await sidebarLink('Findings').click()
+    await expect(page.getByText('20 findings, 4 groups')).toBeVisible()
+    await page.getByRole('button', { name: 'Open CVE-2024-23897' }).click()
+    const detail = page.getByRole('dialog', { name: 'CVE-2024-23897' })
+    const reason = detail.getByRole('region', { name: 'Why it is here' })
+    await expect(reason).toBeVisible()
+    check(!/Moved|history/.test(await reason.innerText()), 'the reason tells the moves')
+    await detail.getByRole('button', { name: /^Prioritization history/ }).click()
+    const history = detail.getByRole('region', { name: /^Prioritization history/ })
+    await expect(history.getByText('Moved down from Group 1 to 2')).toBeVisible()
+    await expect(history.getByText(/New above it: “Fallos con exploit activo/)).toBeVisible()
+    await expect(history.getByText('Moved up from Group 3 to 1')).toBeVisible()
+    await expect(history.getByText('Entered the order in Group 3')).toBeVisible()
+    await expect(history.getByText('Risk level changed: Low → Medium')).toBeVisible()
+    await expect(history.getByText('Score 19 · By Score alone #17 · In the prioritization #5–#9')).toBeVisible()
+    await expect(history.getByText('Ahead of the Score').first()).toBeVisible()
+    await shot('history', history)
+    await history.getByRole('button', { name: 'Why it was placed there' }).first().click()
+    await expect(history.getByText(/sube al primer grupo/)).toBeVisible()
+    await shot('older-reason', history.getByText(/sube al primer grupo/))
+    const text = await detail.innerText()
+    check(!/Luna|Prioritizer|Cartógrafo|Editor|Analista|agent|\bAI\b|inferred|Scoring Model/i.test(text), 'the detail names an agent, the AI, an inference or the Scoring Model')
+    // A round that placed it again in the same group still shows, with what led to it.
+    await detail.getByRole('button', { name: 'Close', exact: true }).click()
+    await page.getByRole('button', { name: 'Open CVE-2025-1094' }).click()
+    const other = page.getByRole('dialog', { name: 'CVE-2025-1094' })
+    await other.getByRole('button', { name: /^Prioritization history/ }).click()
+    await expect(other.getByText('Looked at again; still in Group 2')).toBeVisible()
+    await shot('kept-its-group', other.getByText('Looked at again; still in Group 2'))
+    const calls = callsTo('GET', '/findings/').filter((c) => c.path.endsWith('/history'))
+    check(calls.length >= 2 && calls.every((c) => c.status === 200), `history calls: ${JSON.stringify(calls.map((c) => [c.path, c.status]))}`)
+  },
+
+  // The Findings charts: the weekly trend from its first week with findings and what its line
+  // counts, time to close per risk level with no row for findings without one, legends for the
+  // bars' colours, Unknown only with findings, and the tactics matrix with no filter and no empty
+  // columns. No chart says "band".
+  async charts() {
+    await signIn('customer_admin')
+    await sidebarLink('Findings').click()
+    await tab('Summary').click()
+    const trend = page.locator('section', { has: page.getByRole('heading', { name: 'Weekly trend of findings' }) })
+    await expect(trend.getByText(/the line, those still open when the week ended/)).toBeVisible()
+    await expect(trend.getByText('9/29')).toBeVisible()
+    check(await trend.getByText('9/15').count() === 0, 'the trend shows the empty weeks before the first findings')
+    await expect(page.getByRole('heading', { name: 'Time to close findings by risk level' })).toBeVisible()
+    check(await page.getByText('No risk level').count() === 0, 'time to close shows a row with no risk level')
+    await page.waitForTimeout(1800) // recharts draws its series in over 1.5 s
+    await shot('summary', trend)
+    await tab('Before & After').click()
+    const composition = page.locator('section', { has: page.getByRole('heading', { name: 'Risk level composition per group' }) })
+    await expect(composition.getByRole('list', { name: 'Risk level' })).toBeVisible()
+    await shot('composition', composition)
+    await tab('Where the risk is').click()
+    const heatmap = page.locator('section', { has: page.getByRole('heading', { name: 'Where the risk is' }) })
+    await expect(heatmap.getByText('Unknown', { exact: true })).toBeVisible()
+    const assets = page.locator('section', { has: page.getByRole('heading', { name: 'Assets with most findings' }) })
+    await expect(assets.getByRole('list', { name: 'Risk level' })).toBeVisible()
+    await shot('risk', assets)
+    await tab('Threats').click()
+    const tactics = page.locator('section', { has: page.getByRole('heading', { name: 'Findings per tactic' }) })
+    await expect(tactics.getByText('No findings: Resource Dev., Exfiltration')).toBeVisible()
+    check(await tactics.getByRole('button').count() === 0, 'the tactics matrix still has a filter')
+    await shot('tactics', tactics)
+    const body = await page.locator('main').innerText()
+    check(!/\bband\b/i.test(body), 'a chart still says band')
+  },
+
+  // Before & After compares the order by Score alone with the prioritization; a row of its most
+  // significant movements opens that Finding's detail over the tab, and closing it comes back.
+  async 'before-after'() {
+    await signIn('customer_admin')
+    await sidebarLink('Findings').click()
+    await tab('Before & After').click()
+    const movements = page.locator('section', { has: page.getByRole('heading', { name: 'Most significant movements' }) })
+    await expect(movements.getByRole('button', { name: 'Open CVE-2024-23897' })).toBeVisible()
+    const headers = await movements.getByRole('columnheader').allTextContents()
+    check(!headers.includes('Reason'), `the movements still have a Reason column: ${headers}`)
+    await shot('movements', movements)
+    await movements.getByRole('row').filter({ has: page.getByRole('button', { name: 'Open CVE-2024-23897' }) }).click({ position: { x: 300, y: 10 } })
+    const detail = page.getByRole('dialog', { name: 'CVE-2024-23897' })
+    await expect(detail.getByRole('button', { name: /^Prioritization history/ })).toBeVisible()
+    check(new URL(page.url()).searchParams.get('tab') === 'before-after', 'the detail left the Before & After tab')
+    await shot('detail', detail)
+    await detail.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(detail).toBeHidden()
+    check(await tab('Before & After').getAttribute('aria-selected') === 'true', 'closing the detail left the Before & After tab')
+    check(!new URL(page.url()).searchParams.has('finding'), 'the closed detail is still in the URL')
+  },
+
   // A viewer closes a Finding by hand as postponed from its detail, sees it counted as closed
   // at once, finds it in the Closed tab and reopens it from there.
   async 'finding-closes'() {

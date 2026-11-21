@@ -15,20 +15,12 @@ import type {
 } from '../../api/findingsRisk'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
+import { BandLegend } from './BandLegend'
+import { BAND_COLORS, BANDS, type Band } from './bands'
 import { Message } from '../../components/ui/Message'
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
-const BANDS = ['critical', 'high', 'medium', 'low', 'unbanded'] as const
-type Band = (typeof BANDS)[number]
-
-const BAND_COLORS: Record<Band, string> = {
-  critical: 'var(--color-critical)',
-  high: 'var(--color-high)',
-  medium: 'var(--color-medium)',
-  low: 'var(--color-low)',
-  unbanded: 'var(--color-gray)',
-}
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -41,9 +33,9 @@ function cellText(level: number) {
   return level >= 3 ? 'text-white' : level === 0 ? 'text-gray' : 'text-navy'
 }
 
-function ensureUnknown(groups: BreakdownGroup[]): BreakdownGroup[] {
-  if (groups.some((g) => g.value === 'unknown')) return groups
-  return [...groups, { value: 'unknown', name: null, critical: 0, high: 0, medium: 0, low: 0, unbanded: 0 }]
+/** "Unknown" takes room only when some Findings sit on an Asset not yet classified. */
+function withoutEmptyUnknown(groups: BreakdownGroup[]): BreakdownGroup[] {
+  return groups.filter((g) => g.value !== 'unknown' || BANDS.some((b) => g[b] > 0))
 }
 
 // ── public component ──────────────────────────────────────────────────────────
@@ -108,7 +100,6 @@ function HeatmapCard({ by, onByChange }: { by: BreakdownBy; onByChange: (b: Brea
             )
           }
         </QueryBoundary>
-        <p className="mt-4 font-body text-[0.75rem] text-gray">{t('findings.risk.heatmapNote')}</p>
       </div>
     </section>
   )
@@ -118,7 +109,7 @@ function HeatmapGrid({ groups: rawGroups, by }: { groups: BreakdownGroup[]; by: 
   const { t } = useTranslation()
   const [, setParams] = useSearchParams()
 
-  const groups = by !== 'area' ? ensureUnknown(rawGroups) : rawGroups
+  const groups = withoutEmptyUnknown(rawGroups)
 
   const activeBands = BANDS.filter((b) => groups.some((g) => g[b] > 0))
 
@@ -167,79 +158,84 @@ function HeatmapGrid({ groups: rawGroups, by }: { groups: BreakdownGroup[]; by: 
   const bandLabel = (b: Band) => bandLabels[b]
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse font-body text-[0.875rem]">
-        <thead>
-          <tr>
-            <th className="pb-3 pr-4 text-left text-[0.75rem] font-normal text-gray">
-              {t('findings.columns.score')}
-            </th>
-            {groups.map((g) => (
-              <th key={g.value} className="pb-3 px-2 text-center text-[0.75rem] font-semibold text-navy">
-                {groupLabel(g)}
+    <div className="flex flex-col gap-4">
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse font-body text-[0.875rem]">
+          <thead>
+            <tr>
+              <th className="pb-3 pr-4 text-left text-[0.75rem] font-normal text-gray">
+                {t('findings.filter.band')}
               </th>
-            ))}
-            <th className="pb-3 px-2 text-center text-[0.75rem] font-semibold text-navy">
-              {t('findings.risk.totalCol')}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {activeBands.map((band) => {
-            const rowTotal = groups.reduce((s, g) => s + g[band], 0)
-            return (
-              <tr key={band}>
-                <td className="py-1 pr-4">
-                  <span className="flex items-center gap-1.5 font-body text-[0.75rem] font-semibold text-navy">
-                    <span
-                      className="inline-block h-2 w-2 shrink-0 rounded-sm"
-                      style={{ backgroundColor: BAND_COLORS[band] }}
-                    />
-                    {bandLabel(band)}
-                  </span>
-                </td>
-                {groups.map((g) => {
-                  const count = g[band]
-                  const level = heatLevel(count)
-                  const clickable = count > 0
-                  const isHighlighted = band === 'critical' && g.value === 'internet_facing'
-                  return (
-                    <td key={g.value} className="px-2 py-1 text-center">
-                      <div
-                        className={`mx-auto flex h-10 w-10 items-center justify-center rounded-lg font-body ${count > 0 ? 'font-semibold' : ''} ${cellText(level)} ${clickable ? 'cursor-pointer' : ''}`}
-                        style={{
-                          backgroundColor: cellBg(level),
-                          boxShadow: isHighlighted ? '0 0 0 2px #D7263D' : undefined,
-                        }}
-                        role={clickable ? 'button' : undefined}
-                        tabIndex={clickable ? 0 : undefined}
-                        aria-label={t('findings.risk.cellLabel', { count, band: bandLabel(band), group: groupLabel(g) })}
-                        title={clickable ? t('findings.risk.cellClickable') : undefined}
-                        onClick={clickable ? () => openCell(band, g) : undefined}
-                        onKeyDown={
-                          clickable
-                            ? (e) => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                  e.preventDefault()
-                                  openCell(band, g)
+              {groups.map((g) => (
+                <th key={g.value} className="pb-3 px-2 text-center text-[0.75rem] font-semibold text-navy">
+                  {groupLabel(g)}
+                </th>
+              ))}
+              <th className="pb-3 px-2 text-center text-[0.75rem] font-semibold text-navy">
+                {t('findings.risk.totalCol')}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {activeBands.map((band) => {
+              const rowTotal = groups.reduce((s, g) => s + g[band], 0)
+              return (
+                <tr key={band}>
+                  <td className="py-1 pr-4">
+                    <span className="flex items-center gap-1.5 font-body text-[0.75rem] font-semibold text-navy">
+                      <span
+                        className="inline-block h-2 w-2 shrink-0 rounded-sm"
+                        style={{ backgroundColor: BAND_COLORS[band] }}
+                      />
+                      {bandLabel(band)}
+                    </span>
+                  </td>
+                  {groups.map((g) => {
+                    const count = g[band]
+                    const level = heatLevel(count)
+                    const clickable = count > 0
+                    const isHighlighted = band === 'critical' && g.value === 'internet_facing'
+                    return (
+                      <td key={g.value} className="px-2 py-1 text-center">
+                        <div
+                          className={`mx-auto flex h-10 w-10 items-center justify-center rounded-lg font-body ${count > 0 ? 'font-semibold' : ''} ${cellText(level)} ${clickable ? 'cursor-pointer' : ''}`}
+                          style={{
+                            backgroundColor: cellBg(level),
+                            boxShadow: isHighlighted ? '0 0 0 2px #D7263D' : undefined,
+                          }}
+                          role={clickable ? 'button' : undefined}
+                          tabIndex={clickable ? 0 : undefined}
+                          aria-label={t('findings.risk.cellLabel', { count, band: bandLabel(band), group: groupLabel(g) })}
+                          title={clickable ? t('findings.risk.cellClickable') : undefined}
+                          onClick={clickable ? () => openCell(band, g) : undefined}
+                          onKeyDown={
+                            clickable
+                              ? (e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault()
+                                    openCell(band, g)
+                                  }
                                 }
-                              }
-                            : undefined
-                        }
-                      >
-                        {count === 0 ? '–' : count}
-                      </div>
-                    </td>
-                  )
-                })}
-                <td className="px-2 py-1 text-center">
-                  <span className="font-semibold tabular-nums text-navy">{rowTotal}</span>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+                              : undefined
+                          }
+                        >
+                          {count === 0 ? '–' : count}
+                        </div>
+                      </td>
+                    )
+                  })}
+                  <td className="px-2 py-1 text-center">
+                    <span className="font-semibold tabular-nums text-navy">{rowTotal}</span>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+      {groups.some((g) => g.value === 'unknown') && (
+        <p className="font-body text-[0.75rem] text-gray">{t('findings.risk.heatmapNote')}</p>
+      )}
     </div>
   )
 }
@@ -307,42 +303,45 @@ function AssetBars({ assets }: { assets: AssetFindingBands[] }) {
   }
 
   return (
-    <ul className="flex flex-col gap-3 p-6">
-      {data.map((row) => (
-        <li
-          key={row.name}
-          className="flex cursor-pointer items-center gap-3 font-body text-[0.875rem]"
-          role="button"
-          tabIndex={0}
-          aria-label={t('findings.risk.assetBarLabel', { name: row.name, total: row.total })}
-          onClick={() => openAsset(row.name)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              openAsset(row.name)
-            }
-          }}
-        >
-          <span className="w-32 shrink-0 truncate text-right text-navy">{row.name}</span>
-          <div className="relative h-5 flex-1 overflow-hidden rounded bg-panel" style={{ maxWidth: `${(row.total / maxTotal) * 100}%` }}>
-            {BANDS.filter((b) => row[b] > 0).reduce<{ segments: { band: Band; left: number; pct: number }[]; offset: number }>(
-              ({ segments, offset }, band) => {
-                const pct = (row[band] / row.total) * 100
-                return { segments: [...segments, { band, left: offset, pct }], offset: offset + pct }
-              },
-              { segments: [], offset: 0 },
-            ).segments.map(({ band, left, pct }) => (
-              <div
-                key={band}
-                className="absolute inset-y-0"
-                style={{ left: `${left}%`, width: `${pct}%`, backgroundColor: BAND_COLORS[band] }}
-              />
-            ))}
-          </div>
-          <span className="w-8 shrink-0 tabular-nums text-right font-semibold text-navy">{row.total}</span>
-        </li>
-      ))}
-    </ul>
+    <div className="flex flex-col gap-4 p-6">
+      <BandLegend bands={BANDS.filter((b) => data.some((row) => row[b] > 0))} />
+      <ul className="flex flex-col gap-3">
+        {data.map((row) => (
+          <li
+            key={row.name}
+            className="flex cursor-pointer items-center gap-3 font-body text-[0.875rem]"
+            role="button"
+            tabIndex={0}
+            aria-label={t('findings.risk.assetBarLabel', { name: row.name, total: row.total })}
+            onClick={() => openAsset(row.name)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                openAsset(row.name)
+              }
+            }}
+          >
+            <span className="w-32 shrink-0 truncate text-right text-navy">{row.name}</span>
+            <div className="relative h-5 flex-1 overflow-hidden rounded bg-panel" style={{ maxWidth: `${(row.total / maxTotal) * 100}%` }}>
+              {BANDS.filter((b) => row[b] > 0).reduce<{ segments: { band: Band; left: number; pct: number }[]; offset: number }>(
+                ({ segments, offset }, band) => {
+                  const pct = (row[band] / row.total) * 100
+                  return { segments: [...segments, { band, left: offset, pct }], offset: offset + pct }
+                },
+                { segments: [], offset: 0 },
+              ).segments.map(({ band, left, pct }) => (
+                <div
+                  key={band}
+                  className="absolute inset-y-0"
+                  style={{ left: `${left}%`, width: `${pct}%`, backgroundColor: BAND_COLORS[band] }}
+                />
+              ))}
+            </div>
+            <span className="w-8 shrink-0 tabular-nums text-right font-semibold text-navy">{row.total}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 

@@ -1,5 +1,5 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { http } from 'msw'
+import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Finding } from '../../api/prioritizations'
 import { failure } from '../../mocks/handlers/responses'
@@ -554,7 +554,7 @@ describe('Findings', () => {
       await user.click(screen.getByRole('tab', { name: 'Summary' }))
 
       expect(screen.getByRole('tab', { name: 'Summary' })).toHaveAttribute('aria-selected', 'true')
-      expect(await screen.findByText('Weekly trend')).toBeInTheDocument()
+      expect(await screen.findByText('Weekly trend of findings')).toBeInTheDocument()
     })
   })
 
@@ -565,7 +565,15 @@ describe('Findings', () => {
       expect(await screen.findByText('3.5 days')).toBeInTheDocument() // critical
       expect(screen.getByText('7.2 days')).toBeInTheDocument()
       expect(screen.getByText('14.1 days')).toBeInTheDocument()
-      expect(screen.getByText('45.0 days')).toBeInTheDocument()
+      // A Finding with no risk level has no row: it has nothing to compare its time with.
+      expect(screen.queryByText('45.0 days')).not.toBeInTheDocument()
+      expect(screen.queryByText('No risk level')).not.toBeInTheDocument()
+    })
+
+    it('says what the weekly trend’s bars and line count', async () => {
+      await openSummaryTab()
+
+      expect(await screen.findByText(/the line, those still open when the week ended/)).toBeInTheDocument()
     })
 
     it('shows — and none-closed text for a band with no closures', async () => {
@@ -618,7 +626,7 @@ describe('Findings', () => {
     it('filters by band and hides empty groups', async () => {
       await renderFindings()
 
-      const bandSelect = screen.getByRole('combobox', { name: 'Band' })
+      const bandSelect = screen.getByRole('combobox', { name: 'Risk level' })
       fireEvent.change(bandSelect, { target: { value: 'critical' } })
 
       // Only the first group holds a Critical finding.
@@ -635,7 +643,7 @@ describe('Findings', () => {
     it('shows no-results message when no findings match the filter', async () => {
       await renderFindings()
 
-      fireEvent.change(screen.getByRole('combobox', { name: 'Band' }), {
+      fireEvent.change(screen.getByRole('combobox', { name: 'Risk level' }), {
         target: { value: 'unbanded' },
       })
 
@@ -646,11 +654,11 @@ describe('Findings', () => {
       const user = renderApp('/findings?band=critical')
       await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
 
-      expect(screen.getByText('Band: Critical')).toBeInTheDocument()
+      expect(screen.getByText('Risk level: Critical')).toBeInTheDocument()
 
       await user.click(screen.getByRole('button', { name: 'Remove filter' }))
 
-      await waitFor(() => expect(screen.queryByText('Band: Critical')).not.toBeInTheDocument())
+      await waitFor(() => expect(screen.queryByText('Risk level: Critical')).not.toBeInTheDocument())
     })
 
     it('removes the from=chart label when all chips are cleared', async () => {
@@ -661,7 +669,7 @@ describe('Findings', () => {
 
       await waitFor(() => {
         expect(screen.queryByText('From the chart:')).not.toBeInTheDocument()
-        expect(screen.queryByText('Band: Critical')).not.toBeInTheDocument()
+        expect(screen.queryByText('Risk level: Critical')).not.toBeInTheDocument()
       })
     })
 
@@ -671,13 +679,13 @@ describe('Findings', () => {
 
       // Both the chip label ("Band: Critical") and the KEV chip are shown;
       // "KEV only" appears twice: once in the checkbox label, once in the chip.
-      expect(screen.getByText('Band: Critical')).toBeInTheDocument()
+      expect(screen.getByText('Risk level: Critical')).toBeInTheDocument()
       expect(screen.getAllByText('KEV only')).toHaveLength(2)
 
       await user.click(screen.getByRole('button', { name: 'Clear all' }))
 
       await waitFor(() => {
-        expect(screen.queryByText('Band: Critical')).not.toBeInTheDocument()
+        expect(screen.queryByText('Risk level: Critical')).not.toBeInTheDocument()
         // After clearing, only the checkbox label "KEV only" remains (no chip).
         expect(screen.getAllByText('KEV only')).toHaveLength(1)
       })
@@ -685,12 +693,40 @@ describe('Findings', () => {
   })
 
   describe('risk tab', () => {
+    it('shows Unknown, and what it means, only when some findings sit on an unclassified asset', async () => {
+      server.use(
+        http.get(apiUrl('/findings/breakdown'), () =>
+          HttpResponse.json({
+            by: 'exposure',
+            groups: [
+              { value: 'internet_facing', name: null, critical: 1, high: 0, medium: 0, low: 0, unbanded: 0 },
+              { value: 'unknown', name: null, critical: 0, high: 0, medium: 0, low: 0, unbanded: 0 },
+            ],
+          }),
+        ),
+      )
+      await openRiskTab()
+      const heatmap = (await screen.findByRole('heading', { name: 'Where the risk is' })).closest('section')!
+
+      expect(await within(heatmap).findByText('Internet')).toBeInTheDocument()
+      expect(within(heatmap).queryByText('Unknown')).not.toBeInTheDocument()
+      expect(within(heatmap).queryByText(/"Unknown" are assets/)).not.toBeInTheDocument()
+    })
+
+    it('tells what each colour of the asset bars means', async () => {
+      await openRiskTab()
+      const assets = (await screen.findByRole('heading', { name: 'Assets with most findings' })).closest('section')!
+
+      const legend = await within(assets).findByRole('list', { name: 'Risk level' })
+      expect(within(legend).getByText('Critical')).toBeInTheDocument()
+    })
+
     it('clicking a heatmap cell navigates to the prioritized list with band and exposure filters', async () => {
       const user = await openRiskTab()
       // Critical × internet_facing cell (count=5 from mock)
       const cell = await screen.findByLabelText(/5 findings: Critical on Internet/)
       await user.click(cell)
-      expect(await screen.findByText('Band: Critical')).toBeInTheDocument()
+      expect(await screen.findByText('Risk level: Critical')).toBeInTheDocument()
       expect(screen.getByText('Exposure: Internet-facing')).toBeInTheDocument()
       expect(screen.getByText('From the chart:')).toBeInTheDocument()
     })
@@ -709,7 +745,7 @@ describe('Findings', () => {
       // High × Producción cell (count=6 from mock)
       const cell = await screen.findByLabelText(/6 findings: High on Producción/)
       await user.click(cell)
-      expect(await screen.findByText('Band: High')).toBeInTheDocument()
+      expect(await screen.findByText('Risk level: High')).toBeInTheDocument()
       expect(screen.getByText('Area: Producción')).toBeInTheDocument()
       expect(screen.getByText('From the chart:')).toBeInTheDocument()
     })
@@ -733,12 +769,44 @@ describe('Findings', () => {
       expect(subioLabel.previousElementSibling).toHaveTextContent('6')
     })
 
+    it('tells what each colour of the composition per group means', async () => {
+      await openBeforeAfterTab()
+      const composition = (await screen.findByRole('heading', { name: 'Risk level composition per group' })).closest('section')!
+
+      const legend = within(composition).getByRole('list', { name: 'Risk level' })
+      expect(within(legend).getAllByRole('listitem').length).toBeGreaterThan(1)
+    })
+
     it('shows diagonal cell for G1 (3 findings stayed in SG1→G1)', async () => {
       await openBeforeAfterTab()
 
       // Diagonal cell SG1→G1 should contain 3
       const cell = await screen.findByLabelText('3 findings from score group 1 in priority group 1')
       expect(cell).toBeInTheDocument()
+    })
+
+    it('lists the most significant movements without their reason, which the detail tells', async () => {
+      await openBeforeAfterTab()
+
+      const table = (await screen.findByRole('heading', { name: 'Most significant movements' })).closest('section')!
+      const headers = within(table).getAllByRole('columnheader').map((h) => h.textContent)
+      expect(headers).not.toContain('Reason')
+      expect(within(table).getByRole('button', { name: 'Open CVE-2024-23897' })).toBeInTheDocument()
+    })
+
+    it('opens a movement’s finding over the tab, and closing it comes back to the tab', async () => {
+      const user = await openBeforeAfterTab()
+      const table = (await screen.findByRole('heading', { name: 'Most significant movements' })).closest('section')!
+
+      await user.click(within(table).getByRole('button', { name: 'Open CVE-2024-23897' }).closest('tr')!)
+      const dialog = await screen.findByRole('dialog', { name: 'CVE-2024-23897' })
+      expect(within(dialog).getByRole('button', { name: /^Prioritization history/ })).toBeInTheDocument()
+      expect(window.location.search).toContain('finding=')
+
+      await user.click(within(dialog).getByRole('button', { name: 'Close' }))
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      expect(screen.getByRole('tab', { name: 'Before & After' })).toHaveAttribute('aria-selected', 'true')
+      expect(window.location.search).not.toContain('finding=')
     })
 
   })
@@ -749,11 +817,17 @@ describe('Findings', () => {
       expect(await screen.findByText('22 of 35 open findings have an ATT&CK label')).toBeInTheDocument()
     })
 
-    it('shows all 14 ATT&CK tactics in the heatmap', async () => {
+    it('shows every role together, a column only for the tactics some finding leads to, and names the rest', async () => {
       await openThreatsTab()
-      expect(await screen.findByText('Initial Access')).toBeInTheDocument()
-      expect(screen.getByText('Impact')).toBeInTheDocument()
-      expect(screen.getByText('Reconnaissance')).toBeInTheDocument()
+      const matrix = (await screen.findByRole('heading', { name: 'Findings per tactic' })).closest('section')!
+
+      expect(within(matrix).queryByRole('group')).not.toBeInTheDocument()
+      const columns = within(matrix).getAllByRole('columnheader').map((h) => h.textContent)
+      expect(columns).toContain('Initial Access')
+      expect(columns).toContain('Impact')
+      expect(columns).not.toContain('Exfiltration')
+      expect(columns).not.toContain('Resource Dev.')
+      expect(within(matrix).getByText('No findings: Resource Dev., Exfiltration')).toBeInTheDocument()
     })
 
     it('shows the top techniques table with technique IDs', async () => {

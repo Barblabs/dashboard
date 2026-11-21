@@ -1,22 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
 import { useAttackMatrixQuery } from '../../api/attackMatrix'
 import type { TacticCount, TechniqueCount } from '../../api/attackMatrix'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
+import { BAND_COLORS, BANDS, type Band } from './bands'
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
-const BANDS = ['critical', 'high', 'medium', 'low', 'unbanded'] as const
-type Band = (typeof BANDS)[number]
-
-const BAND_COLORS: Record<Band, string> = {
-  critical: 'var(--color-critical)',
-  high: 'var(--color-high)',
-  medium: 'var(--color-medium)',
-  low: 'var(--color-low)',
-  unbanded: 'var(--color-gray)',
-}
 
 const TACTIC_ORDER = [
   'reconnaissance',
@@ -54,19 +44,7 @@ function sortTactics(tactics: TacticCount[]): TacticCount[] {
 // ── public component ──────────────────────────────────────────────────────────
 
 export function ThreatsTabContent() {
-  const [params, setParams] = useSearchParams()
-  const role = params.get('role') ?? ''
-
-  const setRole = (value: string) =>
-    setParams((prev) => {
-      const next = new URLSearchParams(prev)
-      next.set('tab', 'threats')
-      if (value) next.set('role', value)
-      else next.delete('role')
-      return next
-    })
-
-  const query = useAttackMatrixQuery(role)
+  const query = useAttackMatrixQuery()
 
   return (
     <div className="flex flex-col gap-6">
@@ -80,7 +58,7 @@ export function ThreatsTabContent() {
               <CoverageCard labeled={data.coverage.labeled} open={data.coverage.open} />
             </ChartErrorBoundary>
             <ChartErrorBoundary>
-              <HeatmapCard tactics={sortTactics(data.tactics)} role={role} onRoleChange={setRole} />
+              <HeatmapCard tactics={sortTactics(data.tactics)} />
             </ChartErrorBoundary>
             <ChartErrorBoundary>
               <TopTechniquesCard techniques={data.techniques} />
@@ -124,46 +102,13 @@ function CoverageCard({ labeled, open }: { labeled: number; open: number }) {
 
 // ── heatmap ───────────────────────────────────────────────────────────────────
 
-function HeatmapCard({
-  tactics,
-  role,
-  onRoleChange,
-}: {
-  tactics: TacticCount[]
-  role: string
-  onRoleChange: (r: string) => void
-}) {
+function HeatmapCard({ tactics }: { tactics: TacticCount[] }) {
   const { t } = useTranslation()
 
   return (
     <section className="rounded-xl border border-border-panel bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-panel px-6 py-4">
+      <div className="border-b border-border-panel px-6 py-4">
         <h2 className="font-title text-[1rem] text-navy">{t('findings.threats.heatmapTitle')}</h2>
-        <div className="flex flex-wrap items-center gap-2 font-body text-[0.875rem]">
-          <span className="text-gray">{t('findings.threats.roleLabel')}</span>
-          <div className="flex flex-wrap gap-1" role="group" aria-label={t('findings.threats.roleLabel')}>
-            {([
-              { key: '', label: t('findings.threats.roleAll') },
-              { key: 'exploitation', label: t('findings.threats.roleExploitation') },
-              { key: 'primary_impact', label: t('findings.threats.rolePrimaryImpact') },
-              { key: 'secondary_impact', label: t('findings.threats.roleSecondaryImpact') },
-            ] as const).map(({ key: opt, label }) => (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => onRoleChange(opt)}
-                aria-pressed={role === opt}
-                className={`focus-ring rounded-md px-3 py-1 font-body text-[0.8125rem] transition-colors ${
-                  role === opt
-                    ? 'bg-navy text-white'
-                    : 'border border-border-panel text-gray hover:border-navy hover:text-navy'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
       <div className="p-6">
         <HeatmapGrid tactics={tactics} />
@@ -173,8 +118,13 @@ function HeatmapCard({
   )
 }
 
-function HeatmapGrid({ tactics }: { tactics: TacticCount[] }) {
+function HeatmapGrid({ tactics: all }: { tactics: TacticCount[] }) {
   const { t } = useTranslation()
+
+  // Only the tactics some Finding leads to take a column; the rest are named in one line below.
+  const tactics = all.filter((tac) => BANDS.some((b) => tac[b] > 0))
+  const withFindings = new Set(tactics.map((tac) => tac.tactic))
+  const empty = TACTIC_ORDER.filter((tactic) => !withFindings.has(tactic))
 
   const activeBands = BANDS.filter((b) => tactics.some((tac) => tac[b] > 0))
   const maxCount = Math.max(...tactics.flatMap((tac) => BANDS.map((b) => tac[b])), 1)
@@ -212,55 +162,62 @@ function HeatmapGrid({ tactics }: { tactics: TacticCount[] }) {
   if (activeBands.length === 0) return null
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse font-body text-[0.875rem]">
-        <thead>
-          <tr>
-            <th className="pb-3 pr-4 text-left text-[0.75rem] font-normal text-gray">
-              {t('findings.columns.score')}
-            </th>
-            {tactics.map((tac) => (
-              <th key={tac.tactic} className="pb-3 px-1 text-center text-[0.6875rem] font-semibold text-navy">
-                {tacticLabels[tac.tactic] ?? tac.tactic}
+    <div className="flex flex-col gap-3">
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse font-body text-[0.875rem]">
+          <thead>
+            <tr>
+              <th className="pb-3 pr-4 text-left text-[0.75rem] font-normal text-gray">
+                {t('findings.filter.band')}
               </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {activeBands.map((band) => (
-            <tr key={band}>
-              <td className="py-1 pr-4">
-                <span className="flex items-center gap-1.5 font-body text-[0.75rem] font-semibold text-navy">
-                  <span
-                    className="inline-block h-2 w-2 shrink-0 rounded-sm"
-                    style={{ backgroundColor: BAND_COLORS[band] }}
-                  />
-                  {bandLabels[band]}
-                </span>
-              </td>
-              {tactics.map((tac) => {
-                const count = tac[band]
-                const level = heatLevel(count)
-                return (
-                  <td key={tac.tactic} className="px-1 py-1 text-center">
-                    <div
-                      className={`mx-auto flex h-8 w-8 items-center justify-center rounded-md font-body text-[0.75rem] ${count > 0 ? 'font-semibold' : ''} ${cellText(level)}`}
-                      style={{ backgroundColor: cellBg(level) }}
-                      aria-label={t('findings.threats.cellLabel', {
-                        count,
-                        band: bandLabels[band],
-                        tactic: tacticLabels[tac.tactic] ?? tac.tactic,
-                      })}
-                    >
-                      {count === 0 ? '–' : count}
-                    </div>
-                  </td>
-                )
-              })}
+              {tactics.map((tac) => (
+                <th key={tac.tactic} className="pb-3 px-1 text-center text-[0.6875rem] font-semibold text-navy">
+                  {tacticLabels[tac.tactic] ?? tac.tactic}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {activeBands.map((band) => (
+              <tr key={band}>
+                <td className="py-1 pr-4">
+                  <span className="flex items-center gap-1.5 font-body text-[0.75rem] font-semibold text-navy">
+                    <span
+                      className="inline-block h-2 w-2 shrink-0 rounded-sm"
+                      style={{ backgroundColor: BAND_COLORS[band] }}
+                    />
+                    {bandLabels[band]}
+                  </span>
+                </td>
+                {tactics.map((tac) => {
+                  const count = tac[band]
+                  const level = heatLevel(count)
+                  return (
+                    <td key={tac.tactic} className="px-1 py-1 text-center">
+                      <div
+                        className={`mx-auto flex h-8 w-8 items-center justify-center rounded-md font-body text-[0.75rem] ${count > 0 ? 'font-semibold' : ''} ${cellText(level)}`}
+                        style={{ backgroundColor: cellBg(level) }}
+                        aria-label={t('findings.threats.cellLabel', {
+                          count,
+                          band: bandLabels[band],
+                          tactic: tacticLabels[tac.tactic] ?? tac.tactic,
+                        })}
+                      >
+                        {count === 0 ? '–' : count}
+                      </div>
+                    </td>
+                  )
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {empty.length > 0 && (
+        <p className="font-body text-[0.875rem] text-gray">
+          {t('findings.threats.emptyTactics', { tactics: empty.map((tactic) => tacticLabels[tactic]).join(', ') })}
+        </p>
+      )}
     </div>
   )
 }
