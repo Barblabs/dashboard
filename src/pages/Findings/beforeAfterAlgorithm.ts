@@ -19,7 +19,6 @@ export interface TopChange {
   agentGroup: number
   delta: number
   agentGroupTitle: string
-  agentGroupReason: string
 }
 
 export interface MatrixData {
@@ -81,7 +80,6 @@ export function buildMatrix(p: Prioritization): MatrixData {
         agentGroup: ag,
         delta: Math.abs(sg - ag),
         agentGroupTitle: agGroup.title,
-        agentGroupReason: agGroup.reason,
       })
     }
   }

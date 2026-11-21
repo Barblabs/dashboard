@@ -584,7 +584,6 @@ export const es: Translations = {
       topChangesScoreGroup: 'Por score',
       topChangesAgentGroup: 'Por prioridad',
       topChangesDelta: 'Δ',
-      topChangesReason: 'Razón',
       topChangesUp: '↑{{n}}',
       topChangesDown: '↓{{n}}',
     },

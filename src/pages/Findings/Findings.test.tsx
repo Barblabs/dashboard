@@ -741,6 +741,30 @@ describe('Findings', () => {
       expect(cell).toBeInTheDocument()
     })
 
+    it('lists the most significant movements without their reason, which the detail tells', async () => {
+      await openBeforeAfterTab()
+
+      const table = (await screen.findByRole('heading', { name: 'Most significant movements' })).closest('section')!
+      const headers = within(table).getAllByRole('columnheader').map((h) => h.textContent)
+      expect(headers).not.toContain('Reason')
+      expect(within(table).getByRole('button', { name: 'Open CVE-2024-23897' })).toBeInTheDocument()
+    })
+
+    it('opens a movement’s finding over the tab, and closing it comes back to the tab', async () => {
+      const user = await openBeforeAfterTab()
+      const table = (await screen.findByRole('heading', { name: 'Most significant movements' })).closest('section')!
+
+      await user.click(within(table).getByRole('button', { name: 'Open CVE-2024-23897' }).closest('tr')!)
+      const dialog = await screen.findByRole('dialog', { name: 'CVE-2024-23897' })
+      expect(within(dialog).getByRole('button', { name: /^Prioritization history/ })).toBeInTheDocument()
+      expect(window.location.search).toContain('finding=')
+
+      await user.click(within(dialog).getByRole('button', { name: 'Close' }))
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      expect(screen.getByRole('tab', { name: 'Before & After' })).toHaveAttribute('aria-selected', 'true')
+      expect(window.location.search).not.toContain('finding=')
+    })
+
   })
 
   describe('threats tab', () => {

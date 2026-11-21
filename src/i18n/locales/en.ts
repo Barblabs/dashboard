@@ -582,7 +582,6 @@ export const en = {
       topChangesScoreGroup: 'By score',
       topChangesAgentGroup: 'By priority',
       topChangesDelta: 'Δ',
-      topChangesReason: 'Reason',
       topChangesUp: '↑{{n}}',
       topChangesDown: '↓{{n}}',
     },

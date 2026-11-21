@@ -1,12 +1,15 @@
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { useCurrentOrderQuery } from '../../api/prioritizations'
-import type { PriorityGroup } from '../../api/prioritizations'
+import type { CurrentOrder, PriorityGroup } from '../../api/prioritizations'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Message } from '../../components/ui/Message'
+import { Modal } from '../../components/ui/Modal'
 import { BAND_COLORS, BANDS, buildMatrix } from './beforeAfterAlgorithm'
 import type { Band, MatrixData, TopChange } from './beforeAfterAlgorithm'
+import { FindingDetail } from './FindingDetail'
 
 export function BeforeAfterTabContent() {
   const { t } = useTranslation()
@@ -20,7 +23,7 @@ export function BeforeAfterTabContent() {
       {(order) =>
         order ? (
           <ChartErrorBoundary>
-            <BeforeAfterContent data={buildMatrix(order.prioritization)} />
+            <BeforeAfterContent order={order} data={buildMatrix(order.prioritization)} />
           </ChartErrorBoundary>
         ) : (
           <Message>{t('findings.empty')}</Message>
@@ -30,8 +33,22 @@ export function BeforeAfterTabContent() {
   )
 }
 
-function BeforeAfterContent({ data }: { data: MatrixData }) {
+const FINDING_PARAM = 'finding'
+
+function BeforeAfterContent({ order, data }: { order: CurrentOrder; data: MatrixData }) {
   const { t } = useTranslation()
+  // A movement opens its Finding's detail over this tab, as the list does, and closing it comes back here.
+  const [params, setParams] = useSearchParams()
+  const closeButton = useRef<HTMLButtonElement>(null)
+  const openId = params.get(FINDING_PARAM)
+  const open = order.prioritization.findings.find((f) => f.finding_id === openId)
+  const setOpen = (id: string | null) =>
+    setParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (id) next.set(FINDING_PARAM, id)
+      else next.delete(FINDING_PARAM)
+      return next
+    })
   const { groups, matrix, cellIds, rankRanges, subio, seMantuvo, bajo, total, bandByGroup, topChanges } = data
   const N = groups.length
   const matchPct = Math.round((seMantuvo / total) * 100)
@@ -80,7 +97,7 @@ function BeforeAfterContent({ data }: { data: MatrixData }) {
                 {t('findings.beforeAfter.topChangesTitle')}
               </h2>
             </div>
-            <TopChangesTable topChanges={topChanges} groups={groups} rankRanges={rankRanges} />
+            <TopChangesTable topChanges={topChanges} groups={groups} rankRanges={rankRanges} onOpen={setOpen} />
           </section>
         </ChartErrorBoundary>
       )}
@@ -95,6 +112,12 @@ function BeforeAfterContent({ data }: { data: MatrixData }) {
           <BandComposition groups={groups} bandByGroup={bandByGroup} />
         </section>
       </ChartErrorBoundary>
+
+      <Modal open={open !== undefined} onClose={() => setOpen(null)} width="xl" initialFocus={closeButton}>
+        {open && (
+          <FindingDetail order={order} finding={open} onClose={() => setOpen(null)} closeButton={closeButton} />
+        )}
+      </Modal>
     </div>
   )
 }
@@ -222,16 +245,18 @@ function TopChangesTable({
   topChanges,
   groups,
   rankRanges,
+  onOpen,
 }: {
   topChanges: TopChange[]
   groups: PriorityGroup[]
   rankRanges: [number, number][]
+  onOpen: (findingId: string) => void
 }) {
   const { t } = useTranslation()
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[44rem] border-collapse font-body text-[0.875rem]">
+      <table className="w-full min-w-[36rem] border-collapse font-body text-[0.875rem]">
         <thead>
           <tr className="border-b border-border-panel text-left text-[0.75rem] font-normal text-gray">
             <th className="px-6 py-3 font-normal">{t('findings.beforeAfter.topChangesCve')}</th>
@@ -239,7 +264,6 @@ function TopChangesTable({
             <th className="px-4 py-3 font-normal">{t('findings.beforeAfter.topChangesScoreGroup')}</th>
             <th className="px-4 py-3 font-normal">{t('findings.beforeAfter.topChangesAgentGroup')}</th>
             <th className="px-4 py-3 font-normal">{t('findings.beforeAfter.topChangesDelta')}</th>
-            <th className="px-4 py-3 font-normal">{t('findings.beforeAfter.topChangesReason')}</th>
           </tr>
         </thead>
         <tbody>
@@ -250,11 +274,25 @@ function TopChangesTable({
             return (
               <tr
                 key={c.findingId}
-                className="border-b border-border-panel last:border-0 hover:bg-panel"
+                // The whole row is the mouse target; the button stays the keyboard and screen reader path.
+                onClick={() => onOpen(c.findingId)}
+                className="cursor-pointer border-b border-border-panel transition-colors duration-150 last:border-0 hover:bg-row-hover"
               >
-                <td className="px-6 py-3 font-mono text-[0.8125rem] whitespace-nowrap text-navy">{c.cveId}</td>
+                <td className="px-6 py-3 whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      onOpen(c.findingId)
+                    }}
+                    aria-label={t('findings.open', { cve: c.cveId })}
+                    className="focus-ring cursor-pointer rounded-xs font-mono text-[0.8125rem] font-semibold text-navy underline-offset-2 hover:underline"
+                  >
+                    {c.cveId}
+                  </button>
+                </td>
                 <td className="px-4 py-3 text-navy">{c.component}</td>
-                <td className="px-4 py-3 tabular-nums text-navy">
+                <td className="px-4 py-3 whitespace-nowrap tabular-nums text-navy">
                   {t('findings.beforeAfter.groupLabel', { n: c.scoreGroup })}{' '}
                   <span className="text-gray">
                     {t('findings.beforeAfter.rankRange', { min: sgRange[0], max: sgRange[1] })}
@@ -268,9 +306,6 @@ function TopChangesTable({
                   {wentUp
                     ? t('findings.beforeAfter.topChangesUp', { n: c.delta })
                     : t('findings.beforeAfter.topChangesDown', { n: c.delta })}
-                </td>
-                <td className="max-w-[16rem] px-4 py-3 text-gray">
-                  <span className="line-clamp-2">{c.agentGroupReason}</span>
                 </td>
               </tr>
             )
