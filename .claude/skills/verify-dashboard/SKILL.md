@@ -40,6 +40,7 @@ node drive.mjs <scenario> [--headed]
 | `findings` | features/findings.md | order summary and groups, detail modal kept in the URL across a reload, action plan, folded sections, no agent named, feedback |
 | `finding-closes` | features/findings.md | Feedback takes three verdict buttons and a required Why, a single Close finding in the top bar, close by hand as postponed for 30 days, counted closed at once, Closed tab, reopen from its row |
 | `finding-history` | features/findings.md | the folded prioritization history under the Score (newest first, what changed, an older reason on demand), nothing about moves in the reason, a round that kept its group |
+| `charts` | features/findings.md | the weekly trend from its first week with findings and what its line counts, time to close by risk level with no row for none, risk level legends, Unknown only with findings, the tactics matrix with no filter and no empty column, no "band" on screen |
 | `before-after` | features/findings.md | the most significant movements have no Reason column, a row opens its Finding's detail over the tab, closing it comes back to the tab |
 | `news` | features/news.md | newest digest's groups in order, Ransomware.live credit, earlier digest kept in the URL across a reload, the note when the Editor did not answer, Spanish |
 | `connect` | features/connect-cmdb.md | rejected user error, test connection, connect, still connected after a reload |

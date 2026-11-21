@@ -797,7 +797,7 @@ const scenarios = {
     await expect(history.getByText(/New above it: “Fallos con exploit activo/)).toBeVisible()
     await expect(history.getByText('Moved up from Group 3 to 1')).toBeVisible()
     await expect(history.getByText('Entered the order in Group 3')).toBeVisible()
-    await expect(history.getByText('Band changed: Low → Medium')).toBeVisible()
+    await expect(history.getByText('Risk level changed: Low → Medium')).toBeVisible()
     await expect(history.getByText('Score 19 · By Score alone #17 · In the prioritization #5–#9')).toBeVisible()
     await expect(history.getByText('Ahead of the Score').first()).toBeVisible()
     await shot('history', history)
@@ -815,6 +815,41 @@ const scenarios = {
     await shot('kept-its-group', other.getByText('Looked at again; still in Group 2'))
     const calls = callsTo('GET', '/findings/').filter((c) => c.path.endsWith('/history'))
     check(calls.length >= 2 && calls.every((c) => c.status === 200), `history calls: ${JSON.stringify(calls.map((c) => [c.path, c.status]))}`)
+  },
+
+  // The Findings charts: the weekly trend from its first week with findings and what its line
+  // counts, time to close per risk level with no row for findings without one, legends for the
+  // bars' colours, Unknown only with findings, and the tactics matrix with no filter and no empty
+  // columns. No chart says "band".
+  async charts() {
+    await signIn('customer_admin')
+    await sidebarLink('Findings').click()
+    await tab('Summary').click()
+    const trend = page.locator('section', { has: page.getByRole('heading', { name: 'Weekly trend of findings' }) })
+    await expect(trend.getByText(/the line, those still open when the week ended/)).toBeVisible()
+    await expect(trend.getByText('9/29')).toBeVisible()
+    check(await trend.getByText('9/15').count() === 0, 'the trend shows the empty weeks before the first findings')
+    await expect(page.getByRole('heading', { name: 'Time to close findings by risk level' })).toBeVisible()
+    check(await page.getByText('No risk level').count() === 0, 'time to close shows a row with no risk level')
+    await page.waitForTimeout(1800) // recharts draws its series in over 1.5 s
+    await shot('summary', trend)
+    await tab('Before & After').click()
+    const composition = page.locator('section', { has: page.getByRole('heading', { name: 'Risk level composition per group' }) })
+    await expect(composition.getByRole('list', { name: 'Risk level' })).toBeVisible()
+    await shot('composition', composition)
+    await tab('Where the risk is').click()
+    const heatmap = page.locator('section', { has: page.getByRole('heading', { name: 'Where the risk is' }) })
+    await expect(heatmap.getByText('Unknown', { exact: true })).toBeVisible()
+    const assets = page.locator('section', { has: page.getByRole('heading', { name: 'Assets with most findings' }) })
+    await expect(assets.getByRole('list', { name: 'Risk level' })).toBeVisible()
+    await shot('risk', assets)
+    await tab('Threats').click()
+    const tactics = page.locator('section', { has: page.getByRole('heading', { name: 'Findings per tactic' }) })
+    await expect(tactics.getByText('No findings: Resource Dev., Exfiltration')).toBeVisible()
+    check(await tactics.getByRole('button').count() === 0, 'the tactics matrix still has a filter')
+    await shot('tactics', tactics)
+    const body = await page.locator('main').innerText()
+    check(!/\bband\b/i.test(body), 'a chart still says band')
   },
 
   // Before & After compares the order by Score alone with the prioritization; a row of its most
