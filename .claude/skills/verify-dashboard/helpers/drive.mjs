@@ -817,6 +817,28 @@ const scenarios = {
     check(calls.length >= 2 && calls.every((c) => c.status === 200), `history calls: ${JSON.stringify(calls.map((c) => [c.path, c.status]))}`)
   },
 
+  // Before & After compares the order by Score alone with the prioritization; a row of its most
+  // significant movements opens that Finding's detail over the tab, and closing it comes back.
+  async 'before-after'() {
+    await signIn('customer_admin')
+    await sidebarLink('Findings').click()
+    await tab('Before & After').click()
+    const movements = page.locator('section', { has: page.getByRole('heading', { name: 'Most significant movements' }) })
+    await expect(movements.getByRole('button', { name: 'Open CVE-2024-23897' })).toBeVisible()
+    const headers = await movements.getByRole('columnheader').allTextContents()
+    check(!headers.includes('Reason'), `the movements still have a Reason column: ${headers}`)
+    await shot('movements', movements)
+    await movements.getByRole('row').filter({ has: page.getByRole('button', { name: 'Open CVE-2024-23897' }) }).click({ position: { x: 300, y: 10 } })
+    const detail = page.getByRole('dialog', { name: 'CVE-2024-23897' })
+    await expect(detail.getByRole('button', { name: /^Prioritization history/ })).toBeVisible()
+    check(new URL(page.url()).searchParams.get('tab') === 'before-after', 'the detail left the Before & After tab')
+    await shot('detail', detail)
+    await detail.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(detail).toBeHidden()
+    check(await tab('Before & After').getAttribute('aria-selected') === 'true', 'closing the detail left the Before & After tab')
+    check(!new URL(page.url()).searchParams.has('finding'), 'the closed detail is still in the URL')
+  },
+
   // A viewer closes a Finding by hand as postponed from its detail, sees it counted as closed
   // at once, finds it in the Closed tab and reopens it from there.
   async 'finding-closes'() {
