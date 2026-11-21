@@ -780,6 +780,41 @@ const scenarios = {
     check(feedback[0]?.body?.verdict === 'should_be_earlier', `feedback request mismatch: ${JSON.stringify(feedback[0]?.body)}`)
   },
 
+  // The detail's folded history, right under the Score, lists every change of the Finding's
+  // place, newest first, and its reason says nothing of the moves.
+  async 'finding-history'() {
+    await signIn('customer_admin')
+    await sidebarLink('Findings').click()
+    await expect(page.getByText('20 findings, 4 groups')).toBeVisible()
+    await page.getByRole('button', { name: 'Open CVE-2024-23897' }).click()
+    const detail = page.getByRole('dialog', { name: 'CVE-2024-23897' })
+    const reason = detail.getByRole('region', { name: 'Why it is here' })
+    await expect(reason).toBeVisible()
+    check(!/Moved|history/.test(await reason.innerText()), 'the reason tells the moves')
+    await detail.getByRole('button', { name: /^Prioritization history/ }).click()
+    const history = detail.getByRole('region', { name: /^Prioritization history/ })
+    await expect(history.getByText('Moved down from Group 1 to 2')).toBeVisible()
+    await expect(history.getByText(/New above it: “Fallos con exploit activo/)).toBeVisible()
+    await expect(history.getByText('Moved up from Group 3 to 1')).toBeVisible()
+    await expect(history.getByText('Entered the order in Group 3')).toBeVisible()
+    await expect(history.getByText('Band changed: Low → Medium')).toBeVisible()
+    await shot('history', history)
+    await history.getByRole('button', { name: 'Why it was placed there' }).first().click()
+    await expect(history.getByText(/sube al primer grupo/)).toBeVisible()
+    await shot('older-reason', history.getByText(/sube al primer grupo/))
+    const text = await detail.innerText()
+    check(!/Luna|Prioritizer|Cartógrafo|Editor|Analista|agent|\bAI\b|inferred|Scoring Model/i.test(text), 'the detail names an agent, the AI, an inference or the Scoring Model')
+    // A round that placed it again in the same group still shows, with what led to it.
+    await detail.getByRole('button', { name: 'Close', exact: true }).click()
+    await page.getByRole('button', { name: 'Open CVE-2025-1094' }).click()
+    const other = page.getByRole('dialog', { name: 'CVE-2025-1094' })
+    await other.getByRole('button', { name: /^Prioritization history/ }).click()
+    await expect(other.getByText('Looked at again; still in Group 2')).toBeVisible()
+    await shot('kept-its-group', other.getByText('Looked at again; still in Group 2'))
+    const calls = callsTo('GET', '/findings/').filter((c) => c.path.endsWith('/history'))
+    check(calls.length >= 2 && calls.every((c) => c.status === 200), `history calls: ${JSON.stringify(calls.map((c) => [c.path, c.status]))}`)
+  },
+
   // A viewer closes a Finding by hand as postponed from its detail, sees it counted as closed
   // at once, finds it in the Closed tab and reopens it from there.
   async 'finding-closes'() {
