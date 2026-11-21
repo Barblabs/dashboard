@@ -3,6 +3,7 @@ import { useClosedFindingsQuery, type ClosedFinding } from '../../api/findingClo
 import type { Finding } from '../../api/prioritizations'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
+import { CheckIcon, RestoreIcon } from '../../components/ui/icons'
 import { useDateFormat } from '../../i18n/format'
 import type { FindingRef } from './FindingCloseDialogs'
 import { useReopensText } from './reopens'
@@ -42,13 +43,15 @@ export function CloseAction({ finding, onCloseFinding, onReopenFinding }: Action
   switch (status.kind) {
     case 'open':
       return (
-        <Button variant="secondary" size="sm" onClick={() => onCloseFinding(ref)}>
+        <Button size="sm" className="inline-flex items-center gap-2" onClick={() => onCloseFinding(ref)}>
+          <CheckIcon size={13} />
           {t('findings.close.action')}
         </Button>
       )
     case 'byHand':
       return (
-        <Button variant="secondary" size="sm" onClick={() => onReopenFinding(ref)}>
+        <Button size="sm" className="inline-flex items-center gap-2" onClick={() => onReopenFinding(ref)}>
+          <RestoreIcon size={14} />
           {t('findings.reopen.action')}
         </Button>
       )
@@ -65,7 +68,7 @@ export function CloseNote({ finding }: { finding: Finding }) {
   const status = useHandClose(finding)
 
   if (status.kind === 'onItsOwn') {
-    return <p className="font-body text-[0.8125rem] leading-[1.4] text-gray">{t('findings.closedByHand.onItsOwn')}</p>
+    return <p className="font-body text-[0.875rem] leading-[1.4] text-gray">{t('findings.closedByHand.onItsOwn')}</p>
   }
   if (status.kind !== 'byHand') return null
   const { close } = status

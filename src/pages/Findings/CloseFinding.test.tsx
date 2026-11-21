@@ -47,10 +47,11 @@ async function openFinding(cve = CVE, user = renderApp(`/findings`)) {
 }
 
 describe('Closing a finding by hand', () => {
-  it('is offered from Feedback, for what does not apply or is already fixed', async () => {
+  it('is offered once, in the top bar, apart from the Feedback', async () => {
     const { user, dialog } = await openFinding()
 
-    await user.click(within(dialog).getByRole('button', { name: 'Close the finding' }))
+    expect(within(dialog).getAllByRole('button', { name: /close finding|close the finding/i })).toHaveLength(1)
+    await user.click(within(dialog).getByRole('button', { name: 'Close finding' }))
 
     expect(await screen.findByRole('dialog', { name: `Close ${CVE}` })).toBeInTheDocument()
   })
@@ -174,6 +175,5 @@ describe('Reopening a finding', () => {
     ).toBeInTheDocument()
     expect(within(dialog).queryByRole('button', { name: 'Reopen' })).not.toBeInTheDocument()
     expect(within(dialog).queryByRole('button', { name: 'Close finding' })).not.toBeInTheDocument()
-    expect(within(dialog).queryByRole('button', { name: 'Close the finding' })).not.toBeInTheDocument()
   })
 })
