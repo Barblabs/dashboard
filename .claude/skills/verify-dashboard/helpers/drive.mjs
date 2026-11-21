@@ -798,6 +798,8 @@ const scenarios = {
     await expect(history.getByText('Moved up from Group 3 to 1')).toBeVisible()
     await expect(history.getByText('Entered the order in Group 3')).toBeVisible()
     await expect(history.getByText('Band changed: Low → Medium')).toBeVisible()
+    await expect(history.getByText('Score 19 · By Score alone #17 · In the prioritization #5–#9')).toBeVisible()
+    await expect(history.getByText('Ahead of the Score').first()).toBeVisible()
     await shot('history', history)
     await history.getByRole('button', { name: 'Why it was placed there' }).first().click()
     await expect(history.getByText(/sube al primer grupo/)).toBeVisible()
