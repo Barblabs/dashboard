@@ -1,5 +1,5 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { http } from 'msw'
+import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Finding } from '../../api/prioritizations'
 import { failure } from '../../mocks/handlers/responses'
@@ -693,6 +693,26 @@ describe('Findings', () => {
   })
 
   describe('risk tab', () => {
+    it('shows Unknown, and what it means, only when some findings sit on an unclassified asset', async () => {
+      server.use(
+        http.get(apiUrl('/findings/breakdown'), () =>
+          HttpResponse.json({
+            by: 'exposure',
+            groups: [
+              { value: 'internet_facing', name: null, critical: 1, high: 0, medium: 0, low: 0, unbanded: 0 },
+              { value: 'unknown', name: null, critical: 0, high: 0, medium: 0, low: 0, unbanded: 0 },
+            ],
+          }),
+        ),
+      )
+      await openRiskTab()
+      const heatmap = (await screen.findByRole('heading', { name: 'Where the risk is' })).closest('section')!
+
+      expect(await within(heatmap).findByText('Internet')).toBeInTheDocument()
+      expect(within(heatmap).queryByText('Unknown')).not.toBeInTheDocument()
+      expect(within(heatmap).queryByText(/"Unknown" are assets/)).not.toBeInTheDocument()
+    })
+
     it('tells what each colour of the asset bars means', async () => {
       await openRiskTab()
       const assets = (await screen.findByRole('heading', { name: 'Assets with most findings' })).closest('section')!
@@ -700,6 +720,7 @@ describe('Findings', () => {
       const legend = await within(assets).findByRole('list', { name: 'Risk level' })
       expect(within(legend).getByText('Critical')).toBeInTheDocument()
     })
+
     it('clicking a heatmap cell navigates to the prioritized list with band and exposure filters', async () => {
       const user = await openRiskTab()
       // Critical × internet_facing cell (count=5 from mock)
