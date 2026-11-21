@@ -565,7 +565,9 @@ describe('Findings', () => {
       expect(await screen.findByText('3.5 days')).toBeInTheDocument() // critical
       expect(screen.getByText('7.2 days')).toBeInTheDocument()
       expect(screen.getByText('14.1 days')).toBeInTheDocument()
-      expect(screen.getByText('45.0 days')).toBeInTheDocument()
+      // A Finding with no risk level has no row: it has nothing to compare its time with.
+      expect(screen.queryByText('45.0 days')).not.toBeInTheDocument()
+      expect(screen.queryByText('No risk level')).not.toBeInTheDocument()
     })
 
     it('says what the weekly trend’s bars and line count', async () => {

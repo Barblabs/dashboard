@@ -14,6 +14,8 @@ import type { CloseTimeBand, WeeklyTrendPoint } from '../../api/findingsTrend'
 import { useTimeToCloseQuery, useWeeklyTrendQuery } from '../../api/findingsTrend'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
+import { isOneOf } from '../../api/schemas'
+import { BAND_COLORS, BANDS } from './bands'
 import { fromFirstRecord } from './weeks'
 
 const CHART_STYLE = {
@@ -136,26 +138,13 @@ function TrendChart({ weeks }: { weeks: WeeklyTrendPoint[] }) {
   )
 }
 
-const BAND_DOT_COLORS: Record<string, string> = {
-  critical: 'var(--color-critical)',
-  high: 'var(--color-high)',
-  medium: 'var(--color-medium)',
-  low: 'var(--color-low)',
-  unbanded: 'var(--color-gray)',
-}
-
 function TimeToCloseChart({ bands }: { bands: CloseTimeBand[] }) {
   const { t } = useTranslation()
 
-  const bandLabels: Record<string, string> = {
-    critical: t('findings.filter.bandValues.critical'),
-    high: t('findings.filter.bandValues.high'),
-    medium: t('findings.filter.bandValues.medium'),
-    low: t('findings.filter.bandValues.low'),
-    unbanded: t('findings.filter.bandValues.unbanded'),
-  }
+  // A Finding with no risk level has nothing to compare its time with.
+  const rows = bands.filter((b) => b.band !== 'unbanded')
 
-  if (bands.length === 0) {
+  if (rows.length === 0) {
     return (
       <p className="py-8 text-center font-body text-[0.875rem] text-gray">
         {t('findings.resumen.ttcNoData')}
@@ -163,19 +152,20 @@ function TimeToCloseChart({ bands }: { bands: CloseTimeBand[] }) {
     )
   }
 
-  const maxDays = Math.max(...bands.map((b) => b.median_days ?? 0), 1)
+  const maxDays = Math.max(...rows.map((b) => b.median_days ?? 0), 1)
   const unit = t('findings.resumen.ttcDays')
 
   return (
     <ul className="flex flex-col gap-4 p-6">
-      {bands.map((row) => {
-        const label = bandLabels[row.band] ?? row.band
+      {rows.map((row) => {
+        const band = isOneOf(BANDS, row.band) ? row.band : null
+        const label = band ? t(`findings.filter.bandValues.${band}`) : row.band
         return (
           <li key={row.band} className="flex items-center gap-3 font-body text-[0.875rem]">
             <span className="flex w-24 shrink-0 items-center justify-end gap-1.5 text-right text-gray">
               <span
                 className="inline-block h-2.5 w-2.5 shrink-0 rounded-sm"
-                style={{ backgroundColor: BAND_DOT_COLORS[row.band] ?? 'var(--color-gray)' }}
+                style={{ backgroundColor: band ? BAND_COLORS[band] : 'var(--color-gray)' }}
               />
               {label}
             </span>
