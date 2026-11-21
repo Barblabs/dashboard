@@ -618,7 +618,7 @@ describe('Findings', () => {
     it('filters by band and hides empty groups', async () => {
       await renderFindings()
 
-      const bandSelect = screen.getByRole('combobox', { name: 'Band' })
+      const bandSelect = screen.getByRole('combobox', { name: 'Risk level' })
       fireEvent.change(bandSelect, { target: { value: 'critical' } })
 
       // Only the first group holds a Critical finding.
@@ -635,7 +635,7 @@ describe('Findings', () => {
     it('shows no-results message when no findings match the filter', async () => {
       await renderFindings()
 
-      fireEvent.change(screen.getByRole('combobox', { name: 'Band' }), {
+      fireEvent.change(screen.getByRole('combobox', { name: 'Risk level' }), {
         target: { value: 'unbanded' },
       })
 
@@ -646,11 +646,11 @@ describe('Findings', () => {
       const user = renderApp('/findings?band=critical')
       await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
 
-      expect(screen.getByText('Band: Critical')).toBeInTheDocument()
+      expect(screen.getByText('Risk level: Critical')).toBeInTheDocument()
 
       await user.click(screen.getByRole('button', { name: 'Remove filter' }))
 
-      await waitFor(() => expect(screen.queryByText('Band: Critical')).not.toBeInTheDocument())
+      await waitFor(() => expect(screen.queryByText('Risk level: Critical')).not.toBeInTheDocument())
     })
 
     it('removes the from=chart label when all chips are cleared', async () => {
@@ -661,7 +661,7 @@ describe('Findings', () => {
 
       await waitFor(() => {
         expect(screen.queryByText('From the chart:')).not.toBeInTheDocument()
-        expect(screen.queryByText('Band: Critical')).not.toBeInTheDocument()
+        expect(screen.queryByText('Risk level: Critical')).not.toBeInTheDocument()
       })
     })
 
@@ -671,13 +671,13 @@ describe('Findings', () => {
 
       // Both the chip label ("Band: Critical") and the KEV chip are shown;
       // "KEV only" appears twice: once in the checkbox label, once in the chip.
-      expect(screen.getByText('Band: Critical')).toBeInTheDocument()
+      expect(screen.getByText('Risk level: Critical')).toBeInTheDocument()
       expect(screen.getAllByText('KEV only')).toHaveLength(2)
 
       await user.click(screen.getByRole('button', { name: 'Clear all' }))
 
       await waitFor(() => {
-        expect(screen.queryByText('Band: Critical')).not.toBeInTheDocument()
+        expect(screen.queryByText('Risk level: Critical')).not.toBeInTheDocument()
         // After clearing, only the checkbox label "KEV only" remains (no chip).
         expect(screen.getAllByText('KEV only')).toHaveLength(1)
       })
@@ -690,7 +690,7 @@ describe('Findings', () => {
       // Critical × internet_facing cell (count=5 from mock)
       const cell = await screen.findByLabelText(/5 findings: Critical on Internet/)
       await user.click(cell)
-      expect(await screen.findByText('Band: Critical')).toBeInTheDocument()
+      expect(await screen.findByText('Risk level: Critical')).toBeInTheDocument()
       expect(screen.getByText('Exposure: Internet-facing')).toBeInTheDocument()
       expect(screen.getByText('From the chart:')).toBeInTheDocument()
     })
@@ -709,7 +709,7 @@ describe('Findings', () => {
       // High × Producción cell (count=6 from mock)
       const cell = await screen.findByLabelText(/6 findings: High on Producción/)
       await user.click(cell)
-      expect(await screen.findByText('Band: High')).toBeInTheDocument()
+      expect(await screen.findByText('Risk level: High')).toBeInTheDocument()
       expect(screen.getByText('Area: Producción')).toBeInTheDocument()
       expect(screen.getByText('From the chart:')).toBeInTheDocument()
     })

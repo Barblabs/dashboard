@@ -84,7 +84,7 @@ describe('A finding’s prioritization history', () => {
 
     const climb = within(entries[1])
     expect(climb.getByText("Entered CISA's KEV catalog (actively exploited)")).toBeInTheDocument()
-    expect(climb.getByText('Band changed: Low → Medium')).toBeInTheDocument()
+    expect(climb.getByText('Risk level changed: Low → Medium')).toBeInTheDocument()
     expect(climb.getByText('The Score went from 15 to 19')).toBeInTheDocument()
     expect(
       climb.getByText('A user asked to attend it earlier: “ci-01 guarda los secretos de despliegue a producción.”'),
