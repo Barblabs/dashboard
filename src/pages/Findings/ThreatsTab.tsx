@@ -102,7 +102,6 @@ function CoverageCard({ labeled, open }: { labeled: number; open: number }) {
     <section className="rounded-xl border border-border-panel bg-white p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-title text-[1rem] text-navy">{t('findings.threats.coverageTitle')}</h2>
-        <span className="font-body text-[0.75rem] text-gray">{t('findings.threats.coverageInferred')}</span>
       </div>
       <p className="mb-3 font-body text-[0.875rem] text-navy">
         {t('findings.threats.coverageLabel', { labeled, open })}

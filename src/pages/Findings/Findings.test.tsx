@@ -640,7 +640,7 @@ describe('Findings', () => {
       await openBeforeAfterTab()
 
       // Diagonal cell SG1→G1 should contain 3
-      const cell = await screen.findByLabelText('3 findings from score group 1 in agent group 1')
+      const cell = await screen.findByLabelText('3 findings from score group 1 in priority group 1')
       expect(cell).toBeInTheDocument()
     })
 

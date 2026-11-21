@@ -304,7 +304,7 @@ describe('Business context', () => {
     await anyFile.upload(within(dialog).getByLabelText('Files'), new File(['x'], 'logo.png', { type: 'image/png' }))
     await user.click(within(dialog).getByRole('button', { name: 'Generate draft' }))
 
-    expect(within(dialog).getByRole('alert')).toHaveTextContent('logo.png: the agent reads PDF, Word (.docx), TXT, Markdown, CSV and JSON files.')
+    expect(within(dialog).getByRole('alert')).toHaveTextContent('logo.png: we read PDF, Word (.docx), TXT, Markdown, CSV and JSON files.')
     expect(drafts).toBe(0)
   })
 
@@ -331,7 +331,7 @@ describe('Business context', () => {
     await user.type(within(dialog).getByLabelText('Or paste text'), 'ACME')
     await user.click(within(dialog).getByRole('button', { name: 'Generate draft' }))
 
-    expect(await within(dialog).findByRole('alert')).toHaveTextContent('The agent is unavailable right now.')
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent("Documents can't be read right now.")
   })
 
   it('warns when someone else saved first and reloads the newest version', async () => {
