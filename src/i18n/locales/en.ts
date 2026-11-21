@@ -528,11 +528,7 @@ export const en = {
       network: 'Could not reach the server to load the threat matrix.',
       coverageTitle: 'Threat coverage',
       coverageLabel: '{{labeled}} of {{open}} open findings have an ATT&CK label',
-      roleLabel: 'Role',
-      roleAll: 'All',
-      roleExploitation: 'Exploitation',
-      rolePrimaryImpact: 'Primary impact',
-      roleSecondaryImpact: 'Secondary impact',
+      emptyTactics: 'No findings: {{tactics}}',
       heatmapTitle: 'Findings per tactic',
       tacticLabel: {
         reconnaissance: 'Reconnaissance',

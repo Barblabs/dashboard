@@ -817,11 +817,17 @@ describe('Findings', () => {
       expect(await screen.findByText('22 of 35 open findings have an ATT&CK label')).toBeInTheDocument()
     })
 
-    it('shows all 14 ATT&CK tactics in the heatmap', async () => {
+    it('shows every role together, a column only for the tactics some finding leads to, and names the rest', async () => {
       await openThreatsTab()
-      expect(await screen.findByText('Initial Access')).toBeInTheDocument()
-      expect(screen.getByText('Impact')).toBeInTheDocument()
-      expect(screen.getByText('Reconnaissance')).toBeInTheDocument()
+      const matrix = (await screen.findByRole('heading', { name: 'Findings per tactic' })).closest('section')!
+
+      expect(within(matrix).queryByRole('group')).not.toBeInTheDocument()
+      const columns = within(matrix).getAllByRole('columnheader').map((h) => h.textContent)
+      expect(columns).toContain('Initial Access')
+      expect(columns).toContain('Impact')
+      expect(columns).not.toContain('Exfiltration')
+      expect(columns).not.toContain('Resource Dev.')
+      expect(within(matrix).getByText('No findings: Resource Dev., Exfiltration')).toBeInTheDocument()
     })
 
     it('shows the top techniques table with technique IDs', async () => {

@@ -3,7 +3,8 @@ import { apiUrl } from '../url'
 
 const TACTICS_BASE = [
   { tactic: 'reconnaissance', critical: 0, high: 2, medium: 3, low: 1, unbanded: 0 },
-  { tactic: 'resource-development', critical: 0, high: 0, medium: 1, low: 0, unbanded: 0 },
+  // No Finding leads to these two, so the matrix leaves them out and names them below.
+  { tactic: 'resource-development', critical: 0, high: 0, medium: 0, low: 0, unbanded: 0 },
   { tactic: 'initial-access', critical: 2, high: 5, medium: 4, low: 2, unbanded: 0 },
   { tactic: 'execution', critical: 1, high: 3, medium: 2, low: 1, unbanded: 0 },
   { tactic: 'persistence', critical: 0, high: 2, medium: 3, low: 2, unbanded: 1 },
@@ -14,7 +15,7 @@ const TACTICS_BASE = [
   { tactic: 'lateral-movement', critical: 1, high: 2, medium: 1, low: 0, unbanded: 0 },
   { tactic: 'collection', critical: 0, high: 1, medium: 2, low: 1, unbanded: 0 },
   { tactic: 'command-and-control', critical: 0, high: 2, medium: 3, low: 2, unbanded: 0 },
-  { tactic: 'exfiltration', critical: 1, high: 1, medium: 2, low: 1, unbanded: 0 },
+  { tactic: 'exfiltration', critical: 0, high: 0, medium: 0, low: 0, unbanded: 0 },
   { tactic: 'impact', critical: 4, high: 6, medium: 3, low: 1, unbanded: 0 },
 ]
 
@@ -72,7 +73,7 @@ const TECHNIQUES = [
     attack_id: 'T1021',
     name: 'Remote Services',
     findings: 2,
-    roles: ['lateral-movement'],
+    roles: ['secondary_impact'],
     tactics: ['lateral-movement'],
   },
   {

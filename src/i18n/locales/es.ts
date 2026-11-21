@@ -530,11 +530,7 @@ export const es: Translations = {
       network: 'No se pudo conectar al servidor para cargar la matriz.',
       coverageTitle: 'Cobertura de amenazas',
       coverageLabel: '{{labeled}} de {{open}} hallazgos abiertos tienen etiqueta ATT&CK',
-      roleLabel: 'Rol',
-      roleAll: 'Todos',
-      roleExploitation: 'Explotación',
-      rolePrimaryImpact: 'Impacto principal',
-      roleSecondaryImpact: 'Impacto secundario',
+      emptyTactics: 'Sin hallazgos: {{tactics}}',
       heatmapTitle: 'Hallazgos por táctica',
       tacticLabel: {
         reconnaissance: 'Reconocimiento',
