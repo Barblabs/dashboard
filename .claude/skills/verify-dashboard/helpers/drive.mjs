@@ -428,7 +428,7 @@ const scenarios = {
       check(fullScreen === (device === 'phone'), `${device}: detail box ${JSON.stringify(box)} vs viewport ${JSON.stringify(viewport)}`)
       check((radius === '0px') === (device === 'phone'), `${device}: detail corner radius ${radius}`)
       check(why && why.y + why.height <= viewport.height, `${device}: "Why it is here" starts below the first screen (${JSON.stringify(why)})`)
-      await detail.getByRole('button', { name: 'Close' }).first().click()
+      await detail.getByRole('button', { name: 'Close', exact: true }).click()
       await expect(detail).toBeHidden()
 
       await (device === 'phone' ? page.getByRole('button', { name: 'Menu', includeHidden: true }).click().then(() => page.getByRole('dialog').getByRole('button', { name: 'Sign out' }).click()) : signOut())
@@ -757,11 +757,17 @@ const scenarios = {
     // The open Finding lives in the URL, so a reload lands on it.
     await page.reload()
     await expect(detail.getByRole('heading', { name: 'Action plan' })).toBeVisible()
-    await detail.getByRole('button', { name: 'Ask Luna for an action plan' }).click()
-    await expect(detail.getByText('Luna is writing the plan')).toBeVisible()
-    await expect(detail.getByText(/^Written by Luna/)).toBeVisible(15000)
-    await shot('plan', detail.getByText(/^Written by Luna/))
-    await detail.getByLabel('What do you say?').selectOption({ label: 'Should be attended earlier' })
+    await detail.getByRole('button', { name: 'Get an action plan' }).click()
+    await expect(detail.getByText('Writing the plan')).toBeVisible()
+    await expect(detail.getByText(/^Written /)).toBeVisible(15000)
+    await shot('plan', detail.getByText(/^Written /))
+    // The technical sections start folded and unfold on demand.
+    await detail.getByRole('button', { name: /^Vulnerability/ }).click()
+    await expect(detail.getByText('CVSS 3.1 vector')).toBeVisible()
+    await shot('vulnerability', detail.getByRole('button', { name: /^Vulnerability/ }))
+    const text = await detail.innerText()
+    check(!/Luna|Prioritizer|Cartógrafo|Editor|Analista|agent|inferred|Scoring Model/i.test(text), 'the detail names an agent, an inference or the Scoring Model')
+    await detail.getByRole('button', { name: 'Should be attended earlier' }).click()
     await detail.getByRole('textbox', { name: 'Why', exact: true }).fill('Customer-facing and exploited in the wild.')
     await detail.getByRole('button', { name: 'Send' }).click()
     await expect(detail.getByText('Saved.')).toBeVisible()
@@ -774,7 +780,7 @@ const scenarios = {
     check(feedback[0]?.body?.verdict === 'should_be_earlier', `feedback request mismatch: ${JSON.stringify(feedback[0]?.body)}`)
   },
 
-  // A viewer closes a Finding by hand as postponed from its Feedback, sees it counted as closed
+  // A viewer closes a Finding by hand as postponed from its detail, sees it counted as closed
   // at once, finds it in the Closed tab and reopens it from there.
   async 'finding-closes'() {
     await signIn('viewer')
@@ -783,14 +789,18 @@ const scenarios = {
     await expect(page.getByText('23', { exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Open CVE-2024-6387' }).click()
     const detail = page.getByRole('dialog', { name: 'CVE-2024-6387' })
-    await expect(detail.getByRole('heading', { name: 'Feedback' })).toBeVisible()
+    await expect(detail.getByRole('heading', { name: 'Is it in the right place?' })).toBeVisible()
 
-    const verdicts = await detail.getByLabel('What do you say?').locator('option').allTextContents()
-    check(JSON.stringify(verdicts) === JSON.stringify(['It applies', 'Should be attended earlier', 'Should be attended later']), `verdicts: ${verdicts}`)
+    const verdicts = await detail.getByRole('group', { name: 'Is it in the right place?' }).getByRole('button').allTextContents()
+    check(JSON.stringify(verdicts.map((v) => v.slice(1))) === JSON.stringify(['It applies', 'Should be attended earlier', 'Should be attended later']), `verdicts: ${verdicts}`)
+    check(await detail.getByRole('textbox', { name: 'Why' }).count() === 0, 'the Why shows before a verdict is chosen')
+    await detail.getByRole('button', { name: 'It applies' }).click()
     check(await detail.getByRole('button', { name: 'Send' }).isDisabled(), 'Send is enabled with no why')
-    await shot('feedback-form', detail.getByRole('button', { name: 'Close the finding' }))
+    await shot('feedback-form', detail.getByRole('button', { name: 'Send' }))
 
-    await detail.getByRole('button', { name: 'Close the finding' }).click()
+    // Close finding is offered once, in the top bar.
+    check(await detail.getByRole('button', { name: /close finding|close the finding/i }).count() === 1, 'Close finding is offered more than once')
+    await detail.getByRole('button', { name: 'Close finding', exact: true }).click()
     const close = page.getByRole('dialog', { name: 'Close CVE-2024-6387' })
     await expect(close).toBeVisible()
     await close.getByRole('radio', { name: 'Postponed' }).click()
@@ -848,7 +858,7 @@ const scenarios = {
     const credit = page.getByRole('link', { name: /^Source: Ransomware\.live/ })
     check(await credit.count() === 2, `expected 2 Ransomware.live credits, got ${await credit.count()}`)
     await page.getByLabel('Digest').selectOption({ index: 1 })
-    await expect(page.getByText("The Editor didn't answer")).toBeVisible()
+    await expect(page.getByText("The summary couldn't be written")).toBeVisible()
     check(new URL(page.url()).searchParams.has('digest'), 'the open digest is not in the URL')
     await shot('older-without-editor')
     // The open digest lives in the URL, so a reload lands on it.

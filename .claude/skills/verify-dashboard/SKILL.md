@@ -37,8 +37,8 @@ node drive.mjs <scenario> [--headed]
 | Scenario | Feature file | What it proves |
 |---|---|---|
 | `navigation` | features/navigation.md, features/sign-in-and-roles.md | login guard and return to the asked page, per-role menu and redirects, placeholder, 403, 404, sign out |
-| `findings` | features/findings.md | order summary and groups, detail modal kept in the URL across a reload, Luna action plan, feedback |
-| `finding-closes` | features/findings.md | Feedback takes three verdicts and a required Why, close by hand as postponed for 30 days, counted closed at once, Closed tab, reopen from its row |
+| `findings` | features/findings.md | order summary and groups, detail modal kept in the URL across a reload, action plan, folded sections, no agent named, feedback |
+| `finding-closes` | features/findings.md | Feedback takes three verdict buttons and a required Why, a single Close finding in the top bar, close by hand as postponed for 30 days, counted closed at once, Closed tab, reopen from its row |
 | `news` | features/news.md | newest digest's groups in order, Ransomware.live credit, earlier digest kept in the URL across a reload, the note when the Editor did not answer, Spanish |
 | `connect` | features/connect-cmdb.md | rejected user error, test connection, connect, still connected after a reload |
 | `sync-edit-disconnect` | features/manage-connection.md | sync, edit dialog, disconnect confirm |
