@@ -1,5 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query'
 import type { Asset } from './assets'
+import { invalidateFindingsStats } from './findingsSummary'
 import { invalidateInventory, showAssetInInventory } from './inventory'
 import { invalidatePrioritizations } from './prioritizations'
 import { invalidateTriage, showAssetInTriage } from './triage'
@@ -19,10 +20,11 @@ export function declarationSaved(queryClient: QueryClient, asset: Asset) {
 /**
  * Refetches the Asset lists after any outcome, without holding the mutation: a failure may
  * follow a change made elsewhere. Every Declaration rescores the Asset's open Findings (ADR 0032),
- * so they are refetched too.
+ * so they are refetched too, with the counts and charts over them.
  */
 export function declarationSettled(queryClient: QueryClient) {
   invalidateInventory(queryClient)
   invalidateTriage(queryClient)
   invalidatePrioritizations(queryClient)
+  invalidateFindingsStats(queryClient)
 }

@@ -1,11 +1,126 @@
 import { delay, http, HttpResponse } from 'msw'
+import { z, type ZodType } from 'zod'
+import { CLOSE_REASONS, closesUntil, type ClosedFinding } from '../../api/findingCloses'
+import type { Finding, Prioritization } from '../../api/prioritizations'
+import type { Known, Schemas } from '../../api/schemas'
+import { assetsStore } from '../assets-store'
+import { closedFindingsStore } from '../closed-findings-store'
+import { prioritizationsStore } from '../prioritizations-store'
 import { apiUrl } from '../url'
+import { mockCaller } from './auth'
+import { failure, parsedBody } from './responses'
+
+const closeBody = z.object({
+  reason: z.enum(CLOSE_REASONS),
+  note: z.string(),
+  reopen_at: z.iso.datetime({ offset: true }).optional(),
+}) satisfies ZodType<Known<Schemas['CloseRequestBody']>>
+
+/** barbackend's checks after the body, in its order (internal/findings/manual.go). */
+function invalidClose({ reason, note, reopen_at }: z.infer<typeof closeBody>): boolean {
+  const why = note.trim()
+  if (why === '' || why.length > 2000) return true
+  if (closesUntil(reason) !== (reopen_at !== undefined)) return true
+  return reopen_at !== undefined && new Date(reopen_at).getTime() <= Date.now()
+}
+
+/** A Platform Admin sees no Customer's Findings. */
+function refusedCaller(): Response | null {
+  return mockCaller().role === 'platform_admin' ? failure(403, 'forbidden', 'a platform admin acts for no customer') : null
+}
+
+/** The Finding as the newest Prioritization that placed it has it. */
+function findFinding(id: string): Finding | undefined {
+  for (const p of prioritizationsStore.load()) {
+    const finding = p.findings.find((f) => f.finding_id === id)
+    if (finding) return finding
+  }
+  return undefined
+}
+
+/** Applies `change` to the Finding in every Prioritization that placed it. */
+function saveFinding(id: string, change: (finding: Finding) => Finding) {
+  prioritizationsStore.save(
+    prioritizationsStore.load().map(
+      (p): Prioritization => ({ ...p, findings: p.findings.map((f) => (f.finding_id === id ? change(f) : f)) }),
+    ),
+  )
+}
+
+function closedByHand(finding: Finding, close: z.infer<typeof closeBody>): ClosedFinding {
+  const base = {
+    id: finding.finding_id,
+    cve_id: finding.cve_id,
+    asset_id: assetsStore.load().find((a) => a.name === finding.asset_name)?.id ?? 0,
+    asset_name: finding.asset_name,
+    vendor: '',
+    product: '',
+    component_name: finding.component,
+    component_version: finding.version,
+    note: close.note.trim(),
+    closed_at: new Date().toISOString(),
+    closed_by: mockCaller().email,
+  }
+  const { reason, reopen_at } = close
+  if (!closesUntil(reason)) return { ...base, reason, reopen_at: null }
+  // invalidClose already turned away an until reason without its day.
+  return { ...base, reason, reopen_at: new Date(reopen_at ?? Date.now()).toISOString() }
+}
 
 export const findingsHandlers = [
+  http.post(apiUrl('/findings/:id/close'), async ({ params, request }) => {
+    const body = await parsedBody(request, closeBody)
+    if (body instanceof Response) return body
+    const refused = refusedCaller()
+    if (refused) return refused
+    if (invalidClose(body)) return failure(400, 'invalid_request', 'invalid close')
+    const id = String(params.id)
+    const finding = findFinding(id)
+    if (!finding) return failure(404, 'finding_not_found', 'finding not found')
+    if (finding.closed_at !== null) return failure(409, 'finding_closed', 'finding is already closed')
+    const closed = closedByHand(finding, body)
+    closedFindingsStore.save([closed, ...closedFindingsStore.load()])
+    saveFinding(id, (f) => ({ ...f, closed_at: closed.closed_at, current: null }))
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  http.post(apiUrl('/findings/:id/reopen'), ({ params }) => {
+    const refused = refusedCaller()
+    if (refused) return refused
+    const id = String(params.id)
+    const finding = findFinding(id)
+    if (!finding) return failure(404, 'finding_not_found', 'finding not found')
+    const closed = closedFindingsStore.load()
+    if (finding.closed_at === null || !closed.some((c) => c.id === id)) {
+      return failure(409, 'finding_not_closed_by_hand', 'finding is not closed by hand')
+    }
+    closedFindingsStore.save(closed.filter((c) => c.id !== id))
+    // Until the Prioritizer places it again, it stands as it was placed.
+    saveFinding(id, (f) => {
+      const { criticality, exposure, information_classification, lifecycle_stage } = f.details.asset
+      return {
+        ...f,
+        closed_at: null,
+        current: {
+          asset: { criticality, exposure, information_classification, lifecycle_stage },
+          score_details: f.details.score_details,
+        },
+      }
+    })
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  http.get(apiUrl('/findings/closed'), () => {
+    const refused = refusedCaller()
+    if (refused) return refused
+    return HttpResponse.json({ findings: closedFindingsStore.load() })
+  }),
+
   http.get(apiUrl('/findings/summary'), async () => {
     await delay()
     return HttpResponse.json({
-      open: 23,
+      // A close by hand counts at once; the rest of the counts are fixed.
+      open: 23 - closedFindingsStore.load().length,
       critical: 5,
       high: 8,
       medium: 7,

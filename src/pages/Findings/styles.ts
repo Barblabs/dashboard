@@ -13,7 +13,7 @@ export const WRITTEN = 'font-body text-[0.875rem] leading-[1.5] whitespace-pre-l
 export const READING = 'max-w-[66ch] font-body leading-[1.6] whitespace-pre-line text-navy'
 
 /** Secondary text beside a value: dates, sources, explanations. No colour, so callers can vary it. */
-export const META = 'font-body text-[0.8125rem]'
+export const META = 'font-body text-[0.875rem]'
 
 /** A section's heading in a Finding's detail, set apart from the field labels inside it. */
 export const HEADING = 'font-title text-[1.125rem] leading-tight text-navy'

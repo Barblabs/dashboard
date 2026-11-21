@@ -79,7 +79,7 @@ function PlanView({ plan }: { plan: ActionPlan }) {
         ))}
       </ol>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <Callout label={t('findings.detail.plan.fixedVersion')}>
           {output.fixed_version ? (
             <span className="font-mono text-[1rem] font-semibold text-navy">{output.fixed_version}</span>

@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react'
+import { useId, useState, type ReactNode, type RefObject } from 'react'
+import { Collapsible } from '@base-ui/react/collapsible'
 import { Dialog } from '@base-ui/react/dialog'
 import type { ParseKeys } from 'i18next'
 import { useTranslation } from 'react-i18next'
@@ -14,12 +15,14 @@ import {
 } from '../../api/prioritizations'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { ChevronRightIcon } from '../../components/ui/icons'
+import { ChevronDownIcon, ChevronRightIcon, CloseIcon } from '../../components/ui/icons'
+import { useDialogTarget } from '../../components/ui/useDialogTarget'
 import { EMPTY, useDateFormat, useLocale, usePercentFormat } from '../../i18n/format'
 import { informationClassificationLabel } from '../Config/assetText'
 import { ActionPlanSection } from './ActionPlanSection'
-import { Evidence } from './Evidence'
+import { CloseAction, CloseNote } from './CloseStatus'
 import { FeedbackSection } from './FeedbackSection'
+import { CloseFindingDialog, ReopenFindingDialog, type FindingRef } from './FindingCloseDialogs'
 import { FindingBadges } from './GroupPanel'
 import { References } from './References'
 import { scorePoints } from './score'
@@ -34,10 +37,9 @@ interface Props {
   closeButton?: RefObject<HTMLButtonElement | null>
 }
 
-type SectionId = 'why' | 'plan' | 'threats' | 'vulnerability' | 'asset' | 'score' | 'advisories' | 'references' | 'feedback'
+type SectionId = 'plan' | 'threats' | 'vulnerability' | 'asset' | 'score' | 'advisories' | 'references'
 
 const SECTION_TITLES: Record<SectionId, ParseKeys> = {
-  why: 'findings.detail.sections.why',
   plan: 'findings.detail.sections.plan',
   threats: 'findings.detail.sections.threats',
   vulnerability: 'findings.detail.sections.vulnerability',
@@ -45,67 +47,52 @@ const SECTION_TITLES: Record<SectionId, ParseKeys> = {
   score: 'findings.detail.sections.score',
   advisories: 'findings.detail.sections.advisories',
   references: 'findings.detail.vulnerability.references',
-  feedback: 'findings.detail.sections.feedback',
 }
 
 /**
- * Everything known of one Finding: why it has its place, what it is, and what to do about it.
- * The facts that decide how urgent it is stay in a rail that never scrolls away; the column
- * beside it reads top to bottom, and the rail's index follows where the reader is.
+ * Everything known of one Finding: why it has its place, what a User says about it, and what
+ * to do about it. The facts that decide how urgent it is stay in a rail that never scrolls
+ * away; the column reads the reason, then the decision, then the Action Plan, and keeps the
+ * technical detail folded until it is asked for.
  */
 export function FindingDetail({ order, finding, onClose, closeButton }: Props) {
   const { t } = useTranslation()
   const idPrefix = useId()
-  const column = useRef<HTMLDivElement>(null)
+  const closeDialog = useDialogTarget<FindingRef>()
+  const reopenDialog = useDialogTarget<FindingRef>()
   const group = order.prioritization.groups.find((g) => g.position === finding.group)
   const { details } = finding
+  const plan = order.prioritization.plans.find((p) => p.finding_id === finding.finding_id)
+  const planSources = new Set(plan?.output.sources)
+  const references = details.references.filter((url) => !planSources.has(url))
 
-  const sections: SectionId[] = [
-    ...(group ? (['why'] as const) : []),
-    'plan',
+  const folded: SectionId[] = [
     'threats',
     'vulnerability',
     'asset',
     'score',
     'advisories',
-    ...(details.references.length > 0 ? (['references'] as const) : []),
-    'feedback',
+    ...(references.length > 0 ? (['references'] as const) : []),
   ]
-  const sectionId = (id: SectionId) => `${idPrefix}-${id}`
-  const active = useActiveSection(column, sections.map(sectionId))
-
-  const jump = (id: SectionId) => {
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    document.getElementById(sectionId(id))?.scrollIntoView?.({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
-  }
+  const sectionId = (id: string) => `${idPrefix}-${id}`
 
   const counts: Partial<Record<SectionId, number>> = {
     threats: details.techniques.length,
     advisories: details.advisories.length,
-    references: details.references.length,
+    references: references.length,
   }
 
   const groupEvidence = group?.evidence.filter((e) => e.finding_id === finding.finding_id) ?? []
   const contextEvidence = group?.context_evidence ?? []
 
   const content: Record<SectionId, ReactNode> = {
-    why: group && (
-      <>
-        <WrittenText text={group.reason} marks={[...groupEvidence, ...contextEvidence].map((e) => e.value)} lead />
-        <div className="flex flex-col gap-2">
-          <Evidence label={t('findings.detail.why.evidence')} items={groupEvidence} />
-          <Evidence label={t('findings.detail.why.contextEvidence')} items={contextEvidence} fromContext />
-        </div>
-      </>
-    ),
     plan: <ActionPlanSection order={order} finding={finding} />,
     threats: <Threats details={details} />,
-    vulnerability: <Vulnerability details={details} />,
+    vulnerability: <Vulnerability details={details} planMitigation={plan?.output.mitigation} />,
     asset: <AssetDetails finding={finding} />,
     score: <ScoreDetails finding={finding} />,
     advisories: <Advisories details={details} />,
-    references: <References urls={details.references} />,
-    feedback: <FeedbackSection order={order} finding={finding} />,
+    references: <References urls={references} />,
   }
 
   // Narrow screens stack the rail over the column and scroll both together; from md up each scrolls on its own.
@@ -113,82 +100,74 @@ export function FindingDetail({ order, finding, onClose, closeButton }: Props) {
     <div className="h-full overflow-y-auto md:grid md:grid-cols-[17.5rem_minmax(0,1fr)] md:overflow-hidden">
       <aside className="flex flex-col gap-5 border-b border-border-panel bg-panel px-5 py-6 md:min-h-0 md:overflow-y-auto md:border-r md:border-b-0">
         <Rail order={order} finding={finding} />
-
-        <nav aria-label={t('findings.detail.onThisFinding')} className="hidden flex-col md:flex">
-          <span className={`${LABEL} mb-1.5`}>{t('findings.detail.onThisFinding')}</span>
-          {sections.map((id) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => jump(id)}
-              aria-current={active === sectionId(id) ? 'location' : undefined}
-              className="focus-ring flex cursor-pointer items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left font-body text-[0.8125rem] text-gray transition-colors duration-150 ease-out hover:text-navy aria-[current]:bg-white aria-[current]:font-semibold aria-[current]:text-navy aria-[current]:shadow-[0_1px_2px_rgba(15,56,91,0.08)]"
-            >
-              {t(SECTION_TITLES[id])}
-              {(counts[id] ?? 0) > 0 && <span className="text-[0.6875rem] text-gray tabular-nums">{counts[id]}</span>}
-            </button>
-          ))}
-        </nav>
-
-        <p className="font-body text-[0.6875rem] leading-[1.4] text-gray md:mt-auto">{t('findings.detail.plainText')}</p>
       </aside>
 
-      <div ref={column} className="relative md:min-h-0 md:overflow-y-auto">
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 bg-white/85 px-6 py-3 backdrop-blur-md md:px-8">
-          <span className={`${LABEL} truncate`}>
-            {group && t('findings.detail.why.group', { position: group.position, title: group.title })}
-          </span>
-          <Button ref={closeButton} variant="secondary" size="sm" onClick={onClose}>
-            {t('common.close')}
-          </Button>
+      <div className="relative md:min-h-0 md:overflow-y-auto">
+        <div className="sticky top-0 z-10 flex items-center justify-end gap-3 bg-white/85 px-6 py-3 backdrop-blur-md md:px-8">
+          {/* Closing the Finding stands apart from closing the dialog, so one is never taken for the other. */}
+          <div className="flex shrink-0 items-center gap-3">
+            <CloseAction finding={finding} onCloseFinding={closeDialog.show} onReopenFinding={reopenDialog.show} />
+            <span aria-hidden="true" className="h-6 w-px bg-border-panel" />
+            <Button ref={closeButton} variant="secondary" size="sm" aria-label={t('common.close')} onClick={onClose}>
+              <CloseIcon size={12} />
+            </Button>
+          </div>
         </div>
 
-        <article className="flex flex-col gap-10 px-6 pt-2 pb-16 md:px-8">
-          {sections.map((id) => (
-            <section key={id} id={sectionId(id)} aria-labelledby={`${sectionId(id)}-title`} className="flex scroll-mt-16 flex-col gap-3.5">
-              <h3 id={`${sectionId(id)}-title`} className={HEADING}>
-                {t(SECTION_TITLES[id])}
+        <article className="flex flex-col gap-8 px-6 pt-2 pb-16 md:px-8">
+          {group && (
+            <section aria-labelledby={sectionId('why-title')} className="flex flex-col gap-3.5">
+              <h3 id={sectionId('why-title')} className={HEADING}>
+                {t('findings.detail.sections.why')}
               </h3>
-              {content[id]}
+              {/* The values it cites stay marked in the text; the Score section warns of the data gaps. */}
+              <WrittenText text={group.reason} marks={[...groupEvidence, ...contextEvidence].map((e) => e.value)} lead />
             </section>
-          ))}
+          )}
+
+          <FeedbackSection order={order} finding={finding} />
+
+          <section aria-labelledby={sectionId('plan-title')} className="flex flex-col gap-3.5">
+            <h3 id={sectionId('plan-title')} className={HEADING}>
+              {t(SECTION_TITLES.plan)}
+            </h3>
+            {content.plan}
+          </section>
+
+          <div className="flex flex-col border-t border-border-row">
+            {folded.map((id) => (
+              <Collapsible.Root
+                key={id}
+                render={<section aria-labelledby={sectionId(`${id}-title`)} />}
+                className="border-b border-border-row"
+              >
+                <h3 id={sectionId(`${id}-title`)}>
+                  <Collapsible.Trigger className="focus-ring group flex w-full cursor-pointer items-center justify-between gap-3 rounded-md py-4 text-left">
+                    <span className="flex items-baseline gap-2">
+                      <span className={HEADING}>{t(SECTION_TITLES[id])}</span>
+                      {(counts[id] ?? 0) > 0 && (
+                        <span className="font-body text-[0.875rem] text-gray tabular-nums">{counts[id]}</span>
+                      )}
+                    </span>
+                    <ChevronDownIcon
+                      size={14}
+                      className="shrink-0 text-gray transition-transform duration-200 ease-[ease] group-data-panel-open:-rotate-180"
+                    />
+                  </Collapsible.Trigger>
+                </h3>
+                <Collapsible.Panel className="h-[var(--collapsible-panel-height)] overflow-hidden opacity-100 transition-[height,opacity] duration-200 ease-[ease] data-ending-style:h-0 data-ending-style:opacity-0 data-starting-style:h-0 data-starting-style:opacity-0 motion-reduce:transition-none">
+                  <div className="flex flex-col gap-3.5 pb-6">{content[id]}</div>
+                </Collapsible.Panel>
+              </Collapsible.Root>
+            ))}
+          </div>
         </article>
       </div>
+
+      <CloseFindingDialog dialog={closeDialog} />
+      <ReopenFindingDialog dialog={reopenDialog} />
     </div>
   )
-}
-
-/*
- * The section being read: the last whose top has passed the upper third of the column, or
- * the last section once the column is scrolled to its end, since a short one never gets there.
- */
-function useActiveSection(column: RefObject<HTMLElement | null>, ids: string[]): string | undefined {
-  const [active, setActive] = useState<string | undefined>(ids[0])
-  // A string, so the effect reruns when the sections change rather than on every new array.
-  const joined = ids.join(' ')
-
-  useEffect(() => {
-    const root = column.current
-    if (!root) return undefined
-    const sections = joined.split(' ')
-    const onScroll = () => {
-      const limit = root.getBoundingClientRect().top + root.clientHeight / 3
-      let current: string | undefined = sections[0]
-      for (const id of sections) {
-        const el = document.getElementById(id)
-        if (el && el.getBoundingClientRect().top <= limit) current = id
-      }
-      if (root.scrollHeight > root.clientHeight && root.scrollTop + root.clientHeight >= root.scrollHeight - 4) {
-        current = sections.at(-1)
-      }
-      setActive(current)
-    }
-    onScroll()
-    root.addEventListener('scroll', onScroll, { passive: true })
-    return () => root.removeEventListener('scroll', onScroll)
-  }, [column, joined])
-
-  return active
 }
 
 /* ---------- Rail ---------- */
@@ -209,6 +188,11 @@ interface Signal {
   tone: Tone
 }
 
+/** The CVSS with the highest base score, which the rail shows and whose vector the detail spells out. */
+function topCvss(details: FindingDetails): FindingDetails['cvss'][number] | undefined {
+  return details.cvss.toSorted((a, b) => b.base_score - a.base_score)[0]
+}
+
 /** CVSS calls 9.0 and above Critical. */
 const CVSS_CRITICAL = 9
 
@@ -222,9 +206,10 @@ function useEpssFormat() {
 function useSignals(finding: Finding): Signal[] {
   const { t } = useTranslation()
   const epssFormat = useEpssFormat()
-  const { kev, epss, cvss } = finding.details
+  const { kev, epss } = finding.details
   const asset = currentAsset(finding)
-  const top = cvss.toSorted((a, b) => b.base_score - a.base_score)[0]
+  const classification = findingInformationClassification(asset)
+  const top = topCvss(finding.details)
 
   return [
     {
@@ -259,6 +244,16 @@ function useSignals(finding: Finding): Signal[] {
       label: t('findings.detail.asset.criticality'),
       value: t(`config.inventory.criticality.${asset.criticality}`),
       tone: asset.criticality === 'high' ? 'warn' : 'plain',
+    },
+    {
+      label: t('findings.detail.asset.lifecycleStage'),
+      value: t(`config.inventory.lifecycleStage.${asset.lifecycle_stage}`),
+      tone: asset.lifecycle_stage === 'unknown' ? 'quiet' : asset.lifecycle_stage === 'production' ? 'warn' : 'plain',
+    },
+    {
+      label: t('findings.detail.asset.informationClassification'),
+      value: informationClassificationLabel(t, classification),
+      tone: classification === null ? 'quiet' : classification === 'confidential' ? 'warn' : 'plain',
     },
   ]
 }
@@ -300,7 +295,7 @@ function Rail({ order, finding }: { order: CurrentOrder; finding: Finding }) {
             </dt>
             <dd className="md:text-right">
               <span className={`${META} font-semibold ${s.tone === 'quiet' ? 'text-gray' : 'text-navy'}`}>{s.value}</span>
-              {s.note && <span className="block font-body text-[0.6875rem] text-gray">{s.note}</span>}
+              {s.note && <span className="block font-body text-[0.75rem] text-gray">{s.note}</span>}
             </dd>
           </div>
         ))}
@@ -310,6 +305,7 @@ function Rail({ order, finding }: { order: CurrentOrder; finding: Finding }) {
         {t('findings.detail.placed', { date: formatDate(finding.placed_at) })}
         {finding.closed_at && ` · ${t('findings.detail.closedOn', { date: formatDate(finding.closed_at) })}`}
       </p>
+      <CloseNote finding={finding} />
     </>
   )
 }
@@ -394,12 +390,9 @@ function ScoreDetails({ finding }: { finding: Finding }) {
         />
         <Factors title={t('findings.detail.score.multipliers')} factors={multipliers} />
       </div>
-      <div className="flex flex-col gap-1.5">
-        <p className={`${META} text-gray`}>
-          <span>{t(score.data_gaps.length === 0 ? 'findings.detail.score.measured' : 'findings.detail.score.estimated')}</span>{' '}
-          <span>{t('findings.detail.score.model', { model: score.scoring_model })}</span>
-        </p>
-        {score.data_gaps.length > 0 && (
+      {score.data_gaps.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <p className={`${META} text-gray`}>{t('findings.detail.score.estimated')}</p>
           <span className="flex flex-wrap gap-1.5">
             {score.data_gaps.map((gap) => (
               <Badge key={gap} variant="muted">
@@ -407,8 +400,8 @@ function ScoreDetails({ finding }: { finding: Finding }) {
               </Badge>
             ))}
           </span>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -456,59 +449,27 @@ function Factors({
   )
 }
 
-function Vulnerability({ details }: { details: FindingDetails }) {
+function Vulnerability({ details, planMitigation }: { details: FindingDetails; planMitigation?: string | null }) {
   const { t } = useTranslation()
-  const epssFormat = useEpssFormat()
-  const { kev, epss } = details
+  const { kev } = details
+  // The Action Plan often carries CISA's required action as its mitigation; then it reads there only.
+  const requiredAction = kev?.required_action.trim()
+  const showRequiredAction = !!requiredAction && requiredAction !== planMitigation?.trim()
+  const cvss = topCvss(details)
 
   return (
     <div className="flex flex-col gap-5">
       {details.description ? <WrittenText text={details.description} /> : <p className={`${META} text-gray`}>{EMPTY}</p>}
-      <dl className={FACTS}>
-        <Fact label={t('findings.detail.vulnerability.kev')}>
-          {kev ? (
-            <span className="flex flex-col gap-0.5">
-              <span>{t('findings.detail.vulnerability.kevListed', { date: kev.date_added, due: kev.due_date || EMPTY })}</span>
-              <span className="text-gray">
-                {t(`findings.detail.vulnerability.ransomware.${kev.known_ransomware_campaign_use === 'Known' ? 'Known' : 'Unknown'}`)}
-              </span>
-            </span>
-          ) : (
-            t('findings.detail.vulnerability.notInKev')
-          )}
-        </Fact>
-        <Fact label={t('findings.detail.vulnerability.epss')}>
-          {epss ? (
-            <span className="flex flex-col gap-0.5">
-              <span>{t('findings.detail.vulnerability.epssValue', { probability: epssFormat(epss.probability) })}</span>
-              <span className="text-gray">
-                {t('findings.detail.vulnerability.epssPercentile', {
-                  share: epssFormat(epss.percentile),
-                  date: epss.score_date,
-                })}
-              </span>
-            </span>
-          ) : (
-            t('findings.detail.vulnerability.noEpss')
-          )}
-        </Fact>
-        {details.cvss.map((m, i) => (
-          <Fact key={i} label={t('findings.detail.vulnerability.cvss', { version: m.version, score: m.base_score })}>
-            <span className="flex flex-col gap-0.5">
-              <span className={`${MONO} truncate`} title={m.vector}>
-                {m.vector || EMPTY}
-              </span>
-              <span className="text-gray">
-                {t(`findings.detail.vulnerability.cvssSource.${m.type === 'Primary' ? 'Primary' : 'Secondary'}`)}
-              </span>
-            </span>
-          </Fact>
-        ))}
-      </dl>
-      {kev?.required_action && (
+      {cvss?.vector && (
+        <div className="flex flex-col gap-1">
+          <span className={LABEL}>{t('findings.detail.vulnerability.cvss', { version: cvss.version })}</span>
+          <code className={`${MONO} text-[0.9375rem] break-all text-navy`}>{cvss.vector}</code>
+        </div>
+      )}
+      {showRequiredAction && (
         <div className="flex flex-col gap-1 rounded-md bg-panel px-3.5 py-3">
           <span className={LABEL}>{t('findings.detail.vulnerability.kevAction')}</span>
-          <p className={`${READING} text-[0.875rem]`}>{kev.required_action}</p>
+          <p className={`${READING} text-[0.875rem]`}>{requiredAction}</p>
         </div>
       )}
       {details.unavailable_feeds.length > 0 && (
@@ -597,11 +558,9 @@ function Threats({ details }: { details: FindingDetails }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className={`${META} text-gray`}>
-        {labeling.outcome === 'labeled'
-          ? `${t('findings.detail.threats.inferred')} ${t('findings.detail.threats.labeling.labeled', { model: labeling.model })}.`
-          : t(`findings.detail.threats.labeling.${labeling.outcome}`)}
-      </p>
+      {labeling.outcome !== 'labeled' && (
+        <p className={`${META} text-gray`}>{t(`findings.detail.threats.labeling.${labeling.outcome}`)}</p>
+      )}
       {techniques.length > 0 && (
         <ol className="flex flex-col">
           {techniques.map((technique, i) => (
@@ -610,10 +569,10 @@ function Threats({ details }: { details: FindingDetails }) {
               className="grid gap-x-4 gap-y-2 border-t border-border-row py-4 first:border-t-0 first:pt-1 sm:grid-cols-[7.5rem_minmax(0,1fr)]"
             >
               <span className="flex flex-col gap-0.5 pt-0.5">
-                <span className="font-body text-[0.6875rem] font-semibold text-gray tabular-nums">
+                <span className="font-body text-[0.75rem] font-semibold text-gray tabular-nums">
                   {t('findings.detail.threats.step', { position: i + 1 })}
                 </span>
-                <span className="font-body text-[0.8125rem] leading-tight font-semibold text-navy">
+                <span className="font-body text-[0.875rem] leading-tight font-semibold text-navy">
                   {t(`findings.detail.threats.stage.${technique.role}`)}
                 </span>
               </span>
@@ -651,7 +610,7 @@ function TechniqueItem({ technique }: { technique: Technique }) {
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="focus-ring flex cursor-pointer items-center gap-1 self-start rounded-sm font-body text-[0.8125rem] font-semibold text-nav-active-bg hover:underline"
+        className="focus-ring flex cursor-pointer items-center gap-1 self-start rounded-sm font-body text-[0.875rem] font-semibold text-nav-active-bg hover:underline"
       >
         <ChevronRightIcon
           className={`shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none ${open ? 'rotate-90' : ''}`}
