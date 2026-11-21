@@ -554,7 +554,7 @@ describe('Findings', () => {
       await user.click(screen.getByRole('tab', { name: 'Summary' }))
 
       expect(screen.getByRole('tab', { name: 'Summary' })).toHaveAttribute('aria-selected', 'true')
-      expect(await screen.findByText('Weekly trend')).toBeInTheDocument()
+      expect(await screen.findByText('Weekly trend of findings')).toBeInTheDocument()
     })
   })
 
@@ -566,6 +566,12 @@ describe('Findings', () => {
       expect(screen.getByText('7.2 days')).toBeInTheDocument()
       expect(screen.getByText('14.1 days')).toBeInTheDocument()
       expect(screen.getByText('45.0 days')).toBeInTheDocument()
+    })
+
+    it('says what the weekly trend’s bars and line count', async () => {
+      await openSummaryTab()
+
+      expect(await screen.findByText(/the line, those still open when the week ended/)).toBeInTheDocument()
     })
 
     it('shows — and none-closed text for a band with no closures', async () => {

@@ -224,14 +224,15 @@ export const findingsHandlers = [
     await delay()
     return HttpResponse.json({
       weeks: [
-        { week: '2026-W38', starts_on: '2026-09-15', opened: 4, closed: 2, open_at_end: 18 },
-        { week: '2026-W39', starts_on: '2026-09-22', opened: 3, closed: 3, open_at_end: 18 },
-        { week: '2026-W40', starts_on: '2026-09-29', opened: 5, closed: 1, open_at_end: 22 },
-        { week: '2026-W41', starts_on: '2026-10-06', opened: 2, closed: 4, open_at_end: 20 },
-        { week: '2026-W42', starts_on: '2026-10-13', opened: 6, closed: 2, open_at_end: 24 },
-        { week: '2026-W43', starts_on: '2026-10-20', opened: 1, closed: 5, open_at_end: 20 },
-        { week: '2026-W44', starts_on: '2026-10-27', opened: 3, closed: 1, open_at_end: 22 },
-        { week: '2026-W45', starts_on: '2026-11-03', opened: 2, closed: 1, open_at_end: 23 },
+        // Nothing before the first Sync, two weeks in: the chart starts there.
+        { week: '2026-W38', starts_on: '2026-09-15', opened: 0, closed: 0, open_at_end: 0 },
+        { week: '2026-W39', starts_on: '2026-09-22', opened: 0, closed: 0, open_at_end: 0 },
+        { week: '2026-W40', starts_on: '2026-09-29', opened: 12, closed: 0, open_at_end: 12 },
+        { week: '2026-W41', starts_on: '2026-10-06', opened: 4, closed: 1, open_at_end: 15 },
+        { week: '2026-W42', starts_on: '2026-10-13', opened: 6, closed: 2, open_at_end: 19 },
+        { week: '2026-W43', starts_on: '2026-10-20', opened: 2, closed: 3, open_at_end: 18 },
+        { week: '2026-W44', starts_on: '2026-10-27', opened: 4, closed: 1, open_at_end: 21 },
+        { week: '2026-W45', starts_on: '2026-11-03', opened: 3, closed: 1, open_at_end: 23 },
       ],
     })
   }),
