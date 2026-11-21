@@ -597,6 +597,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/findings/{id}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tell how the Customer's order placed one Finding, and why each change
+         * @description One entry per Prioritization where the Finding's place changed, newest first: placed, placed_again when a round placed it again, moved when other groups moved it, left when it closed. Each gives the Finding's group and its rank by Score alone before and now, and the Prioritizer's justification as it wrote it. placed_again also says what changed in the Finding. It calls no Agent. Empty for a Finding no Prioritization held.
+         */
+        get: operations["get-finding-history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/findings/{id}/reopen": {
         parameters: {
             query?: never;
@@ -1059,6 +1079,10 @@ export interface components {
             tactics: components["schemas"]["TacticCountResponse"][];
             /** @description Those with the most open Findings, most first */
             techniques: components["schemas"]["TechniqueCountResponse"][];
+        };
+        BandChangeResponse: {
+            from: string;
+            to: string;
         };
         BreakdownResponse: {
             by: string;
@@ -1530,6 +1554,69 @@ export interface components {
             model: string;
             vendor: string;
         };
+        HistoryEntryResponse: {
+            band: components["schemas"]["BandChangeResponse"] | null;
+            /** @description For placed_again, what changed in the Finding since it was last placed: kev_listed, ransomware_use, labeled, band_changed, score_moved, feedback, business_context. Empty when none of the rules applies */
+            changes: string[];
+            /** @description For the newest entry when it is left and the Finding is still closed, why it closed */
+            close_reason: string | null;
+            /**
+             * Format: date-time
+             * @description When that Prioritization was made
+             */
+            created_at: string;
+            /** @description What that reason cites of this Finding */
+            evidence: components["schemas"]["HistoryEvidenceResponse"][];
+            /** @description For placed_again, what Users said directly about where it should be since it was last placed */
+            feedback: components["schemas"]["HistoryFeedbackResponse"][];
+            /**
+             * Format: int64
+             * @description Position of its Priority Group in the Prioritization before, from 1; null for placed
+             */
+            group_before: number | null;
+            /**
+             * Format: int64
+             * @description Position of its Priority Group in this one, from 1; null for left
+             */
+            group_now: number | null;
+            /** @description For moved, the titles of the groups above it now that were not above it before */
+            groups_appeared: string[];
+            /** @description For moved, the titles of the groups above it before that are not now */
+            groups_gone: string[];
+            /** @enum {string} */
+            kind: "placed" | "placed_again" | "moved" | "left";
+            prioritization_id: string;
+            /**
+             * Format: int64
+             * @description Where its Score alone put it before, 1 the highest; null for placed
+             */
+            rank_before: number | null;
+            /**
+             * Format: int64
+             * @description Where its Score alone puts it now; null for left
+             */
+            rank_now: number | null;
+            /** @description The Prioritizer's reason for the part of the group that holds it, as it wrote it when it last placed the Finding; render it as plain text */
+            reason: string;
+            score: components["schemas"]["ScoreChangeResponse"] | null;
+            /** @description The title of its Priority Group; empty for left */
+            title: string;
+        };
+        HistoryEvidenceResponse: {
+            /** @description RFC 6901 pointer into what the Prioritizer read of the Finding */
+            path: string;
+            value: string;
+        };
+        HistoryFeedbackResponse: {
+            /** Format: date-time */
+            created_at: string;
+            note: string;
+            /** @enum {string} */
+            verdict: "should_be_earlier" | "should_be_later";
+        };
+        HistoryResponse: {
+            entries: components["schemas"]["HistoryEntryResponse"][];
+        };
         InformationClassificationResponse: {
             /**
              * Format: date-time
@@ -1829,6 +1916,12 @@ export interface components {
             version: number;
         } & {
             [key: string]: unknown;
+        };
+        ScoreChangeResponse: {
+            /** Format: double */
+            from: number;
+            /** Format: double */
+            to: number;
         };
         ScoreResponse: {
             /**
@@ -4302,6 +4395,73 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-finding-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoryResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

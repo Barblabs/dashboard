@@ -172,7 +172,47 @@ export function useRecordFeedbackMutation(prioritizationId: string) {
   return useMutation({
     mutationFn: ({ findingId, verdict, note }: FeedbackInput) =>
       api.post<Feedback>(`/prioritizations/${prioritizationId}/feedback`, { finding_id: findingId, verdict, note }),
-    onSuccess: (feedback) =>
-      updateCurrent(queryClient, prioritizationId, (p) => ({ ...p, feedback: [...p.feedback, feedback] })),
+    onSuccess: (feedback, { findingId }) => {
+      updateCurrent(queryClient, prioritizationId, (p) => ({ ...p, feedback: [...p.feedback, feedback] }))
+      // Earlier or later shows in the history once the next round places the Finding again.
+      void queryClient.invalidateQueries({ queryKey: findingHistoryKey(findingId) })
+    },
+  })
+}
+
+/* ---------- Finding history (ADR 0036) ---------- */
+
+/** What changed in a Finding between two rounds that placed it, as `changes` names it. */
+export const HISTORY_CHANGES = [
+  'kev_listed',
+  'ransomware_use',
+  'labeled',
+  'band_changed',
+  'score_moved',
+  'feedback',
+  'business_context',
+] as const
+type HistoryChange = (typeof HISTORY_CHANGES)[number]
+
+// The spec types these vocabularies as plain strings.
+export type HistoryEntry = Override<
+  Schemas['HistoryEntryResponse'],
+  { changes: HistoryChange[]; band: { from: ScoreBand; to: ScoreBand } | null }
+>
+type FindingHistory = Override<Schemas['HistoryResponse'], { entries: HistoryEntry[] }>
+
+/*
+ * Under the Prioritizations, so whatever refetches them (a close, a reopen, a Declaration)
+ * also refetches the history of an open detail.
+ */
+function findingHistoryKey(findingId: string) {
+  return [...PRIORITIZATIONS_KEY, 'history', findingId] as const
+}
+
+/** Each change of the Finding's place, newest first; empty until a Prioritization holds it. */
+export function useFindingHistoryQuery(findingId: string) {
+  return useQuery({
+    queryKey: findingHistoryKey(findingId),
+    queryFn: async () => (await api.get<FindingHistory>(`/findings/${findingId}/history`)).entries,
   })
 }
