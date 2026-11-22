@@ -341,10 +341,32 @@ describe('Findings', () => {
     expect(within(rowOf('CVE-2021-41773')).queryByText('Critical')).not.toBeInTheDocument()
   })
 
+  it('a Scoring Model 4 Score on a Highly Confidential asset shows its classification and its multiplier', async () => {
+    const user = await renderFindings()
+    const dialog = await openFinding(user, 'CVE-2025-1094')
+
+    const value = within(dialog).getByText('Information Classification').nextElementSibling!
+    expect(value).toHaveTextContent(/^Highly Confidential$/)
+    // The most sensitive value takes the alarm dot, as KEV does.
+    expect(within(dialog).getByText('Information Classification').querySelector('.bg-critical')).not.toBeNull()
+    const score = await openSection(user, dialog, 'Score')
+    expect(within(score).getByText('Classification multiplier').nextElementSibling).toHaveTextContent(/^1$/)
+    expect(within(score).getByText('Exploit signal').nextElementSibling).not.toHaveTextContent('Not applicable')
+  })
+
   it('a Score from before Scoring Model 3 has no Band, and its newer factors say they do not apply', async () => {
     storeFinding('CVE-2025-1094', (f) => ({
       ...f,
-      current: { ...f.current!, score_details: { ...f.current!.score_details, scoring_model: 2 } },
+      current: {
+        ...f.current!,
+        score_details: {
+          ...f.current!.score_details,
+          scoring_model: 2,
+          band: null,
+          exploit_signal: null,
+          information_classification_multiplier: null,
+        },
+      },
     }))
     const user = await renderFindings()
 
