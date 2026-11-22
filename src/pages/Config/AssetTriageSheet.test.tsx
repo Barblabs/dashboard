@@ -144,7 +144,7 @@ describe('Asset triage', () => {
     expect(await sheet.findByText('5 of 5')).toBeInTheDocument()
     expect(sheet.getByText(NEEDS_TRIAGE[4])).toBeInTheDocument()
     expect(exposureSection(sheet).getByText('Internet-facing, from its iTop Location.')).toBeInTheDocument()
-    await user.click(classificationSection(sheet).getByRole('radio', { name: /Confidential/ }))
+    await user.click(classificationSection(sheet).getByRole('radio', { name: /^Confidential/ }))
     await user.click(sheet.getByRole('button', { name: 'Declare Classification' }))
     expect(await classificationSection(sheet).findByRole('status')).toHaveTextContent('Saved')
     await user.click(sheet.getByRole('button', { name: 'Next' }))
@@ -225,6 +225,30 @@ describe('Asset triage', () => {
     expect(await screen.findByText('5 Assets need triage.')).toBeInTheDocument()
   })
 
+  it('offers Highly Confidential first, says what it means, and declares it', async () => {
+    const user = await renderTechStack()
+    const sheet = await openSheet(user, 'prod-api-01')
+    const classification = classificationSection(sheet)
+
+    const radios = classification.getAllByRole('radio').map((r) => r.getAttribute('value'))
+    expect(radios).toEqual(['highly_confidential', 'confidential', 'private', 'public'])
+    expect(
+      classification.getByText(
+        'Its data is regulated or secret and a leak would be grave: health records, card data or credentials.',
+      ),
+    ).toBeInTheDocument()
+
+    await user.click(classification.getByRole('radio', { name: /^Highly Confidential/ }))
+    await user.click(classification.getByRole('button', { name: 'Declare Classification' }))
+
+    expect(
+      await classification.findByText(/^Highly Confidential, declared by admin@barbattack\.example on /),
+    ).toBeInTheDocument()
+    expect(assetsStore.load().find((a) => a.name === 'prod-api-01')?.information_classification.value).toBe(
+      'highly_confidential',
+    )
+  })
+
   it('clearing the Information Classification of an Asset with a known Exposure adds it to the count', async () => {
     const user = await renderTechStack()
     expect(await screen.findByText('5 Assets need triage.')).toBeInTheDocument()
@@ -232,7 +256,7 @@ describe('Asset triage', () => {
     const sheet = await openSheet(user, 'ledger-db')
     const classification = classificationSection(sheet)
     expect(classification.getByText('Confidential, declared by admin@barbattack.example on Nov 3, 2026.')).toBeInTheDocument()
-    expect(classification.getByRole('radio', { name: /Confidential/ })).toBeChecked()
+    expect(classification.getByRole('radio', { name: /^Confidential/ })).toBeChecked()
     await user.click(classification.getByRole('button', { name: 'Clear' }))
 
     expect(await screen.findByText('6 Assets need triage.')).toBeInTheDocument()
@@ -268,11 +292,11 @@ describe('Asset triage', () => {
     await user.click(exposure.getByRole('button', { name: 'Declare Exposure' }))
     expect(await exposure.findByRole('status')).toHaveTextContent('Saved')
 
-    await user.click(classification.getByRole('radio', { name: /Confidential/ }))
+    await user.click(classification.getByRole('radio', { name: /^Confidential/ }))
     await user.click(classification.getByRole('button', { name: 'Declare Classification' }))
 
     expect(await classification.findByRole('alert')).toHaveTextContent("Couldn't save it. Nothing changed; try again.")
-    expect(classification.getByRole('radio', { name: /Confidential/ })).toBeChecked()
+    expect(classification.getByRole('radio', { name: /^Confidential/ })).toBeChecked()
     expect(exposure.queryByRole('alert')).not.toBeInTheDocument()
     expect(exposure.getByRole('status')).toHaveTextContent('Saved')
     expect(exposure.getByRole('radio', { name: /Internet-facing/ })).toBeChecked()
@@ -441,7 +465,7 @@ describe('Asset triage', () => {
 
     await user.click(exposureSection(sheet).getByRole('radio', { name: /Internal/ }))
     await user.click(sheet.getByRole('button', { name: 'Declare Exposure' }))
-    await user.click(classificationSection(sheet).getByRole('radio', { name: /Confidential/ }))
+    await user.click(classificationSection(sheet).getByRole('radio', { name: /^Confidential/ }))
     await user.click(sheet.getByRole('button', { name: 'Declare Classification' }))
     expect(await classificationSection(sheet).findByText(/^Confidential, declared by /)).toBeInTheDocument()
 

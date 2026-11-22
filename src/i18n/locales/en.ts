@@ -1016,9 +1016,10 @@ export const en = {
         unknown: 'Unknown',
       },
       informationClassification: {
-        public: 'Public',
-        private: 'Private',
+        highly_confidential: 'Highly Confidential',
         confidential: 'Confidential',
+        private: 'Private',
+        public: 'Public',
         unclassified: 'Unclassified',
       },
       lifecycleStage: {
@@ -1108,7 +1109,8 @@ export const en = {
         help: {
           public: 'Its data could be published without harm.',
           private: 'Its data is meant for your organization only.',
-          confidential: 'Its data would do serious harm if leaked: personal, financial or secret.',
+          highly_confidential: 'Its data is regulated or secret and a leak would be grave: health records, card data or credentials.',
+          confidential: 'Its internal data would do serious harm if leaked, such as personal or financial information.',
         },
         declare: 'Declare Classification',
       },
