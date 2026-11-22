@@ -34,6 +34,13 @@ type Credentials = z.infer<typeof credentialsSchema>
 
 type ItopFormMode = 'connect' | 'update'
 
+type ItopCheck =
+  | { status: 'editing' }
+  | { status: 'testing' }
+  | { status: 'tested'; ok: boolean; text: string }
+  | { status: 'saving' }
+  | { status: 'saveFailed'; text: string }
+
 interface Props {
   mode: ItopFormMode
   initialValues: Pick<CmdbLogin, 'url' | 'user'>
@@ -90,18 +97,24 @@ export function ItopForm({
     reValidateMode: 'onBlur',
   })
 
-  const isTesting = testMutation.isPending
-  const isSaving = saveMutation.isPending
-  const busy = isTesting || isSaving
-
   const handleTest = handleSubmit((login) => {
     saveMutation.reset()
     testMutation.mutate(login)
   })
 
-  const handleSave = handleSubmit((login) => saveMutation.mutate(login, { onSuccess: onSaved }))
+  const handleSave = handleSubmit((login) => {
+    testMutation.reset()
+    saveMutation.mutate(login, { onSuccess: onSaved })
+  })
 
-  function resultOf(): { ok: boolean; text: string } | null {
+  function edit(field: keyof Credentials) {
+    clearErrors(field)
+    testMutation.reset()
+    saveMutation.reset()
+  }
+
+  function checkOf(): ItopCheck {
+    if (saveMutation.isPending) return { status: 'saving' }
     if (saveMutation.isError) {
       const text = requestErrorText(
         saveMutation.error,
@@ -109,8 +122,9 @@ export function ItopForm({
         { fallback: 'config.form.result.connectFailed' },
         { user: saveMutation.variables.user },
       )
-      return { ok: false, text }
+      return { status: 'saveFailed', text }
     }
+    if (testMutation.isPending) return { status: 'testing' }
     if (testMutation.isError) {
       const text = requestErrorText(
         testMutation.error,
@@ -121,18 +135,23 @@ export function ItopForm({
         },
         { user: testMutation.variables.user },
       )
-      return { ok: false, text }
+      return { status: 'tested', ok: false, text }
     }
     const test = testMutation.data
-    if (!test) return null
-    if (test.ok) return { ok: true, text: t('config.form.result.success') }
+    if (!test) return { status: 'editing' }
+    if (test.ok) return { status: 'tested', ok: true, text: t('config.form.result.success') }
     const text = translatedOrBackendMessage(test, t, 'config.form.result.testFailed', {
       user: testMutation.variables.user,
     })
-    return { ok: false, text }
+    return { status: 'tested', ok: false, text }
   }
 
-  const result = resultOf()
+  const check = checkOf()
+  const isTesting = check.status === 'testing'
+  const isSaving = check.status === 'saving'
+  const busy = isTesting || isSaving
+  const result =
+    check.status === 'tested' ? check : check.status === 'saveFailed' ? { ok: false, text: check.text } : null
 
   return (
     <Panel className={`gap-5 ${className}`}>
@@ -154,7 +173,7 @@ export function ItopForm({
             placeholder="http://10.0.0.5:8000"
             autoComplete="off"
             disabled={busy}
-            {...register('url', { onChange: () => clearErrors('url') })}
+            {...register('url', { onChange: () => edit('url') })}
           />
         </Field>
 
@@ -168,7 +187,7 @@ export function ItopForm({
             placeholder="barb-reader"
             autoComplete="username"
             disabled={busy}
-            {...register('user', { onChange: () => clearErrors('user') })}
+            {...register('user', { onChange: () => edit('user') })}
           />
         </Field>
 
@@ -180,7 +199,7 @@ export function ItopForm({
           <PasswordInput
             autoComplete="new-password"
             disabled={busy}
-            {...register('password', { onChange: () => clearErrors('password') })}
+            {...register('password', { onChange: () => edit('password') })}
           />
         </Field>
       </div>

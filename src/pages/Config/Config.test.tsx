@@ -243,6 +243,28 @@ describe('Configuration', () => {
     expect(await screen.findByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
   })
 
+  it('changing a field after a test drops its result, which no longer holds', async () => {
+    const user = await openForm()
+    await fillForm(user, VALID_CREDENTIALS)
+    await user.click(screen.getByRole('button', { name: 'Test connection' }))
+    expect(await screen.findByRole('status')).toHaveTextContent('Connection successful.')
+
+    await user.type(screen.getByLabelText('Password'), 'x')
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+
+  it('changing a field after a failed test drops the failure', async () => {
+    const user = await openForm()
+    await fillForm(user, { ...VALID_CREDENTIALS, username: 'admin' })
+    await user.click(screen.getByRole('button', { name: 'Test connection' }))
+    expect(await screen.findByRole('alert')).toBeInTheDocument()
+
+    await fillForm(user, { username: 'barb-reader' })
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
   it('testing with the admin user fails with the REST profile message', async () => {
     const user = await openForm()
     await fillForm(user, { ...VALID_CREDENTIALS, username: 'admin' })
