@@ -1235,6 +1235,8 @@ export const en = {
         'Connect your workspace to the Security Team channel. When a finding is delivered there, the team gets a summary and one-click documentation leads back to the report.',
       action: 'Connect Slack',
       opening: 'Opening Slack…',
+      waiting: 'Waiting for Slack…',
+      blocked: 'Your browser blocked the Slack window. Allow pop-ups for this site and try again.',
       failed: 'Could not start the Slack connection. Try again.',
       viewer: 'Slack delivery is not set up for your organization.',
     },

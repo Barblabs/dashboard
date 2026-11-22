@@ -1238,6 +1238,8 @@ export const es: Translations = {
         'Conecta el workspace a tu canal del Security Team. Cuando se entrega una alerta allí, el equipo recibe un resumen y enlaces a la documentación.',
       action: 'Conectar Slack',
       opening: 'Abriendo Slack…',
+      waiting: 'Esperando a Slack…',
+      blocked: 'Tu navegador bloqueó la ventana de Slack. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.',
       failed: 'No se pudo iniciar la conexión de Slack. Inténtalo de nuevo.',
       viewer: 'La entrega a Slack no está configurada para tu organización.',
     },

@@ -3,10 +3,9 @@ import { useSlackInstallationQuery } from '../../api/slack'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Button } from '../../components/ui/Button'
 import { Alert } from '../../components/ui/Alert'
-import { requestErrorText } from '../../i18n/errors'
 import { SlackInstallationBar } from './SlackInstallationBar'
 import { SlackFailedDeliveries } from './SlackFailedDeliveries'
-import { useSlackInstallConnect } from './useSlackInstallConnect'
+import { connectProblemText, isConnecting, useSlackInstallConnect } from './useSlackInstallConnect'
 
 const KEYS = {
   loading: 'slack.loading',
@@ -38,11 +37,8 @@ export function SlackPanel({ readOnly }: { readOnly: boolean }) {
 function SlackNotConnected({ readOnly }: { readOnly: boolean }) {
   const { t } = useTranslation()
   const install = useSlackInstallConnect()
-  const errorText =
-    install.error &&
-    requestErrorText(install.error, t, {
-      fallback: 'slack.notConnected.failed',
-    })
+  const connecting = isConnecting(install.consent)
+  const errorText = connectProblemText(install.consent, t)
 
   return (
     <div className="flex flex-col items-center gap-4 py-10 text-center">
@@ -54,8 +50,12 @@ function SlackNotConnected({ readOnly }: { readOnly: boolean }) {
         <p className="font-body text-[0.875rem] text-gray">{t('slack.notConnected.viewer')}</p>
       ) : (
         <>
-          <Button onClick={() => void install.connect()} disabled={install.pending} loading={install.pending}>
-            {install.pending ? t('slack.notConnected.opening') : t('slack.notConnected.action')}
+          <Button onClick={install.connect} disabled={connecting} loading={connecting}>
+            {install.consent.status === 'starting'
+              ? t('slack.notConnected.opening')
+              : install.consent.status === 'awaitingConsent'
+                ? t('slack.notConnected.waiting')
+                : t('slack.notConnected.action')}
           </Button>
           {errorText && (
             <Alert tone="error" className="max-w-md">

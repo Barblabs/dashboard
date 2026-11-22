@@ -13,7 +13,7 @@ import { Button } from '../../components/ui/Button'
 import { Select } from '../../components/ui/Select'
 import { Alert } from '../../components/ui/Alert'
 import { slackCodeKey } from './slackCodes'
-import { useSlackInstallConnect } from './useSlackInstallConnect'
+import { connectProblemText, isConnecting, useSlackInstallConnect } from './useSlackInstallConnect'
 import { CONNECTION_DETAIL, ConnectionBar, DisconnectConfirm } from './ConnectionBar'
 
 const COPY = 'font-mono text-navy'
@@ -35,6 +35,7 @@ export function SlackInstallationBar({ installation, readOnly = false }: Props) 
   const channelSet = installation.channel_id !== ''
   const needsReauth = installation.state === 'needs re-authorisation'
   const testResult = testMutation.data
+  const connectProblem = connectProblemText(install.consent, t)
 
   return (
     <ConnectionBar
@@ -56,7 +57,12 @@ export function SlackInstallationBar({ installation, readOnly = false }: Props) 
         !readOnly && (
           <>
             {needsReauth ? (
-              <Button size="sm" loading={install.pending} onClick={() => void install.connect()}>
+              <Button
+                size="sm"
+                disabled={isConnecting(install.consent)}
+                loading={isConnecting(install.consent)}
+                onClick={install.connect}
+              >
                 {t('slack.connected.reauthorise')}
               </Button>
             ) : (
@@ -148,6 +154,13 @@ export function SlackInstallationBar({ installation, readOnly = false }: Props) 
             {testResult.error
               ? t(slackCodeKey(testResult.error) ?? 'slack.connected.testFailed')
               : t('slack.connected.testFailed')}
+          </Alert>
+        </div>
+      )}
+      {connectProblem && (
+        <div className="border-t border-border-panel px-6 py-3">
+          <Alert tone="error" className="py-2">
+            {connectProblem}
           </Alert>
         </div>
       )}
