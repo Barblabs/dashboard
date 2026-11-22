@@ -48,8 +48,13 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
   const [text, setText] = useState('')
   const [problem, setProblem] = useState<string | null>(null)
 
-  function add(chosen: File[]) {
+  function edit() {
     setProblem(null)
+    draft.reset()
+  }
+
+  function add(chosen: File[]) {
+    edit()
     const next = [...files]
     for (const file of chosen) {
       if (!next.some((f) => f.name === file.name && f.size === file.size)) next.push(file)
@@ -145,7 +150,10 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
                       type="button"
                       disabled={draft.isPending}
                       aria-label={t('businessContext.import.removeFile', { name: file.name })}
-                      onClick={() => setFiles(files.filter((f) => f !== file))}
+                      onClick={() => {
+                        edit()
+                        setFiles(files.filter((f) => f !== file))
+                      }}
                       className="flex size-6 cursor-pointer items-center justify-center rounded-md text-gray hover:bg-panel hover:text-critical focus-ring"
                     >
                       <CloseIcon />
@@ -165,7 +173,7 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
           disabled={draft.isPending}
           placeholder={t('businessContext.import.textPlaceholder')}
           onChange={(e) => {
-            setProblem(null)
+            edit()
             setText(e.target.value)
           }}
         />

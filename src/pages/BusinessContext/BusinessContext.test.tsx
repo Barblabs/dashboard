@@ -347,6 +347,24 @@ describe('Business context', () => {
     expect(await within(dialog).findByRole('alert')).toHaveTextContent("Documents can't be read right now.")
   })
 
+  it('drops the reason a draft failed once what to read changes', async () => {
+    const user = await renderPage()
+    server.use(
+      http.post(apiUrl('/business-context/draft'), () =>
+        HttpResponse.json({ code: 'agent_unavailable', error: 'the agent is unavailable' }, { status: 502 }),
+      ),
+    )
+    await user.click(screen.getByRole('button', { name: 'Import documents' }))
+    const dialog = await screen.findByRole('dialog')
+    await user.type(within(dialog).getByLabelText('Or paste text'), 'ACME')
+    await user.click(within(dialog).getByRole('button', { name: 'Generate draft' }))
+    await within(dialog).findByRole('alert')
+
+    await user.type(within(dialog).getByLabelText('Or paste text'), ' sells shoes')
+
+    expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument()
+  })
+
   it('warns when someone else saved first and reloads the newest version', async () => {
     seedSaved('First version.')
     const user = await renderPage()
