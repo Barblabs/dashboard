@@ -1018,9 +1018,10 @@ export const es: Translations = {
         unknown: 'Desconocida',
       },
       informationClassification: {
-        public: 'Pública',
-        private: 'Privada',
+        highly_confidential: 'Altamente confidencial',
         confidential: 'Confidencial',
+        private: 'Privada',
+        public: 'Pública',
         unclassified: 'Sin clasificar',
       },
       lifecycleStage: {
@@ -1110,7 +1111,8 @@ export const es: Translations = {
         help: {
           public: 'Sus datos podrían publicarse sin hacer daño.',
           private: 'Sus datos son solo para tu organización.',
-          confidential: 'Sus datos harían un daño serio si se filtraran: personales, financieros o secretos.',
+          highly_confidential: 'Sus datos son regulados o secretos y filtrarlos sería grave: expedientes médicos, datos de tarjetas o credenciales.',
+          confidential: 'Sus datos internos harían un daño serio si se filtraran, como información personal o financiera.',
         },
         declare: 'Declarar Clasificación',
       },

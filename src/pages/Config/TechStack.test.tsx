@@ -3,6 +3,7 @@ import { delay, http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Asset, AssetsPage } from '../../api/assets'
 import { importedExposure, mockAssets } from '../../mocks/assets'
+import { assetsStore } from '../../mocks/assets-store'
 import { apiUrl } from '../../mocks/url'
 import { chooseFilter } from '../../test/filters'
 import { renderApp, seedSource } from '../../test/render'
@@ -487,6 +488,41 @@ describe('Tech stack', () => {
     expect(option('core-switch-01')).toBeInTheDocument()
     expect(option('prod-api-01')).toBeInTheDocument()
     expect(assetList().queryByRole('option', { name: /crm-db-primary/ })).not.toBeInTheDocument()
+  })
+
+  it('lists the Information Classifications most sensitive first, and filters by Highly Confidential', async () => {
+    assetsStore.save(
+      mockAssets.map((a) =>
+        a.name === 'crm-db-primary'
+          ? {
+              ...a,
+              information_classification: {
+                value: 'highly_confidential',
+                declared_by: 'admin@barbattack.example',
+                declared_at: '2026-11-20T10:00:00Z',
+              },
+            }
+          : a,
+      ),
+    )
+    const user = await renderInventory()
+
+    await user.click(screen.getByRole('button', { name: /^Filters/ }))
+    await user.click(await screen.findByRole('combobox', { name: 'Information Classification' }))
+    // The asset list is a labelled listbox of options too; the filter's options are not in it.
+    const options = (await screen.findAllByRole('option')).filter((o) => !o.closest('[role="listbox"][aria-label]'))
+    expect(options.map((o) => o.textContent)).toEqual(
+      expect.arrayContaining(['Highly Confidential', 'Confidential', 'Private', 'Public', 'Unclassified']),
+    )
+    const names = options.map((o) => o.textContent)
+    expect(names.indexOf('Highly Confidential')).toBeLessThan(names.indexOf('Confidential'))
+    expect(names.indexOf('Private')).toBeLessThan(names.indexOf('Public'))
+    expect(names.indexOf('Public')).toBeLessThan(names.indexOf('Unclassified'))
+    await user.click(screen.getByRole('option', { name: 'Highly Confidential' }))
+    await user.keyboard('{Escape}')
+
+    expect(await screen.findByText('1 asset')).toBeInTheDocument()
+    expect(option('crm-db-primary')).toBeInTheDocument()
   })
 
   it('several Lifecycle Stages list the assets of any of them', async () => {

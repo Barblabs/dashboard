@@ -1268,7 +1268,7 @@ export interface components {
             /** @enum {string} */
             exposure: "internet_facing" | "internal" | "unknown";
             /** @enum {string} */
-            information_classification: "confidential" | "private" | "public" | "unclassified";
+            information_classification: "highly_confidential" | "confidential" | "private" | "public" | "unclassified";
             /** @enum {string} */
             lifecycle_stage: "production" | "implementation" | "stock" | "unknown";
         };
@@ -1361,7 +1361,7 @@ export interface components {
              * @description Unclassified cannot be declared; clear the Declaration instead
              * @enum {string}
              */
-            information_classification: "public" | "private" | "confidential";
+            information_classification: "public" | "private" | "confidential" | "highly_confidential";
         } & {
             [key: string]: unknown;
         };
@@ -1454,7 +1454,7 @@ export interface components {
              * @description Unclassified while no Customer Admin declared it, which does not mean the data is public
              * @enum {string}
              */
-            information_classification: "confidential" | "private" | "public" | "unclassified";
+            information_classification: "highly_confidential" | "confidential" | "private" | "public" | "unclassified";
             kind: string;
             /** @enum {string} */
             lifecycle_stage: "production" | "implementation" | "stock" | "unknown";
@@ -1640,7 +1640,7 @@ export interface components {
              * @description The declared Information Classification; null when Unclassified
              * @enum {string|null}
              */
-            value: "public" | "private" | "confidential" | null;
+            value: "public" | "private" | "confidential" | "highly_confidential" | null;
         };
         InviteUserRequest: {
             /**
@@ -2475,7 +2475,7 @@ export interface operations {
                 /** @description Exposure codes, as repeated keys, matched against the effective Exposure (exposure.value); an Asset with any of them matches, and unknown matches an Asset without one */
                 exposure?: ("internet_facing" | "internal" | "unknown")[];
                 /** @description Information Classification codes, as repeated keys; an Asset with any of them matches, and unclassified matches an Asset without a Declaration */
-                information_classification?: ("public" | "private" | "confidential" | "unclassified")[];
+                information_classification?: ("public" | "private" | "confidential" | "highly_confidential" | "unclassified")[];
                 /** @description Lifecycle stage codes, as repeated keys; an Asset with any of them matches, and unknown matches an Asset without one, a retired Asset included */
                 lifecycle_stage?: ("production" | "implementation" | "stock" | "unknown")[];
                 /** @description Area ids, as in GET /areas, as repeated keys; an Asset in any of them matches */

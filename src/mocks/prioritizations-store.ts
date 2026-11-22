@@ -100,17 +100,18 @@ const FINDINGS: Record<string, Finding> = {
     group: 2,
     placed_at: '2026-11-10T08:00:00Z',
     closed_at: null,
+    // Since placed, pg-prod-01 was declared Highly Confidential (it holds card data) and rescored with Model 4 (ADR 0037).
     current: {
       asset: {
         criticality: 'high', exposure: 'internal',
-        lifecycle_stage: 'production', information_classification: 'unclassified',
+        lifecycle_stage: 'production', information_classification: 'highly_confidential',
       },
       score_details: {
-        scoring_model: 1, value: 0.3079,
+        scoring_model: 4, value: 0.3079,
         alpha: 0.81, beta: 0.9003, gamma: 0, vulnerability: 0.5131,
         criticality_multiplier: 1, exposure_multiplier: 0.6, lifecycle_multiplier: 1,
-        exploit_signal: null, information_classification_multiplier: null,
-        band: null, data_gaps: [],
+        exploit_signal: 0.9003, information_classification_multiplier: 1,
+        band: 'medium', data_gaps: [],
       },
     },
     details: {

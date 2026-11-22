@@ -261,7 +261,14 @@ function useSignals(finding: Finding): Signal[] {
     {
       label: t('findings.detail.asset.informationClassification'),
       value: informationClassificationLabel(t, classification),
-      tone: classification === null ? 'quiet' : classification === 'confidential' ? 'warn' : 'plain',
+      tone:
+        classification === null
+          ? 'quiet'
+          : classification === 'highly_confidential'
+            ? 'alarm'
+            : classification === 'confidential'
+              ? 'warn'
+              : 'plain',
     },
   ]
 }

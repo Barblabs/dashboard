@@ -623,7 +623,10 @@ const scenarios = {
     // 5 of 5 is prod-api-01: Exposure comes from iTop, Information Classification is missing.
     await expect(sheet.getByText('5 of 5')).toBeVisible()
     await expect(sheet.getByText('prod-api-01')).toBeVisible()
-    await sheet.getByRole('radio', { name: /^Confidential/ }).check()
+    // Most sensitive first (ADR 0037).
+    const levels = await sheet.getByRole('region', { name: 'Information Classification' }).getByRole('radio').evaluateAll((radios) => radios.map((r) => r.value))
+    check(levels.join() === 'highly_confidential,confidential,private,public', `classification order: ${levels}`)
+    await sheet.getByRole('radio', { name: /^Highly Confidential/ }).check()
     await sheet.getByRole('button', { name: 'Declare Classification' }).click()
     await expect(sheet.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
     await shot('classification-declared')
@@ -645,13 +648,13 @@ const scenarios = {
     await shot('exposure-cleared')
     await page.keyboard.press('Escape')
     await expect(assetRecord('analytics-worker-03').getByRole('button', { name: /^Exposure of analytics-worker-03: Unknown, from iTop/ })).toBeVisible()
-    check(callsTo('PUT', '/assets/1/information-classification')[0]?.body?.information_classification === 'confidential', 'classification request mismatch')
+    check(callsTo('PUT', '/assets/1/information-classification')[0]?.body?.information_classification === 'highly_confidential', 'classification request mismatch')
     check(callsTo('PUT', '/assets/2/exposure')[0]?.body?.exposure === 'internal', 'exposure request mismatch')
     check(callsTo('DELETE', '/assets/2/exposure').length === 1, 'expected one exposure clear')
     // A viewer opens the same sheet read-only.
     await signOut()
     await signIn('viewer')
-    await assetRecord('prod-api-01').getByRole('button', { name: /^Information Classification of prod-api-01: Confidential/ }).click()
+    await assetRecord('prod-api-01').getByRole('button', { name: /^Information Classification of prod-api-01: Highly Confidential/ }).click()
     const viewerSheet = page.getByRole('dialog', { name: 'Triage Asset' })
     await expect(viewerSheet.getByText('Only a Customer Admin can declare')).toBeVisible()
     for (const name of ['Declare Exposure', 'Declare Classification', 'Clear']) {
