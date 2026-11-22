@@ -120,9 +120,8 @@ interface DeclarationSection<V extends string> {
   /** `null` clears the Declaration. */
   save: (value: V | null) => void
   pending: 'declare' | 'clear' | null
-  /** A failed save the User can retry; a 409 locks the whole step instead. */
-  failed: boolean
-  turnedInactive: boolean
+  /** `retry` for a failed save the User can retry; a 409 means the Asset turned Inactive and locks the whole step. */
+  failure: 'retry' | 'turnedInactive' | null
   /** How many times it was saved, so the Saved mark re-enters on each save. */
   saves: number
   /** A choice that differs from the Declaration and was not saved. */
@@ -142,7 +141,6 @@ function useDeclarationSection<V extends string, Saved>(
 ): DeclarationSection<V> {
   const [choice, setChoice] = useState(declared)
   const [saves, setSaves] = useState(0)
-  const turnedInactive = errorCode(mutation.error) === 'asset_inactive'
   return {
     declared,
     choice,
@@ -163,11 +161,31 @@ function useDeclarationSection<V extends string, Saved>(
         },
       ),
     pending: mutation.isPending ? (mutation.variables.value === null ? 'clear' : 'declare') : null,
-    failed: mutation.isError && !turnedInactive,
-    turnedInactive,
+    failure: mutation.isError ? (errorCode(mutation.error) === 'asset_inactive' ? 'turnedInactive' : 'retry') : null,
     saves,
     unsaved: choice !== null && choice !== declared,
   }
+}
+
+type StepLock = 'turnedInactive' | 'viewer' | 'inactive' | null
+
+/*
+ * A 409 means the Asset turned Inactive meanwhile. Its error replaces the reason the step is
+ * locked: the User must learn their save didn't happen. A Viewer never sends, so never sees it.
+ */
+function stepLockOf({
+  sections,
+  canEdit,
+  active,
+}: {
+  sections: Pick<DeclarationSection<string>, 'failure'>[]
+  canEdit: boolean
+  active: boolean
+}): StepLock {
+  if (sections.some((section) => section.failure === 'turnedInactive')) return 'turnedInactive'
+  if (!canEdit) return 'viewer'
+  if (!active) return 'inactive'
+  return null
 }
 
 interface QueueStep {
@@ -211,17 +229,8 @@ function AssetStep({ asset: opened, queue }: { asset: Asset; queue?: QueueStep }
     },
   )
 
-  // A 409 means the Asset turned Inactive meanwhile. Its error replaces the reason the step is
-  // locked: the User must learn their save didn't happen. A Viewer never sends, so never sees it.
-  const notice =
-    exposure.turnedInactive || informationClassification.turnedInactive ? (
-      <Alert tone="error">{t('config.triage.sheet.turnedInactive')}</Alert>
-    ) : !canEdit ? (
-      <LockedReason>{t('config.triage.sheet.viewerReason')}</LockedReason>
-    ) : !asset.active ? (
-      <LockedReason>{t('config.triage.sheet.inactiveReason')}</LockedReason>
-    ) : null
-  const locked = notice !== null
+  const lock = stepLockOf({ sections: [exposure, informationClassification], canEdit, active: asset.active })
+  const locked = lock !== null
 
   const unsaved = [
     exposure.unsaved && t('config.inventory.record.exposure'),
@@ -232,7 +241,11 @@ function AssetStep({ asset: opened, queue }: { asset: Asset; queue?: QueueStep }
     <div className="flex min-h-0 flex-1 animate-fade-in flex-col">
       <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-5">
         <AssetHeading asset={asset} />
-        {notice}
+        {lock === 'turnedInactive' ? (
+          <Alert tone="error">{t('config.triage.sheet.turnedInactive')}</Alert>
+        ) : (
+          lock && <LockedReason>{t(`config.triage.sheet.${lock}Reason`)}</LockedReason>
+        )}
         <ExposureSection asset={asset} section={exposure} locked={locked} />
         <InformationClassificationSection asset={asset} section={informationClassification} locked={locked} />
       </div>
@@ -472,7 +485,7 @@ function DeclarationForm<V extends string>({
   children,
 }: DeclarationFormProps<V>) {
   const { t } = useTranslation()
-  const { declared, choice, choose, save, pending, failed } = section
+  const { declared, choice, choose, save, pending, failure } = section
   return (
     <div className="flex flex-col gap-3">
       <ChoiceCards
@@ -484,7 +497,7 @@ function DeclarationForm<V extends string>({
         onChange={choose}
       />
       {children}
-      {failed && <Alert tone="error">{t('config.triage.sheet.saveFailed')}</Alert>}
+      {failure === 'retry' && <Alert tone="error">{t('config.triage.sheet.saveFailed')}</Alert>}
       <div className="flex justify-end gap-2">
         {declared && (
           <Button

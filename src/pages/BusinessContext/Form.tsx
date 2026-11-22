@@ -16,6 +16,7 @@ import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { ImportDialog } from './ImportDialog'
 import { FormMetaContext, type FormMeta } from './meta'
 import { mergeDraft } from './model'
+import { saveStateOf } from './saveState'
 import { SaveStatus } from './SaveStatus'
 import { businessContextSchema } from './schema'
 import { Footprint } from './sections/Footprint'
@@ -69,7 +70,8 @@ export function BusinessContextForm({
   const [applied, setApplied] = useState<number | null>(null)
   const meta = useMemo<FormMeta>(() => ({ filled, readOnly }), [filled, readOnly])
   const dirty = form.formState.isDirty
-  const saving = save.isPending
+  const saveState = saveStateOf(save, stored.version, dirty)
+  const saving = saveState.status === 'saving'
   const position = SECTIONS.indexOf(section)
   const previous = SECTIONS[position - 1]
   const next = SECTIONS[position + 1]
@@ -166,7 +168,7 @@ export function BusinessContextForm({
                 )}
               </div>
               <div className="flex flex-wrap items-center justify-end gap-3">
-                <SaveStatus save={save} version={stored.version} />
+                <SaveStatus state={saveState} onReload={() => save.reset()} />
                 {!readOnly && dirty && !saving && (
                   <Button variant="link" size="sm" onClick={discard}>
                     {t('businessContext.save.discard')}
