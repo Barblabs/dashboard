@@ -23,3 +23,6 @@ node_modules/
 
 # Local agent task artifacts (PR descriptions, notes)
 .humanlayer/
+
+# Lavish review artifacts
+.lavish/
