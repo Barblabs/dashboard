@@ -95,6 +95,19 @@ describe('Business context', () => {
     // Types through every section: alone it takes about 4 s, past the 5 s default when the whole suite runs.
   }, 15_000)
 
+  it('stops saying Saved once something is typed after the save', async () => {
+    seedSaved('We sell shoes online.')
+    const user = await renderPage()
+    await user.type(screen.getByLabelText('What does your organization do?'), ' And boots.')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByRole('status')).toHaveTextContent('Saved')
+
+    await user.type(screen.getByLabelText('What does your organization do?'), ' And socks.')
+
+    expect(screen.queryByText(/Saved/)).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled()
+  })
+
   it('refuses an entry that is not a domain', async () => {
     const user = await fillByHand()
     await user.click(screen.getByRole('tab', { name: /Digital footprint/ }))
