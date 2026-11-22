@@ -265,6 +265,16 @@ describe('Configuration', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
+  it('shows the connection when someone else connects while the form is open', async () => {
+    await openForm()
+    expect(screen.getByRole('heading', { name: 'Connect iTop' })).toBeInTheDocument()
+
+    seedSource()
+    window.dispatchEvent(new Event('visibilitychange'))
+
+    expect(await screen.findByText('iTop connected')).toBeInTheDocument()
+  })
+
   it('testing with the admin user fails with the REST profile message', async () => {
     const user = await openForm()
     await fillForm(user, { ...VALID_CREDENTIALS, username: 'admin' })
