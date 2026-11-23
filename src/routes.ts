@@ -5,7 +5,6 @@ import { BusinessContextPage } from './pages/BusinessContext'
 import { ConfigPage } from './pages/Config'
 import { FindingsPage } from './pages/Findings'
 import { NewsPage } from './pages/News'
-import { NotificationsPage } from './pages/Notifications'
 import { TenantsPage } from './pages/Tenants'
 import { UsersPage } from './pages/Users'
 
@@ -30,7 +29,6 @@ export const PAGES = [
   { id: 'news', Page: NewsPage, roles: CUSTOMER_ROLES },
   { id: 'config', Page: ConfigPage, roles: CUSTOMER_ROLES },
   { id: 'business-context', Page: BusinessContextPage, roles: CUSTOMER_ROLES },
-  { id: 'notifications', Page: NotificationsPage, roles: CUSTOMER_ROLES },
   { id: 'users', Page: UsersPage, roles: CUSTOMER_ADMIN },
   { id: 'tenants', Page: TenantsPage, roles: PLATFORM_ADMIN },
   { id: 'admin-dashboard', Page: AdminDashboardPage, roles: PLATFORM_ADMIN },

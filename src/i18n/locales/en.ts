@@ -17,7 +17,6 @@ export const en = {
       news: 'News',
       config: 'Configuration',
       'business-context': 'Business context',
-      notifications: 'Notifications',
       users: 'Users',
       tenants: 'Tenants',
       'admin-dashboard': 'Dashboard',
@@ -636,9 +635,6 @@ export const en = {
       noVictim: 'Unnamed victim',
       attacker: 'Attacker: {{name}}',
     },
-  },
-  notifications: {
-    title: 'Notifications',
   },
   users: {
     title: 'Users',
