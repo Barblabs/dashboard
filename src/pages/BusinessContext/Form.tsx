@@ -139,11 +139,8 @@ export function BusinessContextForm({
           >
             <Tabs value={section} onValueChange={showSection}>
               <TabList>
-                {SECTIONS.map((s, i) => (
+                {SECTIONS.map((s) => (
                   <Tab key={s} value={s}>
-                    <span className="flex size-6 items-center justify-center rounded-full border border-muted-bg font-mono text-[0.75rem] group-data-active:border-navy group-data-active:bg-navy group-data-active:text-white">
-                      {i + 1}
-                    </span>
                     {t(`businessContext.sections.${s}.title`)}
                   </Tab>
                 ))}
@@ -152,7 +149,6 @@ export function BusinessContextForm({
                 const Content = CONTENT[s]
                 return (
                   <TabPanel key={s} value={s} className="flex flex-col gap-6 p-6 md:p-8">
-                    <p className="font-body text-[0.9375rem] text-gray">{t(`businessContext.sections.${s}.description`)}</p>
                     <Content />
                   </TabPanel>
                 )
@@ -163,7 +159,7 @@ export function BusinessContextForm({
               <div>
                 {previous && (
                   <Button variant="link" size="sm" onClick={() => setSection(previous)}>
-                    ← {t('businessContext.previous')}
+                    {t('businessContext.previous')}
                   </Button>
                 )}
               </div>
@@ -176,7 +172,7 @@ export function BusinessContextForm({
                 )}
                 {next && (
                   <Button variant="secondary" size="sm" onClick={() => setSection(next)}>
-                    {t('businessContext.next')} →
+                    {t('businessContext.next')}
                   </Button>
                 )}
                 {!readOnly && (

@@ -27,12 +27,7 @@ export function CmdbSelector({ onSelect, className = '' }: Props) {
 
   return (
     <Panel className={`gap-4 ${className}`}>
-      <div className="flex flex-col gap-0.5">
-        <PanelTitle>{t('config.selector.title')}</PanelTitle>
-        <p className="font-body text-[0.875rem] leading-[1.4] text-gray">
-          {t('config.selector.subtitle')}
-        </p>
-      </div>
+      <PanelTitle>{t('config.selector.title')}</PanelTitle>
 
       <div>
         {PROVIDERS.map((p) => (
@@ -55,16 +50,16 @@ export function CmdbSelector({ onSelect, className = '' }: Props) {
               >
                 {t(`config.providers.${p.id}.name`)}
               </span>
-              <span className="font-body text-[0.875rem] text-gray">
-                {t(`config.providers.${p.id}.description`)}
-              </span>
+              {p.id === 'itop' && (
+                <span className="font-body text-[0.875rem] text-gray">{t('config.providers.itop.description')}</span>
+              )}
             </div>
             {p.available ? (
               <Button size="lg" className="shrink-0" onClick={onSelect}>
                 {t('config.selector.select')}
               </Button>
             ) : (
-              <Badge variant="caps">{t('config.selector.comingSoon')}</Badge>
+              <Badge variant="quiet">{t('config.selector.comingSoon')}</Badge>
             )}
           </div>
         ))}

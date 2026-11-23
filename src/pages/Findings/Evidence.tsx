@@ -31,9 +31,9 @@ const CONTEXT_LISTS = new Map<string, ParseKeys>([
   ['/operations/regulations', 'businessContext.fields.regulations'],
   ['/operations/environments', 'businessContext.fields.environments'],
   ['/footprint/domains', 'businessContext.fields.domains.label'],
-  ['/footprint/brands', 'businessContext.fields.brands.label'],
+  ['/footprint/brands', 'businessContext.fields.brands'],
   ['/footprint/technologies', 'businessContext.fields.technologies.label'],
-  ['/footprint/third_parties', 'businessContext.fields.thirdParties.label'],
+  ['/footprint/third_parties', 'businessContext.fields.thirdParties'],
   ['/risk/concerns', 'businessContext.fields.concerns'],
 ])
 

@@ -78,7 +78,7 @@ describe('A finding’s prioritization history', () => {
       .filter((li) => li.parentElement?.tagName === 'OL')
     expect(entries).toHaveLength(3)
     expect(entries[0]).toHaveTextContent(MOVED_DOWN)
-    expect(entries[0]).toHaveTextContent('The finding did not change; the groups above it did.')
+    expect(entries[0]).toHaveTextContent('The finding did not change. The groups above it did.')
     expect(entries[1]).toHaveTextContent('Moved up from Group 3 to 1')
     expect(entries[2]).toHaveTextContent('Entered the order in Group 3')
 
@@ -111,7 +111,7 @@ describe('A finding’s prioritization history', () => {
     const { user, dialog } = await openFinding('CVE-2025-1094')
     const history = await openHistory(user, dialog)
 
-    expect(await within(history).findByText('Looked at again; still in Group 2')).toBeInTheDocument()
+    expect(await within(history).findByText('Looked at again, still in Group 2')).toBeInTheDocument()
     expect(within(history).getByText('Looked at again with no identifiable change')).toBeInTheDocument()
   })
 

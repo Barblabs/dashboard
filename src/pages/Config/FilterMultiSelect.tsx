@@ -25,7 +25,7 @@ export function FilterMultiSelect({
     <div className="flex w-full min-w-0 flex-col gap-1">
       <label
         htmlFor={id}
-        className="font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase"
+        className="font-body text-[0.75rem] font-semibold text-gray"
       >
         {label}
       </label>

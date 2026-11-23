@@ -111,11 +111,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             </button>
           </div>
         )}
-        <p className="font-body text-[0.8125rem] leading-[1.4] text-nav-text-dim">
-          {t('sidebar.footer.course')}
-          <br />
-          {t('sidebar.footer.stage')}
-        </p>
       </div>
     </div>
   )

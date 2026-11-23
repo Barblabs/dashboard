@@ -74,7 +74,7 @@ describe('Findings', () => {
     ])
     expect(within(groups[0]).getByRole('button', { name: 'Open CVE-2021-41773' })).toBeInTheDocument()
     expect(within(groups[2]).getByText(/CVE-2024-21762 y CVE-2024-3400/)).toBeInTheDocument()
-    expect(screen.getByText(/20 findings, 4 groups/)).toBeInTheDocument()
+    expect(screen.getByText('20 findings')).toBeInTheDocument()
     expect(screen.getByText('Weighed with business context v1')).toBeInTheDocument()
   })
 
@@ -102,7 +102,7 @@ describe('Findings', () => {
     expect(within(dialog).getByRole('region', { name: 'Is it in the right place?' })).toBeInTheDocument()
     expect(
       within(dialog).getByText(
-        'No action plan yet. Plans are written on their own, in the order of the list; if you do not want to wait, ask for it now.',
+        'No action plan yet.',
       ),
     ).toBeInTheDocument()
     expect(within(dialog).queryByText(/Improper neutralization of quoting syntax/)).not.toBeInTheDocument()
@@ -121,7 +121,7 @@ describe('Findings', () => {
     const threats = await openSection(user, dialog, 'How it would be attacked')
     expect(within(threats).getByText('T1190')).toBeInTheDocument()
     expect(within(threats).queryByText('M1051')).not.toBeInTheDocument()
-    await user.click(within(threats).getByRole('button', { name: 'Source quote · 1 MITRE mitigation' }))
+    await user.click(within(threats).getByRole('button', { name: 'Source quote and 1 MITRE mitigation' }))
     expect(within(threats).getByText('M1051')).toBeInTheDocument()
     const score = await openSection(user, dialog, 'Score')
     expect(within(score).getByText('Lifecycle multiplier').nextElementSibling).toHaveTextContent(/^1$/)
@@ -273,7 +273,7 @@ describe('Findings', () => {
 
     expect(within(dialog).getByText('Lifecycle Stage').nextElementSibling).toHaveTextContent(/^Unknown$/)
     const score = await openSection(user, dialog, 'Score')
-    expect(within(score).getByText('Estimated: some inputs were missing and took a default.')).toBeInTheDocument()
+    expect(within(score).getByText('Some inputs were missing, so the Score is estimated.')).toBeInTheDocument()
     expect(within(score).getByText('Lifecycle Stage unknown')).toBeInTheDocument()
   })
 
@@ -401,12 +401,12 @@ describe('Findings', () => {
     if (!(classification instanceof HTMLElement)) throw new Error('no value next to Information Classification')
     expect(classification).toHaveTextContent(/^Unclassified$/)
     expect(
-      within(classification).getByTitle("No one has declared it; it doesn't count toward the Score."),
+      within(classification).getByTitle("No one has declared it, so it doesn't count toward the Score."),
     ).toBeInTheDocument()
     const score = await openSection(user, dialog, 'Score')
     expect(within(dialog).queryByText('Public')).not.toBeInTheDocument()
     expect(within(score).getByText('Classification multiplier').nextElementSibling).toHaveTextContent(/^Unclassified$/)
-    expect(within(score).getByText('Estimated: some inputs were missing and took a default.')).toBeInTheDocument()
+    expect(within(score).getByText('Some inputs were missing, so the Score is estimated.')).toBeInTheDocument()
     expect(within(score).getByText('Information Classification undeclared')).toBeInTheDocument()
   })
 
@@ -576,7 +576,7 @@ describe('Findings', () => {
       await user.click(screen.getByRole('tab', { name: 'Summary' }))
 
       expect(screen.getByRole('tab', { name: 'Summary' })).toHaveAttribute('aria-selected', 'true')
-      expect(await screen.findByText('Weekly trend of findings')).toBeInTheDocument()
+      expect(await screen.findByText('Findings per week')).toBeInTheDocument()
     })
   })
 
@@ -590,12 +590,6 @@ describe('Findings', () => {
       // A Finding with no risk level has no row: it has nothing to compare its time with.
       expect(screen.queryByText('45.0 days')).not.toBeInTheDocument()
       expect(screen.queryByText('No risk level')).not.toBeInTheDocument()
-    })
-
-    it('says what the weekly trend’s bars and line count', async () => {
-      await openSummaryTab()
-
-      expect(await screen.findByText(/the line, those still open when the week ended/)).toBeInTheDocument()
     })
 
     it('shows — and none-closed text for a band with no closures', async () => {
@@ -793,7 +787,7 @@ describe('Findings', () => {
 
     it('tells what each colour of the composition per group means', async () => {
       await openBeforeAfterTab()
-      const composition = (await screen.findByRole('heading', { name: 'Risk level composition per group' })).closest('section')!
+      const composition = (await screen.findByRole('heading', { name: 'Risk level per group' })).closest('section')!
 
       const legend = within(composition).getByRole('list', { name: 'Risk level' })
       expect(within(legend).getAllByRole('listitem').length).toBeGreaterThan(1)

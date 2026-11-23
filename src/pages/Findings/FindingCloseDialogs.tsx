@@ -90,7 +90,6 @@ function CloseBody({ finding, onDone }: { finding: FindingRef; onDone: () => voi
   return (
     <DialogLayout
       title={t('findings.close.title', { cve: finding.cve })}
-      description={t('findings.close.description')}
       error={requestErrorText(close.error, t, { fallback: 'findings.close.failed' })}
       onSubmit={() => void onSubmit()}
       actions={

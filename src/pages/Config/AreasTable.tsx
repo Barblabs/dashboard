@@ -146,16 +146,13 @@ export function AreasTable({ readOnly }: { readOnly: boolean }) {
   return (
     <section>
       <div className="flex flex-col gap-4 border-b border-border-panel px-6 pt-5 pb-4">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-baseline gap-3">
-            <h2 className="font-title text-[1rem] text-navy">{t('config.areas.title')}</h2>
-            {query.isSuccess && (
-              <span className="font-body text-[0.8125rem] text-gray">
-                {t('config.areas.total', { count: query.data.areas.length })}
-              </span>
-            )}
-          </div>
-          <p className="font-body text-[0.8125rem] text-gray">{t('config.areas.description')}</p>
+        <div className="flex items-baseline gap-3">
+          <h2 className="font-title text-[1rem] text-navy">{t('config.areas.title')}</h2>
+          {query.isSuccess && (
+            <span className="font-body text-[0.8125rem] text-gray">
+              {t('config.areas.total', { count: query.data.areas.length })}
+            </span>
+          )}
         </div>
         <div className="flex flex-wrap gap-4">
           <FilterSelect

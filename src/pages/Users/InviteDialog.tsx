@@ -78,7 +78,7 @@ function InviteBody({ onClose }: { onClose: () => void }) {
         >
           <Input
             type="email"
-            placeholder="nombre@empresa.com"
+            placeholder={t('login.form.email.placeholder')}
             autoComplete="off"
             disabled={invite.isPending}
             {...register('email')}

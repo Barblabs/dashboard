@@ -36,7 +36,7 @@ export function ConfigPage() {
   const readOnly = !useCanEdit()
 
   return (
-    <Page title={t('config.header.title')} subtitle={t('config.header.subtitle')}>
+    <Page title={t('config.header.title')}>
       <Tabs defaultValue="cmdb">
         <TabList label={t('config.tabs.pageLabel')}>
           <Tab value="cmdb">{t('config.tabs.cmdb')}</Tab>

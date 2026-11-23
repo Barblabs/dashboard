@@ -43,7 +43,6 @@ function AreaOwnerBody({ area, onClose }: { area: Area; onClose: () => void }) {
   return (
     <DialogLayout
       title={t('config.areas.owner.title', { area: area.name })}
-      description={t('config.areas.owner.description')}
       error={requestErrorText(setOwner.error, t, { fallback: 'config.areas.owner.saveFailed' })}
       onSubmit={handleSubmit(({ email }) => save(email))}
       actions={
@@ -71,11 +70,12 @@ function AreaOwnerBody({ area, onClose }: { area: Area; onClose: () => void }) {
     >
       <Field
         label={t('config.areas.owner.email')}
+        help={t('config.areas.owner.help')}
         error={validationText(errors.email?.message)}
       >
         <Input
           type="email"
-          placeholder="nombre@empresa.com"
+          placeholder={t('login.form.email.placeholder')}
           autoComplete="off"
           disabled={setOwner.isPending}
           {...register('email', { onChange: () => setOwner.reset() })}

@@ -7,7 +7,7 @@ import { EMPTY, useDateFormat } from '../../i18n/format'
 import { exposureLabel, informationClassificationLabel } from './assetText'
 
 const MONO = 'font-mono text-[0.8125rem]'
-const LABEL = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase'
+const LABEL = 'font-body text-[0.75rem] font-semibold text-gray'
 // The chrome of the facts that open the triage sheet; each adds its text color, border and background.
 const TRIAGE_BUTTON =
   'focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-sm border px-2.5 py-[3px] font-body text-[0.75rem] font-medium whitespace-nowrap transition-[border-color] duration-150 ease-out hover:border-navy'

@@ -91,7 +91,7 @@ function DigestHeader({ digests, selected, onSelect }: HeaderProps) {
     const { counts } = digest
     const total = counts.named + counts.finding + counts.footprint + counts.peer
     const text = t('news.picker.option', { period: formatPeriod(digest.since, digest.until), count: total })
-    return counts.named > 0 ? `${text} · ${t('news.picker.named', { count: counts.named })}` : text
+    return counts.named > 0 ? `${text}, ${t('news.picker.named', { count: counts.named })}` : text
   }
 
   return (

@@ -30,9 +30,8 @@ export type AssetTriageTarget = { mode: 'single'; asset: Asset } | { mode: 'queu
 
 type Section = 'exposure' | 'informationClassification'
 
-const EASE = 'ease-[cubic-bezier(0.23,1,0.32,1)]'
 const FOOTER = 'flex flex-wrap items-center justify-end gap-2 border-t border-border-panel px-6 py-4'
-const EYEBROW = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase'
+const EYEBROW = 'font-body text-[0.75rem] font-semibold text-gray'
 
 /**
  * Lets the User see where an Asset's Exposure and Information Classification come from and, as a
@@ -78,12 +77,6 @@ function Queue({ assets, onClose }: { assets: Asset[]; onClose: () => void }) {
         title={t('config.triage.sheet.queueTitle')}
         eyebrow={asset && t('config.triage.sheet.position', { index: index + 1, total })}
       />
-      <div className="h-1 shrink-0 bg-panel" aria-hidden="true">
-        <div
-          className={`h-full origin-left bg-nav-active-bg transition-transform duration-300 ${EASE}`}
-          style={{ transform: `scaleX(${index / total})` }}
-        />
-      </div>
       {asset ? (
         // Keyed by Asset, so each one starts from its own Declarations with no leftover choice or error.
         <AssetStep
@@ -398,9 +391,7 @@ function ExposureProvenance({ asset }: { asset: Asset }) {
       : t('config.exposure.sheet.nothingDeclared')
   const importedText = imported
     ? t('config.exposure.sheet.importedFrom', { value: exposureLabel(t, imported) })
-    : asset.kind === 'virtual_machine'
-      ? t('config.exposure.sheet.unknownVirtualMachine')
-      : t('config.exposure.sheet.unknownLocation')
+    : t('config.inventory.exposure.unknown')
 
   return (
     <dl className="flex flex-col gap-1.5 font-body text-[0.8125rem] leading-[1.4]">
@@ -431,7 +422,7 @@ function InformationClassificationProvenance({ asset }: { asset: Asset }) {
         </ProvenanceRow>
       ) : (
         <ProvenanceRow label={informationClassificationLabel(t, null)} inUse={false}>
-          {t('config.informationClassification.sheet.unclassifiedProvenance')}
+          {t('config.exposure.sheet.nothingDeclared')}
         </ProvenanceRow>
       )}
     </dl>
@@ -449,7 +440,7 @@ function ProvenanceRow({ label, inUse, children }: { label: string; inUse: boole
         <dd className="break-words text-gray">{children}</dd>
       </div>
       {inUse && (
-        <span className="shrink-0 rounded-sm bg-navy px-1.5 py-0.5 text-[0.6875rem] font-semibold tracking-[0.04em] text-white uppercase">
+        <span className="shrink-0 rounded-sm bg-navy px-1.5 py-0.5 text-[0.6875rem] font-semibold text-white">
           {t('config.triage.sheet.inUse')}
         </span>
       )}
@@ -570,18 +561,13 @@ interface SummaryProps {
 
 function Summary({ triaged, total, exposureSaved, onClose }: SummaryProps) {
   const { t } = useTranslation()
-  const detail = [
-    exposureSaved && t('config.triage.sheet.summaryDetail'),
-    triaged < total && t('config.triage.sheet.summarySkipped'),
-  ].filter((line) => line !== false)
   return (
     <div className="flex flex-1 animate-fade-in flex-col items-start gap-4 px-6 py-8">
-      <span className="flex size-9 items-center justify-center rounded-full bg-nav-active-bg text-white">
-        <CheckIcon size={16} />
-      </span>
       <div role="status" className="flex flex-col gap-1.5 font-body">
         <p className="text-[1rem] font-semibold text-navy">{t('config.triage.sheet.summary', { triaged, total })}</p>
-        {detail.length > 0 && <p className="text-[0.875rem] leading-[1.45] text-gray">{detail.join(' ')}</p>}
+        {exposureSaved && (
+          <p className="text-[0.875rem] leading-[1.45] text-gray">{t('config.triage.sheet.summaryDetail')}</p>
+        )}
       </div>
       <Button size="sm" onClick={onClose}>
         {t('config.triage.sheet.done')}

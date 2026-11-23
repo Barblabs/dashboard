@@ -12,9 +12,6 @@ export function ConfigStepPanel({ activeStep }: Props) {
   return (
     <aside className="flex w-full shrink-0 flex-col gap-4 rounded-xl bg-navy p-6 md:w-[280px]">
       <h2 className="font-title text-[1.375rem] leading-[1.2] text-white">{t('config.steps.title')}</h2>
-      <p className="font-body text-[0.9375rem] leading-[1.4] text-nav-text">
-        {t('config.steps.description')}
-      </p>
 
       <ol className="flex flex-col gap-3 py-2">
         {STEPS.map((step, i) => {
@@ -40,11 +37,6 @@ export function ConfigStepPanel({ activeStep }: Props) {
           )
         })}
       </ol>
-
-      <div className="flex items-center gap-2 rounded-md border border-nav-text px-3 py-2.5 font-body text-[0.875rem] font-semibold text-white">
-        <span className="size-2 shrink-0 rounded-full bg-gray" />
-        <span>{t('config.steps.status.disconnected')}</span>
-      </div>
     </aside>
   )
 }
