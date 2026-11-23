@@ -30,7 +30,7 @@ describe('Tenants', () => {
 
   it('shows the counter with total and deactivated count', async () => {
     await renderTenants()
-    expect(screen.getByText('3 organizations · 1 deactivated')).toBeInTheDocument()
+    expect(screen.getByText('3 organizations, 1 deactivated')).toBeInTheDocument()
   })
 
   it('shows a counter for a single organization in the singular', async () => {
@@ -44,7 +44,7 @@ describe('Tenants', () => {
     await i18n.changeLanguage()
     seedCustomers([ORG_A, ORG_C])
     await renderTenants()
-    expect(screen.getByText('2 organizaciones · 1 desactivada')).toBeInTheDocument()
+    expect(screen.getByText('2 organizaciones, 1 desactivada')).toBeInTheDocument()
   })
 
   it('filters organizations by name', async () => {
@@ -95,7 +95,7 @@ describe('Tenants', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'An organization with this name already exists.',
     )
-    expect(screen.getByRole('heading', { name: 'Admin email' })).toBeInTheDocument()
+    expect(screen.getByText('Step 2 of 2')).toBeInTheDocument()
   })
 
   it('renames an organization and the card updates', async () => {

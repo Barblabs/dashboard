@@ -654,7 +654,7 @@ export const en = {
       total_other: '{{count}} users',
       disabled_one: '{{count}} disabled',
       disabled_other: '{{count}} disabled',
-      summary: '{{total}} · {{disabled}}',
+      summary: '{{total}}, {{disabled}}',
     },
     invite: {
       button: 'Invite user',
@@ -672,8 +672,7 @@ export const en = {
       emailTaken: 'A user with this email already exists.',
       tempPasswordNotice: "We'll send the user an email with a temporary password.",
       sent: 'Invitation sent to {{email}}.',
-      pending:
-        "User created. The invitation email to {{email}} hasn't gone out yet; it will be retried automatically.",
+      pending: "User created. The invitation email to {{email}} hasn't gone out yet. We'll retry it.",
     },
     columns: {
       email: 'Email',
@@ -723,7 +722,7 @@ export const en = {
       total_other: '{{count}} organizations',
       deactivated_one: '{{count}} deactivated',
       deactivated_other: '{{count}} deactivated',
-      summary: '{{total}} · {{deactivated}}',
+      summary: '{{total}}, {{deactivated}}',
     },
     status: {
       active: 'Active',
@@ -758,12 +757,10 @@ export const en = {
       step1: {
         title: 'New organization',
         label: 'Organization name',
-        placeholder: 'Company name',
         next: 'Next',
         required: 'The name is required.',
       },
       step2: {
-        title: 'Admin email',
         label: 'Admin email',
         notice: 'The admin will receive an email with a temporary password.',
         back: 'Back',

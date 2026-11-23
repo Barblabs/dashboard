@@ -656,7 +656,7 @@ export const es: Translations = {
       total_other: '{{count}} usuarios',
       disabled_one: '{{count}} deshabilitado',
       disabled_other: '{{count}} deshabilitados',
-      summary: '{{total}} · {{disabled}}',
+      summary: '{{total}}, {{disabled}}',
     },
     invite: {
       button: 'Invitar usuario',
@@ -674,8 +674,7 @@ export const es: Translations = {
       emailTaken: 'Ya existe un usuario con este correo.',
       tempPasswordNotice: 'Le enviaremos un correo con una contraseña temporal.',
       sent: 'Invitación enviada a {{email}}.',
-      pending:
-        'Usuario creado. El correo de invitación a {{email}} todavía no salió; se reintentará automáticamente.',
+      pending: 'Usuario creado. El correo de invitación a {{email}} todavía no salió. Lo reintentaremos.',
     },
     columns: {
       email: 'Correo',
@@ -725,7 +724,7 @@ export const es: Translations = {
       total_other: '{{count}} organizaciones',
       deactivated_one: '{{count}} desactivada',
       deactivated_other: '{{count}} desactivadas',
-      summary: '{{total}} · {{deactivated}}',
+      summary: '{{total}}, {{deactivated}}',
     },
     status: {
       active: 'Activa',
@@ -760,12 +759,10 @@ export const es: Translations = {
       step1: {
         title: 'Nueva organización',
         label: 'Nombre de la organización',
-        placeholder: 'Nombre de la empresa',
         next: 'Siguiente',
         required: 'El nombre es obligatorio.',
       },
       step2: {
-        title: 'Correo del administrador',
         label: 'Correo del administrador',
         notice: 'El administrador recibirá un correo con una contraseña temporal.',
         back: 'Atrás',
