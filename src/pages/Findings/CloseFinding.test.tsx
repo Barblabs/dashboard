@@ -170,7 +170,7 @@ describe('Reopening a finding', () => {
 
     expect(
       await within(dialog).findByText(
-        'This finding closed automatically; it will reopen on its own if it shows up again.',
+        'This finding closed automatically. It reopens if it shows up again.',
       ),
     ).toBeInTheDocument()
     expect(within(dialog).queryByRole('button', { name: 'Reopen' })).not.toBeInTheDocument()

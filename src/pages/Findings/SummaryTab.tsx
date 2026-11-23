@@ -88,52 +88,49 @@ function TrendChart({ weeks }: { weeks: WeeklyTrendPoint[] }) {
   }))
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 4, right: 32, bottom: 0, left: -16 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-panel)" vertical={false} />
-            <XAxis dataKey="label" tick={TICK_STYLE} axisLine={false} tickLine={false} />
-            <YAxis yAxisId="count" allowDecimals={false} tick={TICK_STYLE} axisLine={false} tickLine={false} />
-            <YAxis
-              yAxisId="backlog"
-              orientation="right"
-              allowDecimals={false}
-              tick={TICK_STYLE}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: 'var(--color-panel)' }} />
-            {/* Each series carries its translated name, which the legend and the tooltip show. */}
-            <Legend wrapperStyle={{ fontFamily: 'var(--font-body)', fontSize: 13 }} />
-            <Bar
-              yAxisId="count"
-              dataKey="opened"
-              name={t('findings.resumen.trendOpened')}
-              fill="var(--color-high)"
-              radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              yAxisId="count"
-              dataKey="closed"
-              name={t('findings.resumen.trendClosed')}
-              fill="var(--color-navy)"
-              radius={[4, 4, 0, 0]}
-            />
-            <Line
-              yAxisId="backlog"
-              type="monotone"
-              dataKey="open_at_end"
-              name={t('findings.resumen.trendBacklog')}
-              // Red reads as Critical everywhere else.
-              stroke="var(--color-teal)"
-              strokeWidth={2.5}
-              dot={false}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-      <p className="font-body text-[0.875rem] leading-[1.5] text-gray">{t('findings.resumen.trendBacklogHelp')}</p>
+    <div className="h-64">
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart data={data} margin={{ top: 4, right: 32, bottom: 0, left: -16 }}>
+          <CartesianGrid stroke="var(--color-border-row)" vertical={false} />
+          <XAxis dataKey="label" tick={TICK_STYLE} axisLine={false} tickLine={false} />
+          <YAxis yAxisId="count" allowDecimals={false} tick={TICK_STYLE} axisLine={false} tickLine={false} />
+          <YAxis
+            yAxisId="backlog"
+            orientation="right"
+            allowDecimals={false}
+            tick={TICK_STYLE}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: 'var(--color-panel)' }} />
+          {/* Each series carries its translated name, which the legend and the tooltip show. */}
+          <Legend wrapperStyle={{ fontFamily: 'var(--font-body)', fontSize: 13 }} />
+          <Bar
+            yAxisId="count"
+            dataKey="opened"
+            name={t('findings.resumen.trendOpened')}
+            fill="var(--color-high)"
+            radius={[4, 4, 0, 0]}
+          />
+          <Bar
+            yAxisId="count"
+            dataKey="closed"
+            name={t('findings.resumen.trendClosed')}
+            fill="var(--color-navy)"
+            radius={[4, 4, 0, 0]}
+          />
+          <Line
+            yAxisId="backlog"
+            type="monotone"
+            dataKey="open_at_end"
+            name={t('findings.resumen.trendBacklog')}
+            // Red reads as Critical everywhere else.
+            stroke="var(--color-teal)"
+            strokeWidth={2.5}
+            dot={false}
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
     </div>
   )
 }
