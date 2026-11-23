@@ -153,8 +153,10 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
 
   return (
     <div className="flex flex-wrap items-center gap-2 font-body text-[0.875rem]">
-      {filters.fromChart && chips.length > 0 && (
-        <span className="text-gray">{t('findings.chips.fromChart')}</span>
+      {(filters.fromChart || filters.fromDashboard) && chips.length > 0 && (
+        <span className="text-gray">
+          {filters.fromDashboard ? t('findings.chips.fromDashboard') : t('findings.chips.fromChart')}
+        </span>
       )}
       {chips.map(({ key, label }) => (
         <span
@@ -182,7 +184,7 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
         </button>
       )}
       <span className="ml-auto text-gray">{countText}</span>
-      {filters.fromChart && lastRunAt && (
+      {(filters.fromChart || filters.fromDashboard) && lastRunAt && (
         <span className="w-full font-body text-[0.75rem] text-gray">
           {t('findings.chips.fromChartRun', { date: lastRunAt })}
         </span>

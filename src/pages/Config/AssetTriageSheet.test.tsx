@@ -16,7 +16,7 @@ import { holdRequests, server } from '../../test/server'
  */
 const NEEDS_TRIAGE = ['analytics-worker-03', 'core-switch-01', 'payments-gateway', 'reporting-batch-01', 'prod-api-01']
 
-async function renderTechStack(user = renderApp) {
+async function renderTechStack(user: () => ReturnType<typeof renderApp> = () => renderApp('/config')) {
   seedSource()
   const session = user()
   await screen.findByRole('option', { name: /prod-api-01/ })
@@ -313,7 +313,7 @@ describe('Asset triage', () => {
   })
 
   it('a Viewer sees both values and who declared them, with no way to change them', async () => {
-    const user = await renderTechStack(() => renderApp('/', VIEWER))
+    const user = await renderTechStack(() => renderApp('/config', VIEWER))
 
     expect(await screen.findByText('5 Assets need triage.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Triage them' })).not.toBeInTheDocument()

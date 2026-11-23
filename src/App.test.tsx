@@ -7,12 +7,12 @@ function nav() {
 }
 
 describe('Navigation', () => {
-  it('opens the configuration page by default', async () => {
+  it('opens the dashboard page by default', async () => {
     renderApp()
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
-    expect(window.location.pathname).toBe('/config')
-    expect(nav().getByRole('link', { name: 'Configuration' })).toHaveAttribute('aria-current', 'page')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/dashboard')
+    expect(nav().getByRole('link', { name: 'Dashboard' })).toHaveAttribute('aria-current', 'page')
   })
 
   it('switches pages from the sidebar', async () => {
@@ -26,12 +26,6 @@ describe('Navigation', () => {
     expect(nav().getByRole('link', { name: 'Configuration' })).not.toHaveAttribute('aria-current')
   })
 
-  it('opens a page from its URL', () => {
-    renderApp('/notifications')
-
-    expect(screen.getByRole('heading', { level: 1, name: 'Notifications' })).toBeInTheDocument()
-  })
-
   it('shows the not found page for unknown URLs', async () => {
     const user = renderApp('/does-not-exist')
 
@@ -40,7 +34,7 @@ describe('Navigation', () => {
 
     await user.click(screen.getByRole('link', { name: 'Back to home' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
   })
 
   it('shows the forbidden page', () => {
@@ -58,13 +52,13 @@ describe('Pages by role', () => {
   it('shows a Customer Admin every customer page, in order', () => {
     renderApp('/findings')
 
-    expect(navLinks()).toEqual(['Findings', 'News', 'Configuration', 'Business context', 'Notifications', 'Users'])
+    expect(navLinks()).toEqual(['Dashboard', 'Findings', 'News', 'Configuration', 'Business context', 'Users'])
   })
 
   it('shows a Viewer the customer pages without Users, and denies it the Users page', () => {
     renderApp('/users', VIEWER)
 
-    expect(navLinks()).toEqual(['Findings', 'News', 'Configuration', 'Business context', 'Notifications'])
+    expect(navLinks()).toEqual(['Dashboard', 'Findings', 'News', 'Configuration', 'Business context'])
     expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
   })
 
@@ -93,7 +87,7 @@ describe('returnTo after sign-in', () => {
 
     await user.click(screen.getByRole('button', { name: 'Admin (customer_admin)' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
-    expect(window.location.pathname).toBe('/config')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/dashboard')
   })
 })

@@ -10,6 +10,7 @@ export interface FindingsFilters {
   kev: boolean
   text: string
   fromChart: boolean
+  fromDashboard: boolean
   ids: Set<string>
 }
 
@@ -25,6 +26,7 @@ export function parseFilters(params: URLSearchParams): FindingsFilters {
     kev: params.get('kev') === '1',
     text: params.get('q') ?? '',
     fromChart: params.get('from') === 'chart',
+    fromDashboard: params.get('from') === 'dashboard',
     ids: idsParam ? new Set(idsParam.split(',')) : new Set(),
   }
 }
