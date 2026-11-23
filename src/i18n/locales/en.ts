@@ -29,10 +29,6 @@ export const en = {
         viewer: 'Viewer',
       },
     },
-    footer: {
-      course: 'Reto Lyft · TC3008C',
-      stage: 'Stage 3: dissemination and feedback',
-    },
     language: {
       label: 'Language',
     },
@@ -64,7 +60,6 @@ export const en = {
       },
       submit: 'Sign in',
       submitting: 'Signing in…',
-      notice: 'No public registration. Accounts and roles are assigned by an administrator.',
     },
     newPassword: {
       title: 'Create password',
@@ -103,8 +98,7 @@ export const en = {
   },
   findings: {
     title: 'Findings',
-    subtitle:
-      'The order in which to attend your open Findings. It keeps itself up to date: each new or changed Finding takes its place without moving the rest.',
+    subtitle: 'The order in which to attend your open Findings.',
     loading: 'Loading findings…',
     failed: "Couldn't load the findings.",
     network: "Couldn't reach the server to load the findings.",
@@ -802,7 +796,6 @@ export const en = {
   },
   adminDashboard: {
     title: 'Dashboard',
-    subtitle: 'BARBATTACK operations. Counts only: no assets, findings, or customer business data.',
     loading: 'Loading…',
     loadFailed: 'Could not load dashboard data.',
     networkError: 'Could not reach the server to load the dashboard.',
@@ -900,7 +893,6 @@ export const en = {
       },
       password: {
         label: 'Password',
-        help: 'Sent to the backend. Not stored in the browser.',
         required: 'The password is required.',
       },
       actions: {
@@ -1082,8 +1074,6 @@ export const en = {
         nothingDeclared: 'Nothing declared.',
         imported: 'From iTop',
         importedFrom: '{{value}}, from its iTop Location.',
-        unknownVirtualMachine: 'Unknown: iTop has no Location for a Virtual Machine.',
-        unknownLocation: "Unknown: its iTop Location isn't one barbattack reads.",
         question: 'Is it reachable from the public internet?',
         help: {
           internet_facing: 'Reachable from the public internet.',
@@ -1104,7 +1094,6 @@ export const en = {
     informationClassification: {
       cellLabel: 'Information Classification of {{name}}: {{value}}',
       sheet: {
-        unclassifiedProvenance: 'iTop has no field for it, so only a declaration sets it.',
         question: 'How sensitive is the data it holds?',
         help: {
           public: 'Its data could be published without harm.',
@@ -1133,8 +1122,7 @@ export const en = {
         declaredBy: '{{value}}, declared by {{user}} on {{date}}.',
         inUse: 'In use',
         viewerReason: 'Only a Customer Admin can declare an Exposure or an Information Classification.',
-        inactiveReason:
-          "barbattack doesn't monitor Inactive Assets, so their Exposure and Information Classification can't be declared.",
+        inactiveReason: "An Inactive Asset's Exposure and Information Classification can't be declared.",
         turnedInactive:
           "This Asset just turned Inactive, so its Exposure and Information Classification can't be declared.",
         clear: 'Clear',
@@ -1217,11 +1205,9 @@ export const en = {
       },
       servicenow: {
         name: 'ServiceNow',
-        description: 'Integration planned for a future release.',
       },
       other: {
         name: 'Other CMDB',
-        description: 'Connection through a generic API or an inventory file.',
       },
     },
   },

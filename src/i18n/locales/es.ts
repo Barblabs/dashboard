@@ -31,10 +31,6 @@ export const es: Translations = {
         viewer: 'Lector',
       },
     },
-    footer: {
-      course: 'Reto Lyft · TC3008C',
-      stage: 'Etapa 3: diseminación y feedback',
-    },
     language: {
       label: 'Idioma',
     },
@@ -66,7 +62,6 @@ export const es: Translations = {
       },
       submit: 'Entrar',
       submitting: 'Entrando…',
-      notice: 'No hay registro público. Las cuentas y los roles los asigna un administrador.',
     },
     newPassword: {
       title: 'Crear contraseña',
@@ -105,8 +100,7 @@ export const es: Translations = {
   },
   findings: {
     title: 'Hallazgos',
-    subtitle:
-      'El orden en que conviene atender tus hallazgos abiertos. Se mantiene al día solo: cada hallazgo nuevo o que cambió toma su lugar sin mover a los demás.',
+    subtitle: 'El orden en que conviene atender tus hallazgos abiertos.',
     loading: 'Cargando hallazgos…',
     failed: 'No se pudieron cargar los hallazgos.',
     network: 'No se pudo contactar al servidor para cargar los hallazgos.',
@@ -804,7 +798,6 @@ export const es: Translations = {
   },
   adminDashboard: {
     title: 'Dashboard',
-    subtitle: 'Operación de BARBATTACK. Solo conteos: sin activos, hallazgos ni datos de negocio de los clientes.',
     loading: 'Cargando…',
     loadFailed: 'No se pudo cargar el dashboard.',
     networkError: 'No se pudo contactar al servidor para cargar el dashboard.',
@@ -902,7 +895,6 @@ export const es: Translations = {
       },
       password: {
         label: 'Contraseña',
-        help: 'Se envía al backend. No se guarda en el navegador.',
         required: 'La contraseña es obligatoria.',
       },
       actions: {
@@ -1084,8 +1076,6 @@ export const es: Translations = {
         nothingDeclared: 'Nada declarado.',
         imported: 'De iTop',
         importedFrom: '{{value}}, por su ubicación en iTop.',
-        unknownVirtualMachine: 'Desconocida: iTop no tiene ubicación para una máquina virtual.',
-        unknownLocation: 'Desconocida: su ubicación en iTop no es una que barbattack lea.',
         question: '¿Se puede alcanzar desde internet?',
         help: {
           internet_facing: 'Alcanzable desde internet.',
@@ -1106,7 +1096,6 @@ export const es: Translations = {
     informationClassification: {
       cellLabel: 'Clasificación de la Información de {{name}}: {{value}}',
       sheet: {
-        unclassifiedProvenance: 'iTop no tiene un campo para esto, así que solo una declaración lo define.',
         question: '¿Qué tan sensibles son los datos que guarda?',
         help: {
           public: 'Sus datos podrían publicarse sin hacer daño.',
@@ -1135,8 +1124,7 @@ export const es: Translations = {
         declaredBy: '{{value}}, declarada por {{user}} el {{date}}.',
         inUse: 'En uso',
         viewerReason: 'Solo un Administrador puede declarar una Exposición o una Clasificación de la Información.',
-        inactiveReason:
-          'barbattack no monitorea los activos inactivos, así que su Exposición y su Clasificación de la Información no se pueden declarar.',
+        inactiveReason: 'La Exposición y la Clasificación de la Información de un activo inactivo no se pueden declarar.',
         turnedInactive:
           'Este activo acaba de quedar inactivo, así que su Exposición y su Clasificación de la Información no se pueden declarar.',
         clear: 'Quitar',
@@ -1220,11 +1208,9 @@ export const es: Translations = {
       },
       servicenow: {
         name: 'ServiceNow',
-        description: 'Integración planeada para una siguiente versión.',
       },
       other: {
         name: 'Otra CMDB',
-        description: 'Conexión por API genérica o archivo de inventario.',
       },
     },
   },

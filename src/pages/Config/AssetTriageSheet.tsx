@@ -398,9 +398,7 @@ function ExposureProvenance({ asset }: { asset: Asset }) {
       : t('config.exposure.sheet.nothingDeclared')
   const importedText = imported
     ? t('config.exposure.sheet.importedFrom', { value: exposureLabel(t, imported) })
-    : asset.kind === 'virtual_machine'
-      ? t('config.exposure.sheet.unknownVirtualMachine')
-      : t('config.exposure.sheet.unknownLocation')
+    : t('config.inventory.exposure.unknown')
 
   return (
     <dl className="flex flex-col gap-1.5 font-body text-[0.8125rem] leading-[1.4]">
@@ -431,7 +429,7 @@ function InformationClassificationProvenance({ asset }: { asset: Asset }) {
         </ProvenanceRow>
       ) : (
         <ProvenanceRow label={informationClassificationLabel(t, null)} inUse={false}>
-          {t('config.informationClassification.sheet.unclassifiedProvenance')}
+          {t('config.exposure.sheet.nothingDeclared')}
         </ProvenanceRow>
       )}
     </dl>

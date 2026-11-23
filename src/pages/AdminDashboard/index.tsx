@@ -57,7 +57,7 @@ export function AdminDashboardPage() {
   const { t } = useTranslation()
 
   return (
-    <Page title={t('adminDashboard.title')} subtitle={t('adminDashboard.subtitle')}>
+    <Page title={t('adminDashboard.title')}>
       <ChartErrorBoundary><StatsSection /></ChartErrorBoundary>
       <ChartErrorBoundary><OrgsTableSection /></ChartErrorBoundary>
       <ChartErrorBoundary><SyncChartSection /></ChartErrorBoundary>

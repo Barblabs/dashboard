@@ -204,9 +204,7 @@ describe('Asset triage', () => {
     const user = await renderTechStack()
     const sheet = await openSheet(user, 'prod-api-01')
     const classification = classificationSection(sheet)
-    expect(
-      classification.getByText('iTop has no field for it, so only a declaration sets it.'),
-    ).toBeInTheDocument()
+    expect(classification.getByText('Nothing declared.')).toBeInTheDocument()
     expect(classification.queryByRole('button', { name: 'Clear' })).not.toBeInTheDocument()
 
     await user.click(classification.getByRole('radio', { name: /Private/ }))
@@ -217,9 +215,7 @@ describe('Asset triage', () => {
     expect(await screen.findByText('4 Assets need triage.')).toBeInTheDocument()
 
     await user.click(classification.getByRole('button', { name: 'Clear' }))
-    expect(
-      await classification.findByText('iTop has no field for it, so only a declaration sets it.'),
-    ).toBeInTheDocument()
+    expect(await classification.findByText('Nothing declared.')).toBeInTheDocument()
     expect(classification.getByRole('radio', { name: /Private/ })).not.toBeChecked()
     expect(exposureSection(sheet).getByRole('status')).toBeEmptyDOMElement()
     expect(await screen.findByText('5 Assets need triage.')).toBeInTheDocument()
@@ -344,7 +340,7 @@ describe('Asset triage', () => {
     const sheet = within(await screen.findByRole('dialog', { name: 'Triage Asset' }))
     expect(
       sheet.getByText(
-        "barbattack doesn't monitor Inactive Assets, so their Exposure and Information Classification can't be declared.",
+        "An Inactive Asset's Exposure and Information Classification can't be declared.",
       ),
     ).toBeInTheDocument()
     expect(sheet.queryByRole('radio')).not.toBeInTheDocument()
@@ -369,7 +365,7 @@ describe('Asset triage', () => {
         "This Asset just turned Inactive, so its Exposure and Information Classification can't be declared.",
       ),
     ).toBeInTheDocument()
-    expect(sheet.queryByText(/doesn't monitor Inactive Assets/)).not.toBeInTheDocument()
+    expect(sheet.queryByText(/^An Inactive Asset's/)).not.toBeInTheDocument()
     expect(sheet.queryByRole('radio')).not.toBeInTheDocument()
     expect(sheet.queryByRole('button', { name: /Declare/ })).not.toBeInTheDocument()
     // The inventory refetched: the Asset left the Active list.

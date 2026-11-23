@@ -55,9 +55,9 @@ export function CmdbSelector({ onSelect, className = '' }: Props) {
               >
                 {t(`config.providers.${p.id}.name`)}
               </span>
-              <span className="font-body text-[0.875rem] text-gray">
-                {t(`config.providers.${p.id}.description`)}
-              </span>
+              {p.id === 'itop' && (
+                <span className="font-body text-[0.875rem] text-gray">{t('config.providers.itop.description')}</span>
+              )}
             </div>
             {p.available ? (
               <Button size="lg" className="shrink-0" onClick={onSelect}>

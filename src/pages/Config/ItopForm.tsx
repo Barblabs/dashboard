@@ -193,7 +193,6 @@ export function ItopForm({
 
         <Field
           label={t('config.form.password.label')}
-          help={t('config.form.password.help')}
           error={validationText(errors.password?.message)}
         >
           <PasswordInput

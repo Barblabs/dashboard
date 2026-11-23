@@ -11,7 +11,7 @@ export function LoginLayout({ children }: { children: ReactNode }) {
         <Wordmark />
       </header>
 
-      <div className="hidden w-[560px] shrink-0 flex-col justify-between bg-navy px-14 pb-12 pt-14 md:flex">
+      <div className="hidden w-[560px] shrink-0 flex-col bg-navy px-14 pb-12 pt-14 md:flex">
         <div className="flex flex-col gap-7">
           <div className="flex items-center gap-4">
             <img src="/castle-logo.svg" alt="" className="size-16 shrink-0" aria-hidden="true" />
@@ -24,9 +24,6 @@ export function LoginLayout({ children }: { children: ReactNode }) {
             {t('login.form.subtitle')}
           </p>
         </div>
-        <p className="font-body text-[0.8125rem] leading-[1.4] text-nav-text-dim">
-          {t('sidebar.footer.course')}
-        </p>
       </div>
 
       <div className="flex flex-1 items-center justify-center bg-panel px-4 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:p-10">
