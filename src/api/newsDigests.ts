@@ -18,7 +18,9 @@ type NewsDigestList = Schemas['NewsDigestListResponse']
 export type NewsAttack = Schemas['NewsAttackResponse']
 export type NewsItem = Schemas['NewsItemResponse']
 export type NewsGroup = Schemas['NewsGroupResponse']
-export type NewsDigest = Schemas['NewsDigestResponse']
+// The summary's fields come from an embedded Go struct that the OpenAPI spec generator does
+// not reflect, but the Go JSON marshaler always serializes them.
+export type NewsDigest = Schemas['NewsDigestResponse'] & NewsDigestSummary
 
 /** How many digests a reader can go back to: a month of daily ones. */
 const LISTED = 30

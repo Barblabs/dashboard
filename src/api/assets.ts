@@ -1,4 +1,4 @@
-import type { Override, Schemas } from './schemas'
+import { everyOf, type Override, type Schemas } from './schemas'
 
 export const ASSET_KINDS = ['server', 'virtual_machine', 'workstation', 'network_device'] as const
 export type AssetKind = (typeof ASSET_KINDS)[number]
@@ -39,11 +39,13 @@ export type AssetExposure =
     >
 
 export type InformationClassification = NonNullable<Schemas['InformationClassificationResponse']['value']>
-export const INFORMATION_CLASSIFICATIONS = [
-  'public',
-  'private',
+/** Most sensitive first, as the selector and the filter list them (ADR 0037). */
+export const INFORMATION_CLASSIFICATIONS = everyOf<InformationClassification>()([
+  'highly_confidential',
   'confidential',
-] as const satisfies readonly InformationClassification[]
+  'private',
+  'public',
+])
 
 /** `unclassified` matches an Asset without a Declaration. */
 export const INFORMATION_CLASSIFICATION_FILTERS = [...INFORMATION_CLASSIFICATIONS, 'unclassified'] as const

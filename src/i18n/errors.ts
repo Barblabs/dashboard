@@ -35,6 +35,9 @@ const CODE_KEYS = new Map<string, ParseKeys>([
   ['slack_error', 'slack.errors.slackError'],
   ['slack_unavailable', 'slack.errors.unavailable'],
   ['invalid_state', 'slack.errors.invalidState'],
+  ['finding_not_found', 'findings.errors.notFound'],
+  ['finding_closed', 'findings.errors.alreadyClosed'],
+  ['finding_not_closed_by_hand', 'findings.closedByHand.onItsOwn'],
 ])
 
 interface RequestErrorKeys {

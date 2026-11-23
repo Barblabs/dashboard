@@ -1,207 +1,74 @@
 # Dashboard - Barbattack
 
-Frontend del sistema de threat intelligence Barbattack. Muestra el inventario
-de activos del CMDB y los hallazgos de vulnerabilidades priorizados.
+Frontend del sistema de threat intelligence Barbattack: muestra el inventario
+de activos del CMDB y los hallazgos de vulnerabilidades priorizados. Toda la
+información viene de barbackend; el
+front nunca habla directo con iTop.
 
-## Dependencias y cuándo usarlas
-
-| Dependencia | Para qué | Cuándo usarla |
-|---|---|---|
-| `tailwindcss` + `@tailwindcss/vite` | Estilos (el plugin de Vite compila Tailwind en dev y build) | Siempre: utilidades directo en el JSX. Los tokens (colores, fuentes) viven en `@theme` de `src/styles/globals.css`; un color nuevo se agrega ahí, no como valor suelto. Sin `@apply` ni hojas de estilo por componente. |
-| `@base-ui/react` | Componentes accesibles sin estilos | Como base de las primitivas de `src/components/ui/`. Los features usan esas primitivas (`Button`, `Field`, `Input`, `Badge`); si hace falta un control nuevo con comportamiento propio (menú, diálogo, tabs), se envuelve el de Base UI como primitiva nueva. |
-| `axios` | HTTP | Solo a través de `apiClient` (`src/api/client.ts`), que convierte toda falla en `ApiError` (`kind`, `status`, `code`). Ningún componente llama a axios ni a `fetch` directo: cada endpoint es una función en `src/api/`. |
-| `@tanstack/react-query` | Estado del servidor | Todo dato que viene del backend. Un módulo por dominio en `src/api/` (`cmdb.ts`, `assets.ts`) con sus tipos, claves y hooks; los datos que dependen de la conexión van bajo `connectionScopeKey` para que desconectar los borre. Lecturas con `useQuery`; escrituras con `useMutation` que actualizan la caché con la respuesta del contrato (`setQueryData`) en vez de volver a pedir el GET. No copiar datos del servidor a `useState`. |
-| `@tanstack/react-query-devtools` | Inspeccionar la caché | Solo en desarrollo; se carga sola en `App.tsx` y no entra al build. |
-| `react-hook-form` + `zod` + `@hookform/resolvers` | Formularios | Todo formulario: el esquema zod declara las reglas una vez y `zodResolver` las conecta. Los mensajes de error del esquema son claves de traducción, no texto. |
-| `i18next`, `react-i18next`, `i18next-browser-languagedetector` | Traducciones | Todo texto visible, con `useTranslation()` y `t('clave')`. Ver [Idiomas](#idiomas-i18n). |
-| `msw` | Backend falso de las pruebas y del modo mock | Handlers en `src/mocks/`, compartidos por las pruebas y el modo mock de desarrollo. Un endpoint nuevo del contrato se agrega ahí. Ver [Pruebas](#pruebas). |
-| `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom` | Pruebas | Ver [Pruebas](#pruebas). Interactuar con `user-event`, buscar por rol, label o texto, nunca por clases o estado interno. |
-| `react-router` | Ruteo | Las rutas viven en `src/routes.ts` (qué página ve cada rol) y `src/App.tsx` (guardas de sesión y de rol). Una página nueva se agrega a `PAGES`. |
-| `zustand` | Estado global de cliente | Hoy solo la sesión (`src/auth/store.ts`). Úsalo solo para estado de UI compartido entre ramas lejanas del árbol; el estado del servidor va en react-query y el estado local en `useState`. |
-| `aws-amplify` (`aws-amplify/auth`) | Inicio de sesión | Solo dentro de `src/auth/cognito.ts`; el resto de la app pide tokens a `tokens` de `src/auth/tokenSource.ts`. |
-| `recharts` | Gráficas | La del panel de administración (`src/pages/AdminDashboard`). |
+React, Vite, TypeScript, Tailwind, Base UI, react-query, i18next (inglés y
+español) y Cognito para el inicio de sesión.
 
 ## Requisitos
 
-- Node.js 26 (la versión de `.nvmrc`, la misma que usa CI)
+- Node.js 26 (la versión de `.nvmrc`)
 - npm 11+
 
-## Instalación
+## Inicio rápido
 
 ```bash
 npm install
+cp .env.example .env
+npm run dev          # http://localhost:5173
 ```
+
+Con la configuración de ejemplo, la app espera barbackend corriendo en
+`http://localhost:8080` (`./barbackend serve`).
+
+### Modo mock
+
+Para trabajar sin backend ni Cognito, pon `VITE_USE_MOCK=true` en `.env` y
+corre `npm run dev`. MSW intercepta todas las peticiones y la pantalla de login
+ofrece un botón por rol (`platform_admin`, `customer_admin`, `viewer`). El
+build de producción ignora esta variable.
 
 ## Configuración
 
-Copia el archivo de entorno de ejemplo y edítalo:
+| Variable | Descripción |
+|---|---|
+| `VITE_API_URL` | URL base del backend, sin barra al final |
+| `VITE_USE_MOCK` | `true` activa el modo mock (solo en `npm run dev`) |
+| `VITE_COGNITO_REGION` | Región del User Pool |
+| `VITE_COGNITO_USER_POOL_ID` | ID del User Pool |
+| `VITE_COGNITO_CLIENT_ID` | ID del App Client |
 
-```bash
-cp .env.example .env
-```
+Las variables de Cognito son obligatorias fuera del modo mock. No subas `.env`
+al repo.
 
-Variables disponibles:
+## Scripts
 
-| Variable                    | Descripción                                                                          | Ejemplo                    |
-|-----------------------------|--------------------------------------------------------------------------------------|----------------------------|
-| `VITE_API_URL`              | URL base del backend (sin barra al final)                                            | `http://localhost:8080`    |
-| `VITE_USE_MOCK`             | `true` activa el modo mock **solo en desarrollo** (`npm run dev`): MSW intercepta todas las peticiones, sin backend ni Cognito. En el build de producción esta variable se ignora aunque esté en `true`. | `true`                  |
-| `VITE_COGNITO_REGION`       | Región de AWS del User Pool (requerida cuando `VITE_USE_MOCK` no es `true`)          | `us-east-1`                |
-| `VITE_COGNITO_USER_POOL_ID` | ID del User Pool de Cognito                                                          | `us-east-1_XXXXXXXXX`     |
-| `VITE_COGNITO_CLIENT_ID`    | ID del cliente de Cognito (App Client)                                               | `XXXXXXXXXXXXXXXXXXXXXXXXXX` |
+| Comando | Qué hace |
+|---|---|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Typecheck y build de producción en `dist/` |
+| `npm run preview` | Sirve `dist/` localmente |
+| `npm test` | Pruebas (Vitest); `npm run test:watch` en modo watch |
+| `npm run lint` | oxlint con reglas que leen los tipos |
+| `npm run typecheck` | `tsc -b` |
+| `npm run knip` | Archivos, exports y dependencias sin uso |
+| `npm run gen:types` | Regenera `src/api/generated.ts` desde el OpenAPI de barbackend (requiere el backend en `:8080`) |
 
-## Levantar en local
+El hook de pre-commit corre `typecheck`, `lint`, `knip` y `test`.
 
-### Con backend real
+## Despliegue
 
-```bash
-npm run dev
-```
+Cada push a `main` que pasa CI se compila y se sube a S3 + CloudFront. Ver
+[docs/deploy.md](docs/deploy.md) para las variables del environment
+`production` y lo que la infraestructura de Terraform debe proveer.
 
-Abre [http://localhost:5173](http://localhost:5173).
+## Contribuir
 
-Requiere el backend corriendo con `./barbackend serve`.
-
-### Modo mock (sin backend ni Cognito)
-
-Solo funciona con `npm run dev`. **El build de producción ignora `VITE_USE_MOCK` aunque esté en `true`**: el selector de roles y MSW no se incluyen en el bundle.
-
-```bash
-# En .env o .env.local:
-VITE_USE_MOCK=true
-
-npm run dev
-```
-
-La pantalla de login muestra tres botones para elegir rol (`platform_admin`, `customer_admin`, `viewer`) sin necesidad de credenciales de Cognito ni backend corriendo.
-
-## Tipos del contrato (openapi-typescript)
-
-El archivo `src/api/generated.ts` contiene los tipos TypeScript generados desde el OpenAPI del backend. Está commiteado en el repo para que el build no dependa de que el backend esté corriendo.
-
-Cuando el backend cambie su spec, regenera los tipos con:
-
-```bash
-# Requiere el backend corriendo en VITE_API_URL (por defecto http://localhost:8080)
-npm run gen:types
-```
-
-## Idiomas (i18n)
-
-La UI está en inglés y español con react-i18next.
-
-- El idioma se detecta del navegador: cualquier locale `es-*` usa español y
-  cualquier otro usa inglés, que es el idioma de respaldo.
-- El selector ES/EN del pie de la barra lateral cambia el idioma; la elección
-  se guarda en `localStorage` y tiene prioridad sobre el navegador.
-- Los textos viven en `src/i18n/locales/en.ts` y `es.ts`, con claves
-  semánticas en inglés agrupadas por feature (`config.form.url.label`).
-  `en.ts` define el tipo de los recursos: una clave inexistente o mal escrita
-  falla en `tsc`, y `es.ts` debe tener las mismas claves.
-- Ningún texto visible va escrito directo en los componentes. Las únicas
-  excepciones son la marca BARBATTACK y los valores de ejemplo de los
-  `placeholder` del formulario, que no se traducen.
-
-## Pruebas
-
-```bash
-npm test             # corre la suite una vez
-npm run test:watch   # modo watch
-```
-
-Vitest con jsdom y Testing Library. Las pruebas renderizan la app completa con
-sus providers reales y la usan como un usuario (roles, labels, texto
-visible), contra un servidor MSW de Node. Cada archivo de prueba está junto a lo que ejercita: los flujos en
-`src/pages/Config/`, el selector de idioma en `src/components/` y las
-primitivas con comportamiento propio en `src/components/ui/`. La suite corre
-en inglés, salvo las pruebas de cambio de idioma.
-
-- Hay un archivo de handlers por dominio en `src/mocks/handlers/`,
-  siguiendo la API de barbackend, y los datos de ejemplo viven en
-  `src/mocks/`. Para sobrescribir un handler en una prueba, arma la URL
-  con `apiUrl()` de `src/mocks/url.ts`.
-- Cada recurso mock se guarda en `localStorage` con `localStore()` de
-  `src/mocks/localStore.ts`, en un `*-store.ts` por recurso (la conexión CMDB,
-  en `src/mocks/cmdb-store.ts`).
-  `seedSource()` y `renderApp()` de `src/test/render.tsx` preparan el estado y
-  montan la app.
-- El usuario `admin` hace fallar la prueba de conexión con el código
-  `missing_rest_profile`, para probar el mensaje de error traducido.
-
-## Build de producción
-
-```bash
-npm run build    # compila TypeScript y genera dist/
-npm run preview  # sirve dist/ localmente para verificar
-```
-
-## Despliegue (S3 + CloudFront)
-
-Cada push a `main` que pasa `build`, `lint` y `test` ejecuta el job `deploy` de
-`.github/workflows/ci.yml`: compila con los valores del environment
-`production`, sube `dist/` al bucket y crea una invalidación de `/index.html`.
-`dev` nunca despliega. El job está fuera del check `ci`, así que un despliegue
-fallido no bloquea merges.
-
-La infraestructura (bucket, distribución, OAC, rol IAM) vive en el directorio de
-Terraform, no en este repo. El contrato son estas variables (no secrets) del
-environment `production` en GitHub:
-
-| Variable                     | Origen                         |
-|------------------------------|--------------------------------|
-| `AWS_REGION`                 | Terraform                      |
-| `AWS_ROLE_ARN`               | Output de Terraform            |
-| `S3_BUCKET`                  | Output de Terraform            |
-| `CLOUDFRONT_DISTRIBUTION_ID` | Output de Terraform            |
-| `VITE_API_URL`, `VITE_COGNITO_REGION`, `VITE_COGNITO_USER_POOL_ID`, `VITE_COGNITO_CLIENT_ID` | Backend / Cognito |
-
-Si falta alguna, el job falla antes de compilar y lista las que faltan.
-
-Requisitos del lado de Terraform:
-
-- **Trust policy OIDC**: el repo usa subject claims inmutables, así que el `sub`
-  debe ser
-  `repo:Barblabs@338384335/dashboard@1406600557:environment:production`
-  (con `aud` = `sts.amazonaws.com`). La forma con nombres
-  (`repo:Barblabs/dashboard:...`) es rechazada.
-- **Permisos del rol**: `s3:ListBucket`, `s3:PutObject` y `s3:DeleteObject` en
-  el bucket, y `cloudfront:CreateInvalidation` en la distribución.
-- **Rutas del SPA**: la app usa history routing, así que CloudFront debe
-  responder `/index.html` con status 200 ante errores 403 y 404 (custom error
-  responses); si no, abrir `/tenants` directamente falla.
-- La app se sirve desde la raíz de la distribución (Vite usa `base: '/'`).
-
-## Linter
-
-```bash
-npm run lint   # oxlint, con las reglas que leen los tipos (oxlint-tsgolint)
-```
-
-Un hook de pre-commit (husky, instalado con `npm install`) corre `npm run lint`
-y `npm test`; si alguno falla, el commit no se crea.
-
-## Estructura de carpetas
-
-```
-src/
-  api/            # cliente axios, ApiError, tipos del contrato (generated.ts) y hooks de react-query
-  auth/           # sesión, tokens de Cognito (o del modo mock) y permisos por rol
-  components/     # componentes compartidos (Page, Sidebar, QueryBoundary, StatusPage)
-    ui/           # primitivas sobre Base UI y Tailwind (Button, Field, Input, Select, Modal, Sheet…)
-  i18n/           # configuración de i18next, recursos en/es, formatos y mensajes de error
-  mocks/          # handlers de MSW y datos de ejemplo, compartidos por las pruebas y el modo mock
-  pages/          # una carpeta por página (Findings, Config, BusinessContext, Users, Tenants…)
-  styles/         # globals.css: Tailwind y tokens del tema (colores, tipografía)
-  test/           # setup de Vitest, servidor MSW de Node y helpers para montar la app
-docs/
-  contrato-cmdb.md     # endpoints /cmdb/ y una pregunta abierta sobre permisos
-  agents/              # convenciones para agentes (issues, etiquetas, glosario)
-```
-
-## Notas de desarrollo
-
-- Nunca subas `.env` al repo; contiene la URL del backend.
-- Nunca conectes el front directo a iTop; todo pasa por el backend.
-- Los estilos se escriben con utilidades de Tailwind en los componentes, sin
-  `@apply` ni hojas de estilo por componente. `globals.css` es la única hoja
-  de estilos.
+- [CONTRIBUTING.md](CONTRIBUTING.md): estructura del código, qué dependencia
+  usar para qué, traducciones y pruebas.
+- [CODING_STANDARDS.md](CODING_STANDARDS.md): reglas de revisión.
+- [docs/contrato-cmdb.md](docs/contrato-cmdb.md): contrato de los endpoints
+  `/cmdb/`.

@@ -81,7 +81,7 @@ function FindingRow({ order, finding, onOpen }: { order: CurrentOrder; finding: 
     <tr
       // The whole row is the mouse target; the button stays the keyboard and screen reader path.
       onClick={() => onOpen(finding.finding_id)}
-      className={`cursor-pointer transition-colors duration-150 hover:bg-row-hover ${closed ? 'text-gray' : ''}`}
+      className={`cursor-pointer transition-colors duration-150 hover:bg-row-hover ${closed ? 'opacity-60' : ''}`}
     >
       <td className={CELL}>
         <OpenButton finding={finding} onOpen={onOpen} />

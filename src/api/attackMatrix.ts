@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from './client'
+import { findingsStatsScopeKey } from './findingsSummary'
 import type { Schemas } from './schemas'
 import type { Override } from './schemas'
 
@@ -22,13 +23,10 @@ export type AttackMatrixData = Override<
   { tactics: TacticCount[] }
 >
 
-export function useAttackMatrixQuery(role: string) {
+/** Every Technique role together: the Threats tab shows the whole matrix. */
+export function useAttackMatrixQuery() {
   return useQuery({
-    queryKey: ['findings-attack-matrix', role],
-    queryFn: () => {
-      const params = new URLSearchParams({ limit: '10' })
-      if (role) params.set('role', role)
-      return api.get<AttackMatrixData>(`/findings/attack-matrix?${params}`)
-    },
+    queryKey: [...findingsStatsScopeKey, 'attack-matrix'],
+    queryFn: () => api.get<AttackMatrixData>('/findings/attack-matrix?limit=10'),
   })
 }

@@ -21,6 +21,10 @@ const KEYS = {
 
 const NEW_CONNECTION = { url: '', user: '' }
 
+type ConnectStep = 'chooseCmdb' | 'credentials'
+
+const STEP_NUMBER = { chooseCmdb: 1, credentials: 2 } as const satisfies Record<ConnectStep, number>
+
 /*
  * The page holds two halves: the CMDB connection flow (which carries its own nested
  * tabs once connected) and Slack delivery setup. They are siblings because Slack does
@@ -53,10 +57,12 @@ export function ConfigPage() {
 
 function ConfigBody({ source, readOnly }: { source: CmdbSource | null; readOnly: boolean }) {
   const { t } = useTranslation()
-  const [connecting, setConnecting] = useState(false)
+  const [step, setStep] = useState<ConnectStep>('chooseCmdb')
   const [editing, setEditing] = useState(false)
 
-  if (source && !connecting) {
+  if (source && step !== 'chooseCmdb') setStep('chooseCmdb')
+
+  if (source) {
     return (
       <div className="flex animate-fade-in flex-col gap-6">
         <ConnectedBar source={source} onEdit={() => setEditing(true)} readOnly={readOnly} />
@@ -78,17 +84,17 @@ function ConfigBody({ source, readOnly }: { source: CmdbSource | null; readOnly:
 
   return (
     <div className="flex flex-col gap-[22px] md:flex-row md:items-start">
-      <ConfigStepPanel activeStep={connecting ? 2 : 1} />
-      {connecting ? (
+      <ConfigStepPanel activeStep={STEP_NUMBER[step]} />
+      {step === 'credentials' ? (
         <ItopForm
           className="animate-fade-in"
           mode="connect"
           initialValues={NEW_CONNECTION}
-          onBack={() => setConnecting(false)}
-          onSaved={() => setConnecting(false)}
+          onBack={() => setStep('chooseCmdb')}
+          onSaved={() => setStep('chooseCmdb')}
         />
       ) : (
-        <CmdbSelector className="animate-fade-in" onSelect={() => setConnecting(true)} />
+        <CmdbSelector className="animate-fade-in" onSelect={() => setStep('credentials')} />
       )}
     </div>
   )

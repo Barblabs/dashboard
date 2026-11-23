@@ -30,7 +30,7 @@ export function References({ urls }: { urls: string[] }) {
                   target="_blank"
                   rel="noreferrer"
                   title={url}
-                  className="focus-ring group flex min-w-0 items-baseline gap-2 rounded-sm py-1 font-body text-[0.8125rem]"
+                  className="focus-ring group flex min-w-0 items-baseline gap-2 rounded-sm py-1 font-body text-[0.875rem]"
                 >
                   <span className="shrink-0 font-semibold text-navy group-hover:underline">
                     {parsed.hostname.replace(/^www\./, '')}
@@ -53,7 +53,7 @@ export function References({ urls }: { urls: string[] }) {
           type="button"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
-          className="focus-ring cursor-pointer self-start rounded-sm font-body text-[0.8125rem] font-semibold text-nav-active-bg hover:underline"
+          className="focus-ring cursor-pointer self-start rounded-sm font-body text-[0.875rem] font-semibold text-nav-active-bg hover:underline"
         >
           {open ? t('findings.detail.showLess') : t('findings.detail.showAllReferences', { count: urls.length })}
         </button>

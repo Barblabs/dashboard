@@ -17,6 +17,7 @@ afterEach(async () => {
   cleanup()
   vi.unstubAllGlobals()
   server.resetHandlers()
+  server.events.removeAllListeners()
   localStorage.clear()
   useAuthStore.setState(useAuthStore.getInitialState(), true)
   await i18n.changeLanguage()

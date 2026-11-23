@@ -68,7 +68,7 @@ describe('News', () => {
       'Technology and suppliers 2',
       'Your sector 3',
     ])
-    expect(screen.queryByText(/The Editor didn't answer/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/The summary couldn't be written/)).not.toBeInTheDocument()
   })
 
   it('shows the labels the backend wrote, as written, on every item that has them', async () => {
@@ -195,8 +195,8 @@ describe('News', () => {
 
     await user.selectOptions(screen.getByLabelText('Digest'), screen.getByRole('option', { name: /^Nov 15/ }))
 
-    expect(await screen.findByText(/The Editor didn't answer/)).toHaveTextContent(
-      "The Editor didn't answer; the news follows the rules' order, without explanations.",
+    expect(await screen.findByText(/The summary couldn't be written/)).toHaveTextContent(
+      "The summary couldn't be written; the news follows the rules' order, without explanations.",
     )
     expect(window.location.search).toBe(`?digest=${newsDigestsStore.load()[1].id}`)
     expect(groups().map((g) => within(g).getByRole('heading', { level: 2 }).textContent)).toEqual([
@@ -204,7 +204,7 @@ describe('News', () => {
       'Attacks in your sector',
     ])
     expect(screen.queryByText('Why it may matter to you')).not.toBeInTheDocument()
-    expect(screen.getAllByText(/The Editor didn't answer/)).toHaveLength(1)
+    expect(screen.getAllByText(/The summary couldn't be written/)).toHaveLength(1)
   })
 
   it('lists the earlier digests with their period and how many items they hold', async () => {

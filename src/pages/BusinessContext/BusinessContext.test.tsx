@@ -92,6 +92,20 @@ describe('Business context', () => {
     ])
     expect(stored.context.footprint.domains).toEqual(['shoes.example'])
     expect(stored.context.risk.appetite).toBe('cautious')
+    // Types through every section: alone it takes about 4 s, past the 5 s default when the whole suite runs.
+  }, 15_000)
+
+  it('stops saying Saved once something is typed after the save', async () => {
+    seedSaved('We sell shoes online.')
+    const user = await renderPage()
+    await user.type(screen.getByLabelText('What does your organization do?'), ' And boots.')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByRole('status')).toHaveTextContent('Saved')
+
+    await user.type(screen.getByLabelText('What does your organization do?'), ' And socks.')
+
+    expect(screen.queryByText(/Saved/)).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled()
   })
 
   it('refuses an entry that is not a domain', async () => {
@@ -303,7 +317,7 @@ describe('Business context', () => {
     await anyFile.upload(within(dialog).getByLabelText('Files'), new File(['x'], 'logo.png', { type: 'image/png' }))
     await user.click(within(dialog).getByRole('button', { name: 'Generate draft' }))
 
-    expect(within(dialog).getByRole('alert')).toHaveTextContent('logo.png: the agent reads PDF, Word (.docx), TXT, Markdown, CSV and JSON files.')
+    expect(within(dialog).getByRole('alert')).toHaveTextContent('logo.png: we read PDF, Word (.docx), TXT, Markdown, CSV and JSON files.')
     expect(drafts).toBe(0)
   })
 
@@ -330,7 +344,25 @@ describe('Business context', () => {
     await user.type(within(dialog).getByLabelText('Or paste text'), 'ACME')
     await user.click(within(dialog).getByRole('button', { name: 'Generate draft' }))
 
-    expect(await within(dialog).findByRole('alert')).toHaveTextContent('The agent is unavailable right now.')
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent("Documents can't be read right now.")
+  })
+
+  it('drops the reason a draft failed once what to read changes', async () => {
+    const user = await renderPage()
+    server.use(
+      http.post(apiUrl('/business-context/draft'), () =>
+        HttpResponse.json({ code: 'agent_unavailable', error: 'the agent is unavailable' }, { status: 502 }),
+      ),
+    )
+    await user.click(screen.getByRole('button', { name: 'Import documents' }))
+    const dialog = await screen.findByRole('dialog')
+    await user.type(within(dialog).getByLabelText('Or paste text'), 'ACME')
+    await user.click(within(dialog).getByRole('button', { name: 'Generate draft' }))
+    await within(dialog).findByRole('alert')
+
+    await user.type(within(dialog).getByLabelText('Or paste text'), ' sells shoes')
+
+    expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('warns when someone else saved first and reloads the newest version', async () => {

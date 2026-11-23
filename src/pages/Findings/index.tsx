@@ -14,6 +14,7 @@ import { FilterChips, FindingsFilterBar } from './FindingsFilter'
 import { GroupPanel } from './GroupPanel'
 import { SummaryIndicators } from './SummaryIndicators'
 import { BeforeAfterTabContent } from './BeforeAfterTab'
+import { ClosedTabContent } from './ClosedTab'
 import { RiskTabContent } from './RiskTab'
 import { SummaryTabContent } from './SummaryTab'
 import { ThreatsTabContent } from './ThreatsTab'
@@ -42,6 +43,7 @@ export function FindingsPage() {
       <Tabs value={tab} onValueChange={changeTab}>
         <TabList label={t('findings.tabs.label')}>
           <Tab value="prioritized">{t('findings.tabs.prioritized')}</Tab>
+          <Tab value="closed">{t('findings.tabs.closed')}</Tab>
           <Tab value="summary">{t('findings.tabs.summary')}</Tab>
           <Tab value="before-after">{t('findings.tabs.beforeAfter')}</Tab>
           <Tab value="risk">{t('findings.tabs.risk')}</Tab>
@@ -50,6 +52,9 @@ export function FindingsPage() {
 
         <TabPanel value="prioritized" className="mt-6">
           <ChartErrorBoundary><PrioritizedTabContent /></ChartErrorBoundary>
+        </TabPanel>
+        <TabPanel value="closed" className="mt-6">
+          <ClosedTabContent />
         </TabPanel>
         <TabPanel value="summary" className="mt-6">
           <SummaryTabContent />

@@ -428,7 +428,7 @@ const scenarios = {
       check(fullScreen === (device === 'phone'), `${device}: detail box ${JSON.stringify(box)} vs viewport ${JSON.stringify(viewport)}`)
       check((radius === '0px') === (device === 'phone'), `${device}: detail corner radius ${radius}`)
       check(why && why.y + why.height <= viewport.height, `${device}: "Why it is here" starts below the first screen (${JSON.stringify(why)})`)
-      await detail.getByRole('button', { name: 'Close' }).first().click()
+      await detail.getByRole('button', { name: 'Close', exact: true }).click()
       await expect(detail).toBeHidden()
 
       await (device === 'phone' ? page.getByRole('button', { name: 'Menu', includeHidden: true }).click().then(() => page.getByRole('dialog').getByRole('button', { name: 'Sign out' }).click()) : signOut())
@@ -623,7 +623,10 @@ const scenarios = {
     // 5 of 5 is prod-api-01: Exposure comes from iTop, Information Classification is missing.
     await expect(sheet.getByText('5 of 5')).toBeVisible()
     await expect(sheet.getByText('prod-api-01')).toBeVisible()
-    await sheet.getByRole('radio', { name: /^Confidential/ }).check()
+    // Most sensitive first (ADR 0037).
+    const levels = await sheet.getByRole('region', { name: 'Information Classification' }).getByRole('radio').evaluateAll((radios) => radios.map((r) => r.value))
+    check(levels.join() === 'highly_confidential,confidential,private,public', `classification order: ${levels}`)
+    await sheet.getByRole('radio', { name: /^Highly Confidential/ }).check()
     await sheet.getByRole('button', { name: 'Declare Classification' }).click()
     await expect(sheet.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible()
     await shot('classification-declared')
@@ -645,13 +648,13 @@ const scenarios = {
     await shot('exposure-cleared')
     await page.keyboard.press('Escape')
     await expect(assetRecord('analytics-worker-03').getByRole('button', { name: /^Exposure of analytics-worker-03: Unknown, from iTop/ })).toBeVisible()
-    check(callsTo('PUT', '/assets/1/information-classification')[0]?.body?.information_classification === 'confidential', 'classification request mismatch')
+    check(callsTo('PUT', '/assets/1/information-classification')[0]?.body?.information_classification === 'highly_confidential', 'classification request mismatch')
     check(callsTo('PUT', '/assets/2/exposure')[0]?.body?.exposure === 'internal', 'exposure request mismatch')
     check(callsTo('DELETE', '/assets/2/exposure').length === 1, 'expected one exposure clear')
     // A viewer opens the same sheet read-only.
     await signOut()
     await signIn('viewer')
-    await assetRecord('prod-api-01').getByRole('button', { name: /^Information Classification of prod-api-01: Confidential/ }).click()
+    await assetRecord('prod-api-01').getByRole('button', { name: /^Information Classification of prod-api-01: Highly Confidential/ }).click()
     const viewerSheet = page.getByRole('dialog', { name: 'Triage Asset' })
     await expect(viewerSheet.getByText('Only a Customer Admin can declare')).toBeVisible()
     for (const name of ['Declare Exposure', 'Declare Classification', 'Clear']) {
@@ -757,21 +760,183 @@ const scenarios = {
     // The open Finding lives in the URL, so a reload lands on it.
     await page.reload()
     await expect(detail.getByRole('heading', { name: 'Action plan' })).toBeVisible()
-    await detail.getByRole('button', { name: 'Ask Luna for an action plan' }).click()
-    await expect(detail.getByText('Luna is writing the plan')).toBeVisible()
-    await expect(detail.getByText(/^Written by Luna/)).toBeVisible(15000)
-    await shot('plan', detail.getByText(/^Written by Luna/))
-    await detail.getByLabel('What do you say?').selectOption({ label: 'Should be attended earlier' })
+    await detail.getByRole('button', { name: 'Get an action plan' }).click()
+    await expect(detail.getByText('Writing the plan')).toBeVisible()
+    await expect(detail.getByText(/^Written /)).toBeVisible(15000)
+    await shot('plan', detail.getByText(/^Written /))
+    // The technical sections start folded and unfold on demand.
+    await detail.getByRole('button', { name: /^Vulnerability/ }).click()
+    await expect(detail.getByText('CVSS 3.1 vector')).toBeVisible()
+    await shot('vulnerability', detail.getByRole('button', { name: /^Vulnerability/ }))
+    const text = await detail.innerText()
+    check(!/Luna|Prioritizer|Cartógrafo|Editor|Analista|agent|inferred|Scoring Model/i.test(text), 'the detail names an agent, an inference or the Scoring Model')
+    await detail.getByRole('button', { name: 'Should be attended earlier' }).click()
     await detail.getByRole('textbox', { name: 'Why', exact: true }).fill('Customer-facing and exploited in the wild.')
     await detail.getByRole('button', { name: 'Send' }).click()
     await expect(detail.getByText('Saved.')).toBeVisible()
     await shot('feedback', detail.getByText('Saved.'))
-    await detail.getByRole('button', { name: 'Close' }).first().click()
+    await detail.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(detail).toBeHidden()
     const plans = callsTo('POST', '/prioritizations/').filter((c) => c.path.endsWith('/plans'))
     const feedback = callsTo('POST', '/prioritizations/').filter((c) => c.path.endsWith('/feedback'))
     check(plans.length === 1, 'expected one plan request')
     check(feedback[0]?.body?.verdict === 'should_be_earlier', `feedback request mismatch: ${JSON.stringify(feedback[0]?.body)}`)
+  },
+
+  // The detail's folded history, right under the Score, lists every change of the Finding's
+  // place, newest first, and its reason says nothing of the moves.
+  async 'finding-history'() {
+    await signIn('customer_admin')
+    await sidebarLink('Findings').click()
+    await expect(page.getByText('20 findings, 4 groups')).toBeVisible()
+    await page.getByRole('button', { name: 'Open CVE-2024-23897' }).click()
+    const detail = page.getByRole('dialog', { name: 'CVE-2024-23897' })
+    const reason = detail.getByRole('region', { name: 'Why it is here' })
+    await expect(reason).toBeVisible()
+    check(!/Moved|history/.test(await reason.innerText()), 'the reason tells the moves')
+    await detail.getByRole('button', { name: /^Prioritization history/ }).click()
+    const history = detail.getByRole('region', { name: /^Prioritization history/ })
+    await expect(history.getByText('Moved down from Group 1 to 2')).toBeVisible()
+    await expect(history.getByText(/New above it: “Fallos con exploit activo/)).toBeVisible()
+    await expect(history.getByText('Moved up from Group 3 to 1')).toBeVisible()
+    await expect(history.getByText('Entered the order in Group 3')).toBeVisible()
+    await expect(history.getByText('Risk level changed: Low → Medium')).toBeVisible()
+    await expect(history.getByText('Score 19 · By Score alone #17 · In the prioritization #5–#9')).toBeVisible()
+    await expect(history.getByText('Ahead of the Score').first()).toBeVisible()
+    await shot('history', history)
+    await history.getByRole('button', { name: 'Why it was placed there' }).first().click()
+    await expect(history.getByText(/sube al primer grupo/)).toBeVisible()
+    await shot('older-reason', history.getByText(/sube al primer grupo/))
+    const text = await detail.innerText()
+    check(!/Luna|Prioritizer|Cartógrafo|Editor|Analista|agent|\bAI\b|inferred|Scoring Model/i.test(text), 'the detail names an agent, the AI, an inference or the Scoring Model')
+    // A round that placed it again in the same group still shows, with what led to it.
+    await detail.getByRole('button', { name: 'Close', exact: true }).click()
+    await page.getByRole('button', { name: 'Open CVE-2025-1094' }).click()
+    const other = page.getByRole('dialog', { name: 'CVE-2025-1094' })
+    await other.getByRole('button', { name: /^Prioritization history/ }).click()
+    await expect(other.getByText('Looked at again; still in Group 2')).toBeVisible()
+    await shot('kept-its-group', other.getByText('Looked at again; still in Group 2'))
+    const calls = callsTo('GET', '/findings/').filter((c) => c.path.endsWith('/history'))
+    check(calls.length >= 2 && calls.every((c) => c.status === 200), `history calls: ${JSON.stringify(calls.map((c) => [c.path, c.status]))}`)
+  },
+
+  // The Findings charts: the weekly trend from its first week with findings and what its line
+  // counts, time to close per risk level with no row for findings without one, legends for the
+  // bars' colours, Unknown only with findings, and the tactics matrix with no filter and no empty
+  // columns. No chart says "band".
+  async charts() {
+    await signIn('customer_admin')
+    await sidebarLink('Findings').click()
+    await tab('Summary').click()
+    const trend = page.locator('section', { has: page.getByRole('heading', { name: 'Weekly trend of findings' }) })
+    await expect(trend.getByText(/the line, those still open when the week ended/)).toBeVisible()
+    await expect(trend.getByText('9/29')).toBeVisible()
+    check(await trend.getByText('9/15').count() === 0, 'the trend shows the empty weeks before the first findings')
+    await expect(page.getByRole('heading', { name: 'Time to close findings by risk level' })).toBeVisible()
+    check(await page.getByText('No risk level').count() === 0, 'time to close shows a row with no risk level')
+    await page.waitForTimeout(1800) // recharts draws its series in over 1.5 s
+    await shot('summary', trend)
+    await tab('Before & After').click()
+    const composition = page.locator('section', { has: page.getByRole('heading', { name: 'Risk level composition per group' }) })
+    await expect(composition.getByRole('list', { name: 'Risk level' })).toBeVisible()
+    await shot('composition', composition)
+    await tab('Where the risk is').click()
+    const heatmap = page.locator('section', { has: page.getByRole('heading', { name: 'Where the risk is' }) })
+    await expect(heatmap.getByText('Unknown', { exact: true })).toBeVisible()
+    const assets = page.locator('section', { has: page.getByRole('heading', { name: 'Assets with most findings' }) })
+    await expect(assets.getByRole('list', { name: 'Risk level' })).toBeVisible()
+    await shot('risk', assets)
+    await tab('Threats').click()
+    const tactics = page.locator('section', { has: page.getByRole('heading', { name: 'Findings per tactic' }) })
+    await expect(tactics.getByText('No findings: Resource Dev., Exfiltration')).toBeVisible()
+    check(await tactics.getByRole('button').count() === 0, 'the tactics matrix still has a filter')
+    await shot('tactics', tactics)
+    const body = await page.locator('main').innerText()
+    check(!/\bband\b/i.test(body), 'a chart still says band')
+  },
+
+  // Before & After compares the order by Score alone with the prioritization; a row of its most
+  // significant movements opens that Finding's detail over the tab, and closing it comes back.
+  async 'before-after'() {
+    await signIn('customer_admin')
+    await sidebarLink('Findings').click()
+    await tab('Before & After').click()
+    const movements = page.locator('section', { has: page.getByRole('heading', { name: 'Most significant movements' }) })
+    await expect(movements.getByRole('button', { name: 'Open CVE-2024-23897' })).toBeVisible()
+    const headers = await movements.getByRole('columnheader').allTextContents()
+    check(!headers.includes('Reason'), `the movements still have a Reason column: ${headers}`)
+    await shot('movements', movements)
+    await movements.getByRole('row').filter({ has: page.getByRole('button', { name: 'Open CVE-2024-23897' }) }).click({ position: { x: 300, y: 10 } })
+    const detail = page.getByRole('dialog', { name: 'CVE-2024-23897' })
+    await expect(detail.getByRole('button', { name: /^Prioritization history/ })).toBeVisible()
+    check(new URL(page.url()).searchParams.get('tab') === 'before-after', 'the detail left the Before & After tab')
+    await shot('detail', detail)
+    await detail.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(detail).toBeHidden()
+    check(await tab('Before & After').getAttribute('aria-selected') === 'true', 'closing the detail left the Before & After tab')
+    check(!new URL(page.url()).searchParams.has('finding'), 'the closed detail is still in the URL')
+  },
+
+  // A viewer closes a Finding by hand as postponed from its detail, sees it counted as closed
+  // at once, finds it in the Closed tab and reopens it from there.
+  async 'finding-closes'() {
+    await signIn('viewer')
+    await sidebarLink('Findings').click()
+    await expect(page.getByText('20 findings, 4 groups')).toBeVisible()
+    await expect(page.getByText('23', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Open CVE-2024-6387' }).click()
+    const detail = page.getByRole('dialog', { name: 'CVE-2024-6387' })
+    await expect(detail.getByRole('heading', { name: 'Is it in the right place?' })).toBeVisible()
+
+    const verdicts = await detail.getByRole('group', { name: 'Is it in the right place?' }).getByRole('button').allTextContents()
+    check(JSON.stringify(verdicts.map((v) => v.slice(1))) === JSON.stringify(['It applies', 'Should be attended earlier', 'Should be attended later']), `verdicts: ${verdicts}`)
+    check(await detail.getByRole('textbox', { name: 'Why' }).count() === 0, 'the Why shows before a verdict is chosen')
+    await detail.getByRole('button', { name: 'It applies' }).click()
+    check(await detail.getByRole('button', { name: 'Send' }).isDisabled(), 'Send is enabled with no why')
+    await shot('feedback-form', detail.getByRole('button', { name: 'Send' }))
+
+    // Close finding is offered once, in the top bar.
+    check(await detail.getByRole('button', { name: /close finding|close the finding/i }).count() === 1, 'Close finding is offered more than once')
+    await detail.getByRole('button', { name: 'Close finding', exact: true }).click()
+    const close = page.getByRole('dialog', { name: 'Close CVE-2024-6387' })
+    await expect(close).toBeVisible()
+    await close.getByRole('radio', { name: 'Postponed' }).click()
+    await close.getByRole('button', { name: 'In 30 days' }).click()
+    await close.getByRole('textbox', { name: 'Why' }).fill('Next maintenance window.')
+    await shot('close-dialog')
+    await close.getByRole('button', { name: 'Close finding' }).click()
+    await expect(close).toBeHidden()
+    await expect(detail.getByRole('button', { name: 'Reopen' })).toBeVisible()
+    await expect(detail.getByText('Next maintenance window.').first()).toBeVisible()
+    await shot('detail-closed')
+
+    await detail.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(detail).toBeHidden()
+    await expect(page.getByText('22', { exact: true })).toBeVisible()
+    const row = page.getByRole('row').filter({ has: page.getByRole('button', { name: 'Open CVE-2024-6387' }) })
+    await expect(row.getByText('Closed', { exact: true })).toBeVisible()
+    await shot('list-closed', row)
+
+    await tab('Closed').click()
+    const closedRow = page.getByRole('row').filter({ hasText: 'CVE-2024-6387' })
+    await expect(closedRow.getByText('Postponed')).toBeVisible()
+    await expect(closedRow.getByRole('cell', { name: /2026|2027/ }).last()).toBeVisible()
+    // The table scrolls inside its panel: the row's last button must sit inside it, not past its edge.
+    const panelBox = await page.getByRole('table').locator('..').boundingBox()
+    const reopenBox = await closedRow.getByRole('button', { name: 'Reopen CVE-2024-6387' }).boundingBox()
+    check(reopenBox && panelBox && reopenBox.x + reopenBox.width <= panelBox.x + panelBox.width, 'Reopen is past the edge of the table')
+    await shot('closed-tab')
+    await closedRow.getByRole('button', { name: 'Reopen CVE-2024-6387' }).click()
+    const confirm = page.getByRole('dialog', { name: 'Reopen CVE-2024-6387?' })
+    await confirm.getByRole('button', { name: 'Yes, reopen' }).click()
+    await expect(page.getByText('No findings closed by hand')).toBeVisible()
+    await shot('closed-tab-empty')
+
+    const [closed] = callsTo('POST', '/findings/').filter((c) => c.path.endsWith('/close'))
+    check(closed?.body?.reason === 'postponed' && closed.body.note === 'Next maintenance window.', `close request mismatch: ${JSON.stringify(closed?.body)}`)
+    check(/T00:00:00[+-]\d{2}:\d{2}$/.test(closed.body.reopen_at ?? ''), `reopen_at is not a start of day with its offset: ${closed.body.reopen_at}`)
+    check(callsTo('POST', '/findings/').filter((c) => c.path.endsWith('/reopen')).length === 1, 'expected one reopen request')
+    check(callsTo('GET', '/findings/summary').length >= 2, 'the counts were not fetched again after the close')
   },
 
   async news() {
@@ -790,7 +955,7 @@ const scenarios = {
     const credit = page.getByRole('link', { name: /^Source: Ransomware\.live/ })
     check(await credit.count() === 2, `expected 2 Ransomware.live credits, got ${await credit.count()}`)
     await page.getByLabel('Digest').selectOption({ index: 1 })
-    await expect(page.getByText("The Editor didn't answer")).toBeVisible()
+    await expect(page.getByText("The summary couldn't be written")).toBeVisible()
     check(new URL(page.url()).searchParams.has('digest'), 'the open digest is not in the URL')
     await shot('older-without-editor')
     // The open digest lives in the URL, so a reload lands on it.

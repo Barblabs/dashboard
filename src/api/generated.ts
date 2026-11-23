@@ -242,14 +242,20 @@ export interface paths {
          * @description Returns null when the Customer has no Connected CMDB Source.
          */
         get: operations["get-cmdb-source"];
-        /** Replace the login of the Connected CMDB Source */
+        /**
+         * Replace the login of the Connected CMDB Source
+         * @description Only a Customer Admin replaces it.
+         */
         put: operations["update-cmdb-source"];
         /**
          * Connect a CMDB Source and run its first Sync
-         * @description A failed first Sync is reported in last_sync_failure and leaves the CMDB Source connected.
+         * @description Only a Customer Admin connects it. A failed first Sync is reported in last_sync_failure and leaves the CMDB Source connected.
          */
         post: operations["connect-cmdb-source"];
-        /** Disconnect the Connected CMDB Source */
+        /**
+         * Disconnect the Connected CMDB Source
+         * @description Only a Customer Admin disconnects it. Its Assets become Inactive.
+         */
         delete: operations["disconnect-cmdb-source"];
         options?: never;
         head?: never;
@@ -265,7 +271,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Sync the Connected CMDB Source */
+        /**
+         * Sync the Connected CMDB Source
+         * @description Any User of the Customer triggers it.
+         */
         post: operations["sync-cmdb-source"];
         delete?: never;
         options?: never;
@@ -284,7 +293,7 @@ export interface paths {
         put?: never;
         /**
          * Check a CMDB Source login without storing it
-         * @description A login the CMDB rejects is a 200 with ok false and the reason.
+         * @description Only a Customer Admin checks one. A login the CMDB rejects is a 200 with ok false and the reason.
          */
         post: operations["test-cmdb-source"];
         delete?: never;
@@ -468,6 +477,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/findings/closed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the Customer's Findings closed by hand
+         * @description Newest close first, so one can be reopened. Findings closed on their own, by a Sync or NVD, are left out.
+         */
+        get: operations["list-closed-findings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/findings/summary": {
         parameters: {
             query?: never;
@@ -542,6 +571,66 @@ export interface paths {
         get: operations["get-findings-weekly-trend"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/findings/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Close one of the Customer's open Findings by hand
+         * @description A Customer Admin or a Viewer closes it with a reason and a note saying why. remediated reopens at the next match if the CMDB still shows a vulnerable version; false_positive stays closed until a User reopens it; accepted_risk and postponed need reopen_at, and reopen at the first match after it. It leaves the Prioritizer's order.
+         */
+        post: operations["close-finding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/findings/{id}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tell how the Customer's order placed one Finding, and why each change
+         * @description One entry per Prioritization where the Finding's place changed, newest first: placed, placed_again when a round placed it again, moved when other groups moved it, left when it closed. Each gives, before and now, the Finding's group, where that group sits in the Prioritizer's order Finding by Finding, its rank by Score alone and its Score, so the two orders compare, and the Prioritizer's justification as it wrote it. placed_again also says what changed in the Finding. It calls no Agent. Empty for a Finding no Prioritization held.
+         */
+        get: operations["get-finding-history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/findings/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reopen a Finding a User closed
+         * @description A Customer Admin or a Viewer reopens a Finding closed by hand, whatever its reason. A Finding that closed on its own reopens only when it matches again.
+         */
+        post: operations["reopen-finding"];
         delete?: never;
         options?: never;
         head?: never;
@@ -673,7 +762,7 @@ export interface paths {
         put?: never;
         /**
          * Ask Luna for the Action Plan of one Finding of a Prioritization
-         * @description Runs Luna, which can take a minute. A Finding asked again gets a newer plan.
+         * @description Runs Luna, which can take a minute. Luna also writes the plan of each open Finding on her own; asking again gets a newer one.
          */
         post: operations["create-action-plan"];
         delete?: never;
@@ -991,6 +1080,10 @@ export interface components {
             /** @description Those with the most open Findings, most first */
             techniques: components["schemas"]["TechniqueCountResponse"][];
         };
+        BandChangeResponse: {
+            from: string;
+            to: string;
+        };
         BreakdownResponse: {
             by: string;
             groups: components["schemas"]["GroupResponse"][];
@@ -1026,6 +1119,17 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        CloseRequestBody: {
+            /** @description Why, as the User says it */
+            note: string;
+            /** @enum {string} */
+            reason: "remediated" | "false_positive" | "accepted_risk" | "postponed";
+            /**
+             * Format: date-time
+             * @description Required for accepted_risk and postponed, and must be ahead; not allowed otherwise
+             */
+            reopen_at?: string;
+        };
         CloseTimeResponse: {
             /**
              * Format: double
@@ -1041,6 +1145,35 @@ export interface components {
              * @description Null when none was closed
              */
             median_days: number | null;
+        };
+        ClosedFindingResponse: {
+            /**
+             * Format: int64
+             * @description As in GET /assets
+             */
+            asset_id: number;
+            asset_name: string;
+            /** Format: date-time */
+            closed_at: string;
+            /** @description The email of the User who closed it */
+            closed_by: string;
+            component_name: string;
+            component_version: string;
+            cve_id: string;
+            id: string;
+            note: string;
+            product: string;
+            /** @enum {string} */
+            reason: "remediated" | "false_positive" | "accepted_risk" | "postponed";
+            /**
+             * Format: date-time
+             * @description When a match may reopen it; null for remediated and false_positive
+             */
+            reopen_at: string | null;
+            vendor: string;
+        };
+        ClosedFindingsResponse: {
+            findings: components["schemas"]["ClosedFindingResponse"][];
         };
         CmdbSourceResponse: {
             /** Format: date-time */
@@ -1135,7 +1268,7 @@ export interface components {
             /** @enum {string} */
             exposure: "internet_facing" | "internal" | "unknown";
             /** @enum {string} */
-            information_classification: "confidential" | "private" | "public" | "unclassified";
+            information_classification: "highly_confidential" | "confidential" | "private" | "public" | "unclassified";
             /** @enum {string} */
             lifecycle_stage: "production" | "implementation" | "stock" | "unknown";
         };
@@ -1228,7 +1361,7 @@ export interface components {
              * @description Unclassified cannot be declared; clear the Declaration instead
              * @enum {string}
              */
-            information_classification: "public" | "private" | "confidential";
+            information_classification: "public" | "private" | "confidential" | "highly_confidential";
         } & {
             [key: string]: unknown;
         };
@@ -1295,9 +1428,10 @@ export interface components {
         };
         FeedbackRequestBody: {
             finding_id: string;
-            note?: string;
+            /** @description Why; the Prioritizer reads it with a verdict on the order */
+            note: string;
             /** @enum {string} */
-            verdict: "applies" | "does_not_apply" | "remediated" | "should_be_earlier" | "should_be_later";
+            verdict: "applies" | "should_be_earlier" | "should_be_later";
         };
         FeedbackResponse: {
             author_id: string;
@@ -1320,7 +1454,7 @@ export interface components {
              * @description Unclassified while no Customer Admin declared it, which does not mean the data is public
              * @enum {string}
              */
-            information_classification: "confidential" | "private" | "public" | "unclassified";
+            information_classification: "highly_confidential" | "confidential" | "private" | "public" | "unclassified";
             kind: string;
             /** @enum {string} */
             lifecycle_stage: "production" | "implementation" | "stock" | "unknown";
@@ -1420,6 +1554,80 @@ export interface components {
             model: string;
             vendor: string;
         };
+        HistoryEntryResponse: {
+            band: components["schemas"]["BandChangeResponse"] | null;
+            /** @description For placed_again, what changed in the Finding since it was last placed: kev_listed, ransomware_use, labeled, band_changed, score_moved, feedback, business_context. Empty when none of the rules applies */
+            changes: string[];
+            /** @description For the newest entry when it is left and the Finding is still closed, why it closed */
+            close_reason: string | null;
+            /**
+             * Format: date-time
+             * @description When that Prioritization was made
+             */
+            created_at: string;
+            /** @description What that reason cites of this Finding */
+            evidence: components["schemas"]["HistoryEvidenceResponse"][];
+            /** @description For placed_again, what Users said directly about where it should be since it was last placed */
+            feedback: components["schemas"]["HistoryFeedbackResponse"][];
+            /**
+             * Format: int64
+             * @description Position of its Priority Group in the Prioritization before, from 1; null for placed
+             */
+            group_before: number | null;
+            /**
+             * Format: int64
+             * @description Position of its Priority Group in this one, from 1; null for left
+             */
+            group_now: number | null;
+            /** @description For moved, the titles of the groups above it now that were not above it before */
+            groups_appeared: string[];
+            /** @description For moved, the titles of the groups above it before that are not now */
+            groups_gone: string[];
+            /** @enum {string} */
+            kind: "placed" | "placed_again" | "moved" | "left";
+            order_before: components["schemas"]["OrderResponse"] | null;
+            order_now: components["schemas"]["OrderResponse"] | null;
+            prioritization_id: string;
+            /**
+             * Format: int64
+             * @description Where its Score alone put it before, 1 the highest; null for placed
+             */
+            rank_before: number | null;
+            /**
+             * Format: int64
+             * @description Where its Score alone puts it now; null for left
+             */
+            rank_now: number | null;
+            /** @description The Prioritizer's reason for the part of the group that holds it, as it wrote it when it last placed the Finding; render it as plain text */
+            reason: string;
+            /**
+             * Format: double
+             * @description Its Score as the Prioritizer read it before; null for placed
+             */
+            score_before: number | null;
+            /**
+             * Format: double
+             * @description Its Score as the Prioritizer read it now; null for left
+             */
+            score_now: number | null;
+            /** @description The title of its Priority Group; empty for left */
+            title: string;
+        };
+        HistoryEvidenceResponse: {
+            /** @description RFC 6901 pointer into what the Prioritizer read of the Finding */
+            path: string;
+            value: string;
+        };
+        HistoryFeedbackResponse: {
+            /** Format: date-time */
+            created_at: string;
+            note: string;
+            /** @enum {string} */
+            verdict: "should_be_earlier" | "should_be_later";
+        };
+        HistoryResponse: {
+            entries: components["schemas"]["HistoryEntryResponse"][];
+        };
         InformationClassificationResponse: {
             /**
              * Format: date-time
@@ -1432,7 +1640,7 @@ export interface components {
              * @description The declared Information Classification; null when Unclassified
              * @enum {string|null}
              */
-            value: "public" | "private" | "confidential" | null;
+            value: "public" | "private" | "confidential" | "highly_confidential" | null;
         };
         InviteUserRequest: {
             /**
@@ -1526,22 +1734,11 @@ export interface components {
              * @description The version of the Business Context the Editor read, null when the Customer had stated none
              */
             business_context_version: number | null;
-            counts: components["schemas"]["NewsCountsResponse"];
-            /** Format: date-time */
-            created_at: string;
             editor: components["schemas"]["EditorRunResponse"];
             /** @description One per Relevance that has News Items, closest first */
             groups: components["schemas"]["NewsGroupResponse"][];
-            id: string;
             /** @description The Business Context states no sector, so no attack on a Peer can reach the Customer */
             no_sectors: boolean;
-            /**
-             * Format: date-time
-             * @description It holds the News Items that became ready after since and up to until
-             */
-            since: string;
-            /** Format: date-time */
-            until: string;
         };
         NewsDigestSummaryResponse: {
             counts: components["schemas"]["NewsCountsResponse"];
@@ -1599,6 +1796,15 @@ export interface components {
             regulations: ("gdpr" | "uk_gdpr" | "lfpdppp" | "lgpdppso" | "lgpd" | "habeas_data_co" | "ley_21719_cl" | "ley_25326_ar" | "ccpa" | "pipeda" | "pci_dss" | "sox" | "glba" | "cnbv" | "banxico" | "ley_fintech" | "cnsf" | "lfpiorpi" | "dora" | "nydfs_500" | "swift_csp" | "sec_cyber" | "hipaa" | "hitrust" | "nom_024_ssa3" | "nom_151" | "nis2" | "nerc_cip" | "iec_62443" | "tisax" | "cmmc" | "fedramp" | "fisma" | "ferpa" | "coppa" | "iso_27001" | "iso_27701" | "iso_22301" | "soc_2" | "nist_csf" | "nist_800_53" | "cis_controls" | "cobit")[];
         } & {
             [key: string]: unknown;
+        };
+        OrderResponse: {
+            /**
+             * Format: int64
+             * @description From 1
+             */
+            from: number;
+            /** Format: int64 */
+            to: number;
         };
         OwnerResponse: {
             email: string;
@@ -2269,7 +2475,7 @@ export interface operations {
                 /** @description Exposure codes, as repeated keys, matched against the effective Exposure (exposure.value); an Asset with any of them matches, and unknown matches an Asset without one */
                 exposure?: ("internet_facing" | "internal" | "unknown")[];
                 /** @description Information Classification codes, as repeated keys; an Asset with any of them matches, and unclassified matches an Asset without a Declaration */
-                information_classification?: ("public" | "private" | "confidential" | "unclassified")[];
+                information_classification?: ("public" | "private" | "confidential" | "highly_confidential" | "unclassified")[];
                 /** @description Lifecycle stage codes, as repeated keys; an Asset with any of them matches, and unknown matches an Asset without one, a retired Asset included */
                 lifecycle_stage?: ("production" | "implementation" | "stock" | "unknown")[];
                 /** @description Area ids, as in GET /areas, as repeated keys; an Asset in any of them matches */
@@ -3872,6 +4078,53 @@ export interface operations {
             };
         };
     };
+    "list-closed-findings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClosedFindingsResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
     "get-findings-summary": {
         parameters: {
             query?: never;
@@ -4078,6 +4331,216 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "close-finding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CloseRequestBody"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-finding-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoryResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "reopen-finding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

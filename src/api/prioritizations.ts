@@ -5,14 +5,17 @@ import { api } from './client'
 import { connectionScopeKey } from './cmdb'
 import type { Override, Schemas } from './schemas'
 
+/** What a User can say about where a Finding is in the order (ADR 0035). */
 export const VERDICTS = [
   'applies',
-  'does_not_apply',
-  'remediated',
   'should_be_earlier',
   'should_be_later',
 ] as const satisfies readonly Schemas['FeedbackRequestBody']['verdict'][]
 type Verdict = (typeof VERDICTS)[number]
+
+/** Feedback recorded before ADR 0035 may still say the Finding did not apply or was fixed. */
+export const RECORDED_VERDICTS = [...VERDICTS, 'does_not_apply', 'remediated'] as const
+type RecordedVerdict = (typeof RECORDED_VERDICTS)[number]
 
 /** The inputs a Scoring Model replaced with a default, which make a Score estimated. */
 export const DATA_GAPS = [
@@ -63,7 +66,7 @@ export type Finding = Override<
 >
 export type PriorityGroup = Schemas['PriorityGroupResponse']
 export type ActionPlan = Schemas['PlanResponse']
-export type Feedback = Override<Schemas['FeedbackResponse'], { verdict: Verdict }>
+export type Feedback = Override<Schemas['FeedbackResponse'], { verdict: RecordedVerdict }>
 type PrioritizationList = Schemas['PrioritizationListResponse']
 export type Prioritization = Override<
   Schemas['PrioritizationResponse'],
@@ -120,7 +123,12 @@ export function findingInformationClassification(asset: FindingAsset): Informati
 
 /** Refetches the Findings after a change that rescores them. */
 export function invalidatePrioritizations(queryClient: QueryClient) {
-  void queryClient.invalidateQueries({ queryKey: PRIORITIZATIONS_KEY })
+  void refetchPrioritizations(queryClient)
+}
+
+/** Like `invalidatePrioritizations`, for a caller that waits until the Findings show the change. */
+export function refetchPrioritizations(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: PRIORITIZATIONS_KEY })
 }
 
 /** Whether the newest Prioritization is the one that placed the Finding. */
@@ -164,7 +172,58 @@ export function useRecordFeedbackMutation(prioritizationId: string) {
   return useMutation({
     mutationFn: ({ findingId, verdict, note }: FeedbackInput) =>
       api.post<Feedback>(`/prioritizations/${prioritizationId}/feedback`, { finding_id: findingId, verdict, note }),
-    onSuccess: (feedback) =>
-      updateCurrent(queryClient, prioritizationId, (p) => ({ ...p, feedback: [...p.feedback, feedback] })),
+    onSuccess: (feedback, { findingId }) => {
+      updateCurrent(queryClient, prioritizationId, (p) => ({ ...p, feedback: [...p.feedback, feedback] }))
+      // Earlier or later shows in the history once the next round places the Finding again.
+      void queryClient.invalidateQueries({ queryKey: findingHistoryKey(findingId) })
+    },
+  })
+}
+
+/* ---------- Finding history (ADR 0036) ---------- */
+
+/** What changed in a Finding between two rounds that placed it, as `changes` names it. */
+export const HISTORY_CHANGES = [
+  'kev_listed',
+  'ransomware_use',
+  'labeled',
+  'band_changed',
+  'score_moved',
+  'feedback',
+  'business_context',
+] as const
+type HistoryChange = (typeof HISTORY_CHANGES)[number]
+
+/** Why a Sync closed a Finding on its own; a left entry may also give a reason a User closed it by hand for. */
+export const SYNC_CLOSE_REASONS = [
+  'no_longer_affected',
+  'component_removed',
+  'asset_inactive',
+  'vulnerability_rejected',
+] as const
+
+/** The range of places, Finding by Finding from 1, its group takes in the order: a group is attended at once. */
+export type OrderRange = Schemas['OrderResponse']
+
+// The spec types these vocabularies as plain strings.
+export type HistoryEntry = Override<
+  Schemas['HistoryEntryResponse'],
+  { changes: HistoryChange[]; band: { from: ScoreBand; to: ScoreBand } | null }
+>
+type FindingHistory = Override<Schemas['HistoryResponse'], { entries: HistoryEntry[] }>
+
+/*
+ * Under the Prioritizations, so whatever refetches them (a close, a reopen, a Declaration)
+ * also refetches the history of an open detail.
+ */
+function findingHistoryKey(findingId: string) {
+  return [...PRIORITIZATIONS_KEY, 'history', findingId] as const
+}
+
+/** Each change of the Finding's place, newest first; empty until a Prioritization holds it. */
+export function useFindingHistoryQuery(findingId: string) {
+  return useQuery({
+    queryKey: findingHistoryKey(findingId),
+    queryFn: async () => (await api.get<FindingHistory>(`/findings/${findingId}/history`)).entries,
   })
 }
