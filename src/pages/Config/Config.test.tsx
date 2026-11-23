@@ -36,13 +36,13 @@ async function fillForm(
 
 async function renderConnected() {
   seedSource({ last_sync: TWO_HOURS_AGO })
-  const user = renderApp()
+  const user = renderApp('/config')
   await screen.findByText('iTop connected')
   return user
 }
 
 async function openForm() {
-  const user = renderApp()
+  const user = renderApp('/config')
   await user.click(await screen.findByRole('button', { name: 'Select' }))
   return user
 }
@@ -50,7 +50,7 @@ async function openForm() {
 describe('Configuration', () => {
   it('opens in the connected state when a connection already exists', async () => {
     seedSource()
-    renderApp()
+    renderApp('/config')
 
     expect(screen.getByText('Loading configuration…')).toBeInTheDocument()
     expect(await screen.findByText('iTop connected')).toBeInTheDocument()
@@ -61,7 +61,7 @@ describe('Configuration', () => {
   })
 
   it('lists iTop as the only available CMDB and the rest as coming soon', async () => {
-    renderApp()
+    renderApp('/config')
 
     expect(await screen.findByRole('heading', { name: 'Connect CMDB' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Configuration' })).toBeInTheDocument()
@@ -193,7 +193,7 @@ describe('Configuration', () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
     seedSource({ last_sync: new Date(Date.now() - 5 * 60 * 1000).toISOString() })
-    const user = renderApp()
+    const user = renderApp('/config')
 
     expect(await screen.findByText('iTop conectado')).toBeInTheDocument()
     expect(screen.getByText('Última sincronización: hace 5 min')).toBeInTheDocument()
@@ -226,7 +226,7 @@ describe('Configuration', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
 
     cleanup()
-    renderApp()
+    renderApp('/config')
     expect(await screen.findByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
   })
 
@@ -308,7 +308,7 @@ describe('Configuration', () => {
   it('shows the form, validation and REST profile error in Spanish', async () => {
     localStorage.setItem('language', 'es')
     await i18n.changeLanguage()
-    const user = renderApp()
+    const user = renderApp('/config')
     await user.click(await screen.findByRole('button', { name: 'Seleccionar' }))
 
     expect(screen.getByRole('heading', { name: 'Conectar iTop' })).toBeInTheDocument()
@@ -430,7 +430,7 @@ describe('Configuration', () => {
         assetRequests += 1
       }),
     )
-    renderApp()
+    renderApp('/config')
 
     expect(await screen.findByRole('heading', { name: 'Choose your CMDB' })).toBeInTheDocument()
     expect(assetRequests).toBe(0)
@@ -439,7 +439,7 @@ describe('Configuration', () => {
   // An unreadable source says nothing about the connection, so the page must not offer a new one.
   it('shows the error right away when the source cannot be read, and retries on demand', async () => {
     server.use(http.get(apiUrl('/cmdb/source'), () => new HttpResponse(null, { status: 500 })))
-    const user = renderApp()
+    const user = renderApp('/config')
 
     expect(
       await screen.findByText('Could not load the CMDB connection.', undefined, { timeout: 1000 }),
@@ -573,7 +573,7 @@ describe('Configuration', () => {
       last_sync: TWO_HOURS_AGO,
       last_sync_failure: { at: new Date(Date.now() - 5 * 60 * 1000).toISOString(), error: 'iTop timed out' },
     })
-    renderApp()
+    renderApp('/config')
 
     expect(
       await screen.findByText('Last sync failed 5 min. ago: iTop timed out'),
@@ -622,7 +622,7 @@ describe('Configuration', () => {
 
   it('a token-auth source shows no user and edits with an empty one', async () => {
     seedSource({ last_sync: TWO_HOURS_AGO, user: null })
-    const user = renderApp()
+    const user = renderApp('/config')
 
     expect(await screen.findByText('iTop connected')).toBeInTheDocument()
     expect(screen.queryByText('barb-reader')).not.toBeInTheDocument()

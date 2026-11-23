@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import { useCurrentOrderQuery } from '../../api/prioritizations'
 import type { CurrentOrder, PriorityGroup } from '../../api/prioritizations'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
@@ -138,20 +138,14 @@ function MatrixGrid({
   N: number
 }) {
   const { t } = useTranslation()
-  const [, setParams] = useSearchParams()
+  const navigate = useNavigate()
 
   const maxCount = Math.max(...matrix.flat())
 
   const openCell = (sgIdx: number, agIdx: number) => {
     const ids = cellIds[sgIdx][agIdx]
     if (ids.length === 0) return
-    setParams(() => {
-      const next = new URLSearchParams()
-      next.set('tab', 'prioritized')
-      next.set('from', 'chart')
-      next.set('ids', ids.join(','))
-      return next
-    })
+    void navigate(`/findings?from=chart&ids=${ids.join(',')}`)
   }
 
   return (

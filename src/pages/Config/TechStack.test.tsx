@@ -24,7 +24,7 @@ const ACTIVE = [
 
 function renderConnected() {
   seedSource()
-  return renderApp()
+  return renderApp('/config')
 }
 
 async function renderInventory() {

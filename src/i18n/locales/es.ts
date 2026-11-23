@@ -15,6 +15,7 @@ export const es: Translations = {
     menu: 'Menú',
     signOut: 'Cerrar sesión',
     nav: {
+      dashboard: 'Dashboard',
       findings: 'Hallazgos',
       news: 'Noticias',
       config: 'Configuración',
@@ -96,6 +97,10 @@ export const es: Translations = {
   placeholder: {
     comingSoon: 'Próximamente',
   },
+  dashboard: {
+    title: 'Dashboard',
+    subtitle: 'Un resumen de tus hallazgos.',
+  },
   findings: {
     title: 'Hallazgos',
     subtitle: 'El orden en que conviene atender tus hallazgos abiertos.',
@@ -145,6 +150,7 @@ export const es: Translations = {
     },
     chips: {
       fromChart: 'Desde la gráfica:',
+      fromDashboard: 'Desde el dashboard:',
       fromChartRun: 'Mostrando la última actualización ({{date}})',
       band: 'Nivel de riesgo: {{value}}',
       exposure: 'Exposición: {{value}}',

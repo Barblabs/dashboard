@@ -13,6 +13,7 @@ export const en = {
     menu: 'Menu',
     signOut: 'Sign out',
     nav: {
+      dashboard: 'Dashboard',
       findings: 'Findings',
       news: 'News',
       config: 'Configuration',
@@ -94,6 +95,10 @@ export const en = {
   placeholder: {
     comingSoon: 'Coming soon',
   },
+  dashboard: {
+    title: 'Dashboard',
+    subtitle: 'An overview of your findings.',
+  },
   findings: {
     title: 'Findings',
     subtitle: 'The order in which to attend your open Findings.',
@@ -143,6 +148,7 @@ export const en = {
     },
     chips: {
       fromChart: 'From the chart:',
+      fromDashboard: 'From the dashboard:',
       fromChartRun: 'Showing the latest update ({{date}})',
       band: 'Risk level: {{value}}',
       exposure: 'Exposure: {{value}}',

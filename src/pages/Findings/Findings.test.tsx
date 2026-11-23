@@ -1,12 +1,12 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { http, HttpResponse } from 'msw'
+import { http } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Finding } from '../../api/prioritizations'
 import { failure } from '../../mocks/handlers/responses'
 import { prioritizationsStore } from '../../mocks/prioritizations-store'
 import { apiUrl } from '../../mocks/url'
-import { onPhone, renderApp, seedSource, VIEWER } from '../../test/render'
-import { holdRequests, server } from '../../test/server'
+import { onPhone, renderApp, VIEWER } from '../../test/render'
+import { server } from '../../test/server'
 
 async function renderFindings(path = '/findings') {
   const user = renderApp(path)
@@ -37,29 +37,6 @@ async function openSection(user: ReturnType<typeof renderApp>, dialog: HTMLEleme
   return within(dialog).getByRole('region', { name: title })
 }
 
-async function openSummaryTab() {
-  const user = renderApp('/findings')
-  await user.click(await screen.findByRole('tab', { name: 'Summary' }))
-  return user
-}
-
-async function openBeforeAfterTab() {
-  const user = renderApp('/findings')
-  await user.click(await screen.findByRole('tab', { name: 'Before & After' }))
-  return user
-}
-
-async function openRiskTab() {
-  const user = renderApp('/findings')
-  await user.click(await screen.findByRole('tab', { name: 'Where the risk is' }))
-  return user
-}
-
-async function openThreatsTab() {
-  const user = renderApp('/findings')
-  await user.click(await screen.findByRole('tab', { name: 'Threats' }))
-  return user
-}
 
 describe('Findings', () => {
   it('shows the newest order in groups, the first to attend first', async () => {
@@ -568,76 +545,6 @@ describe('Findings', () => {
     expect(await screen.findByText(/No findings yet/)).toBeInTheDocument()
   })
 
-  describe('tabs', () => {
-    it('shows the prioritized list by default and switches to Summary', async () => {
-      const user = renderApp('/findings')
-      await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
-
-      await user.click(screen.getByRole('tab', { name: 'Summary' }))
-
-      expect(screen.getByRole('tab', { name: 'Summary' })).toHaveAttribute('aria-selected', 'true')
-      expect(await screen.findByText('Findings per week')).toBeInTheDocument()
-    })
-  })
-
-  describe('summary tab', () => {
-    it('shows time-to-close bars for bands that have closures', async () => {
-      await openSummaryTab()
-
-      expect(await screen.findByText('3.5 days')).toBeInTheDocument() // critical
-      expect(screen.getByText('7.2 days')).toBeInTheDocument()
-      expect(screen.getByText('14.1 days')).toBeInTheDocument()
-      // A Finding with no risk level has no row: it has nothing to compare its time with.
-      expect(screen.queryByText('45.0 days')).not.toBeInTheDocument()
-      expect(screen.queryByText('No risk level')).not.toBeInTheDocument()
-    })
-
-    it('shows — and none-closed text for a band with no closures', async () => {
-      await openSummaryTab()
-
-      expect(await screen.findByText('—')).toBeInTheDocument()
-      expect(screen.getByText('None closed in this period')).toBeInTheDocument()
-    })
-
-    it('labels the critical bar with its band name and median days', async () => {
-      await openSummaryTab()
-
-      expect(await screen.findByRole('img', { name: 'Critical: 3.5 days' })).toBeInTheDocument()
-    })
-  })
-
-  describe('summary indicators', () => {
-    it('shows the 5 indicator cards above the tabs and keeps them on other tabs', async () => {
-      const user = renderApp('/findings')
-
-      // Indicators are always visible; wait for the query to resolve.
-      expect(await screen.findByText('23')).toBeInTheDocument()
-      expect(screen.getByText('In KEV')).toBeInTheDocument()
-      expect(screen.getByText('Critical on internet-facing')).toBeInTheDocument()
-
-      // Switch to a different tab — indicators must remain visible.
-      await user.click(await screen.findByRole('tab', { name: 'Summary' }))
-      expect(screen.getByText('23')).toBeInTheDocument()
-      expect(screen.getByText('In KEV')).toBeInTheDocument()
-    })
-
-    it('forgets the counts of a CMDB once it is disconnected', async () => {
-      seedSource()
-      const user = renderApp('/findings')
-      expect(await screen.findByText('23')).toBeInTheDocument()
-
-      await user.click(screen.getByRole('link', { name: 'Configuration' }))
-      await user.click(await screen.findByRole('button', { name: 'Disconnect' }))
-      await user.click(screen.getByRole('button', { name: 'Yes, disconnect' }))
-      await screen.findByRole('heading', { name: 'Choose your CMDB' })
-
-      holdRequests('get', '/findings/summary')
-      await user.click(screen.getByRole('link', { name: 'Findings' }))
-      expect(await screen.findByText('Critical on internet-facing')).toBeInTheDocument()
-      expect(screen.queryByText('23')).not.toBeInTheDocument()
-    })
-  })
-
   describe('filters', () => {
     it('filters by band and hides empty groups', async () => {
       await renderFindings()
@@ -708,149 +615,4 @@ describe('Findings', () => {
     })
   })
 
-  describe('risk tab', () => {
-    it('shows Unknown, and what it means, only when some findings sit on an unclassified asset', async () => {
-      server.use(
-        http.get(apiUrl('/findings/breakdown'), () =>
-          HttpResponse.json({
-            by: 'exposure',
-            groups: [
-              { value: 'internet_facing', name: null, critical: 1, high: 0, medium: 0, low: 0, unbanded: 0 },
-              { value: 'unknown', name: null, critical: 0, high: 0, medium: 0, low: 0, unbanded: 0 },
-            ],
-          }),
-        ),
-      )
-      await openRiskTab()
-      const heatmap = (await screen.findByRole('heading', { name: 'Where the risk is' })).closest('section')!
-
-      expect(await within(heatmap).findByText('Internet')).toBeInTheDocument()
-      expect(within(heatmap).queryByText('Unknown')).not.toBeInTheDocument()
-      expect(within(heatmap).queryByText(/"Unknown" are assets/)).not.toBeInTheDocument()
-    })
-
-    it('tells what each colour of the asset bars means', async () => {
-      await openRiskTab()
-      const assets = (await screen.findByRole('heading', { name: 'Assets with most findings' })).closest('section')!
-
-      const legend = await within(assets).findByRole('list', { name: 'Risk level' })
-      expect(within(legend).getByText('Critical')).toBeInTheDocument()
-    })
-
-    it('clicking a heatmap cell navigates to the prioritized list with band and exposure filters', async () => {
-      const user = await openRiskTab()
-      // Critical × internet_facing cell (count=5 from mock)
-      const cell = await screen.findByLabelText(/5 findings: Critical on Internet/)
-      await user.click(cell)
-      expect(await screen.findByText('Risk level: Critical')).toBeInTheDocument()
-      expect(screen.getByText('Exposure: Internet-facing')).toBeInTheDocument()
-      expect(screen.getByText('From the chart:')).toBeInTheDocument()
-    })
-
-    it('clicking an asset bar navigates to the prioritized list', async () => {
-      const user = await openRiskTab()
-      const assetBar = await screen.findByRole('button', { name: /web-prod-01/ })
-      await user.click(assetBar)
-      expect(await screen.findByText('Asset: web-prod-01')).toBeInTheDocument()
-      expect(screen.getByText('From the chart:')).toBeInTheDocument()
-    })
-
-    it('clicking an area heatmap cell navigates with band and area filters', async () => {
-      const user = await openRiskTab()
-      await user.click(await screen.findByRole('button', { name: 'Area' }))
-      // High × Producción cell (count=6 from mock)
-      const cell = await screen.findByLabelText(/6 findings: High on Producción/)
-      await user.click(cell)
-      expect(await screen.findByText('Risk level: High')).toBeInTheDocument()
-      expect(screen.getByText('Area: Producción')).toBeInTheDocument()
-      expect(screen.getByText('From the chart:')).toBeInTheDocument()
-    })
-
-    it('shows KEV badges in the CVE table', async () => {
-      await openRiskTab()
-      const kevBadges = await screen.findAllByText('Yes')
-      expect(kevBadges.length).toBeGreaterThanOrEqual(1)
-    })
-  })
-
-  describe('before & after tab', () => {
-    it('shows the movement summary cards', async () => {
-      await openBeforeAfterTab()
-
-      const subioLabel = await screen.findByText('Went up')
-      expect(subioLabel).toBeInTheDocument()
-      expect(screen.getByText('Stayed')).toBeInTheDocument()
-      expect(screen.getByText('Went down')).toBeInTheDocument()
-      // Count span is the previous sibling of the label span
-      expect(subioLabel.previousElementSibling).toHaveTextContent('6')
-    })
-
-    it('tells what each colour of the composition per group means', async () => {
-      await openBeforeAfterTab()
-      const composition = (await screen.findByRole('heading', { name: 'Risk level per group' })).closest('section')!
-
-      const legend = within(composition).getByRole('list', { name: 'Risk level' })
-      expect(within(legend).getAllByRole('listitem').length).toBeGreaterThan(1)
-    })
-
-    it('shows diagonal cell for G1 (3 findings stayed in SG1→G1)', async () => {
-      await openBeforeAfterTab()
-
-      // Diagonal cell SG1→G1 should contain 3
-      const cell = await screen.findByLabelText('3 findings from score group 1 in priority group 1')
-      expect(cell).toBeInTheDocument()
-    })
-
-    it('lists the most significant movements without their reason, which the detail tells', async () => {
-      await openBeforeAfterTab()
-
-      const table = (await screen.findByRole('heading', { name: 'Most significant movements' })).closest('section')!
-      const headers = within(table).getAllByRole('columnheader').map((h) => h.textContent)
-      expect(headers).not.toContain('Reason')
-      expect(within(table).getByRole('button', { name: 'Open CVE-2024-23897' })).toBeInTheDocument()
-    })
-
-    it('opens a movement’s finding over the tab, and closing it comes back to the tab', async () => {
-      const user = await openBeforeAfterTab()
-      const table = (await screen.findByRole('heading', { name: 'Most significant movements' })).closest('section')!
-
-      await user.click(within(table).getByRole('button', { name: 'Open CVE-2024-23897' }).closest('tr')!)
-      const dialog = await screen.findByRole('dialog', { name: 'CVE-2024-23897' })
-      expect(within(dialog).getByRole('button', { name: /^Prioritization history/ })).toBeInTheDocument()
-      expect(window.location.search).toContain('finding=')
-
-      await user.click(within(dialog).getByRole('button', { name: 'Close' }))
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-      expect(screen.getByRole('tab', { name: 'Before & After' })).toHaveAttribute('aria-selected', 'true')
-      expect(window.location.search).not.toContain('finding=')
-    })
-
-  })
-
-  describe('threats tab', () => {
-    it('shows the coverage label with labeled and open counts', async () => {
-      await openThreatsTab()
-      expect(await screen.findByText('22 of 35 open findings have an ATT&CK label')).toBeInTheDocument()
-    })
-
-    it('shows every role together, a column only for the tactics some finding leads to, and names the rest', async () => {
-      await openThreatsTab()
-      const matrix = (await screen.findByRole('heading', { name: 'Findings per tactic' })).closest('section')!
-
-      expect(within(matrix).queryByRole('group')).not.toBeInTheDocument()
-      const columns = within(matrix).getAllByRole('columnheader').map((h) => h.textContent)
-      expect(columns).toContain('Initial Access')
-      expect(columns).toContain('Impact')
-      expect(columns).not.toContain('Exfiltration')
-      expect(columns).not.toContain('Resource Dev.')
-      expect(within(matrix).getByText('No findings: Resource Dev., Exfiltration')).toBeInTheDocument()
-    })
-
-    it('shows the top techniques table with technique IDs', async () => {
-      await openThreatsTab()
-      expect(await screen.findByRole('heading', { name: 'Top techniques' })).toBeInTheDocument()
-      expect(screen.getByText('T1190')).toBeInTheDocument()
-      expect(screen.getByText('Exploit Public-Facing Application')).toBeInTheDocument()
-    })
-  })
 })

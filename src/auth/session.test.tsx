@@ -123,7 +123,7 @@ describe('Returning after signing in', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Admin (customer_admin)' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
   })
 
   it("opens a Platform Admin's home when no page was asked for", async () => {
@@ -140,8 +140,8 @@ describe('Returning after signing in', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Viewer (viewer)' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
-    expect(window.location.pathname).toBe('/config')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/dashboard')
   })
 })
 
@@ -205,6 +205,9 @@ describe('Session', () => {
     answerMe(() => HttpResponse.json(NEXT_USER))
     await user.click(screen.getByRole('button', { name: 'Admin (customer_admin)' }))
 
+    // New user lands on Dashboard; navigate to Config to verify it loads fresh data, not the previous session's.
+    await user.click(await screen.findByRole('link', { name: 'Configuration' }))
+
     expect(await screen.findByText('Loading configuration…')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Sync now' })).not.toBeInTheDocument()
   })
@@ -212,7 +215,7 @@ describe('Session', () => {
   it('sends a session that is not deactivated away from the deactivated page', async () => {
     renderApp('/deactivated')
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Configuration' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
   })
 
   it('ignores a deactivation that arrives after signing out', () => {
