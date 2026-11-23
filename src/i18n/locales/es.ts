@@ -784,7 +784,7 @@ export const es: Translations = {
     networkError: 'No se pudo contactar al servidor para cargar el dashboard.',
     stats: {
       organizations: 'Organizaciones',
-      organizationsSub: '{{active}} activas · {{deactivated}} desactivadas',
+      organizationsSub: '{{active}} activas, {{deactivated}} desactivadas',
       usersTotal: 'Usuarios totales',
       cmdbConnected: 'CMDB conectada',
       cmdbConnectedValue: '{{n}} de {{total}}',
@@ -811,9 +811,9 @@ export const es: Translations = {
       failed: 'Fallidas',
     },
     slack: {
-      title: 'Alertas Slack por organización (30 días)',
+      title: 'Alertas Slack (30 días)',
       noAlerts: 'Sin alertas en los últimos 30 días',
-      summary: '{{sent}} enviadas · {{failed}} fallidas · {{pending}} pendientes',
+      summary: '{{sent}} enviadas, {{failed}} fallidas, {{pending}} pendientes',
     },
     chart: {
       title: 'Altas por mes',

@@ -59,7 +59,7 @@ export function CmdbSelector({ onSelect, className = '' }: Props) {
                 {t('config.selector.select')}
               </Button>
             ) : (
-              <Badge variant="caps">{t('config.selector.comingSoon')}</Badge>
+              <Badge variant="quiet">{t('config.selector.comingSoon')}</Badge>
             )}
           </div>
         ))}

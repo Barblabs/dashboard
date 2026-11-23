@@ -119,7 +119,7 @@ function UserIdentity({ user, isSelf }: { user: UserResponse; isSelf: boolean })
     <div className="flex flex-wrap items-center gap-2 font-body">
       {/* An email has no break points: without this it widens the table and pushes the actions out of view. */}
       <span className="min-w-0 wrap-anywhere">{user.email}</span>
-      {isSelf && <Badge variant="caps">{t('users.you')}</Badge>}
+      {isSelf && <Badge variant="quiet">{t('users.you')}</Badge>}
       {status !== 'active' && <Badge variant={STATUS_BADGE[status]}>{t(`users.status.${status}`)}</Badge>}
     </div>
   )

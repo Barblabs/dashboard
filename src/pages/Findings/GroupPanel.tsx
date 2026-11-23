@@ -166,7 +166,7 @@ export function FindingBadges({ order, finding }: { order: CurrentOrder; finding
         <Badge variant="critical">{t('findings.badges.ransomware')}</Badge>
       )}
       {placedByNewest(order, finding) && (
-        <Badge variant="caps" title={t('findings.badges.newHelp')}>{t('findings.badges.new')}</Badge>
+        <Badge variant="quiet" title={t('findings.badges.newHelp')}>{t('findings.badges.new')}</Badge>
       )}
       {hasPlan && <Badge variant="muted">{t('findings.badges.plan')}</Badge>}
     </span>

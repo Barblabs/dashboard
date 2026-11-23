@@ -31,7 +31,7 @@ export type AssetTriageTarget = { mode: 'single'; asset: Asset } | { mode: 'queu
 type Section = 'exposure' | 'informationClassification'
 
 const FOOTER = 'flex flex-wrap items-center justify-end gap-2 border-t border-border-panel px-6 py-4'
-const EYEBROW = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase'
+const EYEBROW = 'font-body text-[0.75rem] font-semibold text-gray'
 
 /**
  * Lets the User see where an Asset's Exposure and Information Classification come from and, as a
@@ -440,7 +440,7 @@ function ProvenanceRow({ label, inUse, children }: { label: string; inUse: boole
         <dd className="break-words text-gray">{children}</dd>
       </div>
       {inUse && (
-        <span className="shrink-0 rounded-sm bg-navy px-1.5 py-0.5 text-[0.6875rem] font-semibold tracking-[0.04em] text-white uppercase">
+        <span className="shrink-0 rounded-sm bg-navy px-1.5 py-0.5 text-[0.6875rem] font-semibold text-white">
           {t('config.triage.sheet.inUse')}
         </span>
       )}

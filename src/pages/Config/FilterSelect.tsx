@@ -16,11 +16,11 @@ export function FilterSelect({
   return (
     <Field
       label={label}
-      labelClassName="font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase"
+      labelClassName="font-body text-[0.75rem] font-semibold text-gray"
       className="gap-1"
     >
       {/* As tall as a filter MultiSelect, so the fields of a filter bar line up. */}
-      <Select value={value} onChange={(event) => onChange(event.target.value)} className="min-h-11 uppercase">
+      <Select value={value} onChange={(event) => onChange(event.target.value)} className="min-h-11">
         {children}
       </Select>
     </Field>

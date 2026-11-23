@@ -782,7 +782,7 @@ export const en = {
     networkError: 'Could not reach the server to load the dashboard.',
     stats: {
       organizations: 'Organizations',
-      organizationsSub: '{{active}} active · {{deactivated}} deactivated',
+      organizationsSub: '{{active}} active, {{deactivated}} deactivated',
       usersTotal: 'Total users',
       cmdbConnected: 'CMDB connected',
       cmdbConnectedValue: '{{n}} of {{total}}',
@@ -809,9 +809,9 @@ export const en = {
       failed: 'Failed',
     },
     slack: {
-      title: 'Slack alerts by organization (30 days)',
+      title: 'Slack alerts (30 days)',
       noAlerts: 'No alerts in the last 30 days',
-      summary: '{{sent}} sent · {{failed}} failed · {{pending}} pending',
+      summary: '{{sent}} sent, {{failed}} failed, {{pending}} pending',
     },
     chart: {
       title: 'New organizations per month',

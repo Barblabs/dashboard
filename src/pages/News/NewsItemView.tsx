@@ -39,7 +39,7 @@ export function NewsItemView({ item }: { item: NewsItem }) {
     <article aria-labelledby={`${id}-title`} className="flex max-w-[72ch] flex-col gap-3">
       <div className="flex flex-col gap-1">
         {item.kind === 'leak_post' && (
-          <Badge variant="caps" className="mb-1 self-start">
+          <Badge variant="quiet" className="mb-1 self-start">
             {t('news.item.leakPost')}
           </Badge>
         )}

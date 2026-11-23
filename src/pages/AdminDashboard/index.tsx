@@ -38,7 +38,7 @@ function getMonthlyData(customers: CustomerResponse[], locale: string, now: Date
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div className="flex flex-col gap-1 rounded-xl border border-border-panel bg-white p-5">
-      <dt className="font-body text-[0.8125rem] font-semibold uppercase tracking-wider text-gray">{label}</dt>
+      <dt className="font-body text-[0.8125rem] font-semibold text-gray">{label}</dt>
       <dd className="font-title text-[2rem] leading-none text-navy">{value}</dd>
       {sub && <span className="font-body text-[0.75rem] text-gray">{sub}</span>}
     </div>
@@ -260,7 +260,7 @@ function SyncChart({ days }: { days: SyncDay[] }) {
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={days} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-panel)" vertical={false} />
+            <CartesianGrid stroke="var(--color-border-row)" vertical={false} />
             <XAxis
               dataKey="date"
               tick={{ fontSize: 11, fill: 'var(--color-gray)', fontFamily: 'var(--font-body)' }}
@@ -392,7 +392,7 @@ function MonthlyChart({ customers }: { customers: CustomerResponse[] }) {
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-panel)" vertical={false} />
+            <CartesianGrid stroke="var(--color-border-row)" vertical={false} />
             <XAxis
               dataKey="label"
               tick={{ fontSize: 12, fill: 'var(--color-gray)', fontFamily: 'var(--font-body)' }}
