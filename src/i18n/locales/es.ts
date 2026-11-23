@@ -1329,11 +1329,11 @@ export const es: Translations = {
       regulations: 'Regulaciones y estándares',
       environments: 'Entornos tecnológicos',
       domains: { label: 'Dominios', placeholder: 'ejemplo.com' },
-      brands: { label: 'Marcas y productos', placeholder: 'Nombre de la marca' },
+      brands: 'Marcas y productos',
       technologies: { label: 'Tecnologías de las que depende', placeholder: 'p. ej. Microsoft 365, SAP' },
-      thirdParties: { label: 'Terceros con acceso', placeholder: 'Nombre del proveedor' },
+      thirdParties: 'Terceros con acceso',
       appetite: 'Apetito de riesgo',
-      appetiteHint: 'De toda la organización, como lo define la dirección. Cada servicio crítico tiene su propia tolerancia.',
+      appetiteHint: 'De toda la organización, como lo define la dirección.',
       concerns: 'Principales preocupaciones',
       pastIncidents: { label: 'Incidentes de seguridad pasados', placeholder: 'Qué pasó y cuándo.' },
       constraints: {
@@ -1370,8 +1370,7 @@ export const es: Translations = {
     import: {
       button: 'Importar documentos',
       title: 'Importar documentos',
-      subtitle:
-        'Leemos todos tus documentos juntos y acomodamos lo que encontramos en cada sección, sin reemplazar lo que ya escribiste. Nada se guarda hasta que des clic en Guardar.',
+      subtitle: 'Conserva lo que ya escribiste. Nada se guarda hasta que des clic en Guardar.',
       filesLabel: 'Archivos',
       choose: 'Elegir archivos',
       fileHelp: 'PDF, Word (.docx), TXT, Markdown, CSV o JSON. Hasta 10 archivos, 10 MB cada uno y 20 MB en total.',

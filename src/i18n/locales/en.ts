@@ -1326,11 +1326,11 @@ export const en = {
       regulations: 'Regulations and standards',
       environments: 'Technology environments',
       domains: { label: 'Domains', placeholder: 'example.com' },
-      brands: { label: 'Brands and products', placeholder: 'Brand name' },
+      brands: 'Brands and products',
       technologies: { label: 'Technologies it depends on', placeholder: 'e.g. Microsoft 365, SAP' },
-      thirdParties: { label: 'Third parties with access', placeholder: 'Supplier name' },
+      thirdParties: 'Third parties with access',
       appetite: 'Risk appetite',
-      appetiteHint: 'For the whole organization, as leadership sets it. Each critical service has its own tolerance.',
+      appetiteHint: 'For the whole organization, as leadership sets it.',
       concerns: 'Main concerns',
       pastIncidents: { label: 'Past security incidents', placeholder: 'What happened and when.' },
       constraints: {
@@ -1367,8 +1367,7 @@ export const en = {
     import: {
       button: 'Import documents',
       title: 'Import documents',
-      subtitle:
-        'We read all your documents together and place what we find in each section, without replacing what you already wrote. Nothing is saved until you click Save.',
+      subtitle: 'It keeps what you already wrote. Nothing is saved until you click Save.',
       filesLabel: 'Files',
       choose: 'Choose files',
       fileHelp: 'PDF, Word (.docx), TXT, Markdown, CSV or JSON. Up to 10 files, 10 MB each and 20 MB in total.',
