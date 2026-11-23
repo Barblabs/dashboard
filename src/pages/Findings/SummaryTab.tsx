@@ -176,7 +176,7 @@ function TimeToCloseChart({ bands }: { bands: CloseTimeBand[] }) {
                     aria-label={`${label}: ${row.median_days.toFixed(1)} ${unit}`}
                   />
                 </div>
-                <span className="w-16 shrink-0 tabular-nums text-navy">
+                <span className="w-20 shrink-0 tabular-nums text-navy">
                   {row.median_days.toFixed(1)} {unit}
                 </span>
               </>
@@ -185,7 +185,7 @@ function TimeToCloseChart({ bands }: { bands: CloseTimeBand[] }) {
                 <span className="flex-1 font-body text-[0.75rem] italic text-gray">
                   {t('findings.resumen.ttcNone')}
                 </span>
-                <span className="w-16 shrink-0 text-gray">—</span>
+                <span className="w-20 shrink-0 text-gray">—</span>
               </>
             )}
           </li>
