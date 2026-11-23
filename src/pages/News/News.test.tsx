@@ -212,8 +212,8 @@ describe('News', () => {
 
     const options = within(screen.getByLabelText('Digest')).getAllByRole('option')
     expect(options.map((o) => plain(o.textContent))).toEqual([
-      'Nov 16 – 17, 2026 · 7 news items · 1 names you',
-      'Nov 15 – 16, 2026 · 2 news items',
+      'Nov 16 – 17, 2026, 7 news items, 1 names you',
+      'Nov 15 – 16, 2026, 2 news items',
     ])
   })
 

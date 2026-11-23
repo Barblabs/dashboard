@@ -70,7 +70,7 @@ export function NewsItemView({ item }: { item: NewsItem }) {
           {item.labels.map((label, i) => (
             <li
               key={i}
-              className="rounded-r-sm border-l-2 border-navy bg-navy/5 px-3 py-1.5 font-body text-[0.875rem] leading-[1.4] font-medium text-navy"
+              className="rounded-sm bg-navy/5 px-3 py-1.5 font-body text-[0.875rem] leading-[1.4] font-medium text-navy"
             >
               {label}
             </li>
