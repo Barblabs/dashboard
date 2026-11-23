@@ -19,7 +19,6 @@ export const es: Translations = {
       news: 'Noticias',
       config: 'Configuración',
       'business-context': 'Contexto empresarial',
-      notifications: 'Notificaciones',
       users: 'Usuarios',
       tenants: 'Tenants',
       'admin-dashboard': 'Dashboard',
@@ -660,9 +659,6 @@ export const es: Translations = {
       noVictim: 'Víctima sin nombre',
       attacker: 'Atacante: {{name}}',
     },
-  },
-  notifications: {
-    title: 'Notificaciones',
   },
   users: {
     title: 'Usuarios',
