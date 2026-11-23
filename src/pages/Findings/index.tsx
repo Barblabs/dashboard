@@ -189,11 +189,6 @@ function OrderContent({
         <span>{t('findings.summary.updated', { date: formatDate(prioritization.created_at) })}</span>
         <span aria-hidden="true">·</span>
         <span>
-          {t('findings.summary.findings', { count: prioritization.findings.length })},{' '}
-          {t('findings.summary.groups', { count: prioritization.groups.length })}
-        </span>
-        <span aria-hidden="true">·</span>
-        <span>
           {prioritization.business_context_version === null
             ? t('findings.summary.noBusinessContext')
             : t('findings.summary.businessContext', {

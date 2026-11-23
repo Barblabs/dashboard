@@ -46,7 +46,7 @@ export const es: Translations = {
       },
     },
     form: {
-      tagline: 'Las vulnerabilidades que sí afectan a tu stack, priorizadas.',
+      tagline: 'Las vulnerabilidades que afectan a tu stack, priorizadas.',
       subtitle: 'Business-Aware Risk-Based Analysis of Threats, Tailored Alerts & Countermeasure Knowledge.',
       title: 'Iniciar sesión',
       access: 'Acceso restringido al equipo de seguridad y a los dueños de activo.',
@@ -170,10 +170,6 @@ export const es: Translations = {
     },
     summary: {
       updated: 'Actualizado {{date}}',
-      findings_one: '{{count}} hallazgo',
-      findings_other: '{{count}} hallazgos',
-      groups_one: '{{count}} grupo',
-      groups_other: '{{count}} grupos',
       businessContext: 'Ponderado con el contexto empresarial v{{version}}',
       noBusinessContext: 'Ponderado sin contexto empresarial',
     },
@@ -583,8 +579,7 @@ export const es: Translations = {
   },
   news: {
     title: 'Noticias',
-    subtitle:
-      'Noticias sobre ataques y vulnerabilidades que las reglas encontraron relevantes para su organización, de la más cercana a la más lejana. Cada día con noticias para ustedes llega una nueva edición.',
+    subtitle: 'Noticias sobre ataques y vulnerabilidades relevantes para su organización, de la más cercana a la más lejana.',
     loading: 'Cargando noticias…',
     loadingDigest: 'Cargando esta edición…',
     failed: 'No se pudieron cargar las noticias.',
@@ -592,10 +587,9 @@ export const es: Translations = {
     notFound: 'Esta edición ya no está disponible.',
     empty: {
       title: 'Aún no hay noticias',
-      daily:
-        'Una vez al día, cuando hay noticias sobre ataques o vulnerabilidades relevantes para ustedes, aparece aquí una edición: noticias que nombran a su organización, una CVE abierta en sus activos, un producto que corre en ellos o un ataque en su sector.',
+      daily: 'Cada día con noticias relevantes para ustedes aparece aquí una edición.',
       context:
-        'Lo que hace que una noticia les llegue es lo que indica su contexto empresarial: sus sectores, dominios, marcas, tecnologías y terceros.',
+        'Su contexto empresarial decide qué es relevante: sus sectores, dominios, marcas, tecnologías y terceros.',
       link: 'Ir al contexto empresarial',
     },
     period: 'Noticias del {{period}}',
@@ -607,7 +601,7 @@ export const es: Translations = {
       named_other: '{{count}} los nombran',
     },
     counts: 'Noticias por relevancia',
-    editorMissing: 'No se pudo escribir el resumen; las noticias van en el orden de las reglas, sin explicación.',
+    editorMissing: 'No se pudo escribir el resumen de esta edición, así que las noticias van sin explicación.',
     noSectors: {
       text: 'Su contexto empresarial no indica ningún sector, así que aquí no pueden aparecer ataques a organizaciones de su sector.',
       link: 'Indicar sus sectores',
@@ -621,18 +615,15 @@ export const es: Translations = {
       },
       finding: {
         title: 'Mencionan vulnerabilidades abiertas en sus activos',
-        description: 'Nombran una CVE que sigue abierta en alguno de sus activos.',
         short: 'Vulnerabilidades abiertas',
       },
       footprint: {
         title: 'Mencionan tecnología o proveedores que usan',
-        description: 'Nombran un producto que corre en sus activos, o una tecnología o un tercero que indica su contexto empresarial.',
         short: 'Tecnología y proveedores',
       },
       peer: {
         title: 'Ataques en su sector',
-        description: 'Ataques a otras organizaciones de su sector.',
-        context: 'Contexto: no indica que ustedes estén expuestos.',
+        context: 'No indica que ustedes estén expuestos.',
         short: 'Su sector',
       },
     },
@@ -745,7 +736,7 @@ export const es: Translations = {
     },
     status: {
       active: 'Activa',
-      deactivated: 'Desactivada · sus usuarios no pueden entrar',
+      deactivated: 'Desactivada',
     },
     created: 'Creada el {{date}}',
     actions: {
@@ -862,25 +853,19 @@ export const es: Translations = {
     networkError: 'No se pudo contactar al servidor para cargar la conexión con la CMDB.',
     header: {
       title: 'Configuración',
-      subtitle: 'Conecta tu CMDB para cargar el stack tecnológico.',
     },
     steps: {
       title: 'Conectar CMDB',
-      description:
-        'BARBATTACK lee el inventario de activos desde tu CMDB. Sin una conexión no hay stack que comparar contra los feeds de vulnerabilidades.',
       items: {
         choose: 'Elige tu CMDB',
         credentials: 'Ingresa la dirección y el usuario',
         connect: 'Conecta y sincroniza',
       },
-      status: {
-        disconnected: 'Sin conexión',
-      },
     },
     form: {
       title: 'Conectar iTop',
       editTitle: 'Editar conexión de iTop',
-      back: '← Cambiar CMDB',
+      back: 'Cambiar CMDB',
       cancel: 'Cancelar',
       url: {
         label: 'Dirección de iTop (IP o URL)',
@@ -1193,7 +1178,6 @@ export const es: Translations = {
     },
     selector: {
       title: 'Elige tu CMDB',
-      subtitle: 'Selecciona de dónde viene tu inventario de activos.',
       select: 'Seleccionar',
       comingSoon: 'Próximamente',
     },
@@ -1305,7 +1289,6 @@ export const es: Translations = {
   businessContext: {
     header: {
       title: 'Contexto empresarial',
-      subtitle: 'Lo que necesitamos saber de tu organización para priorizar lo que de verdad le afecta.',
     },
     loading: 'Cargando el contexto empresarial…',
     loadFailed: 'No se pudo cargar el contexto empresarial.',
@@ -1317,14 +1300,11 @@ export const es: Translations = {
     noMatches: 'Sin resultados.',
     remove: 'Quitar {{value}}',
     sections: {
-      profile: { title: 'Perfil', description: 'A qué se dedica tu organización y qué tamaño tiene.' },
-      geography: { title: 'Ubicación', description: 'Dónde está su sede y dónde opera.' },
-      operations: {
-        title: 'Operación',
-        description: 'Lo que no se puede permitir perder, los datos que maneja y las reglas que cumple.',
-      },
-      footprint: { title: 'Huella digital', description: 'Lo que la identifica en internet y de quién depende.' },
-      risk: { title: 'Riesgo', description: 'Cuánto riesgo acepta y qué le preocupa.' },
+      profile: { title: 'Perfil' },
+      geography: { title: 'Ubicación' },
+      operations: { title: 'Operación' },
+      footprint: { title: 'Huella digital' },
+      risk: { title: 'Riesgo' },
     },
     fields: {
       summary: {
@@ -1392,7 +1372,7 @@ export const es: Translations = {
     start: {
       title: 'Empieza con tus documentos',
       description:
-        'Sube perfiles de la empresa, informes anuales, políticas o cualquier documento de tu organización. Los leemos juntos y acomodamos cada dato en su sección; tú lo revisas antes de guardar.',
+        'Sube perfiles de la empresa, informes anuales o políticas. Cada dato va a su sección y tú lo revisas antes de guardar.',
       import: 'Importar documentos',
       manual: 'Llenarlo a mano',
     },

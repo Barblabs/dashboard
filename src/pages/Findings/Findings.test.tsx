@@ -74,7 +74,7 @@ describe('Findings', () => {
     ])
     expect(within(groups[0]).getByRole('button', { name: 'Open CVE-2021-41773' })).toBeInTheDocument()
     expect(within(groups[2]).getByText(/CVE-2024-21762 y CVE-2024-3400/)).toBeInTheDocument()
-    expect(screen.getByText(/20 findings, 4 groups/)).toBeInTheDocument()
+    expect(screen.getByText('20 findings')).toBeInTheDocument()
     expect(screen.getByText('Weighed with business context v1')).toBeInTheDocument()
   })
 

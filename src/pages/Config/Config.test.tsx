@@ -63,9 +63,8 @@ describe('Configuration', () => {
   it('lists iTop as the only available CMDB and the rest as coming soon', async () => {
     renderApp()
 
-    expect(await screen.findByText('No connection')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Connect CMDB' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Configuration' })).toBeInTheDocument()
-    expect(screen.getByText('Connect your CMDB to load the tech stack.')).toBeInTheDocument()
     expect(screen.getByText('ServiceNow')).toBeInTheDocument()
     expect(screen.getByText('Other CMDB')).toBeInTheDocument()
     expect(screen.getAllByText('Coming soon')).toHaveLength(2)
@@ -381,7 +380,7 @@ describe('Configuration', () => {
     expect(screen.getByLabelText('User')).toHaveValue('barb-reader')
     expect(screen.getByLabelText('Password')).toHaveValue('')
     // Editing a live connection is not the setup wizard.
-    expect(screen.queryByText('No connection')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Connect CMDB' })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Save changes' }))
     expect(screen.getByText('The password is required.')).toBeInTheDocument()

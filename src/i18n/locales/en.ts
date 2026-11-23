@@ -44,7 +44,7 @@ export const en = {
       },
     },
     form: {
-      tagline: 'The vulnerabilities that actually affect your stack, prioritized.',
+      tagline: 'The vulnerabilities that affect your stack, prioritized.',
       subtitle: 'Business-Aware Risk-Based Analysis of Threats, Tailored Alerts & Countermeasure Knowledge.',
       title: 'Sign in',
       access: 'Access restricted to the security team and asset owners.',
@@ -168,10 +168,6 @@ export const en = {
     },
     summary: {
       updated: 'Updated {{date}}',
-      findings_one: '{{count}} finding',
-      findings_other: '{{count}} findings',
-      groups_one: '{{count}} group',
-      groups_other: '{{count}} groups',
       businessContext: 'Weighed with business context v{{version}}',
       noBusinessContext: 'Weighed without a business context',
     },
@@ -581,8 +577,7 @@ export const en = {
   },
   news: {
     title: 'News',
-    subtitle:
-      'News about attacks and vulnerabilities that the rules found relevant to your organization, closest to you first. A new digest arrives each day there is news for you.',
+    subtitle: 'News about attacks and vulnerabilities relevant to your organization, closest to you first.',
     loading: 'Loading the news…',
     loadingDigest: 'Loading this digest…',
     failed: "Couldn't load the news.",
@@ -590,10 +585,9 @@ export const en = {
     notFound: 'This digest is no longer available.',
     empty: {
       title: 'No news yet',
-      daily:
-        'Once a day, when there is news about attacks or vulnerabilities relevant to you, a digest shows up here: news that names your organization, a CVE open on your assets, a product they run, or an attack in your sector.',
+      daily: 'A digest shows up here on each day with news relevant to you.',
       context:
-        'What makes news reach you is what your business context states: your sectors, domains, brands, technologies and third parties.',
+        'Your business context decides what is relevant: your sectors, domains, brands, technologies and third parties.',
       link: 'Go to the business context',
     },
     period: 'News from {{period}}',
@@ -605,7 +599,7 @@ export const en = {
       named_other: '{{count}} name you',
     },
     counts: 'News by relevance',
-    editorMissing: "The summary couldn't be written; the news follows the rules' order, without explanations.",
+    editorMissing: "The summary for this digest couldn't be written, so the news shows without explanations.",
     noSectors: {
       text: 'Your business context states no sector, so no attack on an organization of your sector can show up here.',
       link: 'State your sectors',
@@ -619,18 +613,15 @@ export const en = {
       },
       finding: {
         title: 'They mention vulnerabilities open on your assets',
-        description: 'They name a CVE that is still open on one of your assets.',
         short: 'Open vulnerabilities',
       },
       footprint: {
         title: 'They mention technology or suppliers you use',
-        description: 'They name a product your assets run, or a technology or third party your business context states.',
         short: 'Technology and suppliers',
       },
       peer: {
         title: 'Attacks in your sector',
-        description: 'Attacks on other organizations of your sector.',
-        context: 'Context: it does not mean you are exposed.',
+        context: 'It does not mean you are exposed.',
         short: 'Your sector',
       },
     },
@@ -743,7 +734,7 @@ export const en = {
     },
     status: {
       active: 'Active',
-      deactivated: 'Deactivated · their users cannot sign in',
+      deactivated: 'Deactivated',
     },
     created: 'Created {{date}}',
     actions: {
@@ -860,25 +851,19 @@ export const en = {
     networkError: 'Could not reach the server to load the CMDB connection.',
     header: {
       title: 'Configuration',
-      subtitle: 'Connect your CMDB to load the tech stack.',
     },
     steps: {
       title: 'Connect CMDB',
-      description:
-        'BARBATTACK reads the asset inventory from your CMDB. Without a connection there is no stack to compare against the vulnerability feeds.',
       items: {
         choose: 'Choose your CMDB',
         credentials: 'Enter the address and user',
         connect: 'Connect and sync',
       },
-      status: {
-        disconnected: 'No connection',
-      },
     },
     form: {
       title: 'Connect iTop',
       editTitle: 'Edit iTop connection',
-      back: '← Change CMDB',
+      back: 'Change CMDB',
       cancel: 'Cancel',
       url: {
         label: 'iTop address (IP or URL)',
@@ -1191,7 +1176,6 @@ export const en = {
     },
     selector: {
       title: 'Choose your CMDB',
-      subtitle: 'Select where your asset inventory comes from.',
       select: 'Select',
       comingSoon: 'Coming soon',
     },
@@ -1218,7 +1202,7 @@ export const en = {
     notConnected: {
       title: "BARBATTACK isn't delivering to Slack yet",
       description:
-        'Connect your workspace to the Security Team channel. When a finding is delivered there, the team gets a summary and one-click documentation leads back to the report.',
+        'Connect your workspace to the Security Team channel. When a finding is delivered there, the team gets a summary and links to the documentation.',
       action: 'Connect Slack',
       opening: 'Opening Slack…',
       waiting: 'Waiting for Slack…',
@@ -1302,7 +1286,6 @@ export const en = {
   businessContext: {
     header: {
       title: 'Business context',
-      subtitle: 'What we need to know about your organization to prioritize what truly affects it.',
     },
     loading: 'Loading the business context…',
     loadFailed: "Couldn't load the business context.",
@@ -1314,14 +1297,11 @@ export const en = {
     noMatches: 'No matches.',
     remove: 'Remove {{value}}',
     sections: {
-      profile: { title: 'Profile', description: 'What your organization does and how big it is.' },
-      geography: { title: 'Location', description: 'Where it is headquartered and where it operates.' },
-      operations: {
-        title: 'Operations',
-        description: 'What it cannot afford to lose, the data it holds and the rules it follows.',
-      },
-      footprint: { title: 'Digital footprint', description: 'What identifies it online and who it depends on.' },
-      risk: { title: 'Risk', description: 'How much risk it accepts and what worries it.' },
+      profile: { title: 'Profile' },
+      geography: { title: 'Location' },
+      operations: { title: 'Operations' },
+      footprint: { title: 'Digital footprint' },
+      risk: { title: 'Risk' },
     },
     fields: {
       summary: {
@@ -1389,7 +1369,7 @@ export const en = {
     start: {
       title: 'Start with your documents',
       description:
-        'Upload company profiles, annual reports, policies or any document about your organization. We read them together and place each fact in its section; you review it before saving.',
+        'Upload company profiles, annual reports or policies. Each fact goes into its section, and you review it before saving.',
       import: 'Import documents',
       manual: 'Fill it in by hand',
     },

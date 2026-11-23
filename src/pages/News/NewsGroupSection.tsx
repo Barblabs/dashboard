@@ -31,7 +31,9 @@ export function NewsGroupSection({ group }: { group: NewsGroup }) {
           </h2>
           <span className="font-body text-[0.8125rem] text-gray">{t('news.group.size', { count: items.length })}</span>
         </div>
-        <p className="font-body text-[0.875rem] leading-[1.4] text-gray">{t(`news.relevance.${relevance}.description`)}</p>
+        {relevance === 'named' && (
+          <p className="font-body text-[0.875rem] leading-[1.4] text-gray">{t('news.relevance.named.description')}</p>
+        )}
         {relevance === 'peer' && (
           <p className="font-body text-[0.875rem] leading-[1.4] font-semibold text-gray">
             {t('news.relevance.peer.context')}

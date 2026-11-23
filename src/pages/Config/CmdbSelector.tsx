@@ -27,12 +27,7 @@ export function CmdbSelector({ onSelect, className = '' }: Props) {
 
   return (
     <Panel className={`gap-4 ${className}`}>
-      <div className="flex flex-col gap-0.5">
-        <PanelTitle>{t('config.selector.title')}</PanelTitle>
-        <p className="font-body text-[0.875rem] leading-[1.4] text-gray">
-          {t('config.selector.subtitle')}
-        </p>
-      </div>
+      <PanelTitle>{t('config.selector.title')}</PanelTitle>
 
       <div>
         {PROVIDERS.map((p) => (
