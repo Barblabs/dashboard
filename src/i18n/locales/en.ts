@@ -1086,8 +1086,7 @@ export const en = {
       banner: {
         count_one: '{{count}} Asset needs triage.',
         count_other: '{{count}} Assets need triage.',
-        detail:
-          'They have an Unknown Exposure or no Information Classification. Unknown Exposure leaves a Data Gap on their Findings.',
+        detail: 'They have an Unknown Exposure or no Information Classification.',
         action: 'Triage them',
         none: 'Every Active Asset is triaged.',
       },
@@ -1114,7 +1113,6 @@ export const en = {
         summary: '{{triaged}} of {{total}} Assets triaged',
         summaryDetail:
           'Where you declared an Exposure, open Findings were rescored, so the Findings list may have reordered.',
-        summarySkipped: 'The ones you moved past still show Unknown or Unclassified in the inventory.',
         done: 'Done',
       },
     },
@@ -1129,7 +1127,6 @@ export const en = {
     },
     areas: {
       title: 'Areas',
-      description: 'Imported from your CMDB. Each area can name an owner to reach about it.',
       loading: 'Loading areas…',
       empty: 'The CMDB has no areas yet.',
       noMatches: 'No areas match this filter.',
@@ -1153,7 +1150,7 @@ export const en = {
         set: 'Set owner',
         edit: 'Edit owner',
         title: 'Owner of {{area}}',
-        description: 'Whom to reach about this area. It does not need a dashboard account.',
+        help: 'It does not need a dashboard account.',
         email: 'Email',
         save: 'Save',
         saving: 'Saving…',
@@ -1207,7 +1204,7 @@ export const en = {
     channels: {
       label: 'Security Team channel',
       notSet: 'Not set',
-      help: 'Required to finish the connection. Slack refuses deliveries to channels the app has not joined.',
+      help: 'Required to finish the connection. Add the app to the channel, or Slack refuses deliveries.',
       select: 'Select a channel…',
       loading: 'Loading channels…',
       loadFailed: 'Could not load the channel list.',

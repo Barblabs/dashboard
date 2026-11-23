@@ -1088,8 +1088,7 @@ export const es: Translations = {
       banner: {
         count_one: '{{count}} activo necesita revisión.',
         count_other: '{{count}} activos necesitan revisión.',
-        detail:
-          'Tienen Exposición desconocida o no tienen Clasificación de la Información. La Exposición desconocida deja un Data Gap en sus hallazgos.',
+        detail: 'Tienen Exposición desconocida o no tienen Clasificación de la Información.',
         action: 'Revisarlos',
         none: 'Todos los activos activos están revisados.',
       },
@@ -1116,7 +1115,6 @@ export const es: Translations = {
         summary: '{{triaged}} de {{total}} activos revisados',
         summaryDetail:
           'Donde declaraste una Exposición, sus hallazgos abiertos se recalcularon, así que la lista de hallazgos puede haber cambiado de orden.',
-        summarySkipped: 'Los que pasaste siguen como desconocidos o sin clasificar en el inventario.',
         done: 'Listo',
       },
     },
@@ -1131,7 +1129,6 @@ export const es: Translations = {
     },
     areas: {
       title: 'Áreas',
-      description: 'Importadas desde tu CMDB. Cada área puede indicar a quién contactar sobre ella.',
       loading: 'Cargando áreas…',
       empty: 'El CMDB aún no tiene áreas.',
       noMatches: 'Ninguna área coincide con este filtro.',
@@ -1155,7 +1152,7 @@ export const es: Translations = {
         set: 'Asignar dueño',
         edit: 'Editar dueño',
         title: 'Dueño de {{area}}',
-        description: 'A quién contactar sobre esta área. No necesita una cuenta en el dashboard.',
+        help: 'No necesita una cuenta en el dashboard.',
         email: 'Correo',
         save: 'Guardar',
         saving: 'Guardando…',
@@ -1210,7 +1207,7 @@ export const es: Translations = {
     channels: {
       label: 'Canal del Security Team',
       notSet: 'Sin asignar',
-      help: 'Es obligatorio para completar la conexión. Slack rechaza entregas a canales en los que la app no está.',
+      help: 'Es obligatorio para completar la conexión. Agrega la app al canal, o Slack rechaza las entregas.',
       select: 'Selecciona un canal…',
       loading: 'Cargando canales…',
       loadFailed: 'No se pudo cargar la lista de canales.',

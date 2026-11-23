@@ -29,15 +29,13 @@ export function SlackFailedDeliveries() {
   return (
     <section>
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border-panel px-6 pt-5 pb-4">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-baseline gap-3">
-            <h2 className="font-title text-[1rem] text-navy">{t('slack.deliveries.title')}</h2>
-            {query.isSuccess && (
-              <span className="font-body text-[0.8125rem] text-gray">
-                {t('slack.deliveries.count', { count: deliveries.length })}
-              </span>
-            )}
-          </div>
+        <div className="flex items-baseline gap-3">
+          <h2 className="font-title text-[1rem] text-navy">{t('slack.deliveries.title')}</h2>
+          {query.isSuccess && (
+            <span className="font-body text-[0.8125rem] text-gray">
+              {t('slack.deliveries.count', { count: deliveries.length })}
+            </span>
+          )}
         </div>
         {canEdit && (
           <Button
@@ -46,7 +44,6 @@ export function SlackFailedDeliveries() {
             disabled={retrying || deliveries.length === 0}
             loading={retrying}
             onClick={() => retry.mutate()}
-            title={t('slack.deliveries.retryAll')}
           >
             {t('slack.deliveries.retryAll')}
           </Button>

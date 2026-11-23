@@ -151,7 +151,6 @@ describe('Asset triage', () => {
 
     expect(await sheet.findByText('2 of 5 Assets triaged')).toBeInTheDocument()
     expect(sheet.getByText(/Where you declared an Exposure, open Findings were rescored/)).toBeInTheDocument()
-    expect(sheet.getByText(/The ones you moved past still show Unknown or Unclassified/)).toBeInTheDocument()
     // Each save is confirmed by its Saved mark, not by a toast.
     expect(toasts().queryByText(/Declared/)).not.toBeInTheDocument()
     // prod-api-01 is done; analytics-worker-03 is still Unclassified.
