@@ -3,6 +3,7 @@ import type { Role } from './auth/store'
 import { AdminDashboardPage } from './pages/AdminDashboard'
 import { BusinessContextPage } from './pages/BusinessContext'
 import { ConfigPage } from './pages/Config'
+import { CustomerDashboardPage } from './pages/CustomerDashboard'
 import { FindingsPage } from './pages/Findings'
 import { NewsPage } from './pages/News'
 import { TenantsPage } from './pages/Tenants'
@@ -25,6 +26,7 @@ const PLATFORM_ADMIN: readonly Role[] = ['platform_admin']
  * roles and the sidebar lists, in this order, the ones the signed-in role may open.
  */
 export const PAGES = [
+  { id: 'dashboard', Page: CustomerDashboardPage, roles: CUSTOMER_ROLES },
   { id: 'findings', Page: FindingsPage, roles: CUSTOMER_ROLES },
   { id: 'news', Page: NewsPage, roles: CUSTOMER_ROLES },
   { id: 'config', Page: ConfigPage, roles: CUSTOMER_ROLES },
@@ -38,8 +40,8 @@ type PageId = (typeof PAGES)[number]['id']
 
 const HOME: Record<Role, PageId> = {
   platform_admin: 'tenants',
-  customer_admin: 'config',
-  viewer: 'config',
+  customer_admin: 'dashboard',
+  viewer: 'dashboard',
 }
 
 export function pagesFor(role: Role) {

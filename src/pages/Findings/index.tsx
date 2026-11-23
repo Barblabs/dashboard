@@ -1,74 +1,39 @@
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { useSearchParams, Navigate } from 'react-router'
 import { useCurrentOrderQuery, type CurrentOrder } from '../../api/prioritizations'
 import { Page } from '../../components/Page'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Message } from '../../components/ui/Message'
 import { Modal } from '../../components/ui/Modal'
-import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { useDateFormat } from '../../i18n/format'
 import { FindingDetail } from './FindingDetail'
 import { FilterChips, FindingsFilterBar } from './FindingsFilter'
 import { GroupPanel } from './GroupPanel'
-import { SummaryIndicators } from './SummaryIndicators'
-import { BeforeAfterTabContent } from './BeforeAfterTab'
-import { ClosedTabContent } from './ClosedTab'
-import { RiskTabContent } from './RiskTab'
-import { SummaryTabContent } from './SummaryTab'
-import { ThreatsTabContent } from './ThreatsTab'
 import { hasActiveFilters, matchesFinding, parseFilters } from './filters'
 
 const FINDING_PARAM = 'finding'
 
+const DASHBOARD_TABS = new Set(['summary', 'before-after', 'risk', 'threats', 'closed'])
+
 export function FindingsPage() {
   const { t } = useTranslation()
-  const [params, setParams] = useSearchParams()
-  const tab = params.get('tab') ?? 'prioritized'
+  const [params] = useSearchParams()
+  const tab = params.get('tab')
 
-  const changeTab = (value: string) => {
-    setParams((prev) => {
-      const next = new URLSearchParams()
-      next.set('tab', value)
-      const finding = prev.get(FINDING_PARAM)
-      if (finding) next.set(FINDING_PARAM, finding)
-      return next
-    })
+  // Legacy URLs: /findings?tab=<dashboard-tab> → /dashboard?tab=<dashboard-tab>
+  if (tab && DASHBOARD_TABS.has(tab)) {
+    const next = new URLSearchParams()
+    next.set('tab', tab)
+    return <Navigate to={`/dashboard?${next}`} replace />
   }
 
   return (
     <Page title={t('findings.title')} subtitle={t('findings.subtitle')}>
-      <ChartErrorBoundary><SummaryIndicators /></ChartErrorBoundary>
-      <Tabs value={tab} onValueChange={changeTab}>
-        <TabList label={t('findings.tabs.label')}>
-          <Tab value="prioritized">{t('findings.tabs.prioritized')}</Tab>
-          <Tab value="closed">{t('findings.tabs.closed')}</Tab>
-          <Tab value="summary">{t('findings.tabs.summary')}</Tab>
-          <Tab value="before-after">{t('findings.tabs.beforeAfter')}</Tab>
-          <Tab value="risk">{t('findings.tabs.risk')}</Tab>
-          <Tab value="threats">{t('findings.tabs.threats')}</Tab>
-        </TabList>
-
-        <TabPanel value="prioritized" className="mt-6">
-          <ChartErrorBoundary><PrioritizedTabContent /></ChartErrorBoundary>
-        </TabPanel>
-        <TabPanel value="closed" className="mt-6">
-          <ClosedTabContent />
-        </TabPanel>
-        <TabPanel value="summary" className="mt-6">
-          <SummaryTabContent />
-        </TabPanel>
-        <TabPanel value="before-after" className="mt-6">
-          <BeforeAfterTabContent />
-        </TabPanel>
-        <TabPanel value="risk" className="mt-6">
-          <RiskTabContent />
-        </TabPanel>
-        <TabPanel value="threats" className="mt-6">
-          <ThreatsTabContent />
-        </TabPanel>
-      </Tabs>
+      <ChartErrorBoundary>
+        <PrioritizedTabContent />
+      </ChartErrorBoundary>
     </Page>
   )
 }

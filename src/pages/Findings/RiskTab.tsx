@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { useNavigate } from 'react-router'
 import {
   useAssetFindingsSummaryQuery,
   useBreakdownQuery,
@@ -107,7 +107,7 @@ function HeatmapCard({ by, onByChange }: { by: BreakdownBy; onByChange: (b: Brea
 
 function HeatmapGrid({ groups: rawGroups, by }: { groups: BreakdownGroup[]; by: BreakdownBy }) {
   const { t } = useTranslation()
-  const [, setParams] = useSearchParams()
+  const navigate = useNavigate()
 
   const groups = withoutEmptyUnknown(rawGroups)
 
@@ -136,16 +136,13 @@ function HeatmapGrid({ groups: rawGroups, by }: { groups: BreakdownGroup[]; by: 
   }
 
   const openCell = (band: Band, g: BreakdownGroup) => {
-    setParams(() => {
-      const next = new URLSearchParams()
-      next.set('tab', 'prioritized')
-      next.set('from', 'chart')
-      next.set('band', band)
-      if (by === 'exposure') next.set('exposure', g.value)
-      else if (by === 'criticality') next.set('criticality', g.value)
-      else if (by === 'area') next.set('area', g.value === 'none' ? 'none' : (g.name ?? g.value))
-      return next
-    })
+    const next = new URLSearchParams()
+    next.set('from', 'chart')
+    next.set('band', band)
+    if (by === 'exposure') next.set('exposure', g.value)
+    else if (by === 'criticality') next.set('criticality', g.value)
+    else if (by === 'area') next.set('area', g.value === 'none' ? 'none' : (g.name ?? g.value))
+    void navigate(`/findings?${next}`)
   }
 
   const bandLabels: Record<Band, string> = {
@@ -269,7 +266,7 @@ function AssetBarsCard() {
 
 function AssetBars({ assets }: { assets: AssetFindingBands[] }) {
   const { t } = useTranslation()
-  const [, setParams] = useSearchParams()
+  const navigate = useNavigate()
 
   const sorted = assets.toSorted(
     (a, b) =>
@@ -293,13 +290,7 @@ function AssetBars({ assets }: { assets: AssetFindingBands[] }) {
   const maxTotal = Math.max(...data.map((d) => d.total))
 
   const openAsset = (name: string) => {
-    setParams(() => {
-      const next = new URLSearchParams()
-      next.set('tab', 'prioritized')
-      next.set('from', 'chart')
-      next.set('asset', name)
-      return next
-    })
+    void navigate(`/findings?from=chart&asset=${encodeURIComponent(name)}`)
   }
 
   return (
