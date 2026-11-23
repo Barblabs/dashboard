@@ -22,7 +22,7 @@ describe('AdminDashboard', () => {
     await renderDashboard()
     const card = screen.getByText('Organizations', { selector: 'dt' }).parentElement!
     expect(within(card).getByRole('definition').textContent).toBe('3')
-    expect(within(card).getByText('2 active · 1 deactivated')).toBeInTheDocument()
+    expect(within(card).getByText('2 active, 1 deactivated')).toBeInTheDocument()
   })
 
   it('shows total users across all organizations', async () => {
@@ -62,7 +62,7 @@ describe('AdminDashboard', () => {
 
   it('shows Slack alerts summary and no-alerts message', async () => {
     await renderDashboard()
-    expect(screen.getByText('10 sent · 1 failed · 0 pending')).toBeInTheDocument()
+    expect(screen.getByText('10 sent, 1 failed, 0 pending')).toBeInTheDocument()
     expect(screen.getByText('No alerts in the last 30 days')).toBeInTheDocument()
   })
 

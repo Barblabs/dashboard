@@ -27,7 +27,6 @@ export function BusinessContextPage() {
   return (
     <Page
       title={t('businessContext.header.title')}
-      subtitle={t('businessContext.header.subtitle')}
       actions={
         !readOnly &&
         started && (

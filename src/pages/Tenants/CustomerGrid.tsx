@@ -20,7 +20,6 @@ function CustomerCard({
   const { t } = useTranslation()
   const formatDate = useDateFormat('numeric')
   const isDeactivated = customer.deactivated_at !== null
-  const initial = customer.name[0]?.toUpperCase() ?? '?'
 
   const reactivate = useReactivateCustomerMutation()
   const reactivateError = requestErrorText(reactivate.error, t, { fallback: 'tenants.reactivate.failed' })
@@ -31,8 +30,15 @@ function CustomerCard({
       className={`flex flex-col gap-4 rounded-xl border border-border-panel p-5 ${isDeactivated ? 'bg-panel opacity-75' : 'bg-white'}`}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-navy font-title text-lg text-cyan">
-          {initial}
+        <div className="min-w-0">
+          <h3 className="font-title text-[1rem] leading-snug text-navy">
+            {customer.name}
+          </h3>
+          <p className="mt-0.5 font-body text-[0.8125rem] text-gray">
+            {t('tenants.created', {
+              date: formatDate(customer.created_at),
+            })}
+          </p>
         </div>
 
         <div className="flex items-center gap-0.5">
@@ -65,17 +71,6 @@ function CustomerCard({
             </button>
           )}
         </div>
-      </div>
-
-      <div>
-        <h3 className="font-title text-[1rem] leading-snug text-navy">
-          {customer.name}
-        </h3>
-        <p className="mt-0.5 font-body text-[0.8125rem] text-gray">
-          {t('tenants.created', {
-            date: formatDate(customer.created_at),
-          })}
-        </p>
       </div>
 
       <div className="flex items-center gap-2">

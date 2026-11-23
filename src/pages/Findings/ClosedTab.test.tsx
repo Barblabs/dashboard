@@ -112,7 +112,7 @@ describe('Closed tab', () => {
 
     expect(
       await within(confirm).findByText(
-        'This finding closed automatically; it will reopen on its own if it shows up again.',
+        'This finding closed automatically. It reopens if it shows up again.',
       ),
     ).toBeInTheDocument()
   })

@@ -58,7 +58,7 @@ describe('News', () => {
       'They mention technology or suppliers you use',
       'Attacks in your sector',
     ])
-    expect(within(groups()[3]).getByText('Context: it does not mean you are exposed.')).toBeInTheDocument()
+    expect(within(groups()[3]).getByText('It does not mean you are exposed.')).toBeInTheDocument()
     expect(screen.getByText('News from Nov 16 – 17, 2026')).toBeInTheDocument()
     expect(screen.getByText('Weighed with business context v1')).toBeInTheDocument()
     const counts = screen.getByRole('list', { name: 'News by relevance' })
@@ -68,7 +68,7 @@ describe('News', () => {
       'Technology and suppliers 2',
       'Your sector 3',
     ])
-    expect(screen.queryByText(/The summary couldn't be written/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/The summary for this digest couldn't be written/)).not.toBeInTheDocument()
   })
 
   it('shows the labels the backend wrote, as written, on every item that has them', async () => {
@@ -195,8 +195,8 @@ describe('News', () => {
 
     await user.selectOptions(screen.getByLabelText('Digest'), screen.getByRole('option', { name: /^Nov 15/ }))
 
-    expect(await screen.findByText(/The summary couldn't be written/)).toHaveTextContent(
-      "The summary couldn't be written; the news follows the rules' order, without explanations.",
+    expect(await screen.findByText(/The summary for this digest couldn't be written/)).toHaveTextContent(
+      "The summary for this digest couldn't be written, so the news shows without explanations.",
     )
     expect(window.location.search).toBe(`?digest=${newsDigestsStore.load()[1].id}`)
     expect(groups().map((g) => within(g).getByRole('heading', { level: 2 }).textContent)).toEqual([
@@ -204,7 +204,7 @@ describe('News', () => {
       'Attacks in your sector',
     ])
     expect(screen.queryByText('Why it may matter to you')).not.toBeInTheDocument()
-    expect(screen.getAllByText(/The summary couldn't be written/)).toHaveLength(1)
+    expect(screen.getAllByText(/The summary for this digest couldn't be written/)).toHaveLength(1)
   })
 
   it('lists the earlier digests with their period and how many items they hold', async () => {
@@ -212,8 +212,8 @@ describe('News', () => {
 
     const options = within(screen.getByLabelText('Digest')).getAllByRole('option')
     expect(options.map((o) => plain(o.textContent))).toEqual([
-      'Nov 16 – 17, 2026 · 7 news items · 1 names you',
-      'Nov 15 – 16, 2026 · 2 news items',
+      'Nov 16 – 17, 2026, 7 news items, 1 names you',
+      'Nov 15 – 16, 2026, 2 news items',
     ])
   })
 

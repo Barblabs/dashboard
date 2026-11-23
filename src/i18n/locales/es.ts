@@ -31,10 +31,6 @@ export const es: Translations = {
         viewer: 'Lector',
       },
     },
-    footer: {
-      course: 'Reto Lyft · TC3008C',
-      stage: 'Etapa 3: diseminación y feedback',
-    },
     language: {
       label: 'Idioma',
     },
@@ -50,8 +46,7 @@ export const es: Translations = {
       },
     },
     form: {
-      tagline: 'Las vulnerabilidades que sí afectan a tu stack, priorizadas.',
-      subtitle: 'Business-Aware Risk-Based Analysis of Threats, Tailored Alerts & Countermeasure Knowledge.',
+      tagline: 'Las vulnerabilidades que afectan a tu stack, priorizadas.',
       title: 'Iniciar sesión',
       access: 'Acceso restringido al equipo de seguridad y a los dueños de activo.',
       email: {
@@ -66,7 +61,6 @@ export const es: Translations = {
       },
       submit: 'Entrar',
       submitting: 'Entrando…',
-      notice: 'No hay registro público. Las cuentas y los roles los asigna un administrador.',
     },
     newPassword: {
       title: 'Crear contraseña',
@@ -105,8 +99,7 @@ export const es: Translations = {
   },
   findings: {
     title: 'Hallazgos',
-    subtitle:
-      'El orden en que conviene atender tus hallazgos abiertos. Se mantiene al día solo: cada hallazgo nuevo o que cambió toma su lugar sin mover a los demás.',
+    subtitle: 'El orden en que conviene atender tus hallazgos abiertos.',
     loading: 'Cargando hallazgos…',
     failed: 'No se pudieron cargar los hallazgos.',
     network: 'No se pudo contactar al servidor para cargar los hallazgos.',
@@ -176,10 +169,6 @@ export const es: Translations = {
     },
     summary: {
       updated: 'Actualizado {{date}}',
-      findings_one: '{{count}} hallazgo',
-      findings_other: '{{count}} hallazgos',
-      groups_one: '{{count}} grupo',
-      groups_other: '{{count}} grupos',
       businessContext: 'Ponderado con el contexto empresarial v{{version}}',
       noBusinessContext: 'Ponderado sin contexto empresarial',
     },
@@ -227,7 +216,6 @@ export const es: Translations = {
     close: {
       action: 'Cerrar hallazgo',
       title: 'Cerrar {{cve}}',
-      description: 'Deja de contar como abierto y sale de la lista priorizada en su siguiente actualización.',
       reason: 'Motivo',
       reopenAt: 'Se reabre después del',
       reopenAtHelp: 'Se reabre en el primer Sync después de este día.',
@@ -251,14 +239,14 @@ export const es: Translations = {
       by: 'Lo cerró {{by}} el {{date}}',
       reopensOn: 'Se reabre después del {{date}}',
       reopensNextSync: 'Se reabrirá en la próxima sincronización',
-      onItsOwn: 'Este hallazgo se cerró automáticamente; se reabrirá solo si vuelve a aparecer.',
+      onItsOwn: 'Este hallazgo se cerró automáticamente. Se reabre si vuelve a aparecer.',
     },
     closedList: {
       loading: 'Cargando hallazgos cerrados…',
       failed: 'No se pudieron cargar los hallazgos cerrados.',
       network: 'No se pudo contactar al servidor para cargar los hallazgos cerrados.',
       empty: 'No hay hallazgos cerrados a mano',
-      intro: 'Los hallazgos que alguien cerró a mano, del cierre más reciente al más antiguo. Los que se cerraron solos no salen aquí.',
+      intro: 'Los hallazgos que se cerraron solos no salen aquí.',
       reason: 'Motivo',
       closed: 'Cerrado',
       reopensOn: 'Se reabre el',
@@ -300,7 +288,6 @@ export const es: Translations = {
         history: 'Historial de priorización',
       },
       why: {
-        group: 'Grupo {{position}} · {{title}}',
         evidence: 'Evidencia',
         contextEvidence: 'De tu contexto empresarial',
       },
@@ -325,7 +312,7 @@ export const es: Translations = {
           medium: 'Medio',
           low: 'Bajo',
         },
-        estimated: 'Estimado: faltaban datos y se usó un valor por omisión.',
+        estimated: 'Faltaban datos, así que el Score es estimado.',
         gap: {
           cvss_estimated: 'Falta CVSS',
           epss_pending: 'EPSS pendiente',
@@ -352,7 +339,7 @@ export const es: Translations = {
         exposure: 'Exposición',
         lifecycleStage: 'Ciclo de vida',
         informationClassification: 'Clasificación de la Información',
-        unclassifiedHelp: 'Nadie la ha declarado; no cuenta para el Score.',
+        unclassifiedHelp: 'Nadie la ha declarado, así que no cuenta para el Score.',
         criticalServices: 'Servicios críticos que corre',
         noCriticalServices: 'No corre ninguno de los servicios críticos de tu contexto empresarial.',
       },
@@ -369,8 +356,8 @@ export const es: Translations = {
           secondary_impact: 'A qué lleva',
         },
         showQuote: 'Cita de la fuente',
-        showMore_one: 'Cita de la fuente · {{count}} mitigación de MITRE',
-        showMore_other: 'Cita de la fuente · {{count}} mitigaciones de MITRE',
+        showMore_one: 'Cita de la fuente y {{count}} mitigación de MITRE',
+        showMore_other: 'Cita de la fuente y {{count}} mitigaciones de MITRE',
         labeledAs: 'Etiquetado como {{id}}, que ATT&CK reemplazó',
         quote: 'Cita',
         mitigations: 'Mitigaciones de MITRE',
@@ -379,14 +366,14 @@ export const es: Translations = {
         none: 'Aún no hay avisos de fabricantes que lo mencionen.',
       },
       plan: {
-        none: 'Aún no hay plan de acción. Los planes se escriben solos, en el orden de la lista; si no quieres esperar, pídelo ahora.',
+        none: 'Aún no hay plan de acción.',
         generate: 'Obtener plan de acción',
         regenerate: 'Pedir un plan nuevo',
         generating: 'Escribiendo el plan. Puede tardar un minuto…',
         written: 'Escrito {{date}}',
         steps: 'Pasos',
         fixedVersion: 'Versión que lo corrige',
-        noFixedVersion: 'Las fuentes no la mencionan: revisa el aviso del fabricante.',
+        noFixedVersion: 'Las fuentes no la mencionan. Revisa el aviso del fabricante.',
         mitigation: 'Mientras se corrige',
         attackMitigations: 'Mitigaciones de MITRE para este activo',
         verification: 'Cómo verificar',
@@ -403,7 +390,7 @@ export const es: Translations = {
         empty: 'Todavía no está en el orden de prioridad.',
         up: 'Subió del Grupo {{before}} al {{now}}',
         down: 'Bajó del Grupo {{before}} al {{now}}',
-        same: 'Se volvió a evaluar; sigue en el Grupo {{now}}',
+        same: 'Se volvió a evaluar, sigue en el Grupo {{now}}',
         placed: 'Entró a la priorización en el Grupo {{now}}',
         left: 'Salió de la priorización',
         group: 'Grupo {{position}}',
@@ -422,7 +409,7 @@ export const es: Translations = {
           asset_inactive: 'El activo ya no está activo',
           vulnerability_rejected: 'La vulnerabilidad fue rechazada (NVD)',
         },
-        movedNote: 'El hallazgo no cambió; cambiaron los grupos de arriba.',
+        movedNote: 'El hallazgo no cambió. Cambiaron los grupos de arriba.',
         appeared: 'Entró arriba: «{{title}}»',
         gone: 'Ya no está arriba: «{{title}}»',
         closedAs: 'Se cerró: {{reason}}',
@@ -450,8 +437,7 @@ export const es: Translations = {
         sending: 'Enviando…',
         sent: 'Guardado.',
         failed: 'No se pudo guardar tu retroalimentación.',
-        orderHint:
-          'Con "antes" o "después", la siguiente actualización del orden vuelve a colocar el hallazgo tomando en cuenta tu "Por qué". "Sí aplica" solo queda registrado.',
+        orderHint: '"Antes" o "después" lo mueve en la siguiente actualización del orden.',
         viaAnalista: 'Vía el asistente',
         verdicts: {
           applies: 'Sí aplica',
@@ -463,15 +449,13 @@ export const es: Translations = {
       },
     },
     resumen: {
-      trendTitle: 'Tendencia semanal de hallazgos',
+      trendTitle: 'Hallazgos por semana',
       trendOpened: 'Nuevos',
       trendClosed: 'Cerrados',
       trendBacklog: 'Abiertos al final de la semana',
-      trendBacklogHelp:
-        'Las barras son los hallazgos que entraron y los que se cerraron cada semana; la línea, los que seguían abiertos al terminar la semana (en la actual, los abiertos hoy): lo que queda por atender.',
       trendNoData: 'Aún no hay hallazgos en estas semanas.',
       trendWeek: 'Semana',
-      ttcTitle: 'Tiempo para cerrar hallazgos por nivel de riesgo',
+      ttcTitle: 'Mediana de días para cerrar',
       ttcBand: 'Nivel de riesgo',
       ttcMedian: 'Mediana (días)',
       ttcCount: 'Hallazgos cerrados',
@@ -489,7 +473,7 @@ export const es: Translations = {
       network: 'No se pudo contactar al servidor.',
       empty: 'Sin datos aún.',
       heatmapTitle: 'Dónde está el riesgo',
-      heatmapNote: '"Desconocida" son activos sin clasificar en la CMDB: también indica qué falta declarar.',
+      heatmapNote: '"Desconocida" son activos que la CMDB no clasifica.',
       byLabel: 'Agrupar por',
       byExposure: 'Exposición',
       byCriticality: 'Criticidad',
@@ -510,7 +494,7 @@ export const es: Translations = {
       assetTitle: 'Activos con más hallazgos',
       assetEmpty: 'Sin activos con hallazgos abiertos.',
       assetBarLabel: '{{name}}: {{total}} hallazgos',
-      topTitle: 'Componentes y CVE con más hallazgos',
+      topTitle: 'Top componentes y CVE',
       topComponentsTitle: 'Componentes',
       topCvesTitle: 'CVE',
       topEmpty: 'Sin datos aún.',
@@ -548,7 +532,6 @@ export const es: Translations = {
         exfiltration: 'Exfiltración',
         impact: 'Impacto',
       },
-      heatmapNote: 'Un hallazgo puede contar en varias tácticas, por eso las celdas no suman el total.',
       cellLabel: '{{count}} hallazgos: {{band}} en {{tactic}}',
       topTitle: 'Top técnicas',
       topId: 'ID',
@@ -569,14 +552,14 @@ export const es: Translations = {
       bajo: 'Bajó',
       match: 'Coincidencia',
       matchPct: '{{pct}}%',
-      matrixTitle: 'Matriz de movimientos',
+      matrixTitle: 'Movimiento entre grupos',
       byScore: 'Por score',
       byAgent: 'Por prioridad',
       groupLabel: 'G{{n}}',
       rankRange: '#{{min}}–#{{max}}',
       cellLabel: '{{count}} hallazgos del grupo de score {{sg}} en el grupo de prioridad {{ag}}',
       cellClickable: 'Filtrar a estos {{count}} hallazgos',
-      bandTitle: 'Composición por nivel de riesgo y grupo',
+      bandTitle: 'Nivel de riesgo por grupo',
       topChangesTitle: 'Movimientos más relevantes',
       topChangesCve: 'CVE',
       topChangesComponent: 'Componente',
@@ -589,8 +572,7 @@ export const es: Translations = {
   },
   news: {
     title: 'Noticias',
-    subtitle:
-      'Noticias sobre ataques y vulnerabilidades que las reglas encontraron relevantes para su organización, de la más cercana a la más lejana. Cada día con noticias para ustedes llega una nueva edición.',
+    subtitle: 'Noticias sobre ataques y vulnerabilidades relevantes para su organización, de la más cercana a la más lejana.',
     loading: 'Cargando noticias…',
     loadingDigest: 'Cargando esta edición…',
     failed: 'No se pudieron cargar las noticias.',
@@ -598,22 +580,21 @@ export const es: Translations = {
     notFound: 'Esta edición ya no está disponible.',
     empty: {
       title: 'Aún no hay noticias',
-      daily:
-        'Una vez al día, cuando hay noticias sobre ataques o vulnerabilidades relevantes para ustedes, aparece aquí una edición: noticias que nombran a su organización, una CVE abierta en sus activos, un producto que corre en ellos o un ataque en su sector.',
+      daily: 'Cada día con noticias relevantes para ustedes aparece aquí una edición.',
       context:
-        'Lo que hace que una noticia les llegue es lo que indica su contexto empresarial: sus sectores, dominios, marcas, tecnologías y terceros.',
+        'Su contexto empresarial decide qué es relevante: sus sectores, dominios, marcas, tecnologías y terceros.',
       link: 'Ir al contexto empresarial',
     },
     period: 'Noticias del {{period}}',
     picker: {
       label: 'Edición',
-      option_one: '{{period}} · {{count}} noticia',
-      option_other: '{{period}} · {{count}} noticias',
+      option_one: '{{period}}, {{count}} noticia',
+      option_other: '{{period}}, {{count}} noticias',
       named_one: '{{count}} los nombra',
       named_other: '{{count}} los nombran',
     },
     counts: 'Noticias por relevancia',
-    editorMissing: 'No se pudo escribir el resumen; las noticias van en el orden de las reglas, sin explicación.',
+    editorMissing: 'No se pudo escribir el resumen de esta edición, así que las noticias van sin explicación.',
     noSectors: {
       text: 'Su contexto empresarial no indica ningún sector, así que aquí no pueden aparecer ataques a organizaciones de su sector.',
       link: 'Indicar sus sectores',
@@ -627,18 +608,15 @@ export const es: Translations = {
       },
       finding: {
         title: 'Mencionan vulnerabilidades abiertas en sus activos',
-        description: 'Nombran una CVE que sigue abierta en alguno de sus activos.',
         short: 'Vulnerabilidades abiertas',
       },
       footprint: {
         title: 'Mencionan tecnología o proveedores que usan',
-        description: 'Nombran un producto que corre en sus activos, o una tecnología o un tercero que indica su contexto empresarial.',
         short: 'Tecnología y proveedores',
       },
       peer: {
         title: 'Ataques en su sector',
-        description: 'Ataques a otras organizaciones de su sector.',
-        context: 'Contexto: no indica que ustedes estén expuestos.',
+        context: 'No indica que ustedes estén expuestos.',
         short: 'Su sector',
       },
     },
@@ -678,7 +656,7 @@ export const es: Translations = {
       total_other: '{{count}} usuarios',
       disabled_one: '{{count}} deshabilitado',
       disabled_other: '{{count}} deshabilitados',
-      summary: '{{total}} · {{disabled}}',
+      summary: '{{total}}, {{disabled}}',
     },
     invite: {
       button: 'Invitar usuario',
@@ -696,8 +674,7 @@ export const es: Translations = {
       emailTaken: 'Ya existe un usuario con este correo.',
       tempPasswordNotice: 'Le enviaremos un correo con una contraseña temporal.',
       sent: 'Invitación enviada a {{email}}.',
-      pending:
-        'Usuario creado. El correo de invitación a {{email}} todavía no salió; se reintentará automáticamente.',
+      pending: 'Usuario creado. El correo de invitación a {{email}} todavía no salió. Lo reintentaremos.',
     },
     columns: {
       email: 'Correo',
@@ -747,11 +724,11 @@ export const es: Translations = {
       total_other: '{{count}} organizaciones',
       deactivated_one: '{{count}} desactivada',
       deactivated_other: '{{count}} desactivadas',
-      summary: '{{total}} · {{deactivated}}',
+      summary: '{{total}}, {{deactivated}}',
     },
     status: {
       active: 'Activa',
-      deactivated: 'Desactivada · sus usuarios no pueden entrar',
+      deactivated: 'Desactivada',
     },
     created: 'Creada el {{date}}',
     actions: {
@@ -782,12 +759,10 @@ export const es: Translations = {
       step1: {
         title: 'Nueva organización',
         label: 'Nombre de la organización',
-        placeholder: 'Nombre de la empresa',
         next: 'Siguiente',
         required: 'El nombre es obligatorio.',
       },
       step2: {
-        title: 'Correo del administrador',
         label: 'Correo del administrador',
         notice: 'El administrador recibirá un correo con una contraseña temporal.',
         back: 'Atrás',
@@ -804,13 +779,12 @@ export const es: Translations = {
   },
   adminDashboard: {
     title: 'Dashboard',
-    subtitle: 'Operación de BARBATTACK. Solo conteos: sin activos, hallazgos ni datos de negocio de los clientes.',
     loading: 'Cargando…',
     loadFailed: 'No se pudo cargar el dashboard.',
     networkError: 'No se pudo contactar al servidor para cargar el dashboard.',
     stats: {
       organizations: 'Organizaciones',
-      organizationsSub: '{{active}} activas · {{deactivated}} desactivadas',
+      organizationsSub: '{{active}} activas, {{deactivated}} desactivadas',
       usersTotal: 'Usuarios totales',
       cmdbConnected: 'CMDB conectada',
       cmdbConnectedValue: '{{n}} de {{total}}',
@@ -837,9 +811,9 @@ export const es: Translations = {
       failed: 'Fallidas',
     },
     slack: {
-      title: 'Alertas Slack por organización (30 días)',
+      title: 'Alertas Slack (30 días)',
       noAlerts: 'Sin alertas en los últimos 30 días',
-      summary: '{{sent}} enviadas · {{failed}} fallidas · {{pending}} pendientes',
+      summary: '{{sent}} enviadas, {{failed}} fallidas, {{pending}} pendientes',
     },
     chart: {
       title: 'Altas por mes',
@@ -869,25 +843,19 @@ export const es: Translations = {
     networkError: 'No se pudo contactar al servidor para cargar la conexión con la CMDB.',
     header: {
       title: 'Configuración',
-      subtitle: 'Conecta tu CMDB para cargar el stack tecnológico.',
     },
     steps: {
       title: 'Conectar CMDB',
-      description:
-        'BARBATTACK lee el inventario de activos desde tu CMDB. Sin una conexión no hay stack que comparar contra los feeds de vulnerabilidades.',
       items: {
         choose: 'Elige tu CMDB',
         credentials: 'Ingresa la dirección y el usuario',
         connect: 'Conecta y sincroniza',
       },
-      status: {
-        disconnected: 'Sin conexión',
-      },
     },
     form: {
       title: 'Conectar iTop',
       editTitle: 'Editar conexión de iTop',
-      back: '← Cambiar CMDB',
+      back: 'Cambiar CMDB',
       cancel: 'Cancelar',
       url: {
         label: 'Dirección de iTop (IP o URL)',
@@ -902,7 +870,6 @@ export const es: Translations = {
       },
       password: {
         label: 'Contraseña',
-        help: 'Se envía al backend. No se guarda en el navegador.',
         required: 'La contraseña es obligatoria.',
       },
       actions: {
@@ -1084,8 +1051,6 @@ export const es: Translations = {
         nothingDeclared: 'Nada declarado.',
         imported: 'De iTop',
         importedFrom: '{{value}}, por su ubicación en iTop.',
-        unknownVirtualMachine: 'Desconocida: iTop no tiene ubicación para una máquina virtual.',
-        unknownLocation: 'Desconocida: su ubicación en iTop no es una que barbattack lea.',
         question: '¿Se puede alcanzar desde internet?',
         help: {
           internet_facing: 'Alcanzable desde internet.',
@@ -1106,7 +1071,6 @@ export const es: Translations = {
     informationClassification: {
       cellLabel: 'Clasificación de la Información de {{name}}: {{value}}',
       sheet: {
-        unclassifiedProvenance: 'iTop no tiene un campo para esto, así que solo una declaración lo define.',
         question: '¿Qué tan sensibles son los datos que guarda?',
         help: {
           public: 'Sus datos podrían publicarse sin hacer daño.',
@@ -1121,8 +1085,7 @@ export const es: Translations = {
       banner: {
         count_one: '{{count}} activo necesita revisión.',
         count_other: '{{count}} activos necesitan revisión.',
-        detail:
-          'Tienen Exposición desconocida o no tienen Clasificación de la Información. La Exposición desconocida deja un Data Gap en sus hallazgos.',
+        detail: 'Tienen Exposición desconocida o no tienen Clasificación de la Información.',
         action: 'Revisarlos',
         none: 'Todos los activos activos están revisados.',
       },
@@ -1136,7 +1099,7 @@ export const es: Translations = {
         inUse: 'En uso',
         viewerReason: 'Solo un Administrador puede declarar una Exposición o una Clasificación de la Información.',
         inactiveReason:
-          'barbattack no monitorea los activos inactivos, así que su Exposición y su Clasificación de la Información no se pueden declarar.',
+          'La Exposición y la Clasificación de la Información de un activo inactivo no se pueden declarar. Reactívalo en iTop y queda activo en el siguiente Sync.',
         turnedInactive:
           'Este activo acaba de quedar inactivo, así que su Exposición y su Clasificación de la Información no se pueden declarar.',
         clear: 'Quitar',
@@ -1149,7 +1112,6 @@ export const es: Translations = {
         summary: '{{triaged}} de {{total}} activos revisados',
         summaryDetail:
           'Donde declaraste una Exposición, sus hallazgos abiertos se recalcularon, así que la lista de hallazgos puede haber cambiado de orden.',
-        summarySkipped: 'Los que pasaste siguen como desconocidos o sin clasificar en el inventario.',
         done: 'Listo',
       },
     },
@@ -1164,7 +1126,6 @@ export const es: Translations = {
     },
     areas: {
       title: 'Áreas',
-      description: 'Importadas desde tu CMDB. Cada área puede indicar a quién contactar sobre ella.',
       loading: 'Cargando áreas…',
       empty: 'El CMDB aún no tiene áreas.',
       noMatches: 'Ninguna área coincide con este filtro.',
@@ -1188,7 +1149,7 @@ export const es: Translations = {
         set: 'Asignar dueño',
         edit: 'Editar dueño',
         title: 'Dueño de {{area}}',
-        description: 'A quién contactar sobre esta área. No necesita una cuenta en el dashboard.',
+        help: 'No necesita una cuenta en el dashboard.',
         email: 'Correo',
         save: 'Guardar',
         saving: 'Guardando…',
@@ -1205,7 +1166,6 @@ export const es: Translations = {
     },
     selector: {
       title: 'Elige tu CMDB',
-      subtitle: 'Selecciona de dónde viene tu inventario de activos.',
       select: 'Seleccionar',
       comingSoon: 'Próximamente',
     },
@@ -1220,11 +1180,9 @@ export const es: Translations = {
       },
       servicenow: {
         name: 'ServiceNow',
-        description: 'Integración planeada para una siguiente versión.',
       },
       other: {
         name: 'Otra CMDB',
-        description: 'Conexión por API genérica o archivo de inventario.',
       },
     },
   },
@@ -1246,7 +1204,7 @@ export const es: Translations = {
     channels: {
       label: 'Canal del Security Team',
       notSet: 'Sin asignar',
-      help: 'Es obligatorio para completar la conexión. Slack rechaza entregas a canales en los que la app no está.',
+      help: 'Es obligatorio para completar la conexión. Agrega la app al canal, o Slack rechaza las entregas.',
       select: 'Selecciona un canal…',
       loading: 'Cargando canales…',
       loadFailed: 'No se pudo cargar la lista de canales.',
@@ -1319,7 +1277,6 @@ export const es: Translations = {
   businessContext: {
     header: {
       title: 'Contexto empresarial',
-      subtitle: 'Lo que necesitamos saber de tu organización para priorizar lo que de verdad le afecta.',
     },
     loading: 'Cargando el contexto empresarial…',
     loadFailed: 'No se pudo cargar el contexto empresarial.',
@@ -1331,14 +1288,11 @@ export const es: Translations = {
     noMatches: 'Sin resultados.',
     remove: 'Quitar {{value}}',
     sections: {
-      profile: { title: 'Perfil', description: 'A qué se dedica tu organización y qué tamaño tiene.' },
-      geography: { title: 'Ubicación', description: 'Dónde está su sede y dónde opera.' },
-      operations: {
-        title: 'Operación',
-        description: 'Lo que no se puede permitir perder, los datos que maneja y las reglas que cumple.',
-      },
-      footprint: { title: 'Huella digital', description: 'Lo que la identifica en internet y de quién depende.' },
-      risk: { title: 'Riesgo', description: 'Cuánto riesgo acepta y qué le preocupa.' },
+      profile: { title: 'Perfil' },
+      geography: { title: 'Ubicación' },
+      operations: { title: 'Operación' },
+      footprint: { title: 'Huella digital' },
+      risk: { title: 'Riesgo' },
     },
     fields: {
       summary: {
@@ -1372,11 +1326,11 @@ export const es: Translations = {
       regulations: 'Regulaciones y estándares',
       environments: 'Entornos tecnológicos',
       domains: { label: 'Dominios', placeholder: 'ejemplo.com' },
-      brands: { label: 'Marcas y productos', placeholder: 'Nombre de la marca' },
+      brands: 'Marcas y productos',
       technologies: { label: 'Tecnologías de las que depende', placeholder: 'p. ej. Microsoft 365, SAP' },
-      thirdParties: { label: 'Terceros con acceso', placeholder: 'Nombre del proveedor' },
+      thirdParties: 'Terceros con acceso',
       appetite: 'Apetito de riesgo',
-      appetiteHint: 'De toda la organización, como lo define la dirección. Cada servicio crítico tiene su propia tolerancia.',
+      appetiteHint: 'De toda la organización, como lo define la dirección.',
       concerns: 'Principales preocupaciones',
       pastIncidents: { label: 'Incidentes de seguridad pasados', placeholder: 'Qué pasó y cuándo.' },
       constraints: {
@@ -1406,15 +1360,14 @@ export const es: Translations = {
     start: {
       title: 'Empieza con tus documentos',
       description:
-        'Sube perfiles de la empresa, informes anuales, políticas o cualquier documento de tu organización. Los leemos juntos y acomodamos cada dato en su sección; tú lo revisas antes de guardar.',
+        'Sube perfiles de la empresa, informes anuales o políticas. Cada dato va a su sección y tú lo revisas antes de guardar.',
       import: 'Importar documentos',
       manual: 'Llenarlo a mano',
     },
     import: {
       button: 'Importar documentos',
       title: 'Importar documentos',
-      subtitle:
-        'Leemos todos tus documentos juntos y acomodamos lo que encontramos en cada sección, sin reemplazar lo que ya escribiste. Nada se guarda hasta que des clic en Guardar.',
+      subtitle: 'Conserva lo que ya escribiste. Nada se guarda hasta que des clic en Guardar.',
       filesLabel: 'Archivos',
       choose: 'Elegir archivos',
       fileHelp: 'PDF, Word (.docx), TXT, Markdown, CSV o JSON. Hasta 10 archivos, 10 MB cada uno y 20 MB en total.',

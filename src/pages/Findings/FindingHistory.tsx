@@ -259,9 +259,7 @@ function Entry({ entry, offerReason }: { entry: HistoryEntry; offerReason: boole
           <span className={`${META} text-gray tabular-nums`}>{formatDate(entry.created_at)}</span>
         </p>
         {entry.title && entry.group_now !== null && (
-          <p className={`${ENTRY_TEXT} text-gray`}>
-            {t('findings.detail.why.group', { position: entry.group_now, title: entry.title })}
-          </p>
+          <p className={`${ENTRY_TEXT} text-gray`}>{entry.title}</p>
         )}
         {entry.kind === 'moved' && <p className={`${ENTRY_TEXT} text-gray`}>{t('findings.detail.history.movedNote')}</p>}
         {lines.length > 0 && (

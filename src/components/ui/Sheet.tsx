@@ -45,7 +45,7 @@ export function SheetHeader({ title, eyebrow }: { title: ReactNode; eyebrow?: Re
     <div className="flex items-start justify-between gap-4 border-b border-border-panel px-6 py-5">
       <div className="flex flex-col gap-1">
         {eyebrow && (
-          <span className="font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase">
+          <span className="font-body text-[0.75rem] font-semibold text-gray">
             {eyebrow}
           </span>
         )}

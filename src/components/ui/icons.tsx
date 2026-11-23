@@ -122,15 +122,6 @@ export function BanIcon({ size = 16, className }: IconProps) {
   )
 }
 
-export function UploadFileIcon({ size = 22, className }: IconProps) {
-  return (
-    <Icon size={size} viewBox={24} className={className}>
-      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" strokeWidth="1.8" />
-      <path d="M14 3v5h5M12 18v-6M9 15l3-3 3 3" strokeWidth="1.8" />
-    </Icon>
-  )
-}
-
 export function EyeIcon({ size = 16, className }: IconProps) {
   return (
     <Icon size={size} viewBox={16} className={className}>

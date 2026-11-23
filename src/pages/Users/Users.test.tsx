@@ -68,7 +68,7 @@ describe('Users', () => {
     seedUsers([ADMIN, VIEWER, disabled])
     await renderUsers()
 
-    expect(screen.getByText('3 users · 1 disabled')).toBeInTheDocument()
+    expect(screen.getByText('3 users, 1 disabled')).toBeInTheDocument()
   })
 
   it('shows a disabled user with no action buttons', async () => {
@@ -139,7 +139,7 @@ describe('Users', () => {
     const toasts = screen.getByRole('region', { name: 'Notifications' })
     expect(
       await within(toasts).findByText(
-        "User created. The invitation email to new@acme.example hasn't gone out yet; it will be retried automatically.",
+        "User created. The invitation email to new@acme.example hasn't gone out yet. We'll retry it.",
       ),
     ).toBeInTheDocument()
     const row = screen.getByText('new@acme.example').closest('tr')!

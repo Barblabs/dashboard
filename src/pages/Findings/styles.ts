@@ -1,5 +1,5 @@
 /** A field label inside a Finding, as the inventory's details use. */
-export const LABEL = 'font-body text-[0.75rem] font-semibold tracking-[0.06em] text-gray uppercase'
+export const LABEL = 'font-body text-[0.75rem] font-semibold text-gray'
 
 export const MONO = 'font-mono text-[0.8125rem]'
 

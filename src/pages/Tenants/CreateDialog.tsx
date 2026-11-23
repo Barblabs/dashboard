@@ -32,20 +32,10 @@ export function CreateDialog({ open, onClose }: { open: boolean; onClose: () => 
 
 function StepIndicator({ step }: { step: CreateStep['number'] }) {
   const { t } = useTranslation()
-  const dot = (n: CreateStep['number']) =>
-    `flex h-6 w-6 items-center justify-center rounded-full text-[0.75rem] font-semibold ${step === n ? 'bg-navy text-white' : 'bg-panel text-gray'}`
-
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2">
-        <div className={dot(1)}>1</div>
-        <div className="h-px w-8 bg-border-panel" />
-        <div className={dot(2)}>2</div>
-      </div>
-      <span className="font-body text-[0.75rem] text-gray">
-        {t('tenants.create.step', { current: step, total: 2 })}
-      </span>
-    </div>
+    <span className="font-body text-[0.75rem] text-gray">
+      {t('tenants.create.step', { current: step, total: 2 })}
+    </span>
   )
 }
 
@@ -88,7 +78,6 @@ function CreateBody({ onClose }: { onClose: () => void }) {
           error={validationText(step1Form.formState.errors.name?.message)}
         >
           <Input
-            placeholder={t('tenants.create.step1.placeholder')}
             autoFocus
             {...step1Form.register('name')}
           />
@@ -105,7 +94,7 @@ function CreateBody({ onClose }: { onClose: () => void }) {
   return (
     <DialogLayout
       eyebrow={<StepIndicator step={2} />}
-      title={t('tenants.create.step2.title')}
+      title={t('tenants.create.step1.title')}
       error={requestErrorText(create.error, t, { fallback: 'tenants.create.failed' })}
       onSubmit={handleSubmit}
       actions={
@@ -126,7 +115,7 @@ function CreateBody({ onClose }: { onClose: () => void }) {
         >
           <Input
             type="email"
-            placeholder="admin@empresa.com"
+            placeholder={t('login.form.email.placeholder')}
             autoComplete="off"
             disabled={create.isPending}
             autoFocus

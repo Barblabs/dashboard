@@ -29,10 +29,6 @@ export const en = {
         viewer: 'Viewer',
       },
     },
-    footer: {
-      course: 'Reto Lyft · TC3008C',
-      stage: 'Stage 3: dissemination and feedback',
-    },
     language: {
       label: 'Language',
     },
@@ -48,8 +44,7 @@ export const en = {
       },
     },
     form: {
-      tagline: 'The vulnerabilities that actually affect your stack, prioritized.',
-      subtitle: 'Business-Aware Risk-Based Analysis of Threats, Tailored Alerts & Countermeasure Knowledge.',
+      tagline: 'The vulnerabilities that affect your stack, prioritized.',
       title: 'Sign in',
       access: 'Access restricted to the security team and asset owners.',
       email: {
@@ -64,7 +59,6 @@ export const en = {
       },
       submit: 'Sign in',
       submitting: 'Signing in…',
-      notice: 'No public registration. Accounts and roles are assigned by an administrator.',
     },
     newPassword: {
       title: 'Create password',
@@ -103,8 +97,7 @@ export const en = {
   },
   findings: {
     title: 'Findings',
-    subtitle:
-      'The order in which to attend your open Findings. It keeps itself up to date: each new or changed Finding takes its place without moving the rest.',
+    subtitle: 'The order in which to attend your open Findings.',
     loading: 'Loading findings…',
     failed: "Couldn't load the findings.",
     network: "Couldn't reach the server to load the findings.",
@@ -174,10 +167,6 @@ export const en = {
     },
     summary: {
       updated: 'Updated {{date}}',
-      findings_one: '{{count}} finding',
-      findings_other: '{{count}} findings',
-      groups_one: '{{count}} group',
-      groups_other: '{{count}} groups',
       businessContext: 'Weighed with business context v{{version}}',
       noBusinessContext: 'Weighed without a business context',
     },
@@ -225,7 +214,6 @@ export const en = {
     close: {
       action: 'Close finding',
       title: 'Close {{cve}}',
-      description: 'It stops counting as open and leaves the prioritized list in its next update.',
       reason: 'Reason',
       reopenAt: 'Reopens after',
       reopenAtHelp: 'It reopens at the first Sync after this day.',
@@ -249,14 +237,14 @@ export const en = {
       by: 'Closed by {{by}} on {{date}}',
       reopensOn: 'Reopens after {{date}}',
       reopensNextSync: 'Will reopen at the next sync',
-      onItsOwn: 'This finding closed automatically; it will reopen on its own if it shows up again.',
+      onItsOwn: 'This finding closed automatically. It reopens if it shows up again.',
     },
     closedList: {
       loading: 'Loading closed findings…',
       failed: "Couldn't load the closed findings.",
       network: "Couldn't reach the server to load the closed findings.",
       empty: 'No findings closed by hand',
-      intro: 'Findings a user closed by hand, newest close first. Those that closed on their own are not listed.',
+      intro: 'Findings that closed on their own are not listed.',
       reason: 'Reason',
       closed: 'Closed',
       reopensOn: 'Reopens on',
@@ -298,7 +286,6 @@ export const en = {
         history: 'Prioritization history',
       },
       why: {
-        group: 'Group {{position}} · {{title}}',
         evidence: 'Evidence',
         contextEvidence: 'From your business context',
       },
@@ -323,7 +310,7 @@ export const en = {
           medium: 'Medium',
           low: 'Low',
         },
-        estimated: 'Estimated: some inputs were missing and took a default.',
+        estimated: 'Some inputs were missing, so the Score is estimated.',
         gap: {
           cvss_estimated: 'CVSS missing',
           epss_pending: 'EPSS pending',
@@ -350,7 +337,7 @@ export const en = {
         exposure: 'Exposure',
         lifecycleStage: 'Lifecycle Stage',
         informationClassification: 'Information Classification',
-        unclassifiedHelp: "No one has declared it; it doesn't count toward the Score.",
+        unclassifiedHelp: "No one has declared it, so it doesn't count toward the Score.",
         criticalServices: 'Critical services it runs',
         noCriticalServices: 'It runs none of the critical services in your business context.',
       },
@@ -367,8 +354,8 @@ export const en = {
           secondary_impact: 'What it leads to',
         },
         showQuote: 'Source quote',
-        showMore_one: 'Source quote · {{count}} MITRE mitigation',
-        showMore_other: 'Source quote · {{count}} MITRE mitigations',
+        showMore_one: 'Source quote and {{count}} MITRE mitigation',
+        showMore_other: 'Source quote and {{count}} MITRE mitigations',
         labeledAs: 'Labeled as {{id}}, which ATT&CK replaced',
         quote: 'Quote',
         mitigations: 'MITRE mitigations',
@@ -377,14 +364,14 @@ export const en = {
         none: 'No vendor advisory names it yet.',
       },
       plan: {
-        none: 'No action plan yet. Plans are written on their own, in the order of the list; if you do not want to wait, ask for it now.',
+        none: 'No action plan yet.',
         generate: 'Get an action plan',
         regenerate: 'Ask for a new plan',
         generating: 'Writing the plan. It can take a minute…',
         written: 'Written {{date}}',
         steps: 'Steps',
         fixedVersion: 'Version that fixes it',
-        noFixedVersion: 'The sources do not name one: check the vendor advisory.',
+        noFixedVersion: 'The sources do not name one. Check the vendor advisory.',
         mitigation: 'Until it is fixed',
         attackMitigations: 'MITRE mitigations for this asset',
         verification: 'How to verify',
@@ -401,7 +388,7 @@ export const en = {
         empty: 'It is not in the priority order yet.',
         up: 'Moved up from Group {{before}} to {{now}}',
         down: 'Moved down from Group {{before}} to {{now}}',
-        same: 'Looked at again; still in Group {{now}}',
+        same: 'Looked at again, still in Group {{now}}',
         placed: 'Entered the order in Group {{now}}',
         left: 'Left the priority order',
         group: 'Group {{position}}',
@@ -420,7 +407,7 @@ export const en = {
           asset_inactive: 'The asset is no longer active',
           vulnerability_rejected: 'The vulnerability was rejected (NVD)',
         },
-        movedNote: 'The finding did not change; the groups above it did.',
+        movedNote: 'The finding did not change. The groups above it did.',
         appeared: 'New above it: “{{title}}”',
         gone: 'No longer above it: “{{title}}”',
         closedAs: 'Closed: {{reason}}',
@@ -448,8 +435,7 @@ export const en = {
         sending: 'Sending…',
         sent: 'Saved.',
         failed: "Couldn't save your feedback.",
-        orderHint:
-          'With earlier or later, the next update of the order places the finding again, taking your Why into account. "It applies" is only recorded.',
+        orderHint: 'Earlier or later moves it at the next update of the order.',
         viaAnalista: 'Via the assistant',
         verdicts: {
           applies: 'It applies',
@@ -461,15 +447,13 @@ export const en = {
       },
     },
     resumen: {
-      trendTitle: 'Weekly trend of findings',
+      trendTitle: 'Findings per week',
       trendOpened: 'New',
       trendClosed: 'Closed',
       trendBacklog: 'Open at week end',
-      trendBacklogHelp:
-        'The bars are the findings that came in and those closed each week; the line, those still open when the week ended (this week, those open today): what is left to attend.',
       trendNoData: 'No findings in these weeks yet.',
       trendWeek: 'Week',
-      ttcTitle: 'Time to close findings by risk level',
+      ttcTitle: 'Median days to close',
       ttcBand: 'Risk level',
       ttcMedian: 'Median (days)',
       ttcCount: 'Closed findings',
@@ -487,7 +471,7 @@ export const en = {
       network: 'Could not reach the server.',
       empty: 'No data yet.',
       heatmapTitle: 'Where the risk is',
-      heatmapNote: '"Unknown" are assets not classified in the CMDB: they also indicate what is missing to declare.',
+      heatmapNote: '"Unknown" are assets the CMDB does not classify.',
       byLabel: 'Group by',
       byExposure: 'Exposure',
       byCriticality: 'Criticality',
@@ -508,7 +492,7 @@ export const en = {
       assetTitle: 'Assets with most findings',
       assetEmpty: 'No assets with open findings.',
       assetBarLabel: '{{name}}: {{total}} findings',
-      topTitle: 'Components and CVEs with most findings',
+      topTitle: 'Top components and CVEs',
       topComponentsTitle: 'Components',
       topCvesTitle: 'CVEs',
       topEmpty: 'No data yet.',
@@ -546,7 +530,6 @@ export const en = {
         exfiltration: 'Exfiltration',
         impact: 'Impact',
       },
-      heatmapNote: 'A finding can count in multiple tactics, so cells do not add up to the total.',
       cellLabel: '{{count}} findings: {{band}} on {{tactic}}',
       topTitle: 'Top techniques',
       topId: 'ID',
@@ -567,14 +550,14 @@ export const en = {
       bajo: 'Went down',
       match: 'Match',
       matchPct: '{{pct}}%',
-      matrixTitle: 'Movement matrix',
+      matrixTitle: 'Movement between groups',
       byScore: 'By score',
       byAgent: 'By priority',
       groupLabel: 'G{{n}}',
       rankRange: '#{{min}}–#{{max}}',
       cellLabel: '{{count}} findings from score group {{sg}} in priority group {{ag}}',
       cellClickable: 'Filter to these {{count}} findings',
-      bandTitle: 'Risk level composition per group',
+      bandTitle: 'Risk level per group',
       topChangesTitle: 'Most significant movements',
       topChangesCve: 'CVE',
       topChangesComponent: 'Component',
@@ -587,8 +570,7 @@ export const en = {
   },
   news: {
     title: 'News',
-    subtitle:
-      'News about attacks and vulnerabilities that the rules found relevant to your organization, closest to you first. A new digest arrives each day there is news for you.',
+    subtitle: 'News about attacks and vulnerabilities relevant to your organization, closest to you first.',
     loading: 'Loading the news…',
     loadingDigest: 'Loading this digest…',
     failed: "Couldn't load the news.",
@@ -596,22 +578,21 @@ export const en = {
     notFound: 'This digest is no longer available.',
     empty: {
       title: 'No news yet',
-      daily:
-        'Once a day, when there is news about attacks or vulnerabilities relevant to you, a digest shows up here: news that names your organization, a CVE open on your assets, a product they run, or an attack in your sector.',
+      daily: 'A digest shows up here on each day with news relevant to you.',
       context:
-        'What makes news reach you is what your business context states: your sectors, domains, brands, technologies and third parties.',
+        'Your business context decides what is relevant: your sectors, domains, brands, technologies and third parties.',
       link: 'Go to the business context',
     },
     period: 'News from {{period}}',
     picker: {
       label: 'Digest',
-      option_one: '{{period}} · {{count}} news item',
-      option_other: '{{period}} · {{count}} news items',
+      option_one: '{{period}}, {{count}} news item',
+      option_other: '{{period}}, {{count}} news items',
       named_one: '{{count}} names you',
       named_other: '{{count}} name you',
     },
     counts: 'News by relevance',
-    editorMissing: "The summary couldn't be written; the news follows the rules' order, without explanations.",
+    editorMissing: "The summary for this digest couldn't be written, so the news shows without explanations.",
     noSectors: {
       text: 'Your business context states no sector, so no attack on an organization of your sector can show up here.',
       link: 'State your sectors',
@@ -625,18 +606,15 @@ export const en = {
       },
       finding: {
         title: 'They mention vulnerabilities open on your assets',
-        description: 'They name a CVE that is still open on one of your assets.',
         short: 'Open vulnerabilities',
       },
       footprint: {
         title: 'They mention technology or suppliers you use',
-        description: 'They name a product your assets run, or a technology or third party your business context states.',
         short: 'Technology and suppliers',
       },
       peer: {
         title: 'Attacks in your sector',
-        description: 'Attacks on other organizations of your sector.',
-        context: 'Context: it does not mean you are exposed.',
+        context: 'It does not mean you are exposed.',
         short: 'Your sector',
       },
     },
@@ -676,7 +654,7 @@ export const en = {
       total_other: '{{count}} users',
       disabled_one: '{{count}} disabled',
       disabled_other: '{{count}} disabled',
-      summary: '{{total}} · {{disabled}}',
+      summary: '{{total}}, {{disabled}}',
     },
     invite: {
       button: 'Invite user',
@@ -694,8 +672,7 @@ export const en = {
       emailTaken: 'A user with this email already exists.',
       tempPasswordNotice: "We'll send the user an email with a temporary password.",
       sent: 'Invitation sent to {{email}}.',
-      pending:
-        "User created. The invitation email to {{email}} hasn't gone out yet; it will be retried automatically.",
+      pending: "User created. The invitation email to {{email}} hasn't gone out yet. We'll retry it.",
     },
     columns: {
       email: 'Email',
@@ -745,11 +722,11 @@ export const en = {
       total_other: '{{count}} organizations',
       deactivated_one: '{{count}} deactivated',
       deactivated_other: '{{count}} deactivated',
-      summary: '{{total}} · {{deactivated}}',
+      summary: '{{total}}, {{deactivated}}',
     },
     status: {
       active: 'Active',
-      deactivated: 'Deactivated · their users cannot sign in',
+      deactivated: 'Deactivated',
     },
     created: 'Created {{date}}',
     actions: {
@@ -780,12 +757,10 @@ export const en = {
       step1: {
         title: 'New organization',
         label: 'Organization name',
-        placeholder: 'Company name',
         next: 'Next',
         required: 'The name is required.',
       },
       step2: {
-        title: 'Admin email',
         label: 'Admin email',
         notice: 'The admin will receive an email with a temporary password.',
         back: 'Back',
@@ -802,13 +777,12 @@ export const en = {
   },
   adminDashboard: {
     title: 'Dashboard',
-    subtitle: 'BARBATTACK operations. Counts only: no assets, findings, or customer business data.',
     loading: 'Loading…',
     loadFailed: 'Could not load dashboard data.',
     networkError: 'Could not reach the server to load the dashboard.',
     stats: {
       organizations: 'Organizations',
-      organizationsSub: '{{active}} active · {{deactivated}} deactivated',
+      organizationsSub: '{{active}} active, {{deactivated}} deactivated',
       usersTotal: 'Total users',
       cmdbConnected: 'CMDB connected',
       cmdbConnectedValue: '{{n}} of {{total}}',
@@ -835,9 +809,9 @@ export const en = {
       failed: 'Failed',
     },
     slack: {
-      title: 'Slack alerts by organization (30 days)',
+      title: 'Slack alerts (30 days)',
       noAlerts: 'No alerts in the last 30 days',
-      summary: '{{sent}} sent · {{failed}} failed · {{pending}} pending',
+      summary: '{{sent}} sent, {{failed}} failed, {{pending}} pending',
     },
     chart: {
       title: 'New organizations per month',
@@ -867,25 +841,19 @@ export const en = {
     networkError: 'Could not reach the server to load the CMDB connection.',
     header: {
       title: 'Configuration',
-      subtitle: 'Connect your CMDB to load the tech stack.',
     },
     steps: {
       title: 'Connect CMDB',
-      description:
-        'BARBATTACK reads the asset inventory from your CMDB. Without a connection there is no stack to compare against the vulnerability feeds.',
       items: {
         choose: 'Choose your CMDB',
         credentials: 'Enter the address and user',
         connect: 'Connect and sync',
       },
-      status: {
-        disconnected: 'No connection',
-      },
     },
     form: {
       title: 'Connect iTop',
       editTitle: 'Edit iTop connection',
-      back: '← Change CMDB',
+      back: 'Change CMDB',
       cancel: 'Cancel',
       url: {
         label: 'iTop address (IP or URL)',
@@ -900,7 +868,6 @@ export const en = {
       },
       password: {
         label: 'Password',
-        help: 'Sent to the backend. Not stored in the browser.',
         required: 'The password is required.',
       },
       actions: {
@@ -1082,8 +1049,6 @@ export const en = {
         nothingDeclared: 'Nothing declared.',
         imported: 'From iTop',
         importedFrom: '{{value}}, from its iTop Location.',
-        unknownVirtualMachine: 'Unknown: iTop has no Location for a Virtual Machine.',
-        unknownLocation: "Unknown: its iTop Location isn't one barbattack reads.",
         question: 'Is it reachable from the public internet?',
         help: {
           internet_facing: 'Reachable from the public internet.',
@@ -1104,7 +1069,6 @@ export const en = {
     informationClassification: {
       cellLabel: 'Information Classification of {{name}}: {{value}}',
       sheet: {
-        unclassifiedProvenance: 'iTop has no field for it, so only a declaration sets it.',
         question: 'How sensitive is the data it holds?',
         help: {
           public: 'Its data could be published without harm.',
@@ -1119,8 +1083,7 @@ export const en = {
       banner: {
         count_one: '{{count}} Asset needs triage.',
         count_other: '{{count}} Assets need triage.',
-        detail:
-          'They have an Unknown Exposure or no Information Classification. Unknown Exposure leaves a Data Gap on their Findings.',
+        detail: 'They have an Unknown Exposure or no Information Classification.',
         action: 'Triage them',
         none: 'Every Active Asset is triaged.',
       },
@@ -1134,7 +1097,7 @@ export const en = {
         inUse: 'In use',
         viewerReason: 'Only a Customer Admin can declare an Exposure or an Information Classification.',
         inactiveReason:
-          "barbattack doesn't monitor Inactive Assets, so their Exposure and Information Classification can't be declared.",
+          "An Inactive Asset's Exposure and Information Classification can't be declared. Reactivate it in iTop and it turns Active at the next Sync.",
         turnedInactive:
           "This Asset just turned Inactive, so its Exposure and Information Classification can't be declared.",
         clear: 'Clear',
@@ -1147,7 +1110,6 @@ export const en = {
         summary: '{{triaged}} of {{total}} Assets triaged',
         summaryDetail:
           'Where you declared an Exposure, open Findings were rescored, so the Findings list may have reordered.',
-        summarySkipped: 'The ones you moved past still show Unknown or Unclassified in the inventory.',
         done: 'Done',
       },
     },
@@ -1162,7 +1124,6 @@ export const en = {
     },
     areas: {
       title: 'Areas',
-      description: 'Imported from your CMDB. Each area can name an owner to reach about it.',
       loading: 'Loading areas…',
       empty: 'The CMDB has no areas yet.',
       noMatches: 'No areas match this filter.',
@@ -1186,7 +1147,7 @@ export const en = {
         set: 'Set owner',
         edit: 'Edit owner',
         title: 'Owner of {{area}}',
-        description: 'Whom to reach about this area. It does not need a dashboard account.',
+        help: 'It does not need a dashboard account.',
         email: 'Email',
         save: 'Save',
         saving: 'Saving…',
@@ -1203,7 +1164,6 @@ export const en = {
     },
     selector: {
       title: 'Choose your CMDB',
-      subtitle: 'Select where your asset inventory comes from.',
       select: 'Select',
       comingSoon: 'Coming soon',
     },
@@ -1217,11 +1177,9 @@ export const en = {
       },
       servicenow: {
         name: 'ServiceNow',
-        description: 'Integration planned for a future release.',
       },
       other: {
         name: 'Other CMDB',
-        description: 'Connection through a generic API or an inventory file.',
       },
     },
   },
@@ -1232,7 +1190,7 @@ export const en = {
     notConnected: {
       title: "BARBATTACK isn't delivering to Slack yet",
       description:
-        'Connect your workspace to the Security Team channel. When a finding is delivered there, the team gets a summary and one-click documentation leads back to the report.',
+        'Connect your workspace to the Security Team channel. When a finding is delivered there, the team gets a summary and links to the documentation.',
       action: 'Connect Slack',
       opening: 'Opening Slack…',
       waiting: 'Waiting for Slack…',
@@ -1243,7 +1201,7 @@ export const en = {
     channels: {
       label: 'Security Team channel',
       notSet: 'Not set',
-      help: 'Required to finish the connection. Slack refuses deliveries to channels the app has not joined.',
+      help: 'Required to finish the connection. Add the app to the channel, or Slack refuses deliveries.',
       select: 'Select a channel…',
       loading: 'Loading channels…',
       loadFailed: 'Could not load the channel list.',
@@ -1316,7 +1274,6 @@ export const en = {
   businessContext: {
     header: {
       title: 'Business context',
-      subtitle: 'What we need to know about your organization to prioritize what truly affects it.',
     },
     loading: 'Loading the business context…',
     loadFailed: "Couldn't load the business context.",
@@ -1328,14 +1285,11 @@ export const en = {
     noMatches: 'No matches.',
     remove: 'Remove {{value}}',
     sections: {
-      profile: { title: 'Profile', description: 'What your organization does and how big it is.' },
-      geography: { title: 'Location', description: 'Where it is headquartered and where it operates.' },
-      operations: {
-        title: 'Operations',
-        description: 'What it cannot afford to lose, the data it holds and the rules it follows.',
-      },
-      footprint: { title: 'Digital footprint', description: 'What identifies it online and who it depends on.' },
-      risk: { title: 'Risk', description: 'How much risk it accepts and what worries it.' },
+      profile: { title: 'Profile' },
+      geography: { title: 'Location' },
+      operations: { title: 'Operations' },
+      footprint: { title: 'Digital footprint' },
+      risk: { title: 'Risk' },
     },
     fields: {
       summary: {
@@ -1369,11 +1323,11 @@ export const en = {
       regulations: 'Regulations and standards',
       environments: 'Technology environments',
       domains: { label: 'Domains', placeholder: 'example.com' },
-      brands: { label: 'Brands and products', placeholder: 'Brand name' },
+      brands: 'Brands and products',
       technologies: { label: 'Technologies it depends on', placeholder: 'e.g. Microsoft 365, SAP' },
-      thirdParties: { label: 'Third parties with access', placeholder: 'Supplier name' },
+      thirdParties: 'Third parties with access',
       appetite: 'Risk appetite',
-      appetiteHint: 'For the whole organization, as leadership sets it. Each critical service has its own tolerance.',
+      appetiteHint: 'For the whole organization, as leadership sets it.',
       concerns: 'Main concerns',
       pastIncidents: { label: 'Past security incidents', placeholder: 'What happened and when.' },
       constraints: {
@@ -1403,15 +1357,14 @@ export const en = {
     start: {
       title: 'Start with your documents',
       description:
-        'Upload company profiles, annual reports, policies or any document about your organization. We read them together and place each fact in its section; you review it before saving.',
+        'Upload company profiles, annual reports or policies. Each fact goes into its section, and you review it before saving.',
       import: 'Import documents',
       manual: 'Fill it in by hand',
     },
     import: {
       button: 'Import documents',
       title: 'Import documents',
-      subtitle:
-        'We read all your documents together and place what we find in each section, without replacing what you already wrote. Nothing is saved until you click Save.',
+      subtitle: 'It keeps what you already wrote. Nothing is saved until you click Save.',
       filesLabel: 'Files',
       choose: 'Choose files',
       fileHelp: 'PDF, Word (.docx), TXT, Markdown, CSV or JSON. Up to 10 files, 10 MB each and 20 MB in total.',

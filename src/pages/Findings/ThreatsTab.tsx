@@ -78,15 +78,13 @@ function CoverageCard({ labeled, open }: { labeled: number; open: number }) {
 
   return (
     <section className="rounded-xl border border-border-panel bg-white p-6">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-title text-[1rem] text-navy">{t('findings.threats.coverageTitle')}</h2>
-      </div>
+      <h2 className="mb-4 font-title text-[1rem] text-navy">{t('findings.threats.coverageTitle')}</h2>
       <p className="mb-3 font-body text-[0.875rem] text-navy">
         {t('findings.threats.coverageLabel', { labeled, open })}
       </p>
       <div className="h-3 w-full overflow-hidden rounded-full bg-panel">
         <div
-          className="h-full rounded-full bg-navy transition-all"
+          className="h-full rounded-full bg-navy"
           style={{ width: `${pct}%` }}
           role="progressbar"
           aria-valuenow={pct}
@@ -95,7 +93,6 @@ function CoverageCard({ labeled, open }: { labeled: number; open: number }) {
           aria-label={t('findings.threats.coverageTitle')}
         />
       </div>
-      <p className="mt-1 font-body text-[0.75rem] text-gray">{pct}%</p>
     </section>
   )
 }
@@ -112,7 +109,6 @@ function HeatmapCard({ tactics }: { tactics: TacticCount[] }) {
       </div>
       <div className="p-6">
         <HeatmapGrid tactics={tactics} />
-        <p className="mt-4 font-body text-[0.75rem] text-gray">{t('findings.threats.heatmapNote')}</p>
       </div>
     </section>
   )

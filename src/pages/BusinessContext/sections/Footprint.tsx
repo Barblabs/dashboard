@@ -20,8 +20,7 @@ export function Footprint() {
         />
         <TagField
           name="footprint.brands"
-          label={t('businessContext.fields.brands.label')}
-          placeholder={t('businessContext.fields.brands.placeholder')}
+          label={t('businessContext.fields.brands')}
         />
       </div>
       <div className={ROW}>
@@ -32,8 +31,7 @@ export function Footprint() {
         />
         <TagField
           name="footprint.third_parties"
-          label={t('businessContext.fields.thirdParties.label')}
-          placeholder={t('businessContext.fields.thirdParties.placeholder')}
+          label={t('businessContext.fields.thirdParties')}
         />
       </div>
     </>
