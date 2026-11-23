@@ -12,7 +12,9 @@ Barbattack dashboard: the React + Vite frontend of the Barbattack threat intelli
 - `src/pages/` - one folder per page; routes in `src/routes.ts`, session and role guards in `src/App.tsx`
 - `src/test/` - Vitest setup, MSW Node server, `renderApp` helpers
 - `CODING_STANDARDS.md` - review rules no check catches
-- `README.md` - dependencies and when to use each, env vars, mock mode, deploy
+- `README.md` - setup, env vars, mock mode, scripts
+- `CONTRIBUTING.md` - which dependency to use for what, i18n and testing conventions
+- `docs/deploy.md` - S3 + CloudFront deploy and what Terraform must provide
 
 <important if="you need to run commands to build, test, lint, typecheck, or generate code">
 
