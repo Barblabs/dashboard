@@ -340,7 +340,7 @@ describe('Asset triage', () => {
     const sheet = within(await screen.findByRole('dialog', { name: 'Triage Asset' }))
     expect(
       sheet.getByText(
-        "An Inactive Asset's Exposure and Information Classification can't be declared.",
+        "An Inactive Asset's Exposure and Information Classification can't be declared. Reactivate it in iTop and it turns Active at the next Sync.",
       ),
     ).toBeInTheDocument()
     expect(sheet.queryByRole('radio')).not.toBeInTheDocument()

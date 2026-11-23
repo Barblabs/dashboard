@@ -47,7 +47,6 @@ export const es: Translations = {
     },
     form: {
       tagline: 'Las vulnerabilidades que afectan a tu stack, priorizadas.',
-      subtitle: 'Business-Aware Risk-Based Analysis of Threats, Tailored Alerts & Countermeasure Knowledge.',
       title: 'Iniciar sesión',
       access: 'Acceso restringido al equipo de seguridad y a los dueños de activo.',
       email: {
@@ -440,8 +439,7 @@ export const es: Translations = {
         sending: 'Enviando…',
         sent: 'Guardado.',
         failed: 'No se pudo guardar tu retroalimentación.',
-        orderHint:
-          'Con "antes" o "después", la siguiente actualización del orden vuelve a colocar el hallazgo tomando en cuenta tu "Por qué". "Sí aplica" solo queda registrado.',
+        orderHint: '"Antes" o "después" lo mueve en la siguiente actualización del orden.',
         viaAnalista: 'Vía el asistente',
         verdicts: {
           applies: 'Sí aplica',
@@ -1109,7 +1107,8 @@ export const es: Translations = {
         declaredBy: '{{value}}, declarada por {{user}} el {{date}}.',
         inUse: 'En uso',
         viewerReason: 'Solo un Administrador puede declarar una Exposición o una Clasificación de la Información.',
-        inactiveReason: 'La Exposición y la Clasificación de la Información de un activo inactivo no se pueden declarar.',
+        inactiveReason:
+          'La Exposición y la Clasificación de la Información de un activo inactivo no se pueden declarar. Reactívalo en iTop y queda activo en el siguiente Sync.',
         turnedInactive:
           'Este activo acaba de quedar inactivo, así que su Exposición y su Clasificación de la Información no se pueden declarar.',
         clear: 'Quitar',

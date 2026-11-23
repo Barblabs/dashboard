@@ -20,9 +20,6 @@ export function LoginLayout({ children }: { children: ReactNode }) {
           <p className="font-title text-[2.125rem] leading-[1.2] text-white">
             {t('login.form.tagline')}
           </p>
-          <p className="font-body text-[1rem] leading-[1.4] text-nav-text">
-            {t('login.form.subtitle')}
-          </p>
         </div>
       </div>
 

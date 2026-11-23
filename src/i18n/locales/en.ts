@@ -45,7 +45,6 @@ export const en = {
     },
     form: {
       tagline: 'The vulnerabilities that affect your stack, prioritized.',
-      subtitle: 'Business-Aware Risk-Based Analysis of Threats, Tailored Alerts & Countermeasure Knowledge.',
       title: 'Sign in',
       access: 'Access restricted to the security team and asset owners.',
       email: {
@@ -438,8 +437,7 @@ export const en = {
         sending: 'Sending…',
         sent: 'Saved.',
         failed: "Couldn't save your feedback.",
-        orderHint:
-          'With earlier or later, the next update of the order places the finding again, taking your Why into account. "It applies" is only recorded.',
+        orderHint: 'Earlier or later moves it at the next update of the order.',
         viaAnalista: 'Via the assistant',
         verdicts: {
           applies: 'It applies',
@@ -1107,7 +1105,8 @@ export const en = {
         declaredBy: '{{value}}, declared by {{user}} on {{date}}.',
         inUse: 'In use',
         viewerReason: 'Only a Customer Admin can declare an Exposure or an Information Classification.',
-        inactiveReason: "An Inactive Asset's Exposure and Information Classification can't be declared.",
+        inactiveReason:
+          "An Inactive Asset's Exposure and Information Classification can't be declared. Reactivate it in iTop and it turns Active at the next Sync.",
         turnedInactive:
           "This Asset just turned Inactive, so its Exposure and Information Classification can't be declared.",
         clear: 'Clear',
