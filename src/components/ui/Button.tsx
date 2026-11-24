@@ -1,7 +1,7 @@
 import { Button as BaseButton } from '@base-ui/react/button'
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'link'
-type ButtonSize = 'lg' | 'md' | 'sm'
+type ButtonSize = 'md' | 'sm'
 
 type ButtonProps = Omit<BaseButton.Props, 'className'> & {
   variant?: ButtonVariant
@@ -16,14 +16,13 @@ const BASE =
   'focus-ring cursor-pointer rounded-md font-body whitespace-nowrap transition-[opacity,background-color,border-color,color,scale] duration-150 ease-[ease] data-disabled:cursor-not-allowed data-disabled:opacity-45 motion-safe:not-data-disabled:active:scale-[0.97]'
 
 // Box applies height and horizontal padding. The link variant omits these so it sits inline.
+// md is as tall as an Input, so a button beside a field lines up with it.
 const BOX: Record<ButtonSize, string> = {
-  lg: 'h-11 px-4',
-  md: 'h-[42px] px-5',
+  md: 'h-11 px-5',
   sm: 'h-9 px-3.5',
 }
 
 const FONT: Record<ButtonSize, string> = {
-  lg: 'text-[0.875rem]',
   md: 'text-[0.875rem]',
   sm: 'text-[0.8125rem]',
 }

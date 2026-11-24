@@ -19,8 +19,7 @@ export function FilterSelect({
       labelClassName="font-body text-[0.75rem] font-semibold text-gray"
       className="gap-1"
     >
-      {/* As tall as a filter MultiSelect, so the fields of a filter bar line up. */}
-      <Select value={value} onChange={(event) => onChange(event.target.value)} className="min-h-11">
+      <Select value={value} onChange={(event) => onChange(event.target.value)}>
         {children}
       </Select>
     </Field>
