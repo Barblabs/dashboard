@@ -2,7 +2,7 @@
 
 ## Sub-features
 - Every route except `/`, `/login` and `/deactivated` needs a session; without one it redirects to `/login`, and signing in returns to the page asked for
-- `/` is the public landing page for everyone (h1 "Threat intelligence for the assets in your CMDB"): signed out its "Sign in" links open `/login`; signed in they read "Open dashboard" and open the role's home, platform_admin `/tenants`, customer_admin and viewer `/dashboard`
+- `/` is the public landing page for everyone (h1 "Threat intelligence for the assets your business runs on"): signed out its "Sign in" links open `/login`; signed in they read "Open dashboard" and open the role's home, platform_admin `/tenants`, customer_admin and viewer `/dashboard`
 - Sidebar links by role (the active link is highlighted):
   - customer_admin: Dashboard, Findings, News, Configuration, Business context, Users
   - viewer: the same without Users

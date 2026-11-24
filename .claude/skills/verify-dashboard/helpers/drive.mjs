@@ -987,7 +987,7 @@ const scenarios = {
 
   async navigation() {
     await goto('/')
-    await expect(page.getByRole('heading', { level: 1, name: 'Threat intelligence for the assets in your CMDB' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'Threat intelligence for the assets your business runs on' })).toBeVisible()
     await shot('landing-signed-out')
     await page.getByRole('link', { name: 'Sign in' }).first().click()
     await page.waitForURL('**/login')

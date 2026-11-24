@@ -831,30 +831,29 @@ export const en = {
       open: 'Open dashboard',
     },
     hero: {
-      eyebrow: 'iTop · NVD · EPSS · CISA KEV · Slack',
-      title: 'Threat intelligence for the assets in your CMDB',
-      lead: 'barbattack checks every asset in your iTop inventory against NVD, EPSS and the CISA KEV catalog, ranks the findings to fix first and alerts each asset owner on Slack.',
+      title: 'Threat intelligence for the assets your business runs on',
+      lead: 'barbattack watches every server and application you run, tells you which vulnerabilities to fix first and alerts the person responsible on Slack.',
       secondary: 'See how it works',
       group: 'Exploited flaws on internet-facing services',
     },
     steps: {
-      title: 'From a CMDB record to a Slack message in four steps',
-      lead: 'Follow one finding, CVE-2021-41773 on web-01, from the iTop record to the message its owner reads.',
+      title: 'From your inventory to the person who fixes it',
       sync: {
-        title: 'Syncs your assets from iTop',
-        text: 'Each sync brings in your servers, virtual machines and the software they run.',
+        title: 'Keeps your inventory current',
+        text: 'barbattack reads your servers, virtual machines and the software they run from your CMDB.',
         succeeded: 'Succeeded',
         created: 'Created',
         updated: 'Updated',
         deactivated: 'Deactivated',
       },
       match: {
-        title: 'Matches software to CVEs',
-        text: 'Apache 2.4.49 on web-01 meets CVE-2021-41773, so barbattack opens a finding.',
+        title: 'Finds what affects you',
+        text: 'Every known vulnerability in the software you run becomes a finding.',
       },
       score: {
-        title: 'Scores the finding',
-        text: 'How exploited the CVE is, weighed with how exposed and important the asset is.',
+        title: 'Ranks what to fix first',
+        text: 'Flaws attackers already use, on assets exposed to the internet, go to the top.',
+        exploited: 'Exploited by attackers',
         yes: 'Yes',
       },
       alert: {
@@ -865,12 +864,12 @@ export const en = {
       },
     },
     priorities: {
-      title: 'Priority groups that say what to fix together, and why',
-      lead: 'The Prioritizer groups the open findings to attend at the same time, and Luna writes the plan to fix each one.',
+      title: 'What to fix together, and why',
+      lead: 'barbattack groups the findings to fix at the same time and writes a step-by-step plan for each one.',
       groups: {
         exposed: {
           title: 'Exploited flaws on internet-facing services',
-          reason: 'Both are in CISA KEV and run on assets reachable from the internet.',
+          reason: 'Attackers already exploit both, and they run on assets reachable from the internet.',
         },
         bastion: {
           title: 'One OpenSSH update for the bastion host',
@@ -894,19 +893,17 @@ export const en = {
       closed: 'The next sync saw Apache 2.4.51 on web-01 and closed the finding on its own.',
     },
     agents: {
-      title: 'Agents that read, order and explain',
-      lead: 'Each agent does one job. The ones that rank or explain a finding rely only on what barbattack stored about it.',
-      prioritizer: 'Decides the order to attend your open findings, weighing each Score with what its asset means to your business, and says why.',
+      title: 'AI agents for your security team',
+      lead: 'The agents advise and your team decides. They never change a Score or close a finding.',
+      prioritizer: 'Puts your open findings in the order to fix them, based on what each asset means to your business, and says why.',
       luna: 'Writes the action plan for each finding: the steps, what mitigates it meanwhile and how to confirm the fix.',
       editor: 'Writes your news digest, grouped by why each item matters to you.',
-      cartografo: 'Labels each vulnerability with the MITRE ATT&CK techniques it maps to.',
       drafter: 'Drafts your business context from the documents you give it, for you to review.',
       drafterSample: 'Sectors, critical services, regulations, risk appetite',
-      rule: 'Agents advise. They never change a Score or close a finding: the numbers come from rules, and the decisions stay with your team.',
     },
     closing: {
       title: 'Know what to patch first, and who patches it',
-      lead: 'Connect your iTop CMDB. The first sync brings your assets in, and barbattack starts matching them against every feed it reads.',
+      lead: 'Connect your CMDB. The first sync brings your assets in, and barbattack starts watching them.',
     },
   },
   time: {

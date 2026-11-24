@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { PLATFORM_ADMIN, renderApp } from '../../test/render'
 
-const TITLE = 'Threat intelligence for the assets in your CMDB'
+const TITLE = 'Threat intelligence for the assets your business runs on'
 
 describe('Landing page', () => {
   it('shows a signed-out visitor the landing page and takes them to sign in', async () => {

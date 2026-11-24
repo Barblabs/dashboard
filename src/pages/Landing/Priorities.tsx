@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { Badge } from '../../components/ui/Badge'
 import { ScoreBandBadge } from '../Findings/ScoreBandBadge'
 import { MONO } from '../Findings/styles'
-import { EYEBROW } from './layout'
 import { SAMPLE_FINDINGS, type SampleFinding } from './samples'
 import { Section } from './Section'
 
@@ -19,7 +18,7 @@ export function Priorities() {
   const { t } = useTranslation()
 
   return (
-    <Section id="priorities">
+    <Section id="priorities" lead={t('landing.priorities.lead')}>
       <div aria-hidden="true" className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <ol className="flex flex-col gap-3">
           {GROUPS.map(({ key, findings }, index) => (
@@ -40,8 +39,7 @@ export function Priorities() {
 
         <div className="flex flex-col rounded-xl border border-border-panel bg-white">
           <div className="border-b border-border-panel p-5">
-            <p className={`${EYEBROW} text-teal`}>Luna</p>
-            <p className="mt-2 font-title text-[1.25rem] leading-tight text-navy">{t('landing.priorities.plan.title')}</p>
+            <p className="font-title text-[1.25rem] leading-tight text-navy">{t('landing.priorities.plan.title')}</p>
             <p className={`${MONO} mt-1 text-gray`}>CVE-2021-41773 · web-01 · Apache httpd 2.4.49</p>
           </div>
           <div className="flex flex-1 flex-col gap-3.5 p-5">

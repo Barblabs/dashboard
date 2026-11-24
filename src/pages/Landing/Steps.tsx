@@ -54,7 +54,7 @@ function SyncRunCard() {
   return (
     <div className={MINI_CARD}>
       <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-[0.75rem] font-medium text-navy">iTop</span>
+        <span className="font-mono text-[0.75rem] font-medium text-navy">CMDB</span>
         <Badge variant="outline">{t('landing.steps.sync.succeeded')}</Badge>
       </div>
       <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
@@ -98,9 +98,7 @@ function Chip({ label, value }: { label: string; value: string }) {
 function ScoreCard() {
   const { t } = useTranslation()
   const inputs = [
-    ['CVSS', '9.8'],
-    [t('findings.detail.vulnerability.epss'), '94%'],
-    [t('findings.detail.vulnerability.kev'), t('landing.steps.score.yes')],
+    [t('landing.steps.score.exploited'), t('landing.steps.score.yes')],
     [t('findings.detail.asset.exposure'), t('config.inventory.exposure.internet_facing')],
   ] as const
 

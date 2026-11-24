@@ -833,30 +833,29 @@ export const es: Translations = {
       open: 'Abrir el dashboard',
     },
     hero: {
-      eyebrow: 'iTop · NVD · EPSS · CISA KEV · Slack',
-      title: 'Inteligencia de amenazas para los activos de tu CMDB',
-      lead: 'barbattack revisa cada activo de tu inventario de iTop contra NVD, EPSS y el catálogo CISA KEV, ordena los hallazgos que conviene corregir primero y avisa por Slack al dueño de cada activo.',
+      title: 'Inteligencia de amenazas para los activos de los que depende tu negocio',
+      lead: 'barbattack vigila cada servidor y aplicación que operas, te dice qué vulnerabilidades corregir primero y avisa por Slack a la persona responsable.',
       secondary: 'Ver cómo funciona',
       group: 'Fallos con exploit activo en servicios expuestos a internet',
     },
     steps: {
-      title: 'De un registro de la CMDB a un mensaje de Slack en cuatro pasos',
-      lead: 'Sigue un hallazgo, CVE-2021-41773 en web-01, desde el registro de iTop hasta el mensaje que lee su dueño.',
+      title: 'De tu inventario a la persona que lo corrige',
       sync: {
-        title: 'Sincroniza tus activos desde iTop',
-        text: 'Cada sincronización trae tus servidores, máquinas virtuales y el software que corren.',
+        title: 'Mantiene tu inventario al día',
+        text: 'barbattack lee de tu CMDB tus servidores, máquinas virtuales y el software que corren.',
         succeeded: 'Correcta',
         created: 'Creados',
         updated: 'Actualizados',
         deactivated: 'Desactivados',
       },
       match: {
-        title: 'Cruza el software con los CVE',
-        text: 'Apache 2.4.49 en web-01 coincide con CVE-2021-41773, así que barbattack abre un hallazgo.',
+        title: 'Encuentra lo que te afecta',
+        text: 'Cada vulnerabilidad conocida en el software que corres se convierte en un hallazgo.',
       },
       score: {
-        title: 'Calcula el Score del hallazgo',
-        text: 'Qué tan explotado está el CVE, ponderado con qué tan expuesto e importante es el activo.',
+        title: 'Ordena qué corregir primero',
+        text: 'Los fallos que los atacantes ya usan, en activos expuestos a internet, van primero.',
+        exploited: 'Explotado por atacantes',
         yes: 'Sí',
       },
       alert: {
@@ -867,12 +866,12 @@ export const es: Translations = {
       },
     },
     priorities: {
-      title: 'Grupos de prioridad que dicen qué corregir junto, y por qué',
-      lead: 'El Prioritizer agrupa los hallazgos abiertos que conviene atender a la vez, y Luna escribe el plan para corregir cada uno.',
+      title: 'Qué corregir junto, y por qué',
+      lead: 'barbattack agrupa los hallazgos que conviene corregir a la vez y escribe un plan paso a paso para cada uno.',
       groups: {
         exposed: {
           title: 'Fallos con exploit activo en servicios expuestos a internet',
-          reason: 'Los dos están en CISA KEV y corren en activos alcanzables desde internet.',
+          reason: 'Los atacantes ya explotan los dos, y corren en activos alcanzables desde internet.',
         },
         bastion: {
           title: 'Una actualización de OpenSSH para el bastión',
@@ -896,19 +895,17 @@ export const es: Translations = {
       closed: 'La siguiente sincronización vio Apache 2.4.51 en web-01 y cerró el hallazgo sola.',
     },
     agents: {
-      title: 'Agentes que leen, ordenan y explican',
-      lead: 'Cada agente hace una tarea. Los que ordenan o explican un hallazgo se basan solo en lo que barbattack guardó sobre él.',
-      prioritizer: 'Decide en qué orden atender tus hallazgos abiertos, pondera cada Score con lo que su activo significa para tu negocio y explica por qué.',
+      title: 'Agentes de IA para tu equipo de seguridad',
+      lead: 'Los agentes aconsejan y tu equipo decide. Nunca cambian un Score ni cierran un hallazgo.',
+      prioritizer: 'Ordena tus hallazgos abiertos según lo que cada activo significa para tu negocio, y explica por qué.',
       luna: 'Escribe el plan de acción de cada hallazgo: los pasos, qué lo mitiga mientras tanto y cómo confirmar la corrección.',
       editor: 'Escribe tu resumen de noticias, agrupado por por qué cada una te importa.',
-      cartografo: 'Etiqueta cada vulnerabilidad con las técnicas de MITRE ATT&CK que le corresponden.',
       drafter: 'Redacta tu contexto empresarial a partir de los documentos que le das, para que lo revises.',
       drafterSample: 'Sectores, servicios críticos, regulaciones, apetito de riesgo',
-      rule: 'Los agentes aconsejan. Nunca cambian un Score ni cierran un hallazgo: los números salen de reglas y las decisiones quedan en tu equipo.',
     },
     closing: {
       title: 'Qué parchear primero, y quién lo parchea',
-      lead: 'Conecta tu CMDB de iTop. La primera sincronización trae tus activos y barbattack empieza a cruzarlos con cada fuente que lee.',
+      lead: 'Conecta tu CMDB. La primera sincronización trae tus activos y barbattack empieza a vigilarlos.',
     },
   },
   time: {

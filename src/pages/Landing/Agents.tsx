@@ -9,7 +9,7 @@ export function Agents() {
   const { t } = useTranslation()
 
   return (
-    <Section id="agents">
+    <Section id="agents" lead={t('landing.agents.lead')}>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <AgentCard name="Prioritizer" text={t('landing.agents.prioritizer')} className="lg:col-span-2">
           <div className="flex flex-wrap gap-2">
@@ -35,17 +35,10 @@ export function Agents() {
             ))}
           </div>
         </AgentCard>
-        <AgentCard name="Cartógrafo" text={t('landing.agents.cartografo')}>
-          <p className="flex flex-wrap items-baseline gap-2">
-            <span className="font-mono text-[0.8125rem] font-semibold text-navy">T1190</span>
-            <span className="font-body text-[0.8125rem] text-gray">Exploit Public-Facing Application</span>
-          </p>
-        </AgentCard>
-        <AgentCard name="Drafter" text={t('landing.agents.drafter')}>
+        <AgentCard name="Drafter" text={t('landing.agents.drafter')} className="lg:col-span-2">
           <p className="font-body text-[0.8125rem] text-gray">{t('landing.agents.drafterSample')}</p>
         </AgentCard>
       </div>
-      <p className="mt-6 max-w-[70ch] font-body text-[0.9375rem] leading-[1.5] font-medium text-navy">{t('landing.agents.rule')}</p>
     </Section>
   )
 }

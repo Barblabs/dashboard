@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { WRAP, type SectionId } from './layout'
 
-export function Section({ id, children }: { id: SectionId; children: ReactNode }) {
+export function Section({ id, lead, children }: { id: SectionId; lead?: string; children: ReactNode }) {
   const { t } = useTranslation()
 
   return (
@@ -14,7 +14,7 @@ export function Section({ id, children }: { id: SectionId; children: ReactNode }
         >
           {t(`landing.${id}.title`)}
         </h2>
-        <p className="mt-4 max-w-[58ch] font-body text-[1.0625rem] leading-[1.6] text-gray">{t(`landing.${id}.lead`)}</p>
+        {lead && <p className="mt-4 max-w-[58ch] font-body text-[1.0625rem] leading-[1.6] text-gray">{lead}</p>}
         <div className="mt-10">{children}</div>
       </div>
     </section>
