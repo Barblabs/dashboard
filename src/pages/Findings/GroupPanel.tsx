@@ -43,7 +43,16 @@ export function GroupPanel({ order, group, onOpen }: Props) {
 
       {wide ? (
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-[0.875rem]">
+          {/* Fixed column widths, so each group's columns line up with the groups above and below it. */}
+          <table className="w-full min-w-[56rem] table-fixed border-collapse text-[0.875rem]">
+            <colgroup>
+              <col className="w-[15%]" />
+              <col className="w-[11%]" />
+              <col className="w-[27%]" />
+              <col className="w-[13%]" />
+              <col className="w-[8%]" />
+              <col />
+            </colgroup>
             <thead>
               <tr className={HEADER_ROW}>
                 <th className={HEADER_CELL}>{t('findings.columns.cve')}</th>
