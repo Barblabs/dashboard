@@ -9,6 +9,7 @@ export const es: Translations = {
     showPassword: 'Mostrar contraseña',
     hidePassword: 'Ocultar contraseña',
     chartError: 'No se pudo mostrar esta sección.',
+    infoTip: 'Acerca de {{title}}',
   },
   sidebar: {
     superAdmin: 'Super Admin',
@@ -455,12 +456,16 @@ export const es: Translations = {
     },
     resumen: {
       trendTitle: 'Hallazgos por semana',
+      trendHelp:
+        'Cuántos hallazgos aparecieron y cuántos se cerraron en cada una de las últimas 12 semanas (de lunes a domingo, en UTC). La gráfica empieza en la primera semana con datos.\n\nLas barras «Nuevos» y «Cerrados» se leen en el eje izquierdo. La línea «Abiertos al final de la semana» es cuántos hallazgos seguían abiertos al terminar cada semana (en la semana actual, los abiertos hoy) y se lee en el eje derecho.\n\nSi «Cerrados» supera a «Nuevos» semana tras semana, la línea baja. Un hallazgo que se cerró y después se reabrió no cuenta como cerrado.',
       trendOpened: 'Nuevos',
       trendClosed: 'Cerrados',
       trendBacklog: 'Abiertos al final de la semana',
       trendNoData: 'Aún no hay hallazgos en estas semanas.',
       trendWeek: 'Semana',
       ttcTitle: 'Mediana de días para cerrar',
+      ttcHelp:
+        'Para los hallazgos cerrados en las últimas 12 semanas, la mediana de días entre que cada uno se abrió y se cerró, por nivel de riesgo. Si un hallazgo se reabrió, se cuenta desde la última vez que se abrió.\n\nLa mediana es el valor del hallazgo que queda en medio. La mitad se cerró en menos días y la otra mitad en más, así que un caso aislado muy largo no la mueve.\n\nCada barra se compara con la del nivel que más tarda. Lo esperado es que los Críticos se cierren más rápido que los Altos, y los Altos más rápido que los Medios.',
       ttcBand: 'Nivel de riesgo',
       ttcMedian: 'Mediana (días)',
       ttcCount: 'Hallazgos cerrados',
@@ -478,6 +483,8 @@ export const es: Translations = {
       network: 'No se pudo contactar al servidor.',
       empty: 'Sin datos aún.',
       heatmapTitle: 'Dónde está el riesgo',
+      heatmapHelp:
+        'Cruza los hallazgos abiertos por nivel de riesgo (filas) con una característica de su activo (columnas), que se cambia con «Agrupar por». La exposición dice si el activo es accesible desde internet, la criticidad qué tan importante es para el negocio según la CMDB, y el área a qué parte de la organización pertenece.\n\nCada celda es cuántos hallazgos caen en esa combinación, y entre más oscura, más tiene en comparación con la celda mayor. Agrupado por exposición, la celda con borde rojo son los hallazgos Críticos en activos expuestos a internet, los más urgentes. Al hacer clic en una celda se abre la lista filtrada.\n\nEl nivel de riesgo sale del score, de 0 a 100. Crítico es de 70 en adelante, Alto de 40 a 69, Medio de 20 a 39 y Bajo menos de 20. Los hallazgos «Sin nivel» tienen un score de un modelo anterior y reciben nivel cuando se recalculan.',
       heatmapNote: '"Desconocida" son activos que la CMDB no clasifica.',
       byLabel: 'Agrupar por',
       byExposure: 'Exposición',
@@ -497,9 +504,13 @@ export const es: Translations = {
         none: 'Sin área',
       },
       assetTitle: 'Activos con más hallazgos',
+      assetHelp:
+        'Cada fila es un activo con hallazgos abiertos. La barra mide su total en comparación con el activo que más tiene, y cada color es un nivel de riesgo. El número de la derecha es el total.\n\nEl orden va por gravedad y no por cantidad. Primero va el activo con más hallazgos Críticos, después el que tiene más Altos, y así, de modo que un activo con 2 Críticos va antes que uno con 10 Medios.\n\nAl hacer clic en un activo se abre la lista de sus hallazgos.',
       assetEmpty: 'Sin activos con hallazgos abiertos.',
       assetBarLabel: '{{name}}: {{total}} hallazgos',
       topTitle: 'Top componentes y CVE',
+      topHelp:
+        'Las 10 versiones de software y las 10 vulnerabilidades (CVE) con los hallazgos abiertos más graves. Se ordenan primero por nivel de riesgo, con más Críticos arriba, y luego por cuántos hallazgos suman.\n\nUn componente es un producto en una versión concreta, así que actualizarlo cierra todos sus hallazgos a la vez. «Activos» es en cuántos activos está instalado con algún hallazgo abierto.\n\nKEV indica que la CISA confirmó que la vulnerabilidad se está explotando. EPSS es la probabilidad estimada de que se explote en los próximos 30 días.',
       topComponentsTitle: 'Componentes',
       topCvesTitle: 'CVE',
       topEmpty: 'Sin datos aún.',
@@ -518,9 +529,13 @@ export const es: Translations = {
       failed: 'No se pudo cargar la matriz de amenazas.',
       network: 'No se pudo conectar al servidor para cargar la matriz.',
       coverageTitle: 'Cobertura de amenazas',
+      coverageHelp:
+        'Cuántos hallazgos abiertos tienen su CVE asociado a al menos una técnica de MITRE ATT&CK. Una técnica describe cómo un atacante aprovecharía la vulnerabilidad o qué lograría con ella.\n\nLas técnicas las asigna un agente de IA a partir de la descripción de cada vulnerabilidad, así que son una inferencia y no un dato confirmado. Los hallazgos sin técnica no aparecen en la tabla por táctica ni en el top de técnicas.',
       coverageLabel: '{{labeled}} de {{open}} hallazgos abiertos tienen etiqueta ATT&CK',
       emptyTactics: 'Sin hallazgos: {{tactics}}',
       heatmapTitle: 'Hallazgos por táctica',
+      heatmapHelp:
+        'Las columnas son tácticas de MITRE ATT&CK, la etapa de un ataque a la que ayuda cada técnica (acceso inicial, ejecución, escalada de privilegios, exfiltración, etc.), en el orden en que suele avanzar un ataque. Las filas son los niveles de riesgo.\n\nUn hallazgo cuenta una vez en cada táctica de sus técnicas, así que las columnas pueden sumar más que el total de hallazgos. Entre más oscura la celda, más hallazgos tiene.\n\nLas tácticas sin hallazgos se listan debajo de la tabla.',
       tacticLabel: {
         reconnaissance: 'Reconocimiento',
         'resource-development': 'Recursos',
@@ -539,6 +554,8 @@ export const es: Translations = {
       },
       cellLabel: '{{count}} hallazgos: {{band}} en {{tactic}}',
       topTitle: 'Top técnicas',
+      topHelp:
+        'Las 10 técnicas de MITRE ATT&CK que aparecen en más hallazgos abiertos. El ID es el del catálogo de MITRE; T1190, por ejemplo, es explotar una aplicación expuesta a internet.\n\nEl rol es el papel que juega la técnica en la vulnerabilidad. Explotación es cómo se aprovecha la falla, impacto principal es lo que el atacante obtiene directamente e impacto secundario es lo que puede hacer después con eso.\n\nLas técnicas que más se repiten son buenas candidatas para controles que protejan contra varios hallazgos a la vez.',
       topId: 'ID',
       topName: 'Técnica',
       topTactics: 'Tácticas',
@@ -557,7 +574,11 @@ export const es: Translations = {
       bajo: 'Bajó',
       match: 'Coincidencia',
       matchPct: '{{pct}}%',
+      summaryHelp:
+        'Compara dos órdenes de los mismos hallazgos. El de antes es solo por score. El de después es el que armó el agente de IA que prioriza, que además toma en cuenta el contexto empresarial y junta lo que conviene atender a la vez.\n\n«Subió» cuenta los hallazgos que el agente puso en un grupo más temprano del que les tocaría por score, «Bajó» los que puso en uno más tardío y «Se mantuvo» los que quedaron en el mismo grupo. «Coincidencia» es el porcentaje que se mantuvo.',
       matrixTitle: 'Movimiento entre grupos',
+      matrixHelp:
+        'Las filas son los grupos que saldrían ordenando solo por score. Los hallazgos se ordenan del score más alto al más bajo y se cortan en grupos del mismo tamaño que los del agente; el rango #n–#m son sus posiciones en ese orden. Las columnas son los grupos que asignó el agente.\n\nLas celdas con borde, en la diagonal, son hallazgos que quedaron en el mismo grupo. A la izquierda de la diagonal están los que subieron y a la derecha los que bajaron. Entre más oscura la celda, más hallazgos tiene.\n\nAl hacer clic en una celda se abre la lista con esos hallazgos. Debajo de la tabla está el nombre de cada grupo.',
       byScore: 'Por score',
       byAgent: 'Por prioridad',
       groupLabel: 'G{{n}}',
@@ -565,7 +586,11 @@ export const es: Translations = {
       cellLabel: '{{count}} hallazgos del grupo de score {{sg}} en el grupo de prioridad {{ag}}',
       cellClickable: 'Filtrar a estos {{count}} hallazgos',
       bandTitle: 'Nivel de riesgo por grupo',
+      bandHelp:
+        'Para cada grupo del agente, en el orden en que se atienden, qué parte de sus hallazgos es de nivel Crítico, Alto, Medio o Bajo. Todas las barras miden lo mismo porque muestran proporciones; el número de la derecha es cuántos hallazgos tiene el grupo.\n\nSirve para ver si los primeros grupos concentran los niveles más altos. Si un grupo temprano tiene muchos Medios o Bajos, el agente lo adelantó por otra razón, como lo que el activo significa para el negocio o que una sola actualización corrige varios hallazgos. El detalle de cada hallazgo explica por qué.',
       topChangesTitle: 'Movimientos más relevantes',
+      topChangesHelp:
+        'Los hallazgos que el agente cambió de grupo respecto al orden por score, del salto más grande al más chico. «Por score» es el grupo que les tocaría solo por score, con su rango de posiciones, y «Por prioridad» es el grupo donde quedaron, con su nombre.\n\nΔ es cuántos grupos se movió el hallazgo. ↑ significa que subió y se atiende antes; ↓, que bajó. Al hacer clic en una fila se abre el detalle del hallazgo, con la explicación de por qué está en ese grupo.',
       topChangesCve: 'CVE',
       topChangesComponent: 'Componente',
       topChangesScoreGroup: 'Por score',
@@ -794,6 +819,8 @@ export const es: Translations = {
     },
     orgsTable: {
       title: 'Organizaciones',
+      help:
+        'Cada organización cliente con su estado, cuántos usuarios habilitados tiene (contando a los invitados que aún no entran), si tiene una CMDB conectada y hace cuánto terminó su última sincronización exitosa.\n\nSi la sincronización más reciente falló, debajo aparece en rojo la fecha del fallo, y los activos y hallazgos de esa organización pueden estar desactualizados hasta que vuelva a sincronizar. Esta vista nunca muestra los activos ni los hallazgos de los clientes.',
       empty: 'Aún no hay organizaciones.',
       name: 'Nombre',
       status: 'Estado',
@@ -809,16 +836,21 @@ export const es: Translations = {
     },
     syncChart: {
       title: 'Syncs por día (30 días)',
+      help:
+        'Cuántas sincronizaciones con la CMDB hicieron todas las organizaciones en cada uno de los últimos 30 días (en UTC, hoy incluido). Cada sincronización trae de la CMDB los activos y su software, que es lo que se cruza con las vulnerabilidades.\n\nCada barra suma «Exitosas» y «Fallidas». Un día sin barra es un día sin sincronizaciones. Varios fallos seguidos pueden indicar credenciales vencidas o una CMDB caída; la tabla de Organizaciones muestra cuál está fallando.',
       succeeded: 'Exitosas',
       failed: 'Fallidas',
     },
     slack: {
       title: 'Alertas Slack (30 días)',
+      help:
+        'Los mensajes de Slack que cada organización puso en cola en los últimos 30 días (en UTC, hoy incluido), separados en enviados, fallidos y pendientes. Son las alertas de hallazgos nuevos o que subieron de nivel de riesgo, que llegan por mensaje directo al responsable de cada activo.\n\nLa barra mide el total de cada organización en comparación con la que tiene más mensajes. Un mensaje fallido ya no se reintenta solo, pero un administrador de esa organización puede reenviarlo desde Configuración. Aquí nunca se muestra el contenido de los mensajes.',
       noAlerts: 'Sin alertas en los últimos 30 días',
       summary: '{{sent}} enviadas, {{failed}} fallidas, {{pending}} pendientes',
     },
     chart: {
       title: 'Altas por mes',
+      help: 'Cuántas organizaciones nuevas se dieron de alta en cada uno de los últimos 6 meses, incluido el actual. Cada organización cuenta en el mes en que se creó, aunque después se haya desactivado.',
     },
   },
   landing: {

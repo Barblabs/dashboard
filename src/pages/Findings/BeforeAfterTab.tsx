@@ -5,6 +5,7 @@ import { useCurrentOrderQuery } from '../../api/prioritizations'
 import type { CurrentOrder, PriorityGroup } from '../../api/prioritizations'
 import { Card, CardHeader } from '../../components/ui/Card'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
+import { InfoTip } from '../../components/ui/InfoTip'
 import { CARD_EDGE, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Message } from '../../components/ui/Message'
@@ -60,7 +61,11 @@ function BeforeAfterContent({ order, data }: { order: CurrentOrder; data: Matrix
   return (
     <div className="flex flex-col gap-6">
       <ChartErrorBoundary>
-        <Card className="p-6">
+        <Card className="relative p-6">
+          {/* The figures have no header to hold the "?", so it sits in the Card's corner. */}
+          <div className="absolute top-3 right-3">
+            <InfoTip title={t('findings.tabs.beforeAfter')} text={t('findings.beforeAfter.summaryHelp')} />
+          </div>
           <div className="grid grid-cols-4 divide-x divide-border-panel text-center">
             <div className="flex flex-col gap-1 px-4 py-2">
               <span className="font-title text-[2rem] leading-none text-navy">{subio}</span>
@@ -86,7 +91,7 @@ function BeforeAfterContent({ order, data }: { order: CurrentOrder; data: Matrix
 
       <ChartErrorBoundary>
         <Card>
-          <CardHeader title={t('findings.beforeAfter.matrixTitle')} />
+          <CardHeader title={t('findings.beforeAfter.matrixTitle')} help={t('findings.beforeAfter.matrixHelp')} />
           <div className="p-6">
             <MatrixGrid groups={groups} matrix={matrix} cellIds={cellIds} rankRanges={rankRanges} N={N} />
           </div>
@@ -96,7 +101,7 @@ function BeforeAfterContent({ order, data }: { order: CurrentOrder; data: Matrix
       {topChanges.length > 0 && (
         <ChartErrorBoundary>
           <Card>
-            <CardHeader title={t('findings.beforeAfter.topChangesTitle')} />
+            <CardHeader title={t('findings.beforeAfter.topChangesTitle')} help={t('findings.beforeAfter.topChangesHelp')} />
             <TopChangesTable topChanges={topChanges} groups={groups} rankRanges={rankRanges} onOpen={setOpen} />
           </Card>
         </ChartErrorBoundary>
@@ -104,7 +109,7 @@ function BeforeAfterContent({ order, data }: { order: CurrentOrder; data: Matrix
 
       <ChartErrorBoundary>
         <Card>
-          <CardHeader title={t('findings.beforeAfter.bandTitle')} />
+          <CardHeader title={t('findings.beforeAfter.bandTitle')} help={t('findings.beforeAfter.bandHelp')} />
           <BandComposition groups={groups} bandByGroup={bandByGroup} />
         </Card>
       </ChartErrorBoundary>

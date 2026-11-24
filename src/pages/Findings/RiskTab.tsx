@@ -65,6 +65,7 @@ function HeatmapCard({ by, onByChange }: { by: BreakdownBy; onByChange: (b: Brea
     <Card>
       <CardHeader
         title={t('findings.risk.heatmapTitle')}
+        help={t('findings.risk.heatmapHelp')}
         actions={
           <div className="flex items-center gap-2 font-body text-[0.875rem]">
             <span className="text-gray">{t('findings.risk.byLabel')}</span>
@@ -250,7 +251,7 @@ function AssetBarsCard() {
 
   return (
     <Card>
-      <CardHeader title={t('findings.risk.assetTitle')} />
+      <CardHeader title={t('findings.risk.assetTitle')} help={t('findings.risk.assetHelp')} />
       <QueryBoundary
         query={query}
         keys={{ loading: 'findings.risk.loading', failed: 'findings.risk.failed', network: 'findings.risk.network' }}
@@ -350,7 +351,7 @@ function TopTablesCard() {
 
   return (
     <Card>
-      <CardHeader title={t('findings.risk.topTitle')} />
+      <CardHeader title={t('findings.risk.topTitle')} help={t('findings.risk.topHelp')} />
       <QueryBoundary
         query={query}
         keys={{ loading: 'findings.risk.loading', failed: 'findings.risk.failed', network: 'findings.risk.network' }}

@@ -7,6 +7,7 @@ export const en = {
     showPassword: 'Show password',
     hidePassword: 'Hide password',
     chartError: 'This section could not be displayed.',
+    infoTip: 'About {{title}}',
   },
   sidebar: {
     superAdmin: 'Super Admin',
@@ -453,12 +454,16 @@ export const en = {
     },
     resumen: {
       trendTitle: 'Findings per week',
+      trendHelp:
+        'How many findings appeared and how many were closed in each of the last 12 weeks (Monday to Sunday, in UTC). The chart starts at the first week with any data.\n\nThe “New” and “Closed” bars read on the left axis. The “Open at week end” line is how many findings were still open when each week ended (for the current week, how many are open now) and reads on the right axis.\n\nWhen “Closed” outgrows “New” week after week, the line goes down. A finding that was closed and later reopened does not count as closed.',
       trendOpened: 'New',
       trendClosed: 'Closed',
       trendBacklog: 'Open at week end',
       trendNoData: 'No findings in these weeks yet.',
       trendWeek: 'Week',
       ttcTitle: 'Median days to close',
+      ttcHelp:
+        'For the findings closed in the last 12 weeks, the median number of days from when each one was opened to when it was closed, by risk level. A finding that was reopened counts from the last time it was opened.\n\nThe median is the value of the finding in the middle. Half were closed in fewer days and half in more, so one unusually long case does not move it.\n\nEach bar is compared with the level that takes longest. Critical findings are expected to close faster than High ones, and High faster than Medium.',
       ttcBand: 'Risk level',
       ttcMedian: 'Median (days)',
       ttcCount: 'Closed findings',
@@ -476,6 +481,8 @@ export const en = {
       network: 'Could not reach the server.',
       empty: 'No data yet.',
       heatmapTitle: 'Where the risk is',
+      heatmapHelp:
+        'Crosses the open findings by risk level (rows) with a trait of their asset (columns), which “Group by” switches. Exposure is whether the asset can be reached from the internet, criticality is how important it is to the business according to the CMDB, and area is the part of the organization it belongs to.\n\nEach cell is how many findings fall in that combination, and the darker it is, the more it holds compared with the largest cell. Grouped by exposure, the cell outlined in red holds the Critical findings on internet-facing assets, the most urgent ones. Clicking a cell opens the list filtered to it.\n\nThe risk level comes from the score, from 0 to 100. Critical is 70 and above, High 40 to 69, Medium 20 to 39 and Low below 20. “No risk level” findings have a score from an earlier model and get a level when rescored.',
       heatmapNote: '"Unknown" are assets the CMDB does not classify.',
       byLabel: 'Group by',
       byExposure: 'Exposure',
@@ -495,9 +502,13 @@ export const en = {
         none: 'No area',
       },
       assetTitle: 'Assets with most findings',
+      assetHelp:
+        'Each row is an asset with open findings. The bar measures its total against the asset with the most, and each color is a risk level. The number on the right is the total.\n\nThe order goes by severity, not by count. The asset with the most Critical findings comes first, then the one with the most High, and so on, so an asset with 2 Critical findings comes before one with 10 Medium.\n\nClicking an asset opens the list of its findings.',
       assetEmpty: 'No assets with open findings.',
       assetBarLabel: '{{name}}: {{total}} findings',
       topTitle: 'Top components and CVEs',
+      topHelp:
+        'The 10 software versions and the 10 vulnerabilities (CVEs) with the most severe open findings. They are ordered by risk level first, most Critical at the top, and then by how many findings they add up to.\n\nA component is a product at one specific version, so updating it closes all of its findings at once. “Assets” is how many assets run it with an open finding.\n\nKEV means CISA has confirmed the vulnerability is being exploited. EPSS is the estimated probability that it will be exploited in the next 30 days.',
       topComponentsTitle: 'Components',
       topCvesTitle: 'CVEs',
       topEmpty: 'No data yet.',
@@ -516,9 +527,13 @@ export const en = {
       failed: 'Could not load the threat matrix.',
       network: 'Could not reach the server to load the threat matrix.',
       coverageTitle: 'Threat coverage',
+      coverageHelp:
+        'How many open findings have a CVE linked to at least one MITRE ATT&CK technique. A technique describes how an attacker would exploit the vulnerability or what they would achieve with it.\n\nAn AI agent assigns the techniques from the description of each vulnerability, so they are an inference, not a confirmed fact. Findings without a technique do not appear in the tactics table or in the top techniques.',
       coverageLabel: '{{labeled}} of {{open}} open findings have an ATT&CK label',
       emptyTactics: 'No findings: {{tactics}}',
       heatmapTitle: 'Findings per tactic',
+      heatmapHelp:
+        'The columns are MITRE ATT&CK tactics, the stage of an attack each technique helps with (initial access, execution, privilege escalation, exfiltration and so on), in the order an attack usually moves forward. The rows are the risk levels.\n\nA finding counts once in each tactic of its techniques, so the columns can add up to more than the number of findings. The darker the cell, the more findings it holds.\n\nThe tactics with no findings are listed under the table.',
       tacticLabel: {
         reconnaissance: 'Reconnaissance',
         'resource-development': 'Resource Dev.',
@@ -537,6 +552,8 @@ export const en = {
       },
       cellLabel: '{{count}} findings: {{band}} on {{tactic}}',
       topTitle: 'Top techniques',
+      topHelp:
+        'The 10 MITRE ATT&CK techniques that appear in the most open findings. The ID is the one in the MITRE catalog; T1190, for example, is exploiting a public-facing application.\n\nThe role is the part the technique plays in the vulnerability. Exploitation is how the flaw is taken advantage of, primary impact is what the attacker gets directly, and secondary impact is what they can do next with that.\n\nThe most repeated techniques are good candidates for controls that protect against several findings at once.',
       topId: 'ID',
       topName: 'Technique',
       topTactics: 'Tactics',
@@ -555,7 +572,11 @@ export const en = {
       bajo: 'Went down',
       match: 'Match',
       matchPct: '{{pct}}%',
+      summaryHelp:
+        'Compares two orders of the same findings. The before order goes by score alone. The after order is the one built by the AI agent that prioritizes, which also weighs the business context and puts together what is best attended at the same time.\n\n“Went up” counts the findings the agent placed in an earlier group than their score would give them, “Went down” those placed in a later one, and “Stayed” those left in the same group. “Match” is the share that stayed.',
       matrixTitle: 'Movement between groups',
+      matrixHelp:
+        'The rows are the groups that ordering by score alone would give. The findings are sorted from highest to lowest score and cut into groups the same size as the agent’s; the #n–#m range is their positions in that order. The columns are the groups the agent assigned.\n\nThe outlined cells on the diagonal are findings that stayed in the same group. Left of the diagonal are the ones that went up, and right of it the ones that went down. The darker the cell, the more findings it holds.\n\nClicking a cell opens the list with those findings. The name of each group is under the table.',
       byScore: 'By score',
       byAgent: 'By priority',
       groupLabel: 'G{{n}}',
@@ -563,7 +584,11 @@ export const en = {
       cellLabel: '{{count}} findings from score group {{sg}} in priority group {{ag}}',
       cellClickable: 'Filter to these {{count}} findings',
       bandTitle: 'Risk level per group',
+      bandHelp:
+        'For each of the agent’s groups, in the order they are attended, what share of its findings is Critical, High, Medium or Low. Every bar has the same length because it shows shares; the number on the right is how many findings the group has.\n\nIt shows whether the first groups hold the highest levels. When an early group has many Medium or Low findings, the agent moved it forward for another reason, such as what the asset means to the business or one update fixing several findings. The detail of each finding explains why.',
       topChangesTitle: 'Most significant movements',
+      topChangesHelp:
+        'The findings the agent moved to another group than the score order gives, from the biggest jump to the smallest. “By score” is the group the score alone would give, with its range of positions, and “By priority” is the group they ended up in, with its name.\n\nΔ is how many groups the finding moved. ↑ means it went up and is attended sooner; ↓ means it went down. Clicking a row opens the finding’s detail, which explains why it is in that group.',
       topChangesCve: 'CVE',
       topChangesComponent: 'Component',
       topChangesScoreGroup: 'By score',
@@ -792,6 +817,8 @@ export const en = {
     },
     orgsTable: {
       title: 'Organizations',
+      help:
+        'Each customer organization with its status, how many enabled users it has (counting those invited who have not signed in yet), whether it has a CMDB connected and how long ago its last successful sync finished.\n\nWhen the most recent sync failed, its date shows in red underneath, and the organization’s assets and findings may be out of date until syncing works again. This view never shows any customer’s assets or findings.',
       empty: 'No organizations yet.',
       name: 'Name',
       status: 'Status',
@@ -807,16 +834,21 @@ export const en = {
     },
     syncChart: {
       title: 'Syncs per day (30 days)',
+      help:
+        'How many CMDB syncs all organizations ran on each of the last 30 days (in UTC, today included). Each sync brings the assets and their software from the CMDB, which is what gets matched against vulnerabilities.\n\nEach bar adds up “Successful” and “Failed”. A day with no bar is a day with no syncs. Several failures in a row can mean expired credentials or a CMDB that is down; the Organizations table shows which one is failing.',
       succeeded: 'Successful',
       failed: 'Failed',
     },
     slack: {
       title: 'Slack alerts (30 days)',
+      help:
+        'The Slack messages each organization queued in the last 30 days (in UTC, today included), split into sent, failed and pending. They are the alerts about new findings and findings whose risk level went up, sent as a direct message to the owner of each asset.\n\nThe bar measures each organization’s total against the one with the most messages. A failed message is not retried on its own, but an admin of that organization can resend it from Configuration. The content of the messages is never shown here.',
       noAlerts: 'No alerts in the last 30 days',
       summary: '{{sent}} sent, {{failed}} failed, {{pending}} pending',
     },
     chart: {
       title: 'New organizations per month',
+      help: 'How many new organizations were created in each of the last 6 months, the current one included. Each organization counts in the month it was created, even if it was deactivated later.',
     },
   },
   landing: {
