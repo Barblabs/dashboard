@@ -821,6 +821,93 @@ export const es: Translations = {
       title: 'Altas por mes',
     },
   },
+  landing: {
+    nav: {
+      label: 'Secciones',
+      steps: 'Cómo funciona',
+      priorities: 'Priorización',
+      agents: 'Agentes',
+    },
+    action: {
+      signIn: 'Entrar',
+      open: 'Abrir el dashboard',
+    },
+    hero: {
+      title: 'Inteligencia de amenazas para los activos de los que depende tu negocio',
+      lead: 'barbattack vigila cada servidor y aplicación que operas, te dice qué vulnerabilidades corregir primero y avisa por Slack a la persona responsable.',
+      secondary: 'Ver cómo funciona',
+      group: 'Fallos con exploit activo en servicios expuestos a internet',
+    },
+    steps: {
+      title: 'De tu inventario a la persona que lo corrige',
+      sync: {
+        title: 'Mantiene tu inventario al día',
+        text: 'barbattack lee de tu CMDB tus servidores, máquinas virtuales y el software que corren.',
+        succeeded: 'Correcta',
+        created: 'Creados',
+        updated: 'Actualizados',
+        deactivated: 'Desactivados',
+      },
+      match: {
+        title: 'Encuentra lo que te afecta',
+        text: 'Cada vulnerabilidad conocida en el software que corres se convierte en un hallazgo.',
+      },
+      score: {
+        title: 'Ordena qué corregir primero',
+        text: 'Los fallos que los atacantes ya usan, en activos expuestos a internet, van primero.',
+        exploited: 'Explotado por atacantes',
+        yes: 'Sí',
+      },
+      alert: {
+        title: 'Avisa al dueño del activo',
+        text: 'El dueño recibe un mensaje de Slack y el equipo de seguridad una copia.',
+        owner: 'Nuevo hallazgo',
+        open: 'Abrir en barbattack',
+      },
+    },
+    priorities: {
+      title: 'Qué corregir junto, y por qué',
+      lead: 'barbattack agrupa los hallazgos que conviene corregir a la vez y escribe un plan paso a paso para cada uno.',
+      groups: {
+        exposed: {
+          title: 'Fallos con exploit activo en servicios expuestos a internet',
+          reason: 'Los atacantes ya explotan los dos, y corren en activos alcanzables desde internet.',
+        },
+        bastion: {
+          title: 'Una actualización de OpenSSH para el bastión',
+          reason: 'Una sola actualización del paquete lo cierra, y el host es la entrada a la red interna.',
+        },
+        internal: {
+          title: 'Servicios internos, después de los expuestos',
+          reason: 'api-03 no es alcanzable desde internet, así que espera a los grupos de arriba.',
+        },
+      },
+      plan: {
+        title: 'Plan de acción',
+        steps: {
+          upgrade: 'Actualiza Apache httpd a 2.4.51 o posterior',
+          restart: 'Reinicia el servicio y comprueba que vuelve a responder',
+          review: 'Revisa los logs de acceso en busca de path traversal codificado',
+        },
+        mitigation: 'Niega el acceso a la raíz del sistema de archivos con "Require all denied" en la configuración del servidor.',
+        verification: 'Ejecuta "httpd -v" en web-01 y confirma que reporta 2.4.51.',
+      },
+      closed: 'La siguiente sincronización vio Apache 2.4.51 en web-01 y cerró el hallazgo sola.',
+    },
+    agents: {
+      title: 'Agentes de IA para tu equipo de seguridad',
+      lead: 'Los agentes aconsejan y tu equipo decide. Nunca cambian un Score ni cierran un hallazgo.',
+      prioritizer: 'Ordena tus hallazgos abiertos según lo que cada activo significa para tu negocio, y explica por qué.',
+      luna: 'Escribe el plan de acción de cada hallazgo: los pasos, qué lo mitiga mientras tanto y cómo confirmar la corrección.',
+      editor: 'Escribe tu resumen de noticias, agrupado por por qué cada una te importa.',
+      drafter: 'Redacta tu contexto empresarial a partir de los documentos que le das, para que lo revises.',
+      drafterSample: 'Sectores, servicios críticos, regulaciones, apetito de riesgo',
+    },
+    closing: {
+      title: 'Qué parchear primero, y quién lo parchea',
+      lead: 'Conecta tu CMDB. La primera sincronización trae tus activos y barbattack empieza a vigilarlos.',
+    },
+  },
   time: {
     lessThanAMinute: 'hace menos de un minuto',
   },

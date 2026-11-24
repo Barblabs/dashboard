@@ -12,9 +12,10 @@ import { Sidebar } from './components/Sidebar'
 import { ToastProvider } from './components/ui/Toast'
 import { DeactivatedPage } from './pages/Deactivated'
 import { ForbiddenPage } from './pages/Forbidden'
+import { LandingPage } from './pages/Landing'
 import { LoginPage } from './pages/Login'
 import { NotFoundPage } from './pages/NotFound'
-import { homePath, PAGES } from './routes'
+import { PAGES } from './routes'
 import './i18n'
 
 const ReactQueryDevtools = import.meta.env.DEV
@@ -78,12 +79,6 @@ function RoleGuard({ roles, children }: { roles: readonly Role[]; children: Reac
   return <>{children}</>
 }
 
-function DefaultRedirect() {
-  const user = useCurrentUser()
-  if (!user) return null
-  return <Navigate to={homePath(user.role)} replace />
-}
-
 // The page scrolls inside its main, so the sidebar and anything sticky in a page stay in view.
 function AppLayout() {
   return (
@@ -107,6 +102,7 @@ function RouteErrorPage() {
 
 function createAppRouter() {
   return createBrowserRouter([
+    { index: true, element: <LandingPage /> },
     { path: 'login', element: <LoginPage /> },
     { path: 'deactivated', element: <DeactivatedPage /> },
     {
@@ -115,7 +111,6 @@ function createAppRouter() {
         {
           element: <AppLayout />,
           children: [
-            { index: true, element: <DefaultRedirect /> },
             ...PAGES.map(({ id, Page, roles }) => ({
               path: id,
               element: <RoleGuard roles={roles}><Page /></RoleGuard>,
