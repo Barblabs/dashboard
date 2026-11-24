@@ -8,8 +8,8 @@ export function ClosingCta() {
   const { t } = useTranslation()
 
   return (
-    <footer className="flex min-h-svh flex-col bg-navy pb-[env(safe-area-inset-bottom)]">
-      <div className={`${WRAP} flex flex-1 flex-col items-start justify-center gap-8 py-24`}>
+    <footer className="bg-navy pb-[env(safe-area-inset-bottom)]">
+      <div className={`${WRAP} flex flex-col items-start gap-8 py-24`}>
         <img src="/castle-logo.svg" alt="" className="size-20" aria-hidden="true" />
         <h2 className="max-w-[20ch] font-title text-balance text-[2.25rem] leading-[1.08] tracking-[-0.015em] text-white md:text-[3.5rem]">
           {t('landing.closing.title')}

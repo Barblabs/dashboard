@@ -6,7 +6,7 @@ export function Section({ id, lead, children }: { id: SectionId; lead?: string; 
   const { t } = useTranslation()
 
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="flex min-h-svh scroll-mt-16 flex-col justify-center border-t border-border-panel pt-24 pb-16">
+    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-16 border-t border-border-panel py-20 md:py-24">
       <div className={WRAP}>
         <h2
           id={`${id}-title`}
