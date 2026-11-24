@@ -1074,9 +1074,9 @@ export const en = {
         question: 'How sensitive is the data it holds?',
         help: {
           public: 'Its data could be published without harm.',
-          private: 'Its data is meant for your organization only.',
-          highly_confidential: 'Its data is regulated or secret and a leak would be grave: health records, card data or credentials.',
-          confidential: 'Its internal data would do serious harm if leaked, such as personal or financial information.',
+          private: 'Its data is personal information about employees or providers.',
+          highly_confidential: 'Its data is exclusive to one part or area of the company.',
+          confidential: 'Its data is open to anyone in the company.',
         },
         declare: 'Declare Classification',
       },
