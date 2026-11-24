@@ -116,7 +116,7 @@ export const es: Translations = {
       beforeAfter: 'Antes y después',
       risk: 'Dónde está el riesgo',
       threats: 'Amenazas',
-      closed: 'Cerrados',
+      closed: 'Cierres manuales',
     },
     indicators: {
       open: 'Abiertas',
@@ -251,7 +251,7 @@ export const es: Translations = {
       failed: 'No se pudieron cargar los hallazgos cerrados.',
       network: 'No se pudo contactar al servidor para cargar los hallazgos cerrados.',
       empty: 'No hay hallazgos cerrados a mano',
-      intro: 'Los hallazgos que se cerraron solos no salen aquí.',
+      intro: 'Hallazgos cerrados a mano por el equipo. Los que se cierran solos, porque el activo ya no tiene la vulnerabilidad, aparecen en la lista con el filtro Estado: Cerrados.',
       reason: 'Motivo',
       closed: 'Cerrado',
       reopensOn: 'Se reabre el',

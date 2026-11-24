@@ -7,7 +7,9 @@ import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Message } from '../../components/ui/Message'
 import { Modal } from '../../components/ui/Modal'
+import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { useDateFormat } from '../../i18n/format'
+import { ClosedTabContent } from './ClosedTab'
 import { FindingDetail } from './FindingDetail'
 import { FilterChips, FindingsFilterBar } from './FindingsFilter'
 import { GroupPanel } from './GroupPanel'
@@ -15,25 +17,44 @@ import { hasActiveFilters, matchesFinding, parseFilters } from './filters'
 
 const FINDING_PARAM = 'finding'
 
-const DASHBOARD_TABS = new Set(['summary', 'before-after', 'risk', 'threats', 'closed'])
+const DASHBOARD_TABS = new Set(['summary', 'before-after', 'risk', 'threats'])
 
 export function FindingsPage() {
   const { t } = useTranslation()
-  const [params] = useSearchParams()
-  const tab = params.get('tab')
+  const [params, setParams] = useSearchParams()
+  const tab = params.get('tab') ?? 'prioritized'
 
   // Legacy URLs: /findings?tab=<dashboard-tab> → /dashboard?tab=<dashboard-tab>
-  if (tab && DASHBOARD_TABS.has(tab)) {
+  if (DASHBOARD_TABS.has(tab)) {
     const next = new URLSearchParams()
     next.set('tab', tab)
     return <Navigate to={`/dashboard?${next}`} replace />
   }
 
+  const changeTab = (value: string) => {
+    setParams(() => {
+      const next = new URLSearchParams()
+      next.set('tab', value)
+      return next
+    })
+  }
+
   return (
     <Page title={t('findings.title')} subtitle={t('findings.subtitle')}>
-      <ChartErrorBoundary>
-        <PrioritizedTabContent />
-      </ChartErrorBoundary>
+      <Tabs value={tab} onValueChange={changeTab}>
+        <TabList label={t('findings.tabs.label')}>
+          <Tab value="prioritized">{t('findings.tabs.prioritized')}</Tab>
+          <Tab value="closed">{t('findings.tabs.closed')}</Tab>
+        </TabList>
+        <TabPanel value="prioritized" className="mt-6">
+          <ChartErrorBoundary>
+            <PrioritizedTabContent />
+          </ChartErrorBoundary>
+        </TabPanel>
+        <TabPanel value="closed" className="mt-6">
+          <ClosedTabContent />
+        </TabPanel>
+      </Tabs>
     </Page>
   )
 }
