@@ -12,24 +12,13 @@ import {
 } from 'recharts'
 import type { CloseTimeBand, WeeklyTrendPoint } from '../../api/findingsTrend'
 import { useTimeToCloseQuery, useWeeklyTrendQuery } from '../../api/findingsTrend'
+import { Card, CardHeader } from '../../components/ui/Card'
+import { TICK_STYLE, TOOLTIP_CURSOR, TOOLTIP_STYLE } from '../../components/ui/chart'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { isOneOf } from '../../api/schemas'
 import { BAND_COLORS, BANDS } from './bands'
 import { fromFirstRecord } from './weeks'
-
-const CHART_STYLE = {
-  fontFamily: 'var(--font-body)',
-  fontSize: 13,
-  borderColor: 'var(--color-border-panel)',
-  borderRadius: 8,
-}
-
-const TICK_STYLE = {
-  fontSize: 12,
-  fill: 'var(--color-gray)',
-  fontFamily: 'var(--font-body)',
-}
 
 export function SummaryTabContent() {
   const { t } = useTranslation()
@@ -39,26 +28,26 @@ export function SummaryTabContent() {
   return (
     <div className="flex flex-col gap-6">
       <ChartErrorBoundary>
-        <section className="rounded-xl border border-border-panel bg-white p-6">
-          <h2 className="mb-4 font-title text-[1rem] text-navy">{t('findings.resumen.trendTitle')}</h2>
-          <QueryBoundary
-            query={trendQuery}
-            keys={{
-              loading: 'findings.resumen.loading',
-              failed: 'findings.resumen.failed',
-              network: 'findings.resumen.network',
-            }}
-          >
-            {(data) => <TrendChart weeks={data.weeks} />}
-          </QueryBoundary>
-        </section>
+        <Card>
+          <CardHeader title={t('findings.resumen.trendTitle')} />
+          <div className="p-6">
+            <QueryBoundary
+              query={trendQuery}
+              keys={{
+                loading: 'findings.resumen.loading',
+                failed: 'findings.resumen.failed',
+                network: 'findings.resumen.network',
+              }}
+            >
+              {(data) => <TrendChart weeks={data.weeks} />}
+            </QueryBoundary>
+          </div>
+        </Card>
       </ChartErrorBoundary>
 
       <ChartErrorBoundary>
-        <section className="rounded-xl border border-border-panel bg-white">
-          <div className="border-b border-border-panel px-6 py-4">
-            <h2 className="font-title text-[1rem] text-navy">{t('findings.resumen.ttcTitle')}</h2>
-          </div>
+        <Card>
+          <CardHeader title={t('findings.resumen.ttcTitle')} />
           <QueryBoundary
             query={ttcQuery}
             keys={{
@@ -69,10 +58,14 @@ export function SummaryTabContent() {
           >
             {(data) => <TimeToCloseChart bands={data.bands} />}
           </QueryBoundary>
-        </section>
+        </Card>
       </ChartErrorBoundary>
     </div>
   )
+}
+
+function legendName(name: string) {
+  return <span className="text-navy">{name}</span>
 }
 
 function TrendChart({ weeks }: { weeks: WeeklyTrendPoint[] }) {
@@ -102,9 +95,13 @@ function TrendChart({ weeks }: { weeks: WeeklyTrendPoint[] }) {
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip contentStyle={CHART_STYLE} cursor={{ fill: 'var(--color-panel)' }} />
-          {/* Each series carries its translated name, which the legend and the tooltip show. */}
-          <Legend wrapperStyle={{ fontFamily: 'var(--font-body)', fontSize: 13 }} />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={TOOLTIP_CURSOR} />
+          {/* Each series carries its translated name, which the legend and the tooltip show. The swatch
+              carries the colour; the name stays navy, since orange text on white is unreadable. */}
+          <Legend
+            wrapperStyle={{ fontFamily: 'var(--font-body)', fontSize: 13 }}
+            formatter={legendName}
+          />
           <Bar
             yAxisId="count"
             dataKey="opened"

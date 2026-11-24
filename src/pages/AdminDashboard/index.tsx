@@ -11,8 +11,12 @@ import { useCustomersQuery, type CustomerResponse } from '../../api/customers'
 import { Page } from '../../components/Page'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge } from '../../components/ui/Badge'
+import { Card, CardHeader } from '../../components/ui/Card'
+import { TICK_STYLE, TOOLTIP_CURSOR, TOOLTIP_STYLE } from '../../components/ui/chart'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { Message } from '../../components/ui/Message'
+import { STAT_CARD, STAT_LABEL, STAT_VALUE } from '../../components/ui/stat'
+import { CARD_EDGE, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { useWideLayout } from '../../components/ui/useWideLayout'
 import { useDateFormat, useLocale, useRelativeTime } from '../../i18n/format'
 
@@ -35,12 +39,13 @@ function getMonthlyData(customers: CustomerResponse[], locale: string, now: Date
 
 // ── stat card ─────────────────────────────────────────────────────────────────
 
+// The term comes before its value, as a <dl> needs; the order classes show the figure first, as the Findings dashboard does.
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded-xl border border-border-panel bg-white p-5">
-      <dt className="font-body text-[0.8125rem] font-semibold text-gray">{label}</dt>
-      <dd className="font-title text-[2rem] leading-none text-navy">{value}</dd>
-      {sub && <span className="font-body text-[0.75rem] text-gray">{sub}</span>}
+    <div className={STAT_CARD}>
+      <dt className={`${STAT_LABEL} order-2`}>{label}</dt>
+      <dd className={`${STAT_VALUE} order-1 text-navy`}>{value}</dd>
+      {sub && <span className="order-3 font-body text-[0.75rem] text-gray">{sub}</span>}
     </div>
   )
 }
@@ -93,7 +98,7 @@ function StatsSection() {
   const failedSyncs = syncData.days.reduce((s, d) => s + d.failed, 0)
 
   return (
-    <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <StatCard
         label={t('adminDashboard.stats.organizations')}
         value={active + deactivated}
@@ -130,35 +135,33 @@ function OrgsTable({ customers }: { customers: CustomerStats[] }) {
   const wide = useWideLayout()
 
   return (
-    <section className="rounded-xl border border-border-panel bg-white">
-      <div className="border-b border-border-panel px-6 py-4">
-        <h2 className="font-title text-[1rem] text-navy">{t('adminDashboard.orgsTable.title')}</h2>
-      </div>
+    <Card>
+      <CardHeader title={t('adminDashboard.orgsTable.title')} />
       {customers.length === 0 ? (
         <p className="p-6 font-body text-[0.875rem] text-gray">{t('adminDashboard.orgsTable.empty')}</p>
       ) : wide ? (
         <table className="w-full border-collapse font-body text-[0.875rem]">
           <thead>
-            <tr className="text-left text-[0.75rem] font-normal text-gray">
-              <th className="px-6 py-3 font-normal">{t('adminDashboard.orgsTable.name')}</th>
-              <th className="px-4 py-3 font-normal">{t('adminDashboard.orgsTable.status')}</th>
-              <th className="px-4 py-3 font-normal">{t('adminDashboard.orgsTable.users')}</th>
-              <th className="px-4 py-3 font-normal">{t('adminDashboard.orgsTable.cmdb')}</th>
-              <th className="px-4 py-3 font-normal">{t('adminDashboard.orgsTable.lastSync')}</th>
+            <tr className={HEADER_ROW}>
+              <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('adminDashboard.orgsTable.name')}</th>
+              <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('adminDashboard.orgsTable.status')}</th>
+              <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('adminDashboard.orgsTable.users')}</th>
+              <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('adminDashboard.orgsTable.cmdb')}</th>
+              <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('adminDashboard.orgsTable.lastSync')}</th>
             </tr>
           </thead>
           <tbody>
             {customers.map((c) => (
-              <tr key={c.id} className="border-t border-border-panel hover:bg-panel">
-                <td className="px-6 py-3 font-semibold text-navy">{c.name}</td>
-                <td className="px-4 py-3">
+              <tr key={c.id} className="border-t border-border-row hover:bg-panel">
+                <td className={`px-4 py-3 font-semibold text-navy ${CARD_EDGE}`}>{c.name}</td>
+                <td className={`px-4 py-3 ${CARD_EDGE}`}>
                   <OrgStatus customer={c} />
                 </td>
-                <td className="px-4 py-3 tabular-nums text-gray">{c.user_count}</td>
-                <td className="px-4 py-3">
+                <td className={`px-4 py-3 tabular-nums text-gray ${CARD_EDGE}`}>{c.user_count}</td>
+                <td className={`px-4 py-3 ${CARD_EDGE}`}>
                   <CmdbState customer={c} />
                 </td>
-                <td className="px-4 py-3">
+                <td className={`px-4 py-3 ${CARD_EDGE}`}>
                   <LastSync customer={c} />
                 </td>
               </tr>
@@ -189,7 +192,7 @@ function OrgsTable({ customers }: { customers: CustomerStats[] }) {
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   )
 }
 
@@ -211,7 +214,7 @@ function CmdbState({ customer }: { customer: CustomerStats }) {
   return (
     <span className="flex items-center gap-1.5">
       <span
-        className={`h-2 w-2 shrink-0 rounded-full ${customer.cmdb_connected ? 'bg-[var(--color-low)]' : 'bg-panel'}`}
+        className={`size-2 shrink-0 rounded-full ${customer.cmdb_connected ? 'bg-teal' : 'border border-muted-bg'}`}
       />
       <span className={customer.cmdb_connected ? 'text-navy' : 'text-gray'}>
         {customer.cmdb_connected
@@ -233,7 +236,7 @@ function LastSync({ customer }: { customer: CustomerStats }) {
         {customer.cmdb_last_sync ? relativeTime(customer.cmdb_last_sync) : t('adminDashboard.orgsTable.noSync')}
       </span>
       {syncFailed(customer) && customer.cmdb_last_sync_failed_at && (
-        <span className="mt-0.5 block font-body text-[0.75rem] text-[var(--color-critical)]">
+        <span className="mt-0.5 block font-body text-[0.75rem] text-critical">
           {t('adminDashboard.orgsTable.syncFailedAt', { date: formatDate(customer.cmdb_last_sync_failed_at) })}
         </span>
       )}
@@ -255,40 +258,23 @@ function SyncChart({ days }: { days: SyncDay[] }) {
   const { t } = useTranslation()
 
   return (
-    <section className="rounded-xl border border-border-panel bg-white p-6">
-      <h2 className="mb-4 font-title text-[1rem] text-navy">{t('adminDashboard.syncChart.title')}</h2>
-      <div className="h-56">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={days} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
-            <CartesianGrid stroke="var(--color-border-row)" vertical={false} />
-            <XAxis
-              dataKey="date"
-              tick={{ fontSize: 11, fill: 'var(--color-gray)', fontFamily: 'var(--font-body)' }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={(v: string) => v.slice(5)}
-            />
-            <YAxis
-              allowDecimals={false}
-              tick={{ fontSize: 11, fill: 'var(--color-gray)', fontFamily: 'var(--font-body)' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip
-              contentStyle={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 13,
-                borderColor: 'var(--color-border-panel)',
-                borderRadius: 8,
-              }}
-              cursor={{ fill: 'var(--color-panel)' }}
-            />
-            <Bar dataKey="succeeded" name={t('adminDashboard.syncChart.succeeded')} stackId="a" fill="var(--color-navy)" radius={[0, 0, 0, 0]} />
-            <Bar dataKey="failed" name={t('adminDashboard.syncChart.failed')} stackId="a" fill="var(--color-critical)" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+    <Card>
+      <CardHeader title={t('adminDashboard.syncChart.title')} />
+      <div className="p-6">
+        <div className="h-56">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={days} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
+              <CartesianGrid stroke="var(--color-border-row)" vertical={false} />
+              <XAxis dataKey="date" tick={TICK_STYLE} axisLine={false} tickLine={false} tickFormatter={(v: string) => v.slice(5)} />
+              <YAxis allowDecimals={false} tick={TICK_STYLE} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} cursor={TOOLTIP_CURSOR} />
+              <Bar dataKey="succeeded" name={t('adminDashboard.syncChart.succeeded')} stackId="a" fill="var(--color-navy)" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="failed" name={t('adminDashboard.syncChart.failed')} stackId="a" fill="var(--color-critical)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
-    </section>
+    </Card>
   )
 }
 
@@ -312,9 +298,9 @@ function SlackBars({ customers }: { customers: CustomerSlackDeliveries[] }) {
   const maxTotal = Math.max(...rows.map((r) => r.total), 1)
 
   return (
-    <section className="rounded-xl border border-border-panel bg-white p-6">
-      <h2 className="mb-4 font-title text-[1rem] text-navy">{t('adminDashboard.slack.title')}</h2>
-      <ul className="flex flex-col gap-4">
+    <Card>
+      <CardHeader title={t('adminDashboard.slack.title')} />
+      <ul className="flex flex-col gap-4 p-6">
         {rows.map((row) => (
           <li key={row.id} className="flex flex-col gap-1">
             <div className="flex items-center justify-between gap-3 font-body text-[0.875rem]">
@@ -333,14 +319,15 @@ function SlackBars({ customers }: { customers: CustomerSlackDeliveries[] }) {
             </div>
             {row.total > 0 && (
               <div
-                className="relative h-4 overflow-hidden rounded bg-panel"
+                className="relative h-2.5 overflow-hidden rounded-full bg-panel"
                 style={{ width: `${(row.total / maxTotal) * 100}%` }}
               >
                 {(
                   [
                     { key: 'sent', color: 'var(--color-navy)', count: row.sent },
                     { key: 'failed', color: 'var(--color-critical)', count: row.failed },
-                    { key: 'pending', color: '#F59E0B', count: row.pending },
+                    // Waiting is not a risk level, so it takes a neutral rather than a severity colour.
+                    { key: 'pending', color: 'var(--color-muted-bg)', count: row.pending },
                   ] as const
                 )
                   .filter(({ count }) => count > 0)
@@ -366,7 +353,7 @@ function SlackBars({ customers }: { customers: CustomerSlackDeliveries[] }) {
           </li>
         ))}
       </ul>
-    </section>
+    </Card>
   )
 }
 
@@ -387,37 +374,21 @@ function MonthlyChart({ customers }: { customers: CustomerResponse[] }) {
   const chartData = getMonthlyData(customers, locale, now)
 
   return (
-    <section className="rounded-xl border border-border-panel bg-white p-6">
-      <h2 className="mb-4 font-title text-[1rem] text-navy">{t('adminDashboard.chart.title')}</h2>
-      <div className="h-56">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
-            <CartesianGrid stroke="var(--color-border-row)" vertical={false} />
-            <XAxis
-              dataKey="label"
-              tick={{ fontSize: 12, fill: 'var(--color-gray)', fontFamily: 'var(--font-body)' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              allowDecimals={false}
-              tick={{ fontSize: 12, fill: 'var(--color-gray)', fontFamily: 'var(--font-body)' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip
-              contentStyle={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 13,
-                borderColor: 'var(--color-border-panel)',
-                borderRadius: 8,
-              }}
-              cursor={{ fill: 'var(--color-panel)' }}
-            />
-            <Bar dataKey="count" fill="var(--color-navy)" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+    <Card>
+      <CardHeader title={t('adminDashboard.chart.title')} />
+      <div className="p-6">
+        <div className="h-56">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
+              <CartesianGrid stroke="var(--color-border-row)" vertical={false} />
+              <XAxis dataKey="label" tick={TICK_STYLE} axisLine={false} tickLine={false} />
+              <YAxis allowDecimals={false} tick={TICK_STYLE} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} cursor={TOOLTIP_CURSOR} />
+              <Bar dataKey="count" fill="var(--color-navy)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
-    </section>
+    </Card>
   )
 }

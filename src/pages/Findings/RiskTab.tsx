@@ -13,7 +13,10 @@ import type {
   ComponentCount,
   CveCount,
 } from '../../api/findingsRisk'
+import { Card, CardHeader } from '../../components/ui/Card'
+import { Badge } from '../../components/ui/Badge'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
+import { CARD_EDGE, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { BandLegend } from './BandLegend'
 import { BAND_COLORS, BANDS, type Band } from './bands'
@@ -59,34 +62,36 @@ function HeatmapCard({ by, onByChange }: { by: BreakdownBy; onByChange: (b: Brea
   const query = useBreakdownQuery(by)
 
   return (
-    <section className="rounded-xl border border-border-panel bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-panel px-6 py-4">
-        <h2 className="font-title text-[1rem] text-navy">{t('findings.risk.heatmapTitle')}</h2>
-        <div className="flex items-center gap-2 font-body text-[0.875rem]">
-          <span className="text-gray">{t('findings.risk.byLabel')}</span>
-          <div className="flex gap-1" role="group" aria-label={t('findings.risk.byLabel')}>
-            {([
-              { key: 'exposure', label: t('findings.risk.byExposure') },
-              { key: 'criticality', label: t('findings.risk.byCriticality') },
-              { key: 'area', label: t('findings.risk.byArea') },
-            ] as const).map(({ key: opt, label }) => (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => onByChange(opt)}
-                aria-pressed={by === opt}
-                className={`focus-ring rounded-md px-3 py-1 font-body text-[0.8125rem] transition-colors ${
-                  by === opt
-                    ? 'bg-navy text-white'
-                    : 'border border-border-panel text-gray hover:border-navy hover:text-navy'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+    <Card>
+      <CardHeader
+        title={t('findings.risk.heatmapTitle')}
+        actions={
+          <div className="flex items-center gap-2 font-body text-[0.875rem]">
+            <span className="text-gray">{t('findings.risk.byLabel')}</span>
+            <div className="flex gap-1" role="group" aria-label={t('findings.risk.byLabel')}>
+              {([
+                { key: 'exposure', label: t('findings.risk.byExposure') },
+                { key: 'criticality', label: t('findings.risk.byCriticality') },
+                { key: 'area', label: t('findings.risk.byArea') },
+              ] as const).map(({ key: opt, label }) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => onByChange(opt)}
+                  aria-pressed={by === opt}
+                  className={`focus-ring rounded-md px-3 py-1 font-body text-[0.8125rem] transition-colors ${
+                    by === opt
+                      ? 'bg-navy text-white'
+                      : 'border border-border-panel text-gray hover:border-navy hover:text-navy'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
+        }
+      />
       <div className="p-6">
         <QueryBoundary
           query={query}
@@ -101,7 +106,7 @@ function HeatmapCard({ by, onByChange }: { by: BreakdownBy; onByChange: (b: Brea
           }
         </QueryBoundary>
       </div>
-    </section>
+    </Card>
   )
 }
 
@@ -244,10 +249,8 @@ function AssetBarsCard() {
   const query = useAssetFindingsSummaryQuery()
 
   return (
-    <section className="rounded-xl border border-border-panel bg-white">
-      <div className="border-b border-border-panel px-6 py-4">
-        <h2 className="font-title text-[1rem] text-navy">{t('findings.risk.assetTitle')}</h2>
-      </div>
+    <Card>
+      <CardHeader title={t('findings.risk.assetTitle')} />
       <QueryBoundary
         query={query}
         keys={{ loading: 'findings.risk.loading', failed: 'findings.risk.failed', network: 'findings.risk.network' }}
@@ -260,7 +263,7 @@ function AssetBarsCard() {
           )
         }
       </QueryBoundary>
-    </section>
+    </Card>
   )
 }
 
@@ -343,10 +346,8 @@ function TopTablesCard() {
   const query = useFindingsTopQuery()
 
   return (
-    <section className="rounded-xl border border-border-panel bg-white">
-      <div className="border-b border-border-panel px-6 py-4">
-        <h2 className="font-title text-[1rem] text-navy">{t('findings.risk.topTitle')}</h2>
-      </div>
+    <Card>
+      <CardHeader title={t('findings.risk.topTitle')} />
       <QueryBoundary
         query={query}
         keys={{ loading: 'findings.risk.loading', failed: 'findings.risk.failed', network: 'findings.risk.network' }}
@@ -358,7 +359,7 @@ function TopTablesCard() {
           </div>
         )}
       </QueryBoundary>
-    </section>
+    </Card>
   )
 }
 
@@ -373,28 +374,28 @@ function ComponentsTable({ components }: { components: ComponentCount[] }) {
 
   return (
     <div>
-      <p className="border-b border-border-panel px-4 py-2 font-title text-[0.875rem] font-semibold text-navy">
+      <p className="border-b border-border-panel px-6 py-3 font-title text-[0.875rem] text-navy">
         {t('findings.risk.topComponentsTitle')}
       </p>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse font-body text-[0.875rem]">
           <thead>
-            <tr className="text-left text-[0.75rem] font-normal text-gray">
-              <th className="px-4 py-2 font-normal">{t('findings.risk.topComponent')}</th>
-              <th className="px-4 py-2 font-normal">{t('findings.risk.topVersion')}</th>
-              <th className="px-4 py-2 text-right font-normal">{t('findings.risk.topFindings')}</th>
-              <th className="px-4 py-2 text-right font-normal">{t('findings.risk.topAssets')}</th>
+            <tr className={HEADER_ROW}>
+              <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.risk.topComponent')}</th>
+              <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.risk.topVersion')}</th>
+              <th className={`${HEADER_CELL} ${CARD_EDGE} text-right`}>{t('findings.risk.topFindings')}</th>
+              <th className={`${HEADER_CELL} ${CARD_EDGE} text-right`}>{t('findings.risk.topAssets')}</th>
             </tr>
           </thead>
           <tbody>
             {components.map((c) => (
-              <tr key={`${c.vendor}:${c.product}:${c.version}`} className="border-t border-border-panel hover:bg-panel">
-                <td className="px-4 py-2 text-navy">
+              <tr key={`${c.vendor}:${c.product}:${c.version}`} className="h-10 border-t border-border-row hover:bg-panel">
+                <td className={`px-4 py-2 text-navy ${CARD_EDGE}`}>
                   <span className="font-semibold">{c.product}</span>
                   <span className="ml-1 text-[0.75rem] text-gray">{c.vendor}</span>
                 </td>
-                <td className="px-4 py-2 font-mono text-[0.8125rem] text-gray">{c.version}</td>
-                <td className="px-4 py-2 text-right">
+                <td className={`px-4 py-2 font-mono text-[0.8125rem] text-gray ${CARD_EDGE}`}>{c.version}</td>
+                <td className={`px-4 py-2 text-right ${CARD_EDGE}`}>
                   <div className="flex items-center justify-end gap-2">
                     <div className="h-1.5 w-12 overflow-hidden rounded-full bg-panel">
                       <div
@@ -405,7 +406,7 @@ function ComponentsTable({ components }: { components: ComponentCount[] }) {
                     <span className="w-5 tabular-nums font-semibold text-navy">{c.findings}</span>
                   </div>
                 </td>
-                <td className="px-4 py-2 tabular-nums text-right text-gray">{c.assets}</td>
+                <td className={`px-4 py-2 tabular-nums text-right text-gray ${CARD_EDGE}`}>{c.assets}</td>
               </tr>
             ))}
           </tbody>
@@ -424,38 +425,36 @@ function CvesTable({ cves }: { cves: CveCount[] }) {
 
   return (
     <div>
-      <p className="border-b border-border-panel px-4 py-2 font-title text-[0.875rem] font-semibold text-navy">
+      <p className="border-b border-border-panel px-6 py-3 font-title text-[0.875rem] text-navy">
         {t('findings.risk.topCvesTitle')}
       </p>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse font-body text-[0.875rem]">
           <thead>
-            <tr className="text-left text-[0.75rem] font-normal text-gray">
-              <th className="px-4 py-2 font-normal">{t('findings.risk.topCve')}</th>
-              <th className="px-4 py-2 font-normal">{t('findings.risk.topKev')}</th>
-              <th className="px-4 py-2 font-normal">{t('findings.risk.topEpss')}</th>
-              <th className="px-4 py-2 text-right font-normal">{t('findings.risk.topFindings')}</th>
-              <th className="px-4 py-2 text-right font-normal">{t('findings.risk.topAssets')}</th>
+            <tr className={HEADER_ROW}>
+              <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.risk.topCve')}</th>
+              <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.risk.topKev')}</th>
+              <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.risk.topEpss')}</th>
+              <th className={`${HEADER_CELL} ${CARD_EDGE} text-right`}>{t('findings.risk.topFindings')}</th>
+              <th className={`${HEADER_CELL} ${CARD_EDGE} text-right`}>{t('findings.risk.topAssets')}</th>
             </tr>
           </thead>
           <tbody>
             {cves.map((c) => (
-              <tr key={c.cve_id} className="border-t border-border-panel hover:bg-panel">
-                <td className="px-4 py-2 font-mono text-[0.8125rem] font-semibold whitespace-nowrap text-navy">{c.cve_id}</td>
-                <td className="px-4 py-2">
-                  <span
-                    className={`rounded px-1.5 py-0.5 font-body text-[0.75rem] font-semibold ${
-                      c.kev ? 'bg-[#D7263D] text-white' : 'bg-panel text-gray'
-                    }`}
-                  >
-                    {c.kev ? t('findings.risk.topKevYes') : t('findings.risk.topKevNo')}
-                  </span>
+              <tr key={c.cve_id} className="h-10 border-t border-border-row hover:bg-panel">
+                <td className={`px-4 py-2 font-mono text-[0.8125rem] font-semibold whitespace-nowrap text-navy ${CARD_EDGE}`}>{c.cve_id}</td>
+                <td className={`px-4 py-2 ${CARD_EDGE}`}>
+                  {c.kev ? (
+                    <Badge variant="critical">{t('findings.risk.topKevYes')}</Badge>
+                  ) : (
+                    <span className="text-gray">{t('findings.risk.topKevNo')}</span>
+                  )}
                 </td>
-                <td className="px-4 py-2 tabular-nums text-gray">
+                <td className={`px-4 py-2 tabular-nums text-gray ${CARD_EDGE}`}>
                   {c.epss !== null ? `${(c.epss * 100).toFixed(1)}%` : '—'}
                 </td>
-                <td className="px-4 py-2 tabular-nums text-right font-semibold text-navy">{c.findings}</td>
-                <td className="px-4 py-2 tabular-nums text-right text-gray">{c.assets}</td>
+                <td className={`px-4 py-2 tabular-nums text-right font-semibold text-navy ${CARD_EDGE}`}>{c.findings}</td>
+                <td className={`px-4 py-2 tabular-nums text-right text-gray ${CARD_EDGE}`}>{c.assets}</td>
               </tr>
             ))}
           </tbody>

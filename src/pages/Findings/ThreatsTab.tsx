@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { useAttackMatrixQuery } from '../../api/attackMatrix'
 import type { TacticCount, TechniqueCount } from '../../api/attackMatrix'
+import { Card, CardHeader } from '../../components/ui/Card'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
+import { CARD_EDGE, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { BAND_COLORS, BANDS, type Band } from './bands'
 
@@ -77,23 +79,25 @@ function CoverageCard({ labeled, open }: { labeled: number; open: number }) {
   const pct = open > 0 ? Math.round((labeled / open) * 100) : 0
 
   return (
-    <section className="rounded-xl border border-border-panel bg-white p-6">
-      <h2 className="mb-4 font-title text-[1rem] text-navy">{t('findings.threats.coverageTitle')}</h2>
-      <p className="mb-3 font-body text-[0.875rem] text-navy">
-        {t('findings.threats.coverageLabel', { labeled, open })}
-      </p>
-      <div className="h-3 w-full overflow-hidden rounded-full bg-panel">
-        <div
-          className="h-full rounded-full bg-navy"
-          style={{ width: `${pct}%` }}
-          role="progressbar"
-          aria-valuenow={pct}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label={t('findings.threats.coverageTitle')}
-        />
+    <Card>
+      <CardHeader title={t('findings.threats.coverageTitle')} />
+      <div className="flex flex-col gap-3 p-6">
+        <p className="font-body text-[0.875rem] text-navy">
+          {t('findings.threats.coverageLabel', { labeled, open })}
+        </p>
+        <div className="h-2.5 w-full overflow-hidden rounded-full bg-panel">
+          <div
+            className="h-full rounded-full bg-navy"
+            style={{ width: `${pct}%` }}
+            role="progressbar"
+            aria-valuenow={pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={t('findings.threats.coverageTitle')}
+          />
+        </div>
       </div>
-    </section>
+    </Card>
   )
 }
 
@@ -103,14 +107,12 @@ function HeatmapCard({ tactics }: { tactics: TacticCount[] }) {
   const { t } = useTranslation()
 
   return (
-    <section className="rounded-xl border border-border-panel bg-white">
-      <div className="border-b border-border-panel px-6 py-4">
-        <h2 className="font-title text-[1rem] text-navy">{t('findings.threats.heatmapTitle')}</h2>
-      </div>
+    <Card>
+      <CardHeader title={t('findings.threats.heatmapTitle')} />
       <div className="p-6">
         <HeatmapGrid tactics={tactics} />
       </div>
-    </section>
+    </Card>
   )
 }
 
@@ -224,10 +226,8 @@ function TopTechniquesCard({ techniques }: { techniques: TechniqueCount[] }) {
   const { t } = useTranslation()
 
   return (
-    <section className="rounded-xl border border-border-panel bg-white">
-      <div className="border-b border-border-panel px-6 py-4">
-        <h2 className="font-title text-[1rem] text-navy">{t('findings.threats.topTitle')}</h2>
-      </div>
+    <Card>
+      <CardHeader title={t('findings.threats.topTitle')} />
       {techniques.length === 0 ? (
         <p className="p-6 font-body text-[0.875rem] text-gray">{t('findings.threats.topEmpty')}</p>
       ) : (
@@ -235,7 +235,7 @@ function TopTechniquesCard({ techniques }: { techniques: TechniqueCount[] }) {
           <TechniquesTable techniques={techniques} />
         </div>
       )}
-    </section>
+    </Card>
   )
 }
 
@@ -253,21 +253,21 @@ function TechniquesTable({ techniques }: { techniques: TechniqueCount[] }) {
   return (
     <table className="w-full min-w-[40rem] border-collapse font-body text-[0.875rem]">
       <thead>
-        <tr className="text-left text-[0.75rem] font-normal text-gray">
-          <th className="px-4 py-2 font-normal">{t('findings.threats.topId')}</th>
-          <th className="px-4 py-2 font-normal">{t('findings.threats.topName')}</th>
-          <th className="px-4 py-2 font-normal">{t('findings.threats.topTactics')}</th>
-          <th className="px-4 py-2 font-normal">{t('findings.threats.topRole')}</th>
-          <th className="px-4 py-2 text-right font-normal">{t('findings.threats.topFindings')}</th>
+        <tr className={HEADER_ROW}>
+          <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.threats.topId')}</th>
+          <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.threats.topName')}</th>
+          <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.threats.topTactics')}</th>
+          <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.threats.topRole')}</th>
+          <th className={`${HEADER_CELL} ${CARD_EDGE} text-right`}>{t('findings.threats.topFindings')}</th>
         </tr>
       </thead>
       <tbody>
         {techniques.map((tc) => (
-          <tr key={tc.attack_id} className="border-t border-border-panel hover:bg-panel">
-            <td className="px-4 py-2 font-mono text-[0.8125rem] font-semibold text-navy">{tc.attack_id}</td>
-            <td className="px-4 py-2 text-navy">{tc.name}</td>
-            <td className="px-4 py-2 font-body text-[0.75rem] text-gray">{tc.tactics.join(', ')}</td>
-            <td className="px-4 py-2">
+          <tr key={tc.attack_id} className="border-t border-border-row hover:bg-panel">
+            <td className={`px-4 py-2 font-mono text-[0.8125rem] font-semibold text-navy ${CARD_EDGE}`}>{tc.attack_id}</td>
+            <td className={`px-4 py-2 text-navy ${CARD_EDGE}`}>{tc.name}</td>
+            <td className={`px-4 py-2 font-body text-[0.75rem] text-gray ${CARD_EDGE}`}>{tc.tactics.join(', ')}</td>
+            <td className={`px-4 py-2 ${CARD_EDGE}`}>
               {tc.roles.map((r) => (
                 <span
                   key={r}
@@ -277,7 +277,7 @@ function TechniquesTable({ techniques }: { techniques: TechniqueCount[] }) {
                 </span>
               ))}
             </td>
-            <td className="px-4 py-2 text-right">
+            <td className={`px-4 py-2 text-right ${CARD_EDGE}`}>
               <div className="flex items-center justify-end gap-2">
                 <div className="h-1.5 w-12 overflow-hidden rounded-full bg-panel">
                   <div

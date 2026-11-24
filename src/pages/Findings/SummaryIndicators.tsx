@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useFindingsSummaryQuery } from '../../api/findingsSummary'
+import { STAT_CARD, STAT_LABEL, STAT_VALUE } from '../../components/ui/stat'
 
 interface CardProps {
   label: string
@@ -14,12 +15,10 @@ function IndicatorCard({ label, value, color = 'text-navy', to }: CardProps) {
   return (
     <Link
       to={to}
-      className="flex min-w-[8rem] flex-1 flex-col gap-1 rounded-xl border border-border-panel bg-white p-4 transition-colors duration-150 hover:border-navy focus-visible:outline-2 focus-visible:outline-cyan"
+      className={`${STAT_CARD} focus-ring min-w-[8rem] flex-1 transition-colors duration-150 hover:border-navy`}
     >
-      <span className={`font-title text-[1.75rem] font-bold leading-none ${valueColor}`}>
-        {value ?? '—'}
-      </span>
-      <span className="font-body text-[0.8125rem] text-gray">{label}</span>
+      <span className={`${STAT_VALUE} ${valueColor}`}>{value ?? '—'}</span>
+      <span className={STAT_LABEL}>{label}</span>
     </Link>
   )
 }
