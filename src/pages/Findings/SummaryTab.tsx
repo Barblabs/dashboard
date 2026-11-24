@@ -17,6 +17,7 @@ import { TICK_STYLE, TOOLTIP_CURSOR, TOOLTIP_STYLE } from '../../components/ui/c
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { isOneOf } from '../../api/schemas'
+import { useDayFormat } from '../../i18n/format'
 import { BAND_COLORS, BANDS } from './bands'
 import { fromFirstRecord } from './weeks'
 
@@ -70,6 +71,7 @@ function legendName(name: string) {
 
 function TrendChart({ weeks }: { weeks: WeeklyTrendPoint[] }) {
   const { t } = useTranslation()
+  const formatDay = useDayFormat()
 
   const shown = fromFirstRecord(weeks)
   if (shown.length === 0) {
@@ -77,7 +79,7 @@ function TrendChart({ weeks }: { weeks: WeeklyTrendPoint[] }) {
   }
   const data = shown.map((w) => ({
     ...w,
-    label: formatWeekLabel(w.starts_on),
+    label: formatDay(w.starts_on),
   }))
 
   return (
@@ -190,9 +192,4 @@ function TimeToCloseChart({ bands }: { bands: CloseTimeBand[] }) {
       })}
     </ul>
   )
-}
-
-function formatWeekLabel(isoDate: string): string {
-  const [, m, d] = isoDate.split('-')
-  return `${Number(m)}/${Number(d)}`
 }

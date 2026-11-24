@@ -21,6 +21,19 @@ export function useDateFormat(): (iso: string) => string {
   }, [locale])
 }
 
+/*
+ * A calendar day ("2026-11-03") as its month and day: "Nov 3" in English, "3 nov" in Spanish, never
+ * a bare "11/3" that reads as March in Spanish. `new Date` reads a date with no time as UTC midnight,
+ * so it is formatted in UTC too, or the day would slip back one west of Greenwich.
+ */
+export function useDayFormat(): (isoDay: string) => string {
+  const locale = useLocale()
+  return useMemo(() => {
+    const format = new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric', timeZone: 'UTC' })
+    return (isoDay) => format.format(new Date(isoDay))
+  }, [locale])
+}
+
 /** Two ISO dates as one period, saying once what they share: "Nov 16 – 17, 2026". */
 export function useDateRangeFormat(): (start: string, end: string) => string {
   const locale = useLocale()

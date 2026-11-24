@@ -18,7 +18,7 @@ import { Message } from '../../components/ui/Message'
 import { STAT_CARD, STAT_LABEL, STAT_VALUE } from '../../components/ui/stat'
 import { CARD_EDGE, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { useWideLayout } from '../../components/ui/useWideLayout'
-import { useDateFormat, useLocale, useRelativeTime } from '../../i18n/format'
+import { useDateFormat, useDayFormat, useLocale, useRelativeTime } from '../../i18n/format'
 
 // ── monthly chart helpers ─────────────────────────────────────────────────────
 
@@ -256,6 +256,9 @@ function SyncChartSection() {
 
 function SyncChart({ days }: { days: SyncDay[] }) {
   const { t } = useTranslation()
+  const formatDay = useDayFormat()
+  // Time runs left to right, whatever order the days come in.
+  const shown = days.toSorted((a, b) => a.date.localeCompare(b.date))
 
   return (
     <Card>
@@ -263,11 +266,11 @@ function SyncChart({ days }: { days: SyncDay[] }) {
       <div className="p-6">
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={days} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
+            <BarChart data={shown} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
               <CartesianGrid stroke="var(--color-border-row)" vertical={false} />
-              <XAxis dataKey="date" tick={TICK_STYLE} axisLine={false} tickLine={false} tickFormatter={(v: string) => v.slice(5)} />
+              <XAxis dataKey="date" tick={TICK_STYLE} axisLine={false} tickLine={false} tickFormatter={formatDay} />
               <YAxis allowDecimals={false} tick={TICK_STYLE} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={TOOLTIP_STYLE} cursor={TOOLTIP_CURSOR} />
+              <Tooltip contentStyle={TOOLTIP_STYLE} cursor={TOOLTIP_CURSOR} labelFormatter={(day) => (typeof day === 'string' ? formatDay(day) : day)} />
               <Bar dataKey="succeeded" name={t('adminDashboard.syncChart.succeeded')} stackId="a" fill="var(--color-navy)" radius={[0, 0, 0, 0]} />
               <Bar dataKey="failed" name={t('adminDashboard.syncChart.failed')} stackId="a" fill="var(--color-critical)" radius={[4, 4, 0, 0]} />
             </BarChart>
