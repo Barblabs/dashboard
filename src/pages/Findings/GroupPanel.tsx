@@ -9,7 +9,7 @@ import {
 } from '../../api/prioritizations'
 import { Badge } from '../../components/ui/Badge'
 import { Panel, PanelTitle } from '../../components/ui/Panel'
-import { CELL, HEADER_CELL } from '../../components/ui/table'
+import { CELL, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { useWideLayout } from '../../components/ui/useWideLayout'
 import { scorePoints } from './score'
 import { ScoreBandBadge } from './ScoreBandBadge'
@@ -43,9 +43,18 @@ export function GroupPanel({ order, group, onOpen }: Props) {
 
       {wide ? (
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-[0.875rem]">
+          {/* Fixed column widths, so each group's columns line up with the groups above and below it. */}
+          <table className="w-full min-w-[56rem] table-fixed border-collapse text-[0.875rem]">
+            <colgroup>
+              <col className="w-[15%]" />
+              <col className="w-[11%]" />
+              <col className="w-[27%]" />
+              <col className="w-[13%]" />
+              <col className="w-[8%]" />
+              <col />
+            </colgroup>
             <thead>
-              <tr className="border-b-2 border-border-row">
+              <tr className={HEADER_ROW}>
                 <th className={HEADER_CELL}>{t('findings.columns.cve')}</th>
                 <th className={HEADER_CELL}>{t('findings.columns.asset')}</th>
                 <th className={HEADER_CELL}>{t('findings.columns.component')}</th>

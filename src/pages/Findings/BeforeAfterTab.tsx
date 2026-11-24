@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router'
 import { useCurrentOrderQuery } from '../../api/prioritizations'
 import type { CurrentOrder, PriorityGroup } from '../../api/prioritizations'
+import { Card, CardHeader } from '../../components/ui/Card'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
+import { CARD_EDGE, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Message } from '../../components/ui/Message'
 import { Modal } from '../../components/ui/Modal'
@@ -58,7 +60,7 @@ function BeforeAfterContent({ order, data }: { order: CurrentOrder; data: Matrix
   return (
     <div className="flex flex-col gap-6">
       <ChartErrorBoundary>
-        <section className="rounded-xl border border-border-panel bg-white p-6">
+        <Card className="p-6">
           <div className="grid grid-cols-4 divide-x divide-border-panel text-center">
             <div className="flex flex-col gap-1 px-4 py-2">
               <span className="font-title text-[2rem] leading-none text-navy">{subio}</span>
@@ -79,40 +81,32 @@ function BeforeAfterContent({ order, data }: { order: CurrentOrder; data: Matrix
               <span className="font-body text-[0.875rem] text-gray">{t('findings.beforeAfter.match')}</span>
             </div>
           </div>
-        </section>
+        </Card>
       </ChartErrorBoundary>
 
       <ChartErrorBoundary>
-        <section className="rounded-xl border border-border-panel bg-white p-6">
-          <h2 className="mb-5 font-title text-[1rem] text-navy">
-            {t('findings.beforeAfter.matrixTitle')}
-          </h2>
-          <MatrixGrid groups={groups} matrix={matrix} cellIds={cellIds} rankRanges={rankRanges} N={N} />
-        </section>
+        <Card>
+          <CardHeader title={t('findings.beforeAfter.matrixTitle')} />
+          <div className="p-6">
+            <MatrixGrid groups={groups} matrix={matrix} cellIds={cellIds} rankRanges={rankRanges} N={N} />
+          </div>
+        </Card>
       </ChartErrorBoundary>
 
       {topChanges.length > 0 && (
         <ChartErrorBoundary>
-          <section className="rounded-xl border border-border-panel bg-white">
-            <div className="border-b border-border-panel px-6 py-4">
-              <h2 className="font-title text-[1rem] text-navy">
-                {t('findings.beforeAfter.topChangesTitle')}
-              </h2>
-            </div>
+          <Card>
+            <CardHeader title={t('findings.beforeAfter.topChangesTitle')} />
             <TopChangesTable topChanges={topChanges} groups={groups} rankRanges={rankRanges} onOpen={setOpen} />
-          </section>
+          </Card>
         </ChartErrorBoundary>
       )}
 
       <ChartErrorBoundary>
-        <section className="rounded-xl border border-border-panel bg-white">
-          <div className="border-b border-border-panel px-6 py-4">
-            <h2 className="font-title text-[1rem] text-navy">
-              {t('findings.beforeAfter.bandTitle')}
-            </h2>
-          </div>
+        <Card>
+          <CardHeader title={t('findings.beforeAfter.bandTitle')} />
           <BandComposition groups={groups} bandByGroup={bandByGroup} />
-        </section>
+        </Card>
       </ChartErrorBoundary>
 
       <Modal open={open !== undefined} onClose={() => setOpen(null)} width="xl" initialFocus={closeButton}>
@@ -254,12 +248,12 @@ function TopChangesTable({
     <div className="overflow-x-auto">
       <table className="w-full min-w-[36rem] border-collapse font-body text-[0.875rem]">
         <thead>
-          <tr className="border-b border-border-panel text-left text-[0.75rem] font-normal text-gray">
-            <th className="px-6 py-3 font-normal">{t('findings.beforeAfter.topChangesCve')}</th>
-            <th className="px-4 py-3 font-normal">{t('findings.beforeAfter.topChangesComponent')}</th>
-            <th className="px-4 py-3 font-normal">{t('findings.beforeAfter.topChangesScoreGroup')}</th>
-            <th className="px-4 py-3 font-normal">{t('findings.beforeAfter.topChangesAgentGroup')}</th>
-            <th className="px-4 py-3 font-normal">{t('findings.beforeAfter.topChangesDelta')}</th>
+          <tr className={HEADER_ROW}>
+            <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesCve')}</th>
+            <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesComponent')}</th>
+            <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesScoreGroup')}</th>
+            <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesAgentGroup')}</th>
+            <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesDelta')}</th>
           </tr>
         </thead>
         <tbody>
@@ -272,9 +266,9 @@ function TopChangesTable({
                 key={c.findingId}
                 // The whole row is the mouse target; the button stays the keyboard and screen reader path.
                 onClick={() => onOpen(c.findingId)}
-                className="cursor-pointer border-b border-border-panel transition-colors duration-150 last:border-0 hover:bg-row-hover"
+                className="cursor-pointer border-b border-border-row transition-colors duration-150 last:border-0 hover:bg-row-hover"
               >
-                <td className="px-6 py-3 whitespace-nowrap">
+                <td className={`px-4 py-3 whitespace-nowrap ${CARD_EDGE}`}>
                   <button
                     type="button"
                     onClick={(event) => {
@@ -287,18 +281,18 @@ function TopChangesTable({
                     {c.cveId}
                   </button>
                 </td>
-                <td className="px-4 py-3 text-navy">{c.component}</td>
-                <td className="px-4 py-3 whitespace-nowrap tabular-nums text-navy">
+                <td className={`px-4 py-3 text-navy ${CARD_EDGE}`}>{c.component}</td>
+                <td className={`px-4 py-3 whitespace-nowrap tabular-nums text-navy ${CARD_EDGE}`}>
                   {t('findings.beforeAfter.groupLabel', { n: c.scoreGroup })}{' '}
                   <span className="text-gray">
                     {t('findings.beforeAfter.rankRange', { min: sgRange[0], max: sgRange[1] })}
                   </span>
                 </td>
-                <td className="px-4 py-3 tabular-nums text-navy">
+                <td className={`px-4 py-3 tabular-nums text-navy ${CARD_EDGE}`}>
                   {t('findings.beforeAfter.groupLabel', { n: c.agentGroup })}{' '}
                   <span className="text-[0.75rem] text-gray">{agGroup.title}</span>
                 </td>
-                <td className="px-4 py-3 tabular-nums font-semibold text-navy">
+                <td className={`px-4 py-3 tabular-nums font-semibold text-navy ${CARD_EDGE}`}>
                   {wentUp
                     ? t('findings.beforeAfter.topChangesUp', { n: c.delta })
                     : t('findings.beforeAfter.topChangesDown', { n: c.delta })}

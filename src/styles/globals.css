@@ -55,6 +55,22 @@
   @keyframes pop-in {
     from { opacity: 0; scale: 0.9; }
   }
+
+  --animate-rise-in: rise-in 600ms cubic-bezier(0.23, 1, 0.32, 1) both;
+
+  @keyframes rise-in {
+    from { opacity: 0; translate: 0 14px; }
+  }
+
+  --animate-fill-in: fill-in 500ms cubic-bezier(0.23, 1, 0.32, 1) both;
+
+  @keyframes fill-in {
+    from { scale: 0 1; }
+  }
+}
+
+@utility z-* {
+  z-index: --value(--z-*);
 }
 
 /* Keyboard focus ring shared by the navy controls (buttons, inputs, links). */
@@ -71,5 +87,11 @@
     font-family: var(--font-body);
     background: var(--color-panel);
     color: var(--color-navy);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:has([data-page="landing"]) {
+      scroll-behavior: smooth;
+    }
   }
 }

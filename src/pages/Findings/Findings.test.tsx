@@ -39,6 +39,38 @@ async function openSection(user: ReturnType<typeof renderApp>, dialog: HTMLEleme
 
 
 describe('Findings', () => {
+  it('shows two tabs: Prioritized list (default) and Manual closures', async () => {
+    await renderFindings()
+
+    expect(screen.getByRole('tab', { name: 'Prioritized list' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Manual closures' })).toBeInTheDocument()
+  })
+
+  it('switches to the Manual closures tab and shows its intro text', async () => {
+    const user = await renderFindings()
+
+    await user.click(screen.getByRole('tab', { name: 'Manual closures' }))
+
+    expect(await screen.findByText(/Findings closed by hand by the team/)).toBeInTheDocument()
+    expect(window.location.search).toContain('tab=closed')
+  })
+
+  it('redirects /findings?tab=summary to /dashboard', async () => {
+    renderApp('/findings?tab=summary')
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/dashboard')
+    expect(window.location.search).toContain('tab=summary')
+  })
+
+  it('does not redirect /findings?tab=closed to the dashboard', async () => {
+    renderApp('/findings?tab=closed')
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Findings' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/findings')
+    expect(await screen.findByText(/Findings closed by hand by the team/)).toBeInTheDocument()
+  })
+
   it('shows the newest order in groups, the first to attend first', async () => {
     await renderFindings()
 

@@ -4,7 +4,7 @@ import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Message } from '../../components/ui/Message'
-import { CELL, HEADER_CELL } from '../../components/ui/table'
+import { CELL, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { useDialogTarget } from '../../components/ui/useDialogTarget'
 import { useWideLayout } from '../../components/ui/useWideLayout'
 import { useDateFormat } from '../../i18n/format'
@@ -60,7 +60,7 @@ function ClosedList({ closed, onReopen }: ListProps) {
     <div className="overflow-x-auto rounded-xl border border-border-panel bg-white px-2 py-1">
       <table className="w-full border-collapse text-[0.875rem]">
         <thead>
-          <tr className="border-b-2 border-border-row">
+          <tr className={HEADER_ROW}>
             <th className={HEADER_CELL}>{t('findings.columns.cve')}</th>
             <th className={HEADER_CELL}>
               {t('findings.columns.asset')} · {t('findings.columns.component')}

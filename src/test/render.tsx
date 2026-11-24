@@ -45,7 +45,7 @@ export const PLATFORM_ADMIN: AuthUser = {
  * Starts signed in as a customer_admin by default so protected routes render at once;
  * with `null` nothing is stored and the app starts as a fresh visit would.
  */
-export function renderApp(path = '/', user: AuthUser | null = DEFAULT_TEST_USER) {
+export function renderApp(path = '/dashboard', user: AuthUser | null = DEFAULT_TEST_USER) {
   if (user !== null) {
     setMockRole(user.role)
     useAuthStore.getState().establishSession(user)

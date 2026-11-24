@@ -226,11 +226,9 @@ describe('Asset triage', () => {
     const classification = classificationSection(sheet)
 
     const radios = classification.getAllByRole('radio').map((r) => r.getAttribute('value'))
-    expect(radios).toEqual(['highly_confidential', 'confidential', 'private', 'public'])
+    expect(radios).toEqual(['highly_confidential', 'private', 'confidential', 'public'])
     expect(
-      classification.getByText(
-        'Its data is regulated or secret and a leak would be grave: health records, card data or credentials.',
-      ),
+      classification.getByText('Its data is exclusive to one part or area of the company.'),
     ).toBeInTheDocument()
 
     await user.click(classification.getByRole('radio', { name: /^Highly Confidential/ }))

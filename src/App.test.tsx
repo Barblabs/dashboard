@@ -7,11 +7,10 @@ function nav() {
 }
 
 describe('Navigation', () => {
-  it('opens the dashboard page by default', async () => {
+  it('marks the open page in the sidebar', async () => {
     renderApp()
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
-    expect(window.location.pathname).toBe('/dashboard')
     expect(nav().getByRole('link', { name: 'Dashboard' })).toHaveAttribute('aria-current', 'page')
   })
 
@@ -62,12 +61,11 @@ describe('Pages by role', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
   })
 
-  it('opens the tenants for a Platform Admin and shows only its pages', async () => {
-    renderApp('/', PLATFORM_ADMIN)
+  it('shows a Platform Admin only its pages', async () => {
+    renderApp('/tenants', PLATFORM_ADMIN)
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Organizations' })).toBeInTheDocument()
-    expect(window.location.pathname).toBe('/tenants')
-    expect(navLinks()).toEqual(['Tenants', 'Dashboard'])
+    expect(navLinks()).toEqual(['Organizations', 'Dashboard'])
   })
 
   it('denies a Platform Admin the customer pages', () => {

@@ -42,12 +42,12 @@ export function ConfigPage() {
           <Tab value="cmdb">{t('config.tabs.cmdb')}</Tab>
           <Tab value="slack">{t('config.tabs.slack')}</Tab>
         </TabList>
-        <TabPanel value="cmdb">
+        <TabPanel value="cmdb" className="mt-6">
           <QueryBoundary query={sourceQuery} keys={KEYS}>
             {(source) => <ConfigBody source={source} readOnly={readOnly} />}
           </QueryBoundary>
         </TabPanel>
-        <TabPanel value="slack">
+        <TabPanel value="slack" className="mt-6">
           <SlackPanel readOnly={readOnly} />
         </TabPanel>
       </Tabs>
@@ -83,7 +83,7 @@ function ConfigBody({ source, readOnly }: { source: CmdbSource | null; readOnly:
   }
 
   return (
-    <div className="flex flex-col gap-[22px] md:flex-row md:items-start">
+    <div className="flex flex-col gap-6 md:flex-row md:items-start">
       <ConfigStepPanel activeStep={STEP_NUMBER[step]} />
       {step === 'credentials' ? (
         <ItopForm

@@ -6,24 +6,21 @@ type BadgeProps = ComponentProps<'span'> & {
   variant?: BadgeVariant
 }
 
+// Every variant keeps the same box, so badges side by side (a role, a status) are one size.
+const BOX = 'inline-flex shrink-0 items-center gap-1.5 rounded-sm border px-2.5 py-0.5 font-body text-[0.75rem] whitespace-nowrap'
+
 const VARIANTS: Record<BadgeVariant, string> = {
-  outline: 'inline-block border border-navy px-2.5 py-[3px] text-[0.75rem] font-medium text-navy',
-  muted: 'inline-block border border-gray px-2.5 py-[3px] text-[0.75rem] font-medium text-gray',
-  solid:
-    'inline-flex shrink-0 items-center gap-1.5 bg-navy px-2.5 py-1 text-[0.8125rem] font-semibold text-white',
-  quiet: 'inline-block shrink-0 border border-muted-bg px-2.5 py-1 text-[0.75rem] font-semibold text-gray',
-  critical: 'inline-block border border-critical px-2.5 py-[3px] text-[0.75rem] font-medium text-critical',
+  outline: 'border-navy font-medium text-navy',
+  muted: 'border-gray font-medium text-gray',
+  solid: 'border-navy bg-navy font-semibold text-white',
+  quiet: 'border-muted-bg font-semibold text-gray',
+  critical: 'border-critical font-medium text-critical',
   // Orange text on white is unreadable: the tone lives in the border and tint, the text stays navy.
-  warning: 'inline-block border border-high bg-high/10 px-2.5 py-[3px] text-[0.75rem] font-medium text-navy',
+  warning: 'border-high bg-high/10 font-medium text-navy',
   // Yellow text is unreadable too, for the same reason.
-  caution: 'inline-block border border-medium bg-medium/15 px-2.5 py-[3px] text-[0.75rem] font-medium text-navy',
+  caution: 'border-medium bg-medium/15 font-medium text-navy',
 }
 
 export function Badge({ variant = 'outline', className = '', ...props }: BadgeProps) {
-  return (
-    <span
-      className={`rounded-sm font-body whitespace-nowrap ${VARIANTS[variant]} ${className}`}
-      {...props}
-    />
-  )
+  return <span className={`${BOX} ${VARIANTS[variant]} ${className}`} {...props} />
 }

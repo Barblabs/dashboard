@@ -512,11 +512,12 @@ describe('Tech stack', () => {
     // The asset list is a labelled listbox of options too; the filter's options are not in it.
     const options = (await screen.findAllByRole('option')).filter((o) => !o.closest('[role="listbox"][aria-label]'))
     expect(options.map((o) => o.textContent)).toEqual(
-      expect.arrayContaining(['Highly Confidential', 'Confidential', 'Private', 'Public', 'Unclassified']),
+      expect.arrayContaining(['Highly Confidential', 'Private', 'Confidential', 'Public', 'Unclassified']),
     )
     const names = options.map((o) => o.textContent)
-    expect(names.indexOf('Highly Confidential')).toBeLessThan(names.indexOf('Confidential'))
-    expect(names.indexOf('Private')).toBeLessThan(names.indexOf('Public'))
+    expect(names.indexOf('Highly Confidential')).toBeLessThan(names.indexOf('Private'))
+    expect(names.indexOf('Private')).toBeLessThan(names.indexOf('Confidential'))
+    expect(names.indexOf('Confidential')).toBeLessThan(names.indexOf('Public'))
     expect(names.indexOf('Public')).toBeLessThan(names.indexOf('Unclassified'))
     await user.click(screen.getByRole('option', { name: 'Highly Confidential' }))
     await user.keyboard('{Escape}')

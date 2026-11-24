@@ -143,8 +143,13 @@ export function AssetInspector({ assets, busy, pager, onOpenTriage }: AssetInspe
             />
           ))}
         </ul>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-panel px-5 py-3">
-          <span className="font-body text-[0.75rem] text-gray">{t('config.inventory.inspector.moveHint')}</span>
+        {/* The arrow keys mean nothing on a touch screen, so there the hint goes, and the bar with it when no pager shares it. */}
+        <div
+          className={`flex flex-wrap items-center justify-between gap-3 border-t border-border-panel px-5 py-3 ${pager ? '' : 'pointer-coarse:hidden'}`}
+        >
+          <span className="font-body text-[0.75rem] text-gray pointer-coarse:hidden">
+            {t('config.inventory.inspector.moveHint')}
+          </span>
           {pager && <AssetPager pager={pager} />}
         </div>
       </div>

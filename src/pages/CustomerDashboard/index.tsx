@@ -1,10 +1,9 @@
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Navigate, useSearchParams } from 'react-router'
 import { Page } from '../../components/Page'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { BeforeAfterTabContent } from '../Findings/BeforeAfterTab'
-import { ClosedTabContent } from '../Findings/ClosedTab'
 import { RiskTabContent } from '../Findings/RiskTab'
 import { SummaryIndicators } from '../Findings/SummaryIndicators'
 import { SummaryTabContent } from '../Findings/SummaryTab'
@@ -14,6 +13,8 @@ export function CustomerDashboardPage() {
   const { t } = useTranslation()
   const [params, setParams] = useSearchParams()
   const tab = params.get('tab') ?? 'summary'
+
+  if (tab === 'closed') return <Navigate to="/findings?tab=closed" replace />
 
   const changeTab = (value: string) => {
     setParams(() => {
@@ -34,7 +35,6 @@ export function CustomerDashboardPage() {
           <Tab value="before-after">{t('findings.tabs.beforeAfter')}</Tab>
           <Tab value="risk">{t('findings.tabs.risk')}</Tab>
           <Tab value="threats">{t('findings.tabs.threats')}</Tab>
-          <Tab value="closed">{t('findings.tabs.closed')}</Tab>
         </TabList>
 
         <TabPanel value="summary" className="mt-6">
@@ -48,9 +48,6 @@ export function CustomerDashboardPage() {
         </TabPanel>
         <TabPanel value="threats" className="mt-6">
           <ThreatsTabContent />
-        </TabPanel>
-        <TabPanel value="closed" className="mt-6">
-          <ClosedTabContent />
         </TabPanel>
       </Tabs>
     </Page>

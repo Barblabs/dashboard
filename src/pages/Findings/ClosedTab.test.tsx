@@ -49,7 +49,7 @@ const FOR_GOOD: ClosedFinding = {
 
 async function openClosedTab() {
   const user = renderApp('/findings?tab=closed')
-  await screen.findByRole('tab', { name: 'Closed', selected: true })
+  await screen.findByRole('tab', { name: 'Manual closures', selected: true })
   return user
 }
 

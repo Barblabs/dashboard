@@ -42,8 +42,8 @@ export type InformationClassification = NonNullable<Schemas['InformationClassifi
 /** Most sensitive first, as the selector and the filter list them (ADR 0037). */
 export const INFORMATION_CLASSIFICATIONS = everyOf<InformationClassification>()([
   'highly_confidential',
-  'confidential',
   'private',
+  'confidential',
   'public',
 ])
 

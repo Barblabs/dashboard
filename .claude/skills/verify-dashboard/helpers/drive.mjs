@@ -61,7 +61,7 @@ const ROLE_BUTTON = {
   customer_admin: 'Admin (customer_admin)',
   viewer: 'Viewer (viewer)',
 }
-const HOME = { platform_admin: '/tenants', customer_admin: '/config', viewer: '/config' }
+const HOME = { platform_admin: '/tenants', customer_admin: '/dashboard', viewer: '/dashboard' }
 
 // Signing in returns to the page the guard sent the visitor away from, if any; pass `landing`
 // when that is not the role's home.
@@ -75,10 +75,12 @@ async function signIn(role, landing = HOME[role]) {
 async function signOut({ fresh = false } = {}) {
   await page.getByRole('button', { name: 'Sign out' }).click()
   await page.waitForURL('**/login')
-  if (fresh) {
-    await goto('/')
-    await page.waitForURL('**/login')
-  }
+  if (fresh) await openSignInFromLanding()
+}
+async function openSignInFromLanding() {
+  await goto('/')
+  await page.getByRole('link', { name: 'Sign in' }).first().click()
+  await page.waitForURL('**/login')
 }
 const goto = async (pathname) => page.goto(`${FRONT}${pathname}`)
 const sidebarLink = (name) => page.getByRole('navigation').getByRole('link', { name, exact: true })
@@ -167,7 +169,7 @@ const scenarios = {
     await expect(drawer).toBeHidden()
     check(await menu.evaluate((el) => el === document.activeElement), 'focus not back on menu after backdrop tap')
 
-    for (const [name, pathname] of [['Findings', '/findings'], ['News', '/news'], ['Business context', '/business-context'], ['Notifications', '/notifications'], ['Users', '/users'], ['Configuration', '/config']]) {
+    for (const [name, pathname] of [['Findings', '/findings'], ['News', '/news'], ['Business context', '/business-context'], ['Users', '/users'], ['Configuration', '/config']]) {
       await menu.click()
       await drawerLink(name).click()
       await page.waitForURL(`**${pathname}`)
@@ -183,13 +185,12 @@ const scenarios = {
     await menu.click()
     await drawer.getByRole('button', { name: 'Sign out' }).click()
     await page.waitForURL('**/login')
-    await goto('/')
-    await page.waitForURL('**/login')
+    await openSignInFromLanding()
     await signIn('platform_admin')
     await menu.click()
     await expect(drawer.getByText('Super Admin', { exact: true }).first()).toBeVisible()
     await shot('super-admin-drawer')
-    for (const [name, pathname] of [['Dashboard', '/admin-dashboard'], ['Tenants', '/tenants']]) {
+    for (const [name, pathname] of [['Dashboard', '/admin-dashboard'], ['Organizations', '/tenants']]) {
       if (pathname === '/tenants') await menu.click()
       await drawerLink(name).click()
       await page.waitForURL(`**${pathname}`)
@@ -241,11 +242,10 @@ const scenarios = {
     await page.getByRole('button', { name: 'Menu' }).click()
     await page.getByRole('dialog').getByRole('button', { name: 'Sign out' }).click()
     await page.waitForURL('**/login')
-    await goto('/')
-    await page.waitForURL('**/login')
+    await openSignInFromLanding()
     await signIn('platform_admin')
     const search = page.getByRole('searchbox', { name: 'Search by name…' })
-    const counter = page.getByText('3 organizations · 1 deactivated')
+    const counter = page.getByText('3 organizations, 1 deactivated')
     await expect(counter).toBeVisible()
     await checkNoSidewaysScroll('/tenants')
     const mainBox = await main.boundingBox()
@@ -300,8 +300,7 @@ const scenarios = {
     await page.getByRole('button', { name: 'Menu' }).click()
     await page.getByRole('dialog').getByRole('button', { name: 'Sign out' }).click()
     await page.waitForURL('**/login')
-    await goto('/')
-    await page.waitForURL('**/login')
+    await openSignInFromLanding()
     await signIn('platform_admin')
     await goto('/admin-dashboard')
     const orgs = page.getByRole('heading', { name: 'Organizations', level: 2, exact: true })
@@ -433,8 +432,7 @@ const scenarios = {
 
       await (device === 'phone' ? page.getByRole('button', { name: 'Menu', includeHidden: true }).click().then(() => page.getByRole('dialog').getByRole('button', { name: 'Sign out' }).click()) : signOut())
       await page.waitForURL('**/login')
-      await goto('/')
-      await page.waitForURL('**/login')
+      await openSignInFromLanding()
       await signIn('platform_admin')
       await expect(page.getByRole('searchbox')).toBeVisible()
       await checkFieldFonts('tenants')
@@ -830,8 +828,8 @@ const scenarios = {
     await tab('Summary').click()
     const trend = page.locator('section', { has: page.getByRole('heading', { name: 'Weekly trend of findings' }) })
     await expect(trend.getByText(/the line, those still open when the week ended/)).toBeVisible()
-    await expect(trend.getByText('9/29')).toBeVisible()
-    check(await trend.getByText('9/15').count() === 0, 'the trend shows the empty weeks before the first findings')
+    await expect(trend.getByText('Sep 29')).toBeVisible()
+    check(await trend.getByText('Sep 15').count() === 0, 'the trend shows the empty weeks before the first findings')
     await expect(page.getByRole('heading', { name: 'Time to close findings by risk level' })).toBeVisible()
     check(await page.getByText('No risk level').count() === 0, 'time to close shows a row with no risk level')
     await page.waitForTimeout(1800) // recharts draws its series in over 1.5 s
@@ -988,18 +986,19 @@ const scenarios = {
   },
 
   async navigation() {
+    await goto('/')
+    await expect(page.getByRole('heading', { level: 1, name: 'Threat intelligence for the assets your business runs on' })).toBeVisible()
+    await shot('landing-signed-out')
+    await page.getByRole('link', { name: 'Sign in' }).first().click()
+    await page.waitForURL('**/login')
     await goto('/users')
     await page.waitForURL('**/login')
     await shot('guard-to-login')
     // Signing in returns to the page the guard turned away.
     await signIn('customer_admin', '/users')
-    for (const link of ['Findings', 'News', 'Configuration', 'Business context', 'Notifications', 'Users']) {
+    for (const link of ['Dashboard', 'Findings', 'News', 'Configuration', 'Business context', 'Users']) {
       await expect(sidebarLink(link)).toBeVisible()
     }
-    await sidebarLink('Notifications').click()
-    await expect(page.getByRole('heading', { name: 'Notifications' })).toBeVisible()
-    await expect(page.getByText('Coming soon')).toBeVisible()
-    await shot('nav-notifications')
     // A session survives a typed URL and a reload.
     await goto('/tenants')
     await expect(page.getByText('Access denied')).toBeVisible()
@@ -1007,8 +1006,12 @@ const scenarios = {
     await goto('/does-not-exist')
     await expect(page.getByText('Page not found')).toBeVisible()
     await shot('not-found')
+    await page.getByRole('link', { name: 'Back to home' }).click()
+    await page.waitForURL('**/dashboard')
     await goto('/')
-    await page.waitForURL('**/config')
+    await shot('landing-signed-in')
+    await page.getByRole('link', { name: 'Open dashboard' }).first().click()
+    await page.waitForURL('**/dashboard')
     await signOut()
     await signIn('viewer')
     check(await sidebarLink('Users').count() === 0, 'viewer sees the Users link')
@@ -1017,13 +1020,14 @@ const scenarios = {
     await shot('viewer-forbidden-users')
     await signOut({ fresh: true })
     await signIn('platform_admin')
-    for (const link of ['Tenants', 'Dashboard']) await expect(sidebarLink(link)).toBeVisible()
+    for (const link of ['Organizations', 'Dashboard']) await expect(sidebarLink(link)).toBeVisible()
     check(await sidebarLink('Configuration').count() === 0, 'platform_admin sees Configuration')
     await expect(page.getByText('superadmin@barbattack.example')).toBeVisible()
     await goto('/config')
     await expect(page.getByText('Access denied')).toBeVisible()
     await shot('platform-admin-forbidden-config')
     await goto('/')
+    await page.getByRole('link', { name: 'Open dashboard' }).first().click()
     await page.waitForURL('**/tenants')
     await signOut()
     await shot('signed-out')
@@ -1099,7 +1103,7 @@ const scenarios = {
   async tenants() {
     await signIn('platform_admin')
     await expect(page.getByRole('heading', { name: 'Organizations' })).toBeVisible()
-    await expect(page.getByText('3 organizations · 1 deactivated')).toBeVisible()
+    await expect(page.getByText('3 organizations, 1 deactivated')).toBeVisible()
     await shot('list')
     const create = async (name) => {
       await page.getByRole('button', { name: 'New organization' }).click()
@@ -1109,11 +1113,11 @@ const scenarios = {
       await page.getByRole('button', { name: 'Create and send invitation' }).click()
     }
     await create('Delta SA')
-    await expect(page.getByText('4 organizations · 1 deactivated')).toBeVisible()
+    await expect(page.getByText('4 organizations, 1 deactivated')).toBeVisible()
     const card = (name) => page.getByTestId('customer-card').filter({ hasText: name })
     await card('Acme Corp').getByRole('button', { name: 'Deactivate', exact: true }).click()
     await page.getByRole('button', { name: 'Yes, deactivate' }).click()
-    await expect(page.getByText('4 organizations · 2 deactivated')).toBeVisible()
+    await expect(page.getByText('4 organizations, 2 deactivated')).toBeVisible()
     await shot('created-and-deactivated')
     await create('beta ltd')
     await expect(page.getByRole('alert').filter({ hasText: 'An organization with this name already exists.' })).toBeVisible()

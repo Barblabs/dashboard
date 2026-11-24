@@ -19,7 +19,7 @@ export const en = {
       config: 'Configuration',
       'business-context': 'Business context',
       users: 'Users',
-      tenants: 'Tenants',
+      tenants: 'Organizations',
       'admin-dashboard': 'Dashboard',
     },
     user: {
@@ -114,7 +114,7 @@ export const en = {
       beforeAfter: 'Before & After',
       risk: 'Where the risk is',
       threats: 'Threats',
-      closed: 'Closed',
+      closed: 'Manual closures',
     },
     indicators: {
       open: 'Open',
@@ -249,7 +249,7 @@ export const en = {
       failed: "Couldn't load the closed findings.",
       network: "Couldn't reach the server to load the closed findings.",
       empty: 'No findings closed by hand',
-      intro: 'Findings that closed on their own are not listed.',
+      intro: 'Findings closed by hand by the team. Those that close on their own, because the asset no longer has the vulnerability, appear in the list under Status: Closed.',
       reason: 'Reason',
       closed: 'Closed',
       reopensOn: 'Reopens on',
@@ -819,6 +819,93 @@ export const en = {
       title: 'New organizations per month',
     },
   },
+  landing: {
+    nav: {
+      label: 'Sections',
+      steps: 'How it works',
+      priorities: 'Prioritization',
+      agents: 'Agents',
+    },
+    action: {
+      signIn: 'Sign in',
+      open: 'Open dashboard',
+    },
+    hero: {
+      title: 'Threat intelligence for the assets your business runs on',
+      lead: 'barbattack watches every server and application you run, tells you which vulnerabilities to fix first and alerts the person responsible on Slack.',
+      secondary: 'See how it works',
+      group: 'Exploited flaws on internet-facing services',
+    },
+    steps: {
+      title: 'From your inventory to the person who fixes it',
+      sync: {
+        title: 'Keeps your inventory current',
+        text: 'barbattack reads your servers, virtual machines and the software they run from your CMDB.',
+        succeeded: 'Succeeded',
+        created: 'Created',
+        updated: 'Updated',
+        deactivated: 'Deactivated',
+      },
+      match: {
+        title: 'Finds what affects you',
+        text: 'Every known vulnerability in the software you run becomes a finding.',
+      },
+      score: {
+        title: 'Ranks what to fix first',
+        text: 'Flaws attackers already use, on assets exposed to the internet, go to the top.',
+        exploited: 'Exploited by attackers',
+        yes: 'Yes',
+      },
+      alert: {
+        title: 'Alerts the asset owner',
+        text: 'The owner gets a Slack message and the security team gets a copy.',
+        owner: 'New finding',
+        open: 'Open in barbattack',
+      },
+    },
+    priorities: {
+      title: 'What to fix together, and why',
+      lead: 'barbattack groups the findings to fix at the same time and writes a step-by-step plan for each one.',
+      groups: {
+        exposed: {
+          title: 'Exploited flaws on internet-facing services',
+          reason: 'Attackers already exploit both, and they run on assets reachable from the internet.',
+        },
+        bastion: {
+          title: 'One OpenSSH update for the bastion host',
+          reason: 'A single package update closes it, and the host is the way into the internal network.',
+        },
+        internal: {
+          title: 'Internal services, after the exposed ones',
+          reason: 'api-03 is not reachable from the internet, so it waits for the groups above.',
+        },
+      },
+      plan: {
+        title: 'Action plan',
+        steps: {
+          upgrade: 'Upgrade Apache httpd to 2.4.51 or later',
+          restart: 'Restart the service and check that it serves again',
+          review: 'Review the access logs for requests with encoded path traversal',
+        },
+        mitigation: 'Deny access to the file system root with "Require all denied" in the server configuration.',
+        verification: 'Run "httpd -v" on web-01 and confirm it reports 2.4.51.',
+      },
+      closed: 'The next sync saw Apache 2.4.51 on web-01 and closed the finding on its own.',
+    },
+    agents: {
+      title: 'AI agents for your security team',
+      lead: 'The agents advise and your team decides. They never change a Score or close a finding.',
+      prioritizer: 'Puts your open findings in the order to fix them, based on what each asset means to your business, and says why.',
+      luna: 'Writes the action plan for each finding: the steps, what mitigates it meanwhile and how to confirm the fix.',
+      editor: 'Writes your news digest, grouped by why each item matters to you.',
+      drafter: 'Drafts your business context from the documents you give it, for you to review.',
+      drafterSample: 'Sectors, critical services, regulations, risk appetite',
+    },
+    closing: {
+      title: 'Know what to patch first, and who patches it',
+      lead: 'Connect your CMDB. The first sync brings your assets in, and barbattack starts watching them.',
+    },
+  },
   time: {
     lessThanAMinute: 'less than a minute ago',
   },
@@ -1074,9 +1161,9 @@ export const en = {
         question: 'How sensitive is the data it holds?',
         help: {
           public: 'Its data could be published without harm.',
-          private: 'Its data is meant for your organization only.',
-          highly_confidential: 'Its data is regulated or secret and a leak would be grave: health records, card data or credentials.',
-          confidential: 'Its internal data would do serious harm if leaked, such as personal or financial information.',
+          private: 'Its data is personal information about employees or providers.',
+          highly_confidential: 'Its data is exclusive to one part or area of the company.',
+          confidential: 'Its data is open to anyone in the company.',
         },
         declare: 'Declare Classification',
       },

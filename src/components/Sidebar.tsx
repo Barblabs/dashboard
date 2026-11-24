@@ -3,9 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { NavLink, useNavigate } from 'react-router'
 import { signOut } from '../auth/signOut'
 import { useCurrentUser } from '../auth/store'
-import { chooseLanguage, LANGUAGES } from '../i18n'
-import { useLocale } from '../i18n/format'
 import { pagePath, pagesFor } from '../routes'
+import { LanguageSwitcher } from './LanguageSwitcher'
 import { MenuIcon } from './ui/icons'
 import { Sheet } from './ui/Sheet'
 import { Wordmark } from './Wordmark'
@@ -105,39 +104,13 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             <button
               type="button"
               onClick={handleSignOut}
-              className="cursor-pointer rounded-md bg-critical px-3 py-1.5 font-body text-[0.8125rem] font-semibold text-white transition-opacity duration-150 ease-[ease] hover:opacity-88 focus-visible:outline-2 focus-visible:outline-cyan"
+              className="cursor-pointer rounded-md border border-white/15 px-3 py-1.5 font-body text-[0.8125rem] font-semibold text-nav-text transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan"
             >
               {t('sidebar.signOut')}
             </button>
           </div>
         )}
       </div>
-    </div>
-  )
-}
-
-function LanguageSwitcher() {
-  const { t } = useTranslation()
-  const locale = useLocale()
-
-  return (
-    <div role="group" aria-label={t('sidebar.language.label')} className="flex gap-1">
-      {LANGUAGES.map((language) => {
-        const active = locale === language
-        return (
-          <button
-            key={language}
-            type="button"
-            aria-pressed={active}
-            onClick={() => chooseLanguage(language)}
-            className={`cursor-pointer rounded-md px-2 py-1 font-body text-[0.8125rem] font-semibold transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan ${
-              active ? 'bg-nav-active-bg text-white' : 'text-nav-text-dim'
-            }`}
-          >
-            {language.toUpperCase()}
-          </button>
-        )
-      })}
     </div>
   )
 }
