@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useReactivateCustomerMutation, type CustomerResponse } from '../../api/customers'
 import { Alert } from '../../components/ui/Alert'
+import { Badge } from '../../components/ui/Badge'
 import { PencilIcon, PowerOffIcon, RestoreIcon } from '../../components/ui/icons'
 import { Message } from '../../components/ui/Message'
 import { SearchField } from '../../components/ui/SearchField'
@@ -73,14 +74,10 @@ function CustomerCard({
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <span
-          className={`h-2 w-2 shrink-0 rounded-full ${isDeactivated ? 'bg-muted-bg' : 'bg-cyan'}`}
-        />
-        <span className={`font-body text-[0.8125rem] ${isDeactivated ? 'text-gray' : 'text-navy'}`}>
-          {isDeactivated ? t('tenants.status.deactivated') : t('tenants.status.active')}
-        </span>
-      </div>
+      {/* The same status badge as the organizations table on the dashboard. */}
+      <Badge variant={isDeactivated ? 'muted' : 'outline'} className="self-start">
+        {isDeactivated ? t('tenants.status.deactivated') : t('tenants.status.active')}
+      </Badge>
 
       {reactivateError && <Alert tone="error">{reactivateError}</Alert>}
     </div>
