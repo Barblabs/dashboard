@@ -821,6 +821,22 @@ export const es: Translations = {
       title: 'Altas por mes',
     },
   },
+  landing: {
+    action: {
+      signIn: 'Entrar',
+      open: 'Abrir el dashboard',
+    },
+    hero: {
+      eyebrow: 'iTop · NVD · EPSS · CISA KEV · Slack',
+      title: 'Inteligencia de amenazas para los activos de tu CMDB',
+      lead: 'barbattack revisa cada activo de tu inventario de iTop contra NVD, EPSS y el catálogo CISA KEV, ordena los hallazgos que conviene corregir primero y avisa por Slack al dueño de cada activo.',
+      group: 'Fallos con exploit activo en servicios expuestos a internet',
+    },
+    closing: {
+      title: 'Qué parchear primero, y quién lo parchea',
+      lead: 'Conecta tu CMDB de iTop. La primera sincronización trae tus activos y barbattack empieza a cruzarlos con cada fuente que lee.',
+    },
+  },
   time: {
     lessThanAMinute: 'hace menos de un minuto',
   },

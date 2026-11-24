@@ -819,6 +819,22 @@ export const en = {
       title: 'New organizations per month',
     },
   },
+  landing: {
+    action: {
+      signIn: 'Sign in',
+      open: 'Open dashboard',
+    },
+    hero: {
+      eyebrow: 'iTop · NVD · EPSS · CISA KEV · Slack',
+      title: 'Threat intelligence for the assets in your CMDB',
+      lead: 'barbattack checks every asset in your iTop inventory against NVD, EPSS and the CISA KEV catalog, ranks the findings to fix first and alerts each asset owner on Slack.',
+      group: 'Exploited flaws on internet-facing services',
+    },
+    closing: {
+      title: 'Know what to patch first, and who patches it',
+      lead: 'Connect your iTop CMDB. The first sync brings your assets in, and barbattack starts matching them against every feed it reads.',
+    },
+  },
   time: {
     lessThanAMinute: 'less than a minute ago',
   },
