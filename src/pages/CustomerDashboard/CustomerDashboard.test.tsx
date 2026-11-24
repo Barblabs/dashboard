@@ -45,6 +45,14 @@ describe('CustomerDashboard', () => {
     expect(await screen.findByText('Findings per week')).toBeInTheDocument()
   })
 
+  it('redirects /dashboard?tab=closed to /findings?tab=closed', async () => {
+    renderApp('/dashboard?tab=closed')
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Findings' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/findings')
+    expect(window.location.search).toContain('tab=closed')
+  })
+
   describe('summary indicators', () => {
     it('shows indicator cards above the tabs and keeps them when switching tabs', async () => {
       const user = renderApp('/dashboard')

@@ -114,7 +114,7 @@ export const en = {
       beforeAfter: 'Before & After',
       risk: 'Where the risk is',
       threats: 'Threats',
-      closed: 'Closed',
+      closed: 'Manual closures',
     },
     indicators: {
       open: 'Open',
@@ -249,7 +249,7 @@ export const en = {
       failed: "Couldn't load the closed findings.",
       network: "Couldn't reach the server to load the closed findings.",
       empty: 'No findings closed by hand',
-      intro: 'Findings that closed on their own are not listed.',
+      intro: 'Findings closed by hand by the team. Those that close on their own, because the asset no longer has the vulnerability, appear in the list under Status: Closed.',
       reason: 'Reason',
       closed: 'Closed',
       reopensOn: 'Reopens on',
