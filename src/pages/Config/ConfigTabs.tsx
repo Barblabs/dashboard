@@ -14,7 +14,7 @@ export function ConfigTabs({ readOnly }: { readOnly: boolean }) {
   const { t } = useTranslation()
 
   return (
-    <Tabs defaultValue="techStack" className="overflow-hidden rounded-lg border border-border-panel bg-white">
+    <Tabs defaultValue="techStack" className="overflow-hidden rounded-xl border border-border-panel bg-white">
       <TabList label={t('config.tabs.label')}>
         {TABS.map((tab) => (
           <Tab key={tab} value={tab}>

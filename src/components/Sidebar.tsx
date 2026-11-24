@@ -105,7 +105,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             <button
               type="button"
               onClick={handleSignOut}
-              className="cursor-pointer rounded-md bg-critical px-3 py-1.5 font-body text-[0.8125rem] font-semibold text-white transition-opacity duration-150 ease-[ease] hover:opacity-88 focus-visible:outline-2 focus-visible:outline-cyan"
+              className="cursor-pointer rounded-md border border-white/15 px-3 py-1.5 font-body text-[0.8125rem] font-semibold text-nav-text transition-[background,color] duration-150 ease-[ease] hover:bg-white/6 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan"
             >
               {t('sidebar.signOut')}
             </button>

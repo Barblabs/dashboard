@@ -67,7 +67,7 @@ describe('Pages by role', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Organizations' })).toBeInTheDocument()
     expect(window.location.pathname).toBe('/tenants')
-    expect(navLinks()).toEqual(['Tenants', 'Dashboard'])
+    expect(navLinks()).toEqual(['Organizations', 'Dashboard'])
   })
 
   it('denies a Platform Admin the customer pages', () => {

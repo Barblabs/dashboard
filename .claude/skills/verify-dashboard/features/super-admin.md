@@ -1,7 +1,7 @@
 # Super admin: organizations and dashboard
 
 ## Sub-features
-- `/tenants` (sidebar "Tenants", heading "Organizations"), platform_admin only: cards with name, created date, status ("Deactivated · their users cannot sign in" when deactivated); search box; counter ("3 organizations · 1 deactivated")
+- `/tenants` (sidebar and heading "Organizations"), platform_admin only: cards with name, created date, status ("Deactivated · their users cannot sign in" when deactivated); search box; counter ("3 organizations · 1 deactivated")
 - "New organization" two-step dialog: "Organization name", "Next", then "Admin email", "Create and send invitation"; a taken name shows "An organization with this name already exists."
 - Per card, icon-only buttons named by `aria-label`: "Rename" (dialog "Rename organization"), "Deactivate" (dialog "Deactivate organization" / "Yes, deactivate"), "Reactivate" (immediate; only on deactivated cards, "Deactivate" only on active ones)
 - `/admin-dashboard` (sidebar "Dashboard"): stat cards Organizations (with "N active · N deactivated"), Total users, CMDB connected ("N of M"), Failed syncs (30 days); charts "New organizations per month" and "Syncs per day (30 days)"; "Slack alerts by organization (30 days)"; the "Organizations" table (cards on phones, see phone-cards.md); read only

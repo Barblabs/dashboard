@@ -6,7 +6,7 @@ import { Badge, type BadgeVariant } from '../../components/ui/Badge'
 import { BanIcon, PencilIcon } from '../../components/ui/icons'
 import { Message } from '../../components/ui/Message'
 import { SearchField } from '../../components/ui/SearchField'
-import { CELL, HEADER_CELL } from '../../components/ui/table'
+import { CELL, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { useWideLayout } from '../../components/ui/useWideLayout'
 
 type UserStatus = 'disabled' | 'pending' | 'active'
@@ -56,16 +56,16 @@ export function UserTable({
       {filtered.length === 0 ? (
         <Message>{users.length === 0 ? t('users.empty') : t('users.noMatches')}</Message>
       ) : wide ? (
-        <div className="shrink-0 overflow-hidden rounded-lg border border-border-panel">
+        <div className="shrink-0 overflow-hidden rounded-xl border border-border-panel bg-white">
           <table className="w-full border-collapse text-[0.875rem]">
             <thead>
-              <tr className="border-b border-border-panel bg-panel">
+              <tr className={HEADER_ROW}>
                 <th className={HEADER_CELL}>{t('users.columns.email')}</th>
                 <th className={HEADER_CELL}>{t('users.columns.role')}</th>
                 <th className={HEADER_CELL} />
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody>
               {filtered.map((user) => {
                 const isSelf = user.email === currentUser?.email
                 return (

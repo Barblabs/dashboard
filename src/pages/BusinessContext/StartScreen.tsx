@@ -29,7 +29,7 @@ export function StartScreen({ readOnly, onImport, onStart }: StartScreenProps) {
         <p className="font-body text-[0.9375rem] leading-[1.5] text-gray">{t('businessContext.start.description')}</p>
       </div>
       <div className="flex flex-col items-center gap-3">
-        <Button size="lg" onClick={onImport}>
+        <Button onClick={onImport}>
           {t('businessContext.start.import')}
         </Button>
         <Button variant="link" onClick={onStart}>

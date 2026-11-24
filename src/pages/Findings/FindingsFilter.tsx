@@ -12,9 +12,11 @@ interface FilterBarProps {
 export function FindingsFilterBar({ filters, onFilter }: FilterBarProps) {
   const { t } = useTranslation()
 
+  // Every field grows from a width of its own (flex-auto, or the search's 20rem) rather than from 0, so on
+  // a narrow screen the fields wrap to the next line instead of squeezing past its edge.
   return (
     <div className="flex flex-wrap gap-3">
-      <div className="relative min-w-[12rem] flex-[2]">
+      <div className="relative flex-[2_1_20rem]">
         <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray" />
         <Input
           type="search"
@@ -26,7 +28,7 @@ export function FindingsFilterBar({ filters, onFilter }: FilterBarProps) {
         />
       </div>
 
-      <label className="flex flex-1 items-center gap-2 font-body text-[0.875rem]">
+      <label className="flex flex-auto items-center gap-2 font-body text-[0.875rem]">
         <span className="shrink-0 text-gray">{t('findings.filter.band')}</span>
         <Select
           value={filters.band}
@@ -42,7 +44,7 @@ export function FindingsFilterBar({ filters, onFilter }: FilterBarProps) {
         </Select>
       </label>
 
-      <label className="flex flex-1 items-center gap-2 font-body text-[0.875rem]">
+      <label className="flex flex-auto items-center gap-2 font-body text-[0.875rem]">
         <span className="shrink-0 text-gray">{t('findings.filter.exposure')}</span>
         <Select
           value={filters.exposure}
@@ -56,7 +58,7 @@ export function FindingsFilterBar({ filters, onFilter }: FilterBarProps) {
         </Select>
       </label>
 
-      <label className="flex flex-1 items-center gap-2 font-body text-[0.875rem]">
+      <label className="flex flex-auto items-center gap-2 font-body text-[0.875rem]">
         <span className="shrink-0 text-gray">{t('findings.filter.status')}</span>
         <Select
           value={filters.status}

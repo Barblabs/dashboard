@@ -24,7 +24,7 @@ interface ConnectionBarProps {
 export function ConnectionBar({ badge, details, actions, children }: ConnectionBarProps) {
   const shown = details.filter((detail) => detail !== false)
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border border-border-panel">
+    <div className="flex flex-col overflow-hidden rounded-xl border border-border-panel">
       <div className="flex flex-wrap items-center gap-4 bg-white px-6 py-4">
         <div className="flex min-w-0 basis-full flex-wrap items-center gap-2 md:flex-1">
           <Badge variant="solid">{badge}</Badge>

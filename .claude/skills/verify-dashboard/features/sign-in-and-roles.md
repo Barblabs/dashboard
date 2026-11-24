@@ -3,7 +3,7 @@
 ## Sub-features
 - Real mode: "Sign in" form (labels "Email", "Password") against Cognito, a "Create password" step for a temporary password, then `GET /me` sets the role. Errors show in an alert ("Incorrect email or password.", "Your account is disabled. Contact your administrator.", "Could not connect to the server.", ...)
 - Mock mode (this skill): "Test mode" role picker with buttons "Super Admin (platform_admin)", "Admin (customer_admin)", "Viewer (viewer)"; picking one stores the role in localStorage and then calls `GET /me`, which the mock answers as that role
-- After sign-in: back to the page the guard turned away, otherwise platform_admin lands on `/tenants` and the others on `/config`
+- After sign-in: back to the page the guard turned away, otherwise platform_admin lands on `/tenants` and the others on `/dashboard`
 - The session persists: a reload, a typed URL or a new tab stay signed in (a "Loading…" screen shows while it is restored); signing out in one tab ends the session in the others
 - Sidebar footer: user card (email and role label) and "Sign out", which returns to `/login`; platform_admin also gets a "Super Admin" badge under the logo
 - `/me` out of reach while restoring shows "Cannot connect to the server" with "Retry" and keeps the session

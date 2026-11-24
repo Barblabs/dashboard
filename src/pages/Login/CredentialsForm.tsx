@@ -91,7 +91,7 @@ export function CredentialsForm({ onNewPasswordRequired }: CredFormProps) {
         />
       </Field>
 
-      <Button type="submit" variant="secondary" size="lg" loading={isSubmitting} className="w-full justify-center">
+      <Button type="submit" variant="secondary" loading={isSubmitting} className="w-full justify-center">
         {isSubmitting ? t('login.form.submitting') : t('login.form.submit')}
       </Button>
     </form>

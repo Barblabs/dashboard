@@ -4,7 +4,7 @@ import { QueryBoundary } from '../../components/QueryBoundary'
 import { Message } from '../../components/ui/Message'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { CELL, HEADER_CELL } from '../../components/ui/table'
+import { CELL, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { requestErrorText } from '../../i18n/errors'
 import { useDateFormat } from '../../i18n/format'
 import { useCanEdit } from '../../auth/permissions'
@@ -73,7 +73,7 @@ export function SlackFailedDeliveries() {
             <div className="animate-fade-in overflow-x-auto">
               <table className="w-full border-collapse text-[0.875rem]">
                 <thead>
-                  <tr className="border-b-2 border-border-row">
+                  <tr className={HEADER_ROW}>
                     <th className={HEADER_CELL}>{t('slack.deliveries.columns.target')}</th>
                     <th className={HEADER_CELL}>{t('slack.deliveries.columns.kind')}</th>
                     <th className={HEADER_CELL}>{t('slack.deliveries.columns.attempts')}</th>

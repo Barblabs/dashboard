@@ -21,7 +21,7 @@ export const es: Translations = {
       config: 'Configuración',
       'business-context': 'Contexto empresarial',
       users: 'Usuarios',
-      tenants: 'Tenants',
+      tenants: 'Organizaciones',
       'admin-dashboard': 'Dashboard',
     },
     user: {

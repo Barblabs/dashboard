@@ -19,7 +19,7 @@ export const en = {
       config: 'Configuration',
       'business-context': 'Business context',
       users: 'Users',
-      tenants: 'Tenants',
+      tenants: 'Organizations',
       'admin-dashboard': 'Dashboard',
     },
     user: {

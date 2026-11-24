@@ -11,7 +11,7 @@ import { useDateFormat } from '../../i18n/format'
 import { AreaOwnerDialog } from './AreaOwnerDialog'
 import { FilterSelect } from './FilterSelect'
 import { pick } from './filters'
-import { CELL, HEADER_CELL } from '../../components/ui/table'
+import { CELL, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { Message } from '../../components/ui/Message'
 
 const DEFAULT_ACTIVITY: ActivityFilter = 'true'
@@ -73,7 +73,7 @@ function AreaRows({ areas, onEditOwner }: AreaRowsProps) {
     <div className="animate-fade-in overflow-x-auto">
       <table className="w-full border-collapse text-[0.875rem]">
         <thead>
-          <tr className="border-b-2 border-border-row">
+          <tr className={HEADER_ROW}>
             <th className={HEADER_CELL}>{t('config.areas.columns.area')}</th>
             <th className={HEADER_CELL}>{t('config.areas.columns.owner')}</th>
             <th className={HEADER_CELL}>{t('config.areas.columns.status')}</th>

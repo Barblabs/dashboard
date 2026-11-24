@@ -86,7 +86,7 @@ export function NewPasswordForm() {
         />
       </Field>
 
-      <Button type="submit" variant="secondary" size="lg" loading={isSubmitting} className="w-full justify-center">
+      <Button type="submit" variant="secondary" loading={isSubmitting} className="w-full justify-center">
         {isSubmitting ? t('login.newPassword.submitting') : t('login.newPassword.submit')}
       </Button>
     </form>

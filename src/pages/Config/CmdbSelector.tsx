@@ -55,7 +55,7 @@ export function CmdbSelector({ onSelect, className = '' }: Props) {
               )}
             </div>
             {p.available ? (
-              <Button size="lg" className="shrink-0" onClick={onSelect}>
+              <Button className="shrink-0" onClick={onSelect}>
                 {t('config.selector.select')}
               </Button>
             ) : (
