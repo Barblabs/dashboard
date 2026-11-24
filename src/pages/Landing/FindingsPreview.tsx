@@ -5,7 +5,7 @@ import { ScoreBandBadge } from '../Findings/ScoreBandBadge'
 import { MONO } from '../Findings/styles'
 import { SAMPLE_FINDINGS } from './samples'
 
-const ROW_DELAYS = ['[animation-delay:450ms]', '[animation-delay:540ms]', '[animation-delay:630ms]', '[animation-delay:720ms]', '[animation-delay:810ms]']
+const ROW_DELAYS = ['motion-safe:[animation-delay:370ms]', 'motion-safe:[animation-delay:460ms]', 'motion-safe:[animation-delay:550ms]', 'motion-safe:[animation-delay:640ms]', 'motion-safe:[animation-delay:730ms]']
 
 export function FindingsPreview() {
   const { t } = useTranslation()

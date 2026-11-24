@@ -12,13 +12,13 @@ export function Hero() {
     <section id="top" className="flex min-h-svh flex-col justify-center bg-navy pt-[calc(4rem+env(safe-area-inset-top))] pb-16">
       <div className={`${WRAP} grid items-center gap-12 py-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16`}>
         <div className="flex flex-col items-start">
-          <h1 className={`font-title text-balance text-[2.5rem] leading-[1.05] tracking-[-0.015em] text-white sm:text-[3.25rem] xl:text-[3.75rem] ${ENTER} [animation-delay:0ms]`}>
+          <h1 className={`font-title text-balance text-[2.5rem] leading-[1.05] tracking-[-0.015em] text-white sm:text-[3.25rem] xl:text-[3.75rem] ${ENTER}`}>
             {t('landing.hero.title')}
           </h1>
-          <p className={`mt-6 max-w-[46ch] font-body text-[1.0625rem] leading-[1.6] text-nav-text ${ENTER} [animation-delay:160ms]`}>
+          <p className={`mt-6 max-w-[46ch] font-body text-[1.0625rem] leading-[1.6] text-nav-text ${ENTER} motion-safe:[animation-delay:80ms]`}>
             {t('landing.hero.lead')}
           </p>
-          <div className={`mt-9 flex flex-wrap items-center gap-x-6 gap-y-4 ${ENTER} [animation-delay:240ms]`}>
+          <div className={`mt-9 flex flex-wrap items-center gap-x-6 gap-y-4 ${ENTER} motion-safe:[animation-delay:160ms]`}>
             <PrimaryAction size="lg" />
             <a
               href="#steps"
@@ -28,7 +28,7 @@ export function Hero() {
             </a>
           </div>
         </div>
-        <div className={`${ENTER} [animation-delay:320ms]`}>
+        <div className={`${ENTER} motion-safe:[animation-delay:240ms]`}>
           <FindingsPreview />
         </div>
       </div>
