@@ -1076,9 +1076,9 @@ export const es: Translations = {
         question: '¿Qué tan sensibles son los datos que guarda?',
         help: {
           public: 'Sus datos podrían publicarse sin hacer daño.',
-          private: 'Sus datos son solo para tu organización.',
-          highly_confidential: 'Sus datos son regulados o secretos y filtrarlos sería grave: expedientes médicos, datos de tarjetas o credenciales.',
-          confidential: 'Sus datos internos harían un daño serio si se filtraran, como información personal o financiera.',
+          private: 'Sus datos son información personal de empleados o proveedores.',
+          highly_confidential: 'Sus datos son exclusivos de una parte o área de la empresa.',
+          confidential: 'Sus datos están abiertos a cualquiera en la empresa.',
         },
         declare: 'Declarar Clasificación',
       },
