@@ -10,30 +10,22 @@ export function useLocale(): string {
   return i18n.resolvedLanguage ?? i18n.language
 }
 
-/*
- * `medium` spells the month ("Nov 11, 2026"), for tables; `numeric` is the browser's
- * default short date ("11/11/2026").
- */
-const DATE_STYLES = {
-  medium: { dateStyle: 'medium' },
-  numeric: {},
-} as const satisfies Record<string, Intl.DateTimeFormatOptions>
+/** A date with its month spelled out, "Nov 11, 2026", so it reads the same in every language. */
+const DATE_STYLE = { dateStyle: 'medium' } as const satisfies Intl.DateTimeFormatOptions
 
-export type DateStyle = keyof typeof DATE_STYLES
-
-export function useDateFormat(style: DateStyle = 'medium'): (iso: string) => string {
+export function useDateFormat(): (iso: string) => string {
   const locale = useLocale()
   return useMemo(() => {
-    const format = new Intl.DateTimeFormat(locale, DATE_STYLES[style])
+    const format = new Intl.DateTimeFormat(locale, DATE_STYLE)
     return (iso) => format.format(new Date(iso))
-  }, [locale, style])
+  }, [locale])
 }
 
 /** Two ISO dates as one period, saying once what they share: "Nov 16 – 17, 2026". */
 export function useDateRangeFormat(): (start: string, end: string) => string {
   const locale = useLocale()
   return useMemo(() => {
-    const format = new Intl.DateTimeFormat(locale, DATE_STYLES.medium)
+    const format = new Intl.DateTimeFormat(locale, DATE_STYLE)
     return (start, end) => format.formatRange(new Date(start), new Date(end))
   }, [locale])
 }
@@ -56,7 +48,7 @@ export function useListFormat(): (items: string[]) => string {
   }, [locale])
 }
 
-/** How long ago an ISO date was, in minutes under an hour and in hours after that. */
+/** How long ago an ISO date was: in minutes under an hour, hours under a day, and days after that. */
 export function useRelativeTime(): (iso: string) => string {
   const { t } = useTranslation()
   const locale = useLocale()
@@ -66,7 +58,8 @@ export function useRelativeTime(): (iso: string) => string {
       const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
       if (minutes < 1) return t('time.lessThanAMinute')
       if (minutes < 60) return format.format(-minutes, 'minute')
-      return format.format(-Math.floor(minutes / 60), 'hour')
+      if (minutes < 24 * 60) return format.format(-Math.floor(minutes / 60), 'hour')
+      return format.format(-Math.floor(minutes / (24 * 60)), 'day')
     }
   }, [locale, t])
 }

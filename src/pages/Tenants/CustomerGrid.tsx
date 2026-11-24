@@ -18,7 +18,7 @@ function CustomerCard({
   onDeactivate: () => void
 }) {
   const { t } = useTranslation()
-  const formatDate = useDateFormat('numeric')
+  const formatDate = useDateFormat()
   const isDeactivated = customer.deactivated_at !== null
 
   const reactivate = useReactivateCustomerMutation()
