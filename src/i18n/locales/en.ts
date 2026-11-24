@@ -822,7 +822,8 @@ export const en = {
   landing: {
     nav: {
       label: 'Sections',
-      flow: 'How it works',
+      flow: 'Data flow',
+      steps: 'How it works',
     },
     action: {
       signIn: 'Sign in',
@@ -850,6 +851,33 @@ export const en = {
       luna: 'Writes the action plan for each one',
       owner: 'Asset owner',
       team: 'Security team',
+    },
+    steps: {
+      title: 'From a CMDB record to a Slack message in four steps',
+      lead: 'Follow one finding, CVE-2021-41773 on web-01, from the iTop record to the message its owner reads.',
+      sync: {
+        title: 'Syncs your assets from iTop',
+        text: 'Each sync brings in your servers, virtual machines and the software they run.',
+        succeeded: 'Succeeded',
+        created: 'Created',
+        updated: 'Updated',
+        deactivated: 'Deactivated',
+      },
+      match: {
+        title: 'Matches software to CVEs',
+        text: 'Apache 2.4.49 on web-01 meets CVE-2021-41773, so barbattack opens a finding.',
+      },
+      score: {
+        title: 'Scores the finding',
+        text: 'How exploited the CVE is, weighed with how exposed and important the asset is.',
+        yes: 'Yes',
+      },
+      alert: {
+        title: 'Alerts the asset owner',
+        text: 'The owner gets a Slack message and the security team gets a copy.',
+        owner: 'New finding',
+        open: 'Open in barbattack',
+      },
     },
     closing: {
       title: 'Know what to patch first, and who patches it',

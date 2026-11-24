@@ -2,6 +2,7 @@ import { ClosingCta } from './ClosingCta'
 import { DataFlow } from './DataFlow'
 import { Hero } from './Hero'
 import { LandingNav } from './LandingNav'
+import { Steps } from './Steps'
 
 export function LandingPage() {
   return (
@@ -10,6 +11,7 @@ export function LandingPage() {
       <main>
         <Hero />
         <DataFlow />
+        <Steps />
       </main>
       <ClosingCta />
     </div>

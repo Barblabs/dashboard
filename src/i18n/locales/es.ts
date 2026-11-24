@@ -824,7 +824,8 @@ export const es: Translations = {
   landing: {
     nav: {
       label: 'Secciones',
-      flow: 'Cómo funciona',
+      flow: 'Flujo de datos',
+      steps: 'Cómo funciona',
     },
     action: {
       signIn: 'Entrar',
@@ -852,6 +853,33 @@ export const es: Translations = {
       luna: 'Escribe el plan de acción de cada uno',
       owner: 'Dueño del activo',
       team: 'Equipo de seguridad',
+    },
+    steps: {
+      title: 'De un registro de la CMDB a un mensaje de Slack en cuatro pasos',
+      lead: 'Sigue un hallazgo, CVE-2021-41773 en web-01, desde el registro de iTop hasta el mensaje que lee su dueño.',
+      sync: {
+        title: 'Sincroniza tus activos desde iTop',
+        text: 'Cada sincronización trae tus servidores, máquinas virtuales y el software que corren.',
+        succeeded: 'Correcta',
+        created: 'Creados',
+        updated: 'Actualizados',
+        deactivated: 'Desactivados',
+      },
+      match: {
+        title: 'Cruza el software con los CVE',
+        text: 'Apache 2.4.49 en web-01 coincide con CVE-2021-41773, así que barbattack abre un hallazgo.',
+      },
+      score: {
+        title: 'Calcula el Score del hallazgo',
+        text: 'Qué tan explotado está el CVE, ponderado con qué tan expuesto e importante es el activo.',
+        yes: 'Sí',
+      },
+      alert: {
+        title: 'Avisa al dueño del activo',
+        text: 'El dueño recibe un mensaje de Slack y el equipo de seguridad una copia.',
+        owner: 'Nuevo hallazgo',
+        open: 'Abrir en barbattack',
+      },
     },
     closing: {
       title: 'Qué parchear primero, y quién lo parchea',
