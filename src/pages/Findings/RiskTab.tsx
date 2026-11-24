@@ -299,7 +299,7 @@ function AssetBars({ assets }: { assets: AssetFindingBands[] }) {
   return (
     <div className="flex flex-col gap-4 p-6">
       <BandLegend bands={BANDS.filter((b) => data.some((row) => row[b] > 0))} />
-      <ul className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-4">
         {data.map((row) => (
           <li
             key={row.name}
@@ -316,22 +316,25 @@ function AssetBars({ assets }: { assets: AssetFindingBands[] }) {
             }}
           >
             <span className="w-32 shrink-0 truncate text-right text-navy">{row.name}</span>
-            <div className="relative h-5 flex-1 overflow-hidden rounded bg-panel" style={{ maxWidth: `${(row.total / maxTotal) * 100}%` }}>
-              {BANDS.filter((b) => row[b] > 0).reduce<{ segments: { band: Band; left: number; pct: number }[]; offset: number }>(
-                ({ segments, offset }, band) => {
-                  const pct = (row[band] / row.total) * 100
-                  return { segments: [...segments, { band, left: offset, pct }], offset: offset + pct }
-                },
-                { segments: [], offset: 0 },
-              ).segments.map(({ band, left, pct }) => (
-                <div
-                  key={band}
-                  className="absolute inset-y-0"
-                  style={{ left: `${left}%`, width: `${pct}%`, backgroundColor: BAND_COLORS[band] }}
-                />
-              ))}
+            {/* The track takes the row's free width and the bar a share of it, so a bar's length is its total. */}
+            <div className="flex-1">
+              <div className="relative h-2.5 overflow-hidden rounded-full bg-panel" style={{ width: `${(row.total / maxTotal) * 100}%` }}>
+                {BANDS.filter((b) => row[b] > 0).reduce<{ segments: { band: Band; left: number; pct: number }[]; offset: number }>(
+                  ({ segments, offset }, band) => {
+                    const pct = (row[band] / row.total) * 100
+                    return { segments: [...segments, { band, left: offset, pct }], offset: offset + pct }
+                  },
+                  { segments: [], offset: 0 },
+                ).segments.map(({ band, left, pct }) => (
+                  <div
+                    key={band}
+                    className="absolute inset-y-0"
+                    style={{ left: `${left}%`, width: `${pct}%`, backgroundColor: BAND_COLORS[band] }}
+                  />
+                ))}
+              </div>
             </div>
-            <span className="w-8 shrink-0 tabular-nums text-right font-semibold text-navy">{row.total}</span>
+            <span className="w-8 shrink-0 tabular-nums text-right text-navy">{row.total}</span>
           </li>
         ))}
       </ul>
