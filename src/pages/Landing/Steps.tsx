@@ -1,25 +1,52 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '../../components/ui/Badge'
 import { ScoreBandBadge } from '../Findings/ScoreBandBadge'
 import { Section } from './Section'
 
+const ENTER = 'motion-safe:animate-rise-in motion-reduce:animate-fade-in'
+
+const STEP_DELAYS = ['motion-safe:[animation-delay:0ms]', 'motion-safe:[animation-delay:80ms]', 'motion-safe:[animation-delay:160ms]', 'motion-safe:[animation-delay:240ms]']
+
+function useRevealOnView<T extends Element>() {
+  const ref = useRef<T>(null)
+  const [revealed, setRevealed] = useState(() => typeof IntersectionObserver === 'undefined')
+
+  useEffect(() => {
+    const element = ref.current
+    if (revealed || !element) return undefined
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        setRevealed(true)
+        observer.disconnect()
+      },
+      { rootMargin: '0px 0px -15% 0px', threshold: 0 },
+    )
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [revealed])
+
+  return { ref, revealed }
+}
+
 export function Steps() {
   const { t } = useTranslation()
+  const { ref, revealed } = useRevealOnView<HTMLOListElement>()
 
   return (
     <Section id="steps">
-      <ol className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Step title={t('landing.steps.sync.title')} text={t('landing.steps.sync.text')}>
+      <ol ref={ref} className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Step index={0} revealed={revealed} title={t('landing.steps.sync.title')} text={t('landing.steps.sync.text')}>
           <SyncRunCard />
         </Step>
-        <Step title={t('landing.steps.match.title')} text={t('landing.steps.match.text')}>
+        <Step index={1} revealed={revealed} title={t('landing.steps.match.title')} text={t('landing.steps.match.text')}>
           <MatchCard />
         </Step>
-        <Step title={t('landing.steps.score.title')} text={t('landing.steps.score.text')}>
+        <Step index={2} revealed={revealed} title={t('landing.steps.score.title')} text={t('landing.steps.score.text')}>
           <ScoreCard />
         </Step>
-        <Step title={t('landing.steps.alert.title')} text={t('landing.steps.alert.text')}>
+        <Step index={3} revealed={revealed} title={t('landing.steps.alert.title')} text={t('landing.steps.alert.text')}>
           <AlertCard />
         </Step>
       </ol>
@@ -27,9 +54,9 @@ export function Steps() {
   )
 }
 
-function Step({ title, text, children }: { title: string; text: string; children: ReactNode }) {
+function Step({ index, revealed, title, text, children }: { index: number; revealed: boolean; title: string; text: string; children: ReactNode }) {
   return (
-    <li className="flex flex-col overflow-hidden rounded-xl border border-border-panel bg-white">
+    <li className={`flex flex-col overflow-hidden rounded-xl border border-border-panel bg-white ${revealed ? `${ENTER} ${STEP_DELAYS[index]}` : 'opacity-0'}`}>
       <div aria-hidden="true" className="flex h-52 flex-col justify-center border-b border-border-panel bg-panel px-5">
         {children}
       </div>
