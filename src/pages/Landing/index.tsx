@@ -1,4 +1,5 @@
 import { ClosingCta } from './ClosingCta'
+import { DataFlow } from './DataFlow'
 import { Hero } from './Hero'
 import { LandingNav } from './LandingNav'
 
@@ -8,6 +9,7 @@ export function LandingPage() {
       <LandingNav />
       <main>
         <Hero />
+        <DataFlow />
       </main>
       <ClosingCta />
     </div>

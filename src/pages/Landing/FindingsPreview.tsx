@@ -23,8 +23,8 @@ export function FindingsPreview() {
       <table className="w-full table-fixed border-collapse text-[0.8125rem]">
         <thead>
           <tr className={HEADER_ROW}>
-            <th className={`${HEADER_CELL} w-[38%] pl-5 sm:w-[26%]`}>{t('findings.columns.cve')}</th>
-            <th className={`${HEADER_CELL} hidden sm:table-cell`}>{t('findings.columns.component')}</th>
+            <th className={`${HEADER_CELL} w-[55%] pl-5 sm:w-[28%] lg:w-[42%] xl:w-[28%]`}>{t('findings.columns.cve')}</th>
+            <th className={`${HEADER_CELL} hidden sm:table-cell lg:hidden xl:table-cell`}>{t('findings.columns.component')}</th>
             <th className={`${HEADER_CELL} w-[22%] max-sm:hidden`}>{t('findings.columns.asset')}</th>
             <th className={`${HEADER_CELL} pr-5 sm:w-[24%]`}>{t('findings.columns.score')}</th>
           </tr>
@@ -33,7 +33,7 @@ export function FindingsPreview() {
           {SAMPLE_FINDINGS.map((finding, index) => (
             <tr key={finding.cve} className={`motion-safe:animate-rise-in motion-reduce:animate-fade-in ${ROW_DELAYS[index]}`}>
               <td className={`${CELL} ${MONO} truncate pl-5 font-semibold`}>{finding.cve}</td>
-              <td className={`${CELL} ${MONO} hidden truncate sm:table-cell`}>{finding.component}</td>
+              <td className={`${CELL} ${MONO} hidden truncate sm:table-cell lg:hidden xl:table-cell`}>{finding.component}</td>
               <td className={`${CELL} truncate max-sm:hidden`}>{finding.asset}</td>
               <td className={`${CELL} ${MONO} pr-5 whitespace-nowrap`}>
                 {finding.score}

@@ -13,7 +13,7 @@ export function Hero() {
       <div className={`${WRAP} grid items-center gap-12 py-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16`}>
         <div className="flex flex-col items-start">
           <p className={`${EYEBROW} text-cyan ${ENTER}`}>{t('landing.hero.eyebrow')}</p>
-          <h1 className={`mt-5 font-title text-[2.5rem] leading-[1.05] tracking-[-0.015em] text-white sm:text-[3.25rem] lg:text-[3.75rem] ${ENTER} [animation-delay:80ms]`}>
+          <h1 className={`mt-5 font-title text-balance text-[2.5rem] leading-[1.05] tracking-[-0.015em] text-white sm:text-[3.25rem] xl:text-[3.75rem] ${ENTER} [animation-delay:80ms]`}>
             {t('landing.hero.title')}
           </h1>
           <p className={`mt-6 max-w-[46ch] font-body text-[1.0625rem] leading-[1.6] text-nav-text ${ENTER} [animation-delay:160ms]`}>
@@ -21,6 +21,12 @@ export function Hero() {
           </p>
           <div className={`mt-9 flex flex-wrap items-center gap-x-6 gap-y-4 ${ENTER} [animation-delay:240ms]`}>
             <PrimaryAction size="lg" />
+            <a
+              href="#flow"
+              className="rounded-md py-2.5 font-body text-[0.9375rem] font-semibold text-white underline decoration-white/30 underline-offset-4 transition-[text-decoration-color] duration-150 ease-[ease] hover:decoration-cyan focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"
+            >
+              {t('landing.hero.secondary')}
+            </a>
           </div>
         </div>
         <div className={`${ENTER} [animation-delay:320ms]`}>
