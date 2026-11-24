@@ -1,7 +1,9 @@
+import { Agents } from './Agents'
 import { ClosingCta } from './ClosingCta'
 import { DataFlow } from './DataFlow'
 import { Hero } from './Hero'
 import { LandingNav } from './LandingNav'
+import { Priorities } from './Priorities'
 import { Steps } from './Steps'
 
 export function LandingPage() {
@@ -12,6 +14,8 @@ export function LandingPage() {
         <Hero />
         <DataFlow />
         <Steps />
+        <Priorities />
+        <Agents />
       </main>
       <ClosingCta />
     </div>

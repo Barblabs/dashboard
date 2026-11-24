@@ -826,6 +826,8 @@ export const es: Translations = {
       label: 'Secciones',
       flow: 'Flujo de datos',
       steps: 'Cómo funciona',
+      priorities: 'Priorización',
+      agents: 'Agentes',
     },
     action: {
       signIn: 'Entrar',
@@ -880,6 +882,46 @@ export const es: Translations = {
         owner: 'Nuevo hallazgo',
         open: 'Abrir en barbattack',
       },
+    },
+    priorities: {
+      title: 'Grupos de prioridad que dicen qué corregir junto, y por qué',
+      lead: 'El Prioritizer agrupa los hallazgos abiertos que conviene atender a la vez, y Luna escribe el plan para corregir cada uno.',
+      groups: {
+        exposed: {
+          title: 'Fallos con exploit activo en servicios expuestos a internet',
+          reason: 'Los dos están en CISA KEV y corren en activos alcanzables desde internet.',
+        },
+        bastion: {
+          title: 'Una actualización de OpenSSH para el bastión',
+          reason: 'Una sola actualización del paquete lo cierra, y el host es la entrada a la red interna.',
+        },
+        internal: {
+          title: 'Servicios internos, después de los expuestos',
+          reason: 'api-03 no es alcanzable desde internet, así que espera a los grupos de arriba.',
+        },
+      },
+      plan: {
+        title: 'Plan de acción',
+        steps: {
+          upgrade: 'Actualiza Apache httpd a 2.4.51 o posterior',
+          restart: 'Reinicia el servicio y comprueba que vuelve a responder',
+          review: 'Revisa los logs de acceso en busca de path traversal codificado',
+        },
+        mitigation: 'Niega el acceso a la raíz del sistema de archivos con "Require all denied" en la configuración del servidor.',
+        verification: 'Ejecuta "httpd -v" en web-01 y confirma que reporta 2.4.51.',
+      },
+      closed: 'La siguiente sincronización vio Apache 2.4.51 en web-01 y cerró el hallazgo sola.',
+    },
+    agents: {
+      title: 'Agentes que leen, ordenan y explican',
+      lead: 'Cada agente hace una tarea. Los que ordenan o explican un hallazgo se basan solo en lo que barbattack guardó sobre él.',
+      prioritizer: 'Decide en qué orden atender tus hallazgos abiertos, pondera cada Score con lo que su activo significa para tu negocio y explica por qué.',
+      luna: 'Escribe el plan de acción de cada hallazgo: los pasos, qué lo mitiga mientras tanto y cómo confirmar la corrección.',
+      editor: 'Escribe tu resumen de noticias, agrupado por por qué cada una te importa.',
+      cartografo: 'Etiqueta cada vulnerabilidad con las técnicas de MITRE ATT&CK que le corresponden.',
+      drafter: 'Redacta tu contexto empresarial a partir de los documentos que le das, para que lo revises.',
+      drafterSample: 'Sectores, servicios críticos, regulaciones, apetito de riesgo',
+      rule: 'Los agentes aconsejan. Nunca cambian un Score ni cierran un hallazgo: los números salen de reglas y las decisiones quedan en tu equipo.',
     },
     closing: {
       title: 'Qué parchear primero, y quién lo parchea',

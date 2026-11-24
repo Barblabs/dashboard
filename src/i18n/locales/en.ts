@@ -824,6 +824,8 @@ export const en = {
       label: 'Sections',
       flow: 'Data flow',
       steps: 'How it works',
+      priorities: 'Prioritization',
+      agents: 'Agents',
     },
     action: {
       signIn: 'Sign in',
@@ -878,6 +880,46 @@ export const en = {
         owner: 'New finding',
         open: 'Open in barbattack',
       },
+    },
+    priorities: {
+      title: 'Priority groups that say what to fix together, and why',
+      lead: 'The Prioritizer groups the open findings to attend at the same time, and Luna writes the plan to fix each one.',
+      groups: {
+        exposed: {
+          title: 'Exploited flaws on internet-facing services',
+          reason: 'Both are in CISA KEV and run on assets reachable from the internet.',
+        },
+        bastion: {
+          title: 'One OpenSSH update for the bastion host',
+          reason: 'A single package update closes it, and the host is the way into the internal network.',
+        },
+        internal: {
+          title: 'Internal services, after the exposed ones',
+          reason: 'api-03 is not reachable from the internet, so it waits for the groups above.',
+        },
+      },
+      plan: {
+        title: 'Action plan',
+        steps: {
+          upgrade: 'Upgrade Apache httpd to 2.4.51 or later',
+          restart: 'Restart the service and check that it serves again',
+          review: 'Review the access logs for requests with encoded path traversal',
+        },
+        mitigation: 'Deny access to the file system root with "Require all denied" in the server configuration.',
+        verification: 'Run "httpd -v" on web-01 and confirm it reports 2.4.51.',
+      },
+      closed: 'The next sync saw Apache 2.4.51 on web-01 and closed the finding on its own.',
+    },
+    agents: {
+      title: 'Agents that read, order and explain',
+      lead: 'Each agent does one job. The ones that rank or explain a finding rely only on what barbattack stored about it.',
+      prioritizer: 'Decides the order to attend your open findings, weighing each Score with what its asset means to your business, and says why.',
+      luna: 'Writes the action plan for each finding: the steps, what mitigates it meanwhile and how to confirm the fix.',
+      editor: 'Writes your news digest, grouped by why each item matters to you.',
+      cartografo: 'Labels each vulnerability with the MITRE ATT&CK techniques it maps to.',
+      drafter: 'Drafts your business context from the documents you give it, for you to review.',
+      drafterSample: 'Sectors, critical services, regulations, risk appetite',
+      rule: 'Agents advise. They never change a Score or close a finding: the numbers come from rules, and the decisions stay with your team.',
     },
     closing: {
       title: 'Know what to patch first, and who patches it',
