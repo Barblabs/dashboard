@@ -122,6 +122,17 @@ export function BanIcon({ size = 16, className }: IconProps) {
   )
 }
 
+export function QuestionIcon({ size = 16, className }: IconProps) {
+  return (
+    <Icon size={size} viewBox={16} className={className}>
+      <circle cx="8" cy="8" r="6.5" strokeWidth="1.4" />
+      <path d="M6.1 6.2a1.95 1.95 0 1 1 2.7 1.8c-.5.2-.8.62-.8 1.15v.35" strokeWidth="1.4" />
+      {/* A zero-length line with round caps draws the dot. */}
+      <path d="M8 11.4h.01" strokeWidth="1.8" />
+    </Icon>
+  )
+}
+
 export function EyeIcon({ size = 16, className }: IconProps) {
   return (
     <Icon size={size} viewBox={16} className={className}>

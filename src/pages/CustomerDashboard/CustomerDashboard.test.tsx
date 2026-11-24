@@ -134,6 +134,17 @@ describe('CustomerDashboard', () => {
 
       expect(await screen.findByRole('img', { name: 'Critical: 3.5 days' })).toBeInTheDocument()
     })
+
+    it('explains how to read a chart when its ? is hovered', async () => {
+      const user = await openSummaryTab()
+
+      await user.hover(await screen.findByRole('button', { name: 'About Findings per week' }))
+
+      const help = await screen.findByRole('dialog', { name: 'Findings per week' })
+      // A blank line in the text starts a new paragraph, so each one is an element of its own.
+      expect(within(help).getByText(/^How many findings appeared/)).toHaveRole('paragraph')
+      expect(within(help).getByText(/^When “Closed” outgrows “New”/)).toHaveRole('paragraph')
+    })
   })
 
   describe('risk tab', () => {
@@ -208,6 +219,15 @@ describe('CustomerDashboard', () => {
       expect(screen.getByText('Stayed')).toBeInTheDocument()
       expect(screen.getByText('Went down')).toBeInTheDocument()
       expect(subioLabel.previousElementSibling).toHaveTextContent('6')
+    })
+
+    it('explains the movement summary, which has no header, from a ? in its corner', async () => {
+      const user = await openBeforeAfterTab()
+
+      await user.click(await screen.findByRole('button', { name: 'About Before & After' }))
+
+      const help = await screen.findByRole('dialog', { name: 'Before & After' })
+      expect(within(help).getByText(/“Match” is the share that stayed/)).toBeInTheDocument()
     })
 
     it('tells what each colour of the composition per group means', async () => {

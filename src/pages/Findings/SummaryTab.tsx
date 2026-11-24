@@ -30,7 +30,7 @@ export function SummaryTabContent() {
     <div className="flex flex-col gap-6">
       <ChartErrorBoundary>
         <Card>
-          <CardHeader title={t('findings.resumen.trendTitle')} />
+          <CardHeader title={t('findings.resumen.trendTitle')} help={t('findings.resumen.trendHelp')} />
           <div className="p-6">
             <QueryBoundary
               query={trendQuery}
@@ -48,7 +48,7 @@ export function SummaryTabContent() {
 
       <ChartErrorBoundary>
         <Card>
-          <CardHeader title={t('findings.resumen.ttcTitle')} />
+          <CardHeader title={t('findings.resumen.ttcTitle')} help={t('findings.resumen.ttcHelp')} />
           <QueryBoundary
             query={ttcQuery}
             keys={{
