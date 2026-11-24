@@ -44,7 +44,7 @@ export function Steps() {
           <MatchCard />
         </Step>
         <Step index={2} revealed={revealed} title={t('landing.steps.score.title')} text={t('landing.steps.score.text')}>
-          <ScoreCard />
+          <ScoreCard revealed={revealed} />
         </Step>
         <Step index={3} revealed={revealed} title={t('landing.steps.alert.title')} text={t('landing.steps.alert.text')}>
           <AlertCard />
@@ -122,7 +122,7 @@ function Chip({ label, value }: { label: string; value: string }) {
   )
 }
 
-function ScoreCard() {
+function ScoreCard({ revealed }: { revealed: boolean }) {
   const { t } = useTranslation()
   const inputs = [
     [t('landing.steps.score.exploited'), t('landing.steps.score.yes')],
@@ -142,7 +142,7 @@ function ScoreCard() {
       <div className="mt-3 flex items-center gap-2 border-t border-border-row pt-3">
         <span className="font-mono text-[1.125rem] font-medium text-navy">98</span>
         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-border-row">
-          <div className="h-full w-[98%] rounded-full bg-critical" />
+          <div className={`h-full w-[98%] origin-left rounded-full bg-critical ${revealed ? 'motion-safe:animate-fill-in motion-safe:[animation-delay:360ms]' : ''}`} />
         </div>
         <ScoreBandBadge band="critical" />
       </div>
