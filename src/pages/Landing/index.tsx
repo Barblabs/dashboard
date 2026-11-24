@@ -1,6 +1,5 @@
 import { Agents } from './Agents'
 import { ClosingCta } from './ClosingCta'
-import { DataFlow } from './DataFlow'
 import { Hero } from './Hero'
 import { LandingNav } from './LandingNav'
 import { Priorities } from './Priorities'
@@ -12,7 +11,6 @@ export function LandingPage() {
       <LandingNav />
       <main>
         <Hero />
-        <DataFlow />
         <Steps />
         <Priorities />
         <Agents />

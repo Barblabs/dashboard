@@ -822,7 +822,6 @@ export const en = {
   landing: {
     nav: {
       label: 'Sections',
-      flow: 'Data flow',
       steps: 'How it works',
       priorities: 'Prioritization',
       agents: 'Agents',
@@ -837,22 +836,6 @@ export const en = {
       lead: 'barbattack checks every asset in your iTop inventory against NVD, EPSS and the CISA KEV catalog, ranks the findings to fix first and alerts each asset owner on Slack.',
       secondary: 'See how it works',
       group: 'Exploited flaws on internet-facing services',
-    },
-    flow: {
-      title: 'From your CMDB and the feeds to the person who fixes it',
-      lead: 'barbattack reads your inventory and the public threat feeds, opens a finding for every vulnerability that affects an asset, and tells its owner.',
-      sources: 'Inventory and feeds',
-      news: 'News and leak sites',
-      core: {
-        match: 'Matches the software on each asset to known vulnerabilities',
-        finding: 'Opens a finding for every match',
-        score: 'Scores it from 0 to 100 with CVSS, EPSS, KEV and what the asset means to you',
-      },
-      agents: 'Agents',
-      prioritizer: 'Puts the open findings in the order to fix them',
-      luna: 'Writes the action plan for each one',
-      owner: 'Asset owner',
-      team: 'Security team',
     },
     steps: {
       title: 'From a CMDB record to a Slack message in four steps',

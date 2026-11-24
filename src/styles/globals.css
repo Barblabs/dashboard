@@ -61,21 +61,6 @@
   @keyframes rise-in {
     from { opacity: 0; translate: 0 14px; }
   }
-
-  --animate-flow-x: flow-x 3s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-  --animate-flow-y: flow-y 3s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-
-  @keyframes flow-x {
-    0% { left: -3px; opacity: 0; }
-    4%, 28% { opacity: 1; }
-    33%, 100% { left: calc(100% - 4px); opacity: 0; }
-  }
-
-  @keyframes flow-y {
-    0% { top: -3px; opacity: 0; }
-    4%, 28% { opacity: 1; }
-    33%, 100% { top: calc(100% - 4px); opacity: 0; }
-  }
 }
 
 /* Keyboard focus ring shared by the navy controls (buttons, inputs, links). */

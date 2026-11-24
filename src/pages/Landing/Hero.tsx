@@ -22,7 +22,7 @@ export function Hero() {
           <div className={`mt-9 flex flex-wrap items-center gap-x-6 gap-y-4 ${ENTER} [animation-delay:240ms]`}>
             <PrimaryAction size="lg" />
             <a
-              href="#flow"
+              href="#steps"
               className="rounded-md py-2.5 font-body text-[0.9375rem] font-semibold text-white underline decoration-white/30 underline-offset-4 transition-[text-decoration-color] duration-150 ease-[ease] hover:decoration-cyan focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"
             >
               {t('landing.hero.secondary')}

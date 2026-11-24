@@ -824,7 +824,6 @@ export const es: Translations = {
   landing: {
     nav: {
       label: 'Secciones',
-      flow: 'Flujo de datos',
       steps: 'Cómo funciona',
       priorities: 'Priorización',
       agents: 'Agentes',
@@ -839,22 +838,6 @@ export const es: Translations = {
       lead: 'barbattack revisa cada activo de tu inventario de iTop contra NVD, EPSS y el catálogo CISA KEV, ordena los hallazgos que conviene corregir primero y avisa por Slack al dueño de cada activo.',
       secondary: 'Ver cómo funciona',
       group: 'Fallos con exploit activo en servicios expuestos a internet',
-    },
-    flow: {
-      title: 'De tu CMDB y las fuentes a la persona que lo corrige',
-      lead: 'barbattack lee tu inventario y las fuentes públicas de amenazas, abre un hallazgo por cada vulnerabilidad que afecta a un activo y avisa a su dueño.',
-      sources: 'Inventario y fuentes',
-      news: 'Noticias y sitios de filtraciones',
-      core: {
-        match: 'Cruza el software de cada activo con las vulnerabilidades conocidas',
-        finding: 'Abre un hallazgo por cada coincidencia',
-        score: 'Le da un Score de 0 a 100 con CVSS, EPSS, KEV y lo que el activo significa para ti',
-      },
-      agents: 'Agentes',
-      prioritizer: 'Ordena los hallazgos abiertos en el orden en que corregirlos',
-      luna: 'Escribe el plan de acción de cada uno',
-      owner: 'Dueño del activo',
-      team: 'Equipo de seguridad',
     },
     steps: {
       title: 'De un registro de la CMDB a un mensaje de Slack en cuatro pasos',
