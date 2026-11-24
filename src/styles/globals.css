@@ -78,4 +78,10 @@
     background: var(--color-panel);
     color: var(--color-navy);
   }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:has([data-page="landing"]) {
+      scroll-behavior: smooth;
+    }
+  }
 }

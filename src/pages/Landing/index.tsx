@@ -7,7 +7,7 @@ import { Steps } from './Steps'
 
 export function LandingPage() {
   return (
-    <div className="bg-panel">
+    <div data-page="landing" className="bg-panel">
       <LandingNav />
       <main>
         <Hero />
