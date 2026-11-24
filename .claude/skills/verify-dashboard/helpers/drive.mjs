@@ -61,7 +61,7 @@ const ROLE_BUTTON = {
   customer_admin: 'Admin (customer_admin)',
   viewer: 'Viewer (viewer)',
 }
-const HOME = { platform_admin: '/tenants', customer_admin: '/config', viewer: '/config' }
+const HOME = { platform_admin: '/tenants', customer_admin: '/dashboard', viewer: '/dashboard' }
 
 // Signing in returns to the page the guard sent the visitor away from, if any; pass `landing`
 // when that is not the role's home.
@@ -189,7 +189,7 @@ const scenarios = {
     await menu.click()
     await expect(drawer.getByText('Super Admin', { exact: true }).first()).toBeVisible()
     await shot('super-admin-drawer')
-    for (const [name, pathname] of [['Dashboard', '/admin-dashboard'], ['Tenants', '/tenants']]) {
+    for (const [name, pathname] of [['Dashboard', '/admin-dashboard'], ['Organizations', '/tenants']]) {
       if (pathname === '/tenants') await menu.click()
       await drawerLink(name).click()
       await page.waitForURL(`**${pathname}`)
@@ -245,7 +245,7 @@ const scenarios = {
     await page.waitForURL('**/login')
     await signIn('platform_admin')
     const search = page.getByRole('searchbox', { name: 'Search by name…' })
-    const counter = page.getByText('3 organizations · 1 deactivated')
+    const counter = page.getByText('3 organizations, 1 deactivated')
     await expect(counter).toBeVisible()
     await checkNoSidewaysScroll('/tenants')
     const mainBox = await main.boundingBox()
@@ -830,8 +830,8 @@ const scenarios = {
     await tab('Summary').click()
     const trend = page.locator('section', { has: page.getByRole('heading', { name: 'Weekly trend of findings' }) })
     await expect(trend.getByText(/the line, those still open when the week ended/)).toBeVisible()
-    await expect(trend.getByText('9/29')).toBeVisible()
-    check(await trend.getByText('9/15').count() === 0, 'the trend shows the empty weeks before the first findings')
+    await expect(trend.getByText('Sep 29')).toBeVisible()
+    check(await trend.getByText('Sep 15').count() === 0, 'the trend shows the empty weeks before the first findings')
     await expect(page.getByRole('heading', { name: 'Time to close findings by risk level' })).toBeVisible()
     check(await page.getByText('No risk level').count() === 0, 'time to close shows a row with no risk level')
     await page.waitForTimeout(1800) // recharts draws its series in over 1.5 s
@@ -1017,7 +1017,7 @@ const scenarios = {
     await shot('viewer-forbidden-users')
     await signOut({ fresh: true })
     await signIn('platform_admin')
-    for (const link of ['Tenants', 'Dashboard']) await expect(sidebarLink(link)).toBeVisible()
+    for (const link of ['Organizations', 'Dashboard']) await expect(sidebarLink(link)).toBeVisible()
     check(await sidebarLink('Configuration').count() === 0, 'platform_admin sees Configuration')
     await expect(page.getByText('superadmin@barbattack.example')).toBeVisible()
     await goto('/config')
@@ -1099,7 +1099,7 @@ const scenarios = {
   async tenants() {
     await signIn('platform_admin')
     await expect(page.getByRole('heading', { name: 'Organizations' })).toBeVisible()
-    await expect(page.getByText('3 organizations · 1 deactivated')).toBeVisible()
+    await expect(page.getByText('3 organizations, 1 deactivated')).toBeVisible()
     await shot('list')
     const create = async (name) => {
       await page.getByRole('button', { name: 'New organization' }).click()
@@ -1109,11 +1109,11 @@ const scenarios = {
       await page.getByRole('button', { name: 'Create and send invitation' }).click()
     }
     await create('Delta SA')
-    await expect(page.getByText('4 organizations · 1 deactivated')).toBeVisible()
+    await expect(page.getByText('4 organizations, 1 deactivated')).toBeVisible()
     const card = (name) => page.getByTestId('customer-card').filter({ hasText: name })
     await card('Acme Corp').getByRole('button', { name: 'Deactivate', exact: true }).click()
     await page.getByRole('button', { name: 'Yes, deactivate' }).click()
-    await expect(page.getByText('4 organizations · 2 deactivated')).toBeVisible()
+    await expect(page.getByText('4 organizations, 2 deactivated')).toBeVisible()
     await shot('created-and-deactivated')
     await create('beta ltd')
     await expect(page.getByRole('alert').filter({ hasText: 'An organization with this name already exists.' })).toBeVisible()
