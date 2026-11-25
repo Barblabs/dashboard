@@ -925,8 +925,7 @@ export const en = {
       closed: 'The next sync saw Apache 2.4.51 on web-01 and closed the finding on its own.',
     },
     agents: {
-      title: 'AI agents for your security team',
-      lead: 'The agents advise and your team decides. They never change a Score or close a finding.',
+      title: "How barbattack's AI helps your security team",
       prioritizer: 'Orders your open findings by what each asset means to your business, and explains the order.',
       luna: 'Writes the action plan for each finding: the steps, what mitigates it meanwhile and how to confirm the fix.',
       editor: 'Writes your news digest and groups each story by why it concerns you.',

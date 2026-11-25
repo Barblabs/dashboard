@@ -927,8 +927,7 @@ export const es: Translations = {
       closed: 'La siguiente sincronización vio Apache 2.4.51 en web-01 y cerró el hallazgo sola.',
     },
     agents: {
-      title: 'Agentes de IA para tu equipo de seguridad',
-      lead: 'Los agentes aconsejan y tu equipo decide. Nunca cambian un Score ni cierran un hallazgo.',
+      title: 'Cómo la IA de barbattack ayuda a tu equipo de seguridad',
       prioritizer: 'Ordena tus hallazgos abiertos según lo que cada activo significa para tu negocio, y explica por qué.',
       luna: 'Escribe el plan de acción de cada hallazgo: los pasos, qué lo mitiga mientras tanto y cómo confirmar la corrección.',
       editor: 'Escribe tu resumen de noticias y agrupa cada noticia según por qué te afecta.',

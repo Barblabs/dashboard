@@ -9,7 +9,7 @@ export function Agents() {
   const { t } = useTranslation()
 
   return (
-    <Section id="agents" lead={t('landing.agents.lead')}>
+    <Section id="agents">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <AgentCard name="Prioritizer" text={t('landing.agents.prioritizer')} className="lg:col-span-2">
           <div className="flex flex-wrap gap-2">
