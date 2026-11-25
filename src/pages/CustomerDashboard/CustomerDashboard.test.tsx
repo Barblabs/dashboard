@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { AreaHealth } from '../../api/areas'
+import type { CriticalServiceHealth } from '../../api/businessContext'
 import { apiUrl } from '../../mocks/url'
 import { renderApp, seedSource } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
@@ -54,6 +55,28 @@ function areaRows(card: HTMLElement) {
   return within(card).getAllByRole('row').slice(1)
 }
 
+type ServiceCounts = Pick<CriticalServiceHealth, 'critical_open' | 'high_open' | 'in_the_news' | 'unmatched_assets'>
+
+const NO_COUNTS: ServiceCounts = { critical_open: 0, high_open: 0, in_the_news: 0, unmatched_assets: [] }
+
+function clearService(name: string, counts: Partial<ServiceCounts> = {}): CriticalServiceHealth {
+  return { name, status: 'clear', oldest_critical_days: null, ...NO_COUNTS, ...counts }
+}
+
+function serviceWithCritical(
+  name: string, status: 'at_risk' | 'watch', oldestCriticalDays: number, counts: Partial<ServiceCounts>,
+): CriticalServiceHealth {
+  return { name, status, oldest_critical_days: oldestCriticalDays, ...NO_COUNTS, ...counts }
+}
+
+function criticalServicesOf(...services: CriticalServiceHealth[]) {
+  server.use(http.get(apiUrl('/critical-services'), () => HttpResponse.json({ critical_services: services })))
+}
+
+async function servicesCard() {
+  return screen.findByRole('region', { name: 'Your critical services' })
+}
+
 function minutesAgo(minutes: number) {
   return new Date(Date.now() - minutes * 60_000).toISOString()
 }
@@ -103,7 +126,7 @@ describe('CustomerDashboard', () => {
     expect(screen.queryAllByRole('button', { name: /^About / })).toHaveLength(0)
   })
 
-  it('shows the sync line, the tabs, then the cards, the backlog line, the Areas, Start here and Coming back soon', async () => {
+  it('shows the sync line, the tabs, then the cards, the backlog line, the Areas, Start here, the critical services and Coming back soon', async () => {
     seedSource()
     renderApp('/dashboard')
 
@@ -114,6 +137,7 @@ describe('CustomerDashboard', () => {
       await screen.findByRole('heading', { name: 'The open backlog is growing' }),
       await areasCard('3 Areas need help'),
       screen.getByRole('region', { name: 'Start here' }),
+      await servicesCard(),
       screen.getByRole('region', { name: 'Coming back soon' }),
     ]
     for (const [before, after] of inOrder.slice(0, -1).map((el, i) => [el, inOrder[i + 1]] as const)) {
@@ -564,6 +588,54 @@ describe('CustomerDashboard', () => {
 
       const card = await areasCard('No Area needs help')
       expect(within(card).getByText('25 assets · No owner')).toBeInTheDocument()
+    })
+  })
+
+  describe('Your critical services', () => {
+    it('words each service by its status, in the order returned', async () => {
+      criticalServicesOf(
+        serviceWithCritical('Online payments', 'at_risk', 9, { critical_open: 3, in_the_news: 2 }),
+        serviceWithCritical('Card issuing', 'at_risk', 4, { critical_open: 1 }),
+        serviceWithCritical('Billing', 'watch', 47, { critical_open: 2 }),
+        clearService('Payroll', { high_open: 4 }),
+        clearService('Website'),
+      )
+      renderApp('/dashboard')
+
+      const card = await servicesCard()
+      expect(within(card).getByText('The ones named in your Business Context.')).toBeInTheDocument()
+      const rows = await within(card).findAllByRole('listitem')
+      expect(rows.map((row) => row.textContent)).toEqual([
+        'Online paymentsAt risk3 Critical open, and 2 of them in the news this week',
+        'Card issuingAt risk1 Critical open, exploited in the wild',
+        'BillingWatch2 Critical open for 47 days',
+        'PayrollClearNo Critical open · 4 High',
+        'WebsiteClearNo Critical open',
+      ])
+    })
+
+    it('names the Assets of a service that are not in the inventory', async () => {
+      criticalServicesOf(
+        clearService('Payroll', { unmatched_assets: ['payroll-legacy', 'hr-portal'] }),
+        clearService('Website'),
+      )
+      renderApp('/dashboard')
+
+      const [payroll, website] = await within(await servicesCard()).findAllByRole('listitem')
+      expect(within(payroll).getByText('payroll-legacy and hr-portal not found in your inventory')).toBeInTheDocument()
+      expect(website).not.toHaveTextContent('not found in your inventory')
+    })
+
+    it('sends to Business context to name the services when there are none', async () => {
+      criticalServicesOf()
+      const user = renderApp('/dashboard')
+
+      await user.click(
+        await within(await servicesCard()).findByRole('link', {
+          name: 'Name your critical services in Business context to see them here.',
+        }),
+      )
+      expect(window.location.pathname).toBe('/business-context')
     })
   })
 

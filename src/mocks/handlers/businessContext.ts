@@ -1,9 +1,12 @@
 import { delay, http, HttpResponse } from 'msw'
 import { z, type ZodType } from 'zod'
 import { isStated, type BusinessContextFields, type DraftSource } from '../../api/businessContext'
+import type { Schemas } from '../../api/schemas'
 import { businessContextSchema } from '../../pages/BusinessContext/schema'
 import { KEY_FIELDS, businessContextStore, MOCK_DRAFT } from '../business-context-store'
+import { mockCriticalServices } from '../critical-services'
 import { apiUrl } from '../url'
+import { mockCaller } from './auth'
 import { failure, parsedBody } from './responses'
 
 const saveBody = z.object({ version: z.number().int(), context: businessContextSchema }) satisfies ZodType<{
@@ -58,5 +61,11 @@ export const businessContextHandlers = [
     // The real Drafter takes a while; tests run without the wait.
     if (import.meta.env.MODE !== 'test') await delay(2500)
     return HttpResponse.json({ context: MOCK_DRAFT, gaps: gaps(MOCK_DRAFT) })
+  }),
+
+  http.get(apiUrl('/critical-services'), async () => {
+    if (mockCaller().role === 'platform_admin') return failure(403, 'forbidden', 'a platform admin acts for no customer')
+    await delay()
+    return HttpResponse.json<Schemas['CriticalServiceHealthListResponse']>({ critical_services: mockCriticalServices })
   }),
 ]

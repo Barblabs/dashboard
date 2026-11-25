@@ -302,6 +302,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/critical-services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Report how each Critical Service is doing with the open Findings of its Assets
+         * @description One entry per Critical Service of the latest Business Context, in its order; none without a Business Context. A listed Asset name matches every Active Asset with the same name once both are trimmed, ignoring case, and a Finding on an Asset matched twice counts once. status is at_risk when an open Critical Finding is in CISA KEV or in the news, otherwise watch when any open Finding is Critical, otherwise clear. A Finding is in the news when a News Item published in the last 7 days names its CVE. The list is not paged.
+         */
+        get: operations["get-critical-services"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/customers": {
         parameters: {
             query?: never;
@@ -1233,6 +1253,36 @@ export interface components {
             name: string;
         } & {
             [key: string]: unknown;
+        };
+        CriticalServiceHealthListResponse: {
+            critical_services: components["schemas"]["CriticalServiceHealthResponse"][];
+        };
+        CriticalServiceHealthResponse: {
+            /**
+             * Format: int64
+             * @description Open Findings on its Assets whose latest Score is Critical
+             */
+            critical_open: number;
+            /**
+             * Format: int64
+             * @description Open Findings on its Assets whose latest Score is High
+             */
+            high_open: number;
+            /**
+             * Format: int64
+             * @description Open Critical Findings on its Assets whose CVE a News Item published in the last 7 days names
+             */
+            in_the_news: number;
+            name: string;
+            /**
+             * Format: int64
+             * @description As in GET /areas/health; null when none is Critical
+             */
+            oldest_critical_days: number | null;
+            /** @enum {string} */
+            status: "at_risk" | "watch" | "clear";
+            /** @description The Asset names that match no Active Asset, as the Business Context states them */
+            unmatched_assets: string[];
         };
         CriticalServiceResponse: {
             description: string;
@@ -3404,6 +3454,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-critical-services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CriticalServiceHealthListResponse"];
                 };
             };
             /** @description Unauthorized */

@@ -2,6 +2,7 @@ import { AreasNeedingHelp } from './AreasNeedingHelp'
 import { BacklogLine } from './BacklogLine'
 import { ClosesPanel } from './ClosesPanel'
 import { ComingBackSoon } from './ComingBackSoon'
+import { CriticalServices } from './CriticalServices'
 import { HeadlineCards } from './HeadlineCards'
 import { StartHere } from './StartHere'
 
@@ -14,8 +15,9 @@ export function Overview() {
         <ClosesPanel />
       </div>
       <AreasNeedingHelp />
-      <div className="grid items-start gap-6 lg:grid-cols-2">
+      <div className="grid items-start gap-6 lg:grid-cols-3">
         <StartHere />
+        <CriticalServices />
         <ComingBackSoon />
       </div>
     </div>
