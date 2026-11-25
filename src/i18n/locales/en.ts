@@ -99,6 +99,16 @@ export const en = {
   dashboard: {
     title: 'Summary',
     subtitle: 'An overview of your findings.',
+    loading: 'Loading…',
+    failed: "Couldn't load this.",
+    network: "Couldn't reach the server to load this.",
+    backlog: {
+      shrinking: 'The open backlog is shrinking',
+      growing: 'The open backlog is growing',
+      steady: 'The open backlog is holding steady',
+      tooShort: 'The trend appears after your second week.',
+      chart: 'Findings open at the end of each week since {{start}}: {{first}} then, {{highest}} at the most, {{last}} now',
+    },
     tabs: {
       overview: 'Overview',
       analysis: 'Prioritization and threats',

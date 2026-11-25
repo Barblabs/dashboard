@@ -7,17 +7,18 @@ import { holdRequests, server } from '../../test/server'
 
 const SUMMARY = { open: 23, critical: 5, high: 8, medium: 7, low: 3, unbanded: 0, kev: 4, critical_internet_facing: 3 }
 
-function week(startsOn: string, openAtEnd: number) {
-  return { week: startsOn, starts_on: startsOn, opened: 0, closed: 0, open_at_end: openAtEnd }
+/** The weekly trend, one week per value of `open_at_end`, the last one the current week. */
+function trendOf(...openAtEnd: number[]) {
+  const weeks = openAtEnd.map((open, i) => {
+    const startsOn = new Date(Date.UTC(2026, 8, 28 + i * 7)).toISOString().slice(0, 10)
+    return { week: startsOn, starts_on: startsOn, opened: 0, closed: 0, open_at_end: open }
+  })
+  server.use(http.get(apiUrl('/findings/weekly-trend'), () => HttpResponse.json({ weeks })))
 }
 
-/** The weekly trend with last week ending at `lastWeek` open and the current week at 23, as the summary says. */
+/** Last week ending at `lastWeek` open and the current week at 23, as the summary says. */
 function lastWeekEndedWith(lastWeek: number) {
-  server.use(
-    http.get(apiUrl('/findings/weekly-trend'), () =>
-      HttpResponse.json({ weeks: [week('2026-11-02', 12), week('2026-11-09', lastWeek), week('2026-11-16', 23)] }),
-    ),
-  )
+  trendOf(12, lastWeek, 23)
 }
 
 function minutesAgo(minutes: number) {
@@ -169,6 +170,38 @@ describe('CustomerDashboard', () => {
       holdRequests('get', '/findings/summary')
       await user.click(screen.getByRole('link', { name: 'Summary' }))
       expect(within(await openCard()).queryByText('23')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('backlog line', () => {
+    it.each([
+      ['shrinking', [30, 25, 20]],
+      ['growing', [12, 15, 23]],
+      ['holding steady', [20, 30, 20]],
+    ])('says the backlog is %s, comparing its first week with now', async (direction, values) => {
+      trendOf(...values)
+      renderApp('/dashboard')
+
+      expect(await screen.findByRole('heading', { name: `The open backlog is ${direction}` })).toBeInTheDocument()
+    })
+
+    it('labels the first week, the highest and now, and no other', async () => {
+      trendOf(0, 0, 12, 30, 25, 18)
+      renderApp('/dashboard')
+
+      const chart = await screen.findByRole('img', { name: /^Findings open at the end of each week since Oct 12/ })
+      expect(within(chart).getByText('12')).toBeInTheDocument()
+      expect(within(chart).getByText('30')).toBeInTheDocument()
+      expect(within(chart).getByText('18')).toBeInTheDocument()
+      expect(within(chart).queryByText('25')).not.toBeInTheDocument()
+    })
+
+    it('waits for a second week before drawing a trend', async () => {
+      trendOf(0, 0, 12)
+      renderApp('/dashboard')
+
+      expect(await screen.findByText('The trend appears after your second week.')).toBeInTheDocument()
+      expect(screen.queryByRole('img', { name: /^Findings open/ })).not.toBeInTheDocument()
     })
   })
 

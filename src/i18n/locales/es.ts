@@ -101,6 +101,16 @@ export const es: Translations = {
   dashboard: {
     title: 'Resumen',
     subtitle: 'Un resumen de tus hallazgos.',
+    loading: 'Cargando…',
+    failed: 'No se pudo cargar.',
+    network: 'No se pudo contactar al servidor para cargarlo.',
+    backlog: {
+      shrinking: 'Los hallazgos abiertos están bajando',
+      growing: 'Los hallazgos abiertos están subiendo',
+      steady: 'Los hallazgos abiertos se mantienen',
+      tooShort: 'La tendencia aparece después de tu segunda semana.',
+      chart: 'Hallazgos abiertos al final de cada semana desde el {{start}}: {{first}} entonces, {{highest}} como máximo, {{last}} ahora',
+    },
     tabs: {
       overview: 'Vista general',
       analysis: 'Priorización y amenazas',
