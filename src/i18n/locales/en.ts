@@ -97,7 +97,7 @@ export const en = {
     comingSoon: 'Coming soon',
   },
   dashboard: {
-    title: 'Dashboard',
+    title: 'Summary',
     subtitle: 'An overview of your findings.',
   },
   findings: {
@@ -803,7 +803,7 @@ export const en = {
     },
   },
   adminDashboard: {
-    title: 'Dashboard',
+    title: 'Summary',
     loading: 'Loading…',
     loadFailed: 'Could not load dashboard data.',
     networkError: 'Could not reach the server to load the dashboard.',

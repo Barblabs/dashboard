@@ -10,7 +10,7 @@ describe('Navigation', () => {
   it('marks the open page in the sidebar', async () => {
     renderApp()
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Summary' })).toBeInTheDocument()
     expect(nav().getByRole('link', { name: 'Summary' })).toHaveAttribute('aria-current', 'page')
   })
 
@@ -33,7 +33,7 @@ describe('Navigation', () => {
 
     await user.click(screen.getByRole('link', { name: 'Back to home' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Summary' })).toBeInTheDocument()
   })
 
   it('shows the forbidden page', () => {
@@ -85,7 +85,7 @@ describe('returnTo after sign-in', () => {
 
     await user.click(screen.getByRole('button', { name: 'Admin (customer_admin)' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Summary' })).toBeInTheDocument()
     expect(window.location.pathname).toBe('/dashboard')
   })
 })

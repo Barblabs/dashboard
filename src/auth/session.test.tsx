@@ -123,7 +123,7 @@ describe('Returning after signing in', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Admin (customer_admin)' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Summary' })).toBeInTheDocument()
   })
 
   it("opens a Platform Admin's home when no page was asked for", async () => {
@@ -140,7 +140,7 @@ describe('Returning after signing in', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Viewer (viewer)' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Summary' })).toBeInTheDocument()
     expect(window.location.pathname).toBe('/dashboard')
   })
 })
@@ -215,7 +215,7 @@ describe('Session', () => {
   it('sends a session that is not deactivated away from the deactivated page', async () => {
     renderApp('/deactivated')
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Summary' })).toBeInTheDocument()
   })
 
   it('ignores a deactivation that arrives after signing out', () => {

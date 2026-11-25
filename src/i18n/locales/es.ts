@@ -99,7 +99,7 @@ export const es: Translations = {
     comingSoon: 'Próximamente',
   },
   dashboard: {
-    title: 'Dashboard',
+    title: 'Resumen',
     subtitle: 'Un resumen de tus hallazgos.',
   },
   findings: {
@@ -805,7 +805,7 @@ export const es: Translations = {
     },
   },
   adminDashboard: {
-    title: 'Dashboard',
+    title: 'Resumen',
     loading: 'Cargando…',
     loadFailed: 'No se pudo cargar el dashboard.',
     networkError: 'No se pudo contactar al servidor para cargar el dashboard.',

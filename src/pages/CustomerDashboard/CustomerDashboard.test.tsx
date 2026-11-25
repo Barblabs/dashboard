@@ -33,7 +33,7 @@ describe('CustomerDashboard', () => {
   it('shows the Dashboard heading with Summary tab selected by default', async () => {
     renderApp('/dashboard')
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Summary' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Summary' })).toHaveAttribute('aria-selected', 'true')
   })
 
