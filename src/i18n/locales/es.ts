@@ -179,6 +179,9 @@ export const es: Translations = {
       clearHigh_other: 'Ningún Crítico abierto · {{count}} Altos',
       unmatched: '{{names}} no aparece en tu inventario',
       empty: 'Nombra tus servicios críticos en Contexto empresarial para verlos aquí.',
+      showAll_one: 'Ver los {{count}} servicios',
+      showAll_other: 'Ver los {{count}} servicios',
+      showFewer: 'Ver menos',
     },
     areas: {
       title_one: '{{count}} área necesita ayuda',

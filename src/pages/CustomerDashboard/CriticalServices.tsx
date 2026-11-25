@@ -1,13 +1,16 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useCriticalServicesQuery, type CriticalServiceHealth } from '../../api/businessContext'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge, type BadgeVariant } from '../../components/ui/Badge'
+import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { useLocale } from '../../i18n/format'
 
 const TEXT_LINK = 'focus-ring rounded-sm font-body font-semibold text-nav-active-bg hover:underline'
+
+const ROWS = 5
 
 const PILLS: Record<CriticalServiceHealth['status'], BadgeVariant> = {
   at_risk: 'critical',
@@ -37,6 +40,8 @@ export function CriticalServices() {
 
 function ServiceList({ services }: { services: CriticalServiceHealth[] }) {
   const { t } = useTranslation()
+  const listId = useId()
+  const [expanded, setExpanded] = useState(false)
 
   if (services.length === 0) {
     return (
@@ -48,12 +53,30 @@ function ServiceList({ services }: { services: CriticalServiceHealth[] }) {
     )
   }
 
+  const shown = expanded ? services : services.slice(0, ROWS)
+
   return (
-    <ul className="flex flex-col gap-3 p-6">
-      {services.map((service, i) => (
-        <ServiceRow key={i} service={service} />
-      ))}
-    </ul>
+    <>
+      <ul id={listId} className="flex flex-col gap-3 p-6">
+        {shown.map((service, i) => (
+          <ServiceRow key={i} service={service} />
+        ))}
+      </ul>
+      {services.length > ROWS && (
+        <div className="border-t border-border-panel px-6 py-4">
+          <Button
+            variant="link"
+            size="sm"
+            className="font-semibold"
+            aria-expanded={expanded}
+            aria-controls={listId}
+            onClick={() => setExpanded(!expanded)}
+          >
+            {expanded ? t('dashboard.services.showFewer') : t('dashboard.services.showAll', { count: services.length })}
+          </Button>
+        </div>
+      )}
+    </>
   )
 }
 
