@@ -16,9 +16,19 @@ function trendOf(...openAtEnd: number[]) {
   server.use(http.get(apiUrl('/findings/weekly-trend'), () => HttpResponse.json({ weeks })))
 }
 
-/** Last week ending at `lastWeek` open and the current week at 23, as the summary says. */
-function lastWeekEndedWith(lastWeek: number) {
-  trendOf(12, lastWeek, 23)
+const CLOSES = {
+  current: { opened: 26, fixed: 38, went_away: 9, set_aside: 5 },
+  previous: { opened: 30, fixed: 31, went_away: 4, set_aside: 6 },
+  critical_fixed_median_days: 6,
+}
+
+function closesOf(closes: { current?: Partial<typeof CLOSES.current>; previousFixed?: number; median?: number | null }) {
+  const body = {
+    current: { ...CLOSES.current, ...closes.current },
+    previous: { ...CLOSES.previous, fixed: closes.previousFixed ?? CLOSES.previous.fixed },
+    critical_fixed_median_days: closes.median === undefined ? CLOSES.critical_fixed_median_days : closes.median,
+  }
+  server.use(http.get(apiUrl('/findings/closes'), () => HttpResponse.json(body)))
 }
 
 function minutesAgo(minutes: number) {
@@ -39,6 +49,10 @@ function closed(cve: string, reason: string, reopenAt: string | null) {
 
 async function openCard() {
   return screen.findByRole('region', { name: 'Open right now' })
+}
+
+async function fixedCard() {
+  return screen.findByRole('region', { name: 'Fixed by your teams in the last 30 days' })
 }
 
 async function openAnalysisTab() {
@@ -108,7 +122,7 @@ describe('CustomerDashboard', () => {
 
     it('shows no line with no CMDB connected', async () => {
       renderApp('/dashboard')
-      await within(await openCard()).findByText('↑ 2 since last Monday')
+      await within(await openCard()).findByText('26 new and 52 closed in the last 30 days')
 
       expect(screen.queryByText(/^Inventory synced|inventory sync failed/)).not.toBeInTheDocument()
     })
@@ -174,27 +188,11 @@ describe('CustomerDashboard', () => {
   })
 
   describe('Open right now', () => {
-    it('says in green how many fewer are open than last Monday', async () => {
-      lastWeekEndedWith(41)
+    it('says how many were opened and closed in the last 30 days, every way of closing counted', async () => {
+      closesOf({ current: { opened: 15, fixed: 7, went_away: 3, set_aside: 2 } })
       renderApp('/dashboard')
 
-      const change = await within(await openCard()).findByText('↓ 18 since last Monday')
-      expect(change).toHaveClass('text-good')
-    })
-
-    it('says in red how many more are open than last Monday', async () => {
-      lastWeekEndedWith(19)
-      renderApp('/dashboard')
-
-      const change = await within(await openCard()).findByText('↑ 4 since last Monday')
-      expect(change).toHaveClass('text-critical')
-    })
-
-    it('says when as many are open as last Monday', async () => {
-      lastWeekEndedWith(23)
-      renderApp('/dashboard')
-
-      expect(await within(await openCard()).findByText('No change since last Monday')).toBeInTheDocument()
+      expect(await within(await openCard()).findByText('15 new and 12 closed in the last 30 days')).toBeInTheDocument()
     })
 
     it('forgets the counts of a CMDB once it is disconnected', async () => {
@@ -242,6 +240,68 @@ describe('CustomerDashboard', () => {
 
       expect(await screen.findByText('The trend appears after your second week.')).toBeInTheDocument()
       expect(screen.queryByRole('img', { name: /^Findings open/ })).not.toBeInTheDocument()
+    })
+  })
+
+  describe('closes panel', () => {
+    it('counts the closes in the last 30 days as Fixed, Went away and Set aside', async () => {
+      closesOf({ current: { fixed: 7, went_away: 3, set_aside: 2 } })
+      renderApp('/dashboard')
+      const panel = await screen.findByRole('region', { name: '12 closed in the last 30 days' })
+
+      expect(within(panel).getAllByRole('listitem').map((row) => row.textContent)).toEqual([
+        '7Fixed: patched, as the CMDB now shows, or marked remediated',
+        '3Went away: asset retired or CVE withdrawn',
+        '2Set aside: accepted risk, postponed or false positive.',
+      ])
+    })
+
+    it('says how many set aside come back in the next 30 days, and by when', async () => {
+      server.use(
+        http.get(apiUrl('/findings/closed'), () =>
+          HttpResponse.json({
+            findings: [
+              closed('CVE-0000-0001', 'postponed', daysFromNow(3)),
+              closed('CVE-0000-0002', 'accepted_risk', daysFromNow(20)),
+              closed('CVE-0000-0003', 'postponed', daysFromNow(40)),
+            ],
+          }),
+        ),
+      )
+      renderApp('/dashboard')
+      const panel = await screen.findByRole('region', { name: /closed in the last 30 days$/ })
+
+      const setAside = within(panel).getAllByRole('listitem')[2]
+      expect(await within(setAside).findByText(/^2 come back before \w{3} \d+, \d{4}$/)).toBeInTheDocument()
+    })
+
+    it('counts a finding closed by hand as Set aside once it is closed', async () => {
+      const user = renderApp('/dashboard')
+      await screen.findByRole('region', { name: '52 closed in the last 30 days' })
+
+      await user.click(screen.getByRole('link', { name: 'Findings' }))
+      await user.click(await screen.findByRole('button', { name: 'Open CVE-2024-6387' }))
+      const detail = await screen.findByRole('dialog', { name: 'CVE-2024-6387' })
+      await user.click(within(detail).getByRole('button', { name: 'Close finding' }))
+      const close = await screen.findByRole('dialog', { name: 'Close CVE-2024-6387' })
+      await user.click(within(close).getByRole('radio', { name: 'Postponed' }))
+      await user.click(within(close).getByRole('button', { name: 'In 30 days' }))
+      await user.type(within(close).getByLabelText('Why'), 'Next maintenance window.')
+      await user.click(within(close).getByRole('button', { name: 'Close finding' }))
+      await within(detail).findByRole('button', { name: 'Reopen' })
+      await user.click(within(detail).getByRole('button', { name: 'Close' }))
+
+      await user.click(screen.getByRole('link', { name: 'Summary' }))
+      const panel = await screen.findByRole('region', { name: '53 closed in the last 30 days' })
+      expect(within(panel).getAllByRole('listitem')[2]).toHaveTextContent(/^6Set aside: /)
+    })
+
+    it('says when nothing was closed in the last 30 days', async () => {
+      closesOf({ current: { fixed: 0, went_away: 0, set_aside: 0 } })
+      renderApp('/dashboard')
+
+      const panel = await screen.findByRole('region', { name: 'Nothing closed in the last 30 days.' })
+      expect(within(panel).queryByRole('listitem')).not.toBeInTheDocument()
     })
   })
 
@@ -305,6 +365,47 @@ describe('CustomerDashboard', () => {
       const card = await screen.findByRole('region', { name: 'Coming back soon' })
 
       expect(await within(card).findByText('Nothing set aside comes back in the next 30 days.')).toBeInTheDocument()
+    })
+  })
+
+  describe('Fixed by your teams in the last 30 days', () => {
+    it('counts what was fixed and says in green that it is more than the month before', async () => {
+      closesOf({ current: { fixed: 38 }, previousFixed: 31 })
+      renderApp('/dashboard')
+      const card = await fixedCard()
+
+      expect(await within(card).findByText('38')).toBeInTheDocument()
+      expect(within(card).getByText('↑ from 31 the month before')).toHaveClass('text-good')
+    })
+
+    it('says in red that fewer were fixed than the month before', async () => {
+      closesOf({ current: { fixed: 40 }, previousFixed: 52 })
+      renderApp('/dashboard')
+
+      expect(await within(await fixedCard()).findByText('↓ from 52 the month before')).toHaveClass('text-critical')
+    })
+
+    it('says when as many were fixed as the month before', async () => {
+      closesOf({ current: { fixed: 31 }, previousFixed: 31 })
+      renderApp('/dashboard')
+
+      expect(await within(await fixedCard()).findByText('Same as the month before')).toBeInTheDocument()
+    })
+
+    it('says within how many days half of the Critical ones were fixed, rounding the median up', async () => {
+      closesOf({ median: 4.2 })
+      renderApp('/dashboard')
+
+      expect(await within(await fixedCard()).findByText('Half of the Critical ones were fixed within 5 days')).toBeInTheDocument()
+    })
+
+    it('leaves the Critical line out when no Critical one was fixed', async () => {
+      closesOf({ median: null })
+      renderApp('/dashboard')
+      const card = await fixedCard()
+      await within(card).findByText('↑ from 31 the month before')
+
+      expect(within(card).queryByText(/^Half of the Critical/)).not.toBeInTheDocument()
     })
   })
 

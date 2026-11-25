@@ -818,9 +818,10 @@ const scenarios = {
     check(calls.length >= 2 && calls.every((c) => c.status === 200), `history calls: ${JSON.stringify(calls.map((c) => [c.path, c.status]))}`)
   },
 
-  // The Summary's Overview: the sync line, the open count with its change since last Monday, the
-  // Critical count, the backlog line whose title says where it is heading, Start here and Coming
-  // back soon, with no "?" help anywhere. Then a failed Sync's line. No call to the endpoints only
+  // The Summary's Overview: the sync line, the open count with what opened and closed in the last
+  // 30 days, the Critical count, what the teams fixed against the month before, the backlog line
+  // whose title says where it is heading beside the closes panel, Start here and Coming back soon,
+  // with no "?" help anywhere. Then a failed Sync's line. No call to the endpoints only
   // the old charts used.
   async summary() {
     await signIn('customer_admin')
@@ -830,14 +831,25 @@ const scenarios = {
     check(await tab('Overview').getAttribute('aria-selected') === 'true', 'the Summary did not open on the Overview')
     await expect(page.getByText(/^Inventory synced /)).toBeVisible()
     const open = page.getByRole('region', { name: 'Open right now' })
-    await expect(open.getByText('↑ 2 since last Monday')).toBeVisible()
+    await expect(open.getByText('26 new and 52 closed in the last 30 days')).toBeVisible()
     const critical = page.getByRole('region', { name: 'Critical, open right now' })
     await expect(critical.getByText('3 of them are on internet-facing assets')).toBeVisible()
     const backlog = page.getByRole('img', { name: /^Findings open at the end of each week since Sep 29/ })
     await expect(page.getByRole('heading', { name: 'The open backlog is growing' })).toBeVisible()
     await expect(backlog.getByText('12', { exact: true })).toBeVisible()
     await expect(backlog.getByText('23', { exact: true })).toBeVisible()
+    const fixed = page.getByRole('region', { name: 'Fixed by your teams in the last 30 days' })
+    await expect(fixed.getByText('38', { exact: true })).toBeVisible()
+    await expect(fixed.getByText('↑ from 31 the month before')).toBeVisible()
+    await expect(fixed.getByText('Half of the Critical ones were fixed within 6 days')).toBeVisible()
+    const closes = page.getByRole('region', { name: '52 closed in the last 30 days' })
+    const rows = await closes.getByRole('listitem').allTextContents()
+    check(
+      rows.length === 3 && rows[0].startsWith('38Fixed: ') && rows[1].startsWith('9Went away: ') && rows[2].startsWith('5Set aside: '),
+      `the closes panel rows: ${JSON.stringify(rows)}`,
+    )
     await shot('overview')
+    await shot('closes', closes)
     const startHere = page.getByRole('region', { name: 'Start here' })
     await expect(startHere.getByRole('link', { name: 'Open the prioritized list' })).toBeVisible()
     await expect(startHere.getByText('4 findings, 2 of them Critical')).toBeVisible()
@@ -848,7 +860,7 @@ const scenarios = {
     for (const retired of ['/findings/breakdown', '/findings/top', '/findings/time-to-close', '/assets/findings-summary']) {
       check(callsTo('GET', retired).length === 0, `the Overview still calls ${retired}`)
     }
-    for (const used of ['/cmdb/source', '/findings/summary', '/findings/weekly-trend', '/findings/closed']) {
+    for (const used of ['/cmdb/source', '/findings/summary', '/findings/weekly-trend', '/findings/closed', '/findings/closes']) {
       check(callsTo('GET', used).some((c) => c.status === 200), `the Overview did not fetch ${used}`)
     }
 
@@ -860,7 +872,7 @@ const scenarios = {
       last_sync_failure: { at: new Date(Date.now() - 5 * 60_000).toISOString(), error: 'iTop timed out' },
     })
     await expect(page.getByText(/^The last inventory sync failed 5 min.* These numbers are from Nov 20, 2026\.$/)).toBeVisible()
-    await expect(open.getByText('↑ 2 since last Monday')).toBeVisible()
+    await expect(open.getByText('26 new and 52 closed in the last 30 days')).toBeVisible()
     await shot('failed-sync')
   },
 

@@ -1,23 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import { useClosedFindingsQuery, type ClosedFinding } from '../../api/findingCloses'
+import { useClosedFindingsQuery } from '../../api/findingCloses'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Card, CardHeader } from '../../components/ui/Card'
 import { Message } from '../../components/ui/Message'
 import { useDateFormat } from '../../i18n/format'
+import { returningSoon, type Returning } from './comingBack'
 
-const WINDOW_DAYS = 30
 const SHOWN = 3
-
-type Returning = Extract<ClosedFinding, { reopen_at: string }>
-
-function returningSoon(closed: ClosedFinding[]): Returning[] {
-  const now = Date.now()
-  const until = now + WINDOW_DAYS * 24 * 60 * 60 * 1000
-  const inWindow = (at: number) => at > now && at <= until
-  return closed
-    .flatMap((f) => (f.reopen_at !== null && inWindow(new Date(f.reopen_at).getTime()) ? [f] : []))
-    .toSorted((a, b) => new Date(a.reopen_at).getTime() - new Date(b.reopen_at).getTime())
-}
 
 export function ComingBackSoon() {
   const { t } = useTranslation()

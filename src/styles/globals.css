@@ -29,6 +29,7 @@
   /* Panels / borders */
   --color-border-panel:  #D9E1E8;
   --color-muted-bg:      #C9D3DC;   /* icons and disabled states */
+  --color-gray-blue:     #8CA3BA;   /* between navy and muted-bg, for a middle share of a bar */
 
   /* Tables */
   --color-border-row:  #E2E8EF;

@@ -220,6 +220,26 @@ export const findingsHandlers = [
     })
   }),
 
+  // barbackend reads `days` before the caller.
+  http.get(apiUrl('/findings/closes'), async ({ request }) => {
+    const days = new URL(request.url).searchParams.get('days') ?? '30'
+    if (!/^\d+$/.test(days) || Number(days) < 1 || Number(days) > 365) {
+      return failure(400, 'invalid_request', 'days must be from 1 to 365')
+    }
+    const refused = refusedCaller()
+    if (refused) return refused
+    await delay()
+    // A close by hand counts at once; the rest of the counts are fixed.
+    const since = Date.now() - Number(days) * 24 * 60 * 60 * 1000
+    const byHand = closedFindingsStore.load().filter((c) => new Date(c.closed_at).getTime() > since)
+    const fixedByHand = byHand.filter((c) => c.reason === 'remediated').length
+    return HttpResponse.json({
+      current: { opened: 26, fixed: 38 + fixedByHand, went_away: 9, set_aside: 5 + byHand.length - fixedByHand },
+      previous: { opened: 30, fixed: 31, went_away: 4, set_aside: 6 },
+      critical_fixed_median_days: 6,
+    } satisfies Schemas['ClosesResponse'])
+  }),
+
   http.get(apiUrl('/findings/weekly-trend'), async () => {
     await delay()
     return HttpResponse.json({

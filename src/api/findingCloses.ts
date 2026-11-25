@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import { connectionScopeKey } from './cmdb'
-import { invalidateFindingsStats } from './findingsSummary'
+import { findingsStatsScopeKey, invalidateFindingsStats } from './findingsSummary'
 import { refetchPrioritizations } from './prioritizations'
 import { everyOf, type Known, type Schemas } from './schemas'
 
@@ -36,6 +36,24 @@ export function useClosedFindingsQuery({ enabled = true } = {}) {
     queryKey: CLOSED_KEY,
     queryFn: async () => (await api.get<ClosedFindings>('/findings/closed')).findings,
     enabled,
+  })
+}
+
+export type FindingCloses = Schemas['ClosesResponse']
+
+/**
+ * Every close in a window. Only the closes panel's title and the open count's subline add the
+ * buckets together; Went away and Set aside are not progress, so only Fixed is ever shown as such.
+ */
+export function closedCount({ fixed, went_away, set_aside }: Schemas['CloseCountsResponse']): number {
+  return fixed + went_away + set_aside
+}
+
+/** The Customer's closes in the last 30 days and the 30 before, as Fixed, Went away and Set aside. */
+export function useFindingClosesQuery() {
+  return useQuery({
+    queryKey: [...findingsStatsScopeKey, 'closes'],
+    queryFn: () => api.get<FindingCloses>('/findings/closes'),
   })
 }
 
