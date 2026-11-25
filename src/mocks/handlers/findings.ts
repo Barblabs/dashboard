@@ -9,7 +9,7 @@ import { findingHistoryStore } from '../finding-history-store'
 import { prioritizationsStore } from '../prioritizations-store'
 import { apiUrl } from '../url'
 import { mockCaller } from './auth'
-import { failure, parsedBody } from './responses'
+import { failure, parsedBody, refusedCaller } from './responses'
 
 const closeBody = z.object({
   reason: z.enum(CLOSE_REASONS),
@@ -23,11 +23,6 @@ function invalidClose({ reason, note, reopen_at }: z.infer<typeof closeBody>): b
   if (why === '' || why.length > 2000) return true
   if (closesUntil(reason) !== (reopen_at !== undefined)) return true
   return reopen_at !== undefined && new Date(reopen_at).getTime() <= Date.now()
-}
-
-/** A Platform Admin sees no Customer's Findings. */
-function refusedCaller(): Response | null {
-  return mockCaller().role === 'platform_admin' ? failure(403, 'forbidden', 'a platform admin acts for no customer') : null
 }
 
 /** The Finding as the newest Prioritization that placed it has it. */

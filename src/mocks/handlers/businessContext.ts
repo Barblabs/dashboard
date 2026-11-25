@@ -6,8 +6,7 @@ import { businessContextSchema } from '../../pages/BusinessContext/schema'
 import { KEY_FIELDS, businessContextStore, MOCK_DRAFT } from '../business-context-store'
 import { mockCriticalServices } from '../critical-services'
 import { apiUrl } from '../url'
-import { mockCaller } from './auth'
-import { failure, parsedBody } from './responses'
+import { failure, parsedBody, refusedCaller } from './responses'
 
 const saveBody = z.object({ version: z.number().int(), context: businessContextSchema }) satisfies ZodType<{
   version: number
@@ -64,7 +63,8 @@ export const businessContextHandlers = [
   }),
 
   http.get(apiUrl('/critical-services'), async () => {
-    if (mockCaller().role === 'platform_admin') return failure(403, 'forbidden', 'a platform admin acts for no customer')
+    const refused = refusedCaller()
+    if (refused) return refused
     await delay()
     return HttpResponse.json<Schemas['CriticalServiceHealthListResponse']>({ critical_services: mockCriticalServices })
   }),
