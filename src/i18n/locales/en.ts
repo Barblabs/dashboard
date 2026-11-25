@@ -896,8 +896,8 @@ export const en = {
       },
     },
     priorities: {
-      title: 'What to fix together, and why',
-      lead: 'barbattack groups the findings to fix at the same time and writes a step-by-step plan for each one.',
+      title: 'What to fix first, and how',
+      lead: 'barbattack ranks your findings and writes a step-by-step plan to fix each one.',
       groups: {
         exposed: {
           title: 'Exploited flaws on internet-facing services',

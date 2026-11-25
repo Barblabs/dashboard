@@ -898,8 +898,8 @@ export const es: Translations = {
       },
     },
     priorities: {
-      title: 'Qué corregir junto, y por qué',
-      lead: 'barbattack agrupa los hallazgos que conviene corregir a la vez y escribe un plan paso a paso para cada uno.',
+      title: 'Qué corregir primero, y cómo',
+      lead: 'barbattack ordena tus hallazgos y escribe un plan paso a paso para corregir cada uno.',
       groups: {
         exposed: {
           title: 'Fallos con exploit activo en servicios expuestos a internet',
