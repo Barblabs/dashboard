@@ -818,48 +818,62 @@ const scenarios = {
     check(calls.length >= 2 && calls.every((c) => c.status === 200), `history calls: ${JSON.stringify(calls.map((c) => [c.path, c.status]))}`)
   },
 
-  // The Findings charts: the weekly trend from its first week with findings and what its line
-  // counts, time to close per risk level with no row for findings without one, legends for the
-  // bars' colours, Unknown only with findings, and the tactics matrix with no filter and no empty
-  // columns. No chart says "band".
-  async charts() {
+  // The Summary's Overview: the sync line, the open count with its change since last Monday, the
+  // Critical count, the backlog line whose title says where it is heading, Start here and Coming
+  // back soon, with no "?" help anywhere. Then a failed Sync's line. No call to the endpoints only
+  // the old charts used.
+  async summary() {
     await signIn('customer_admin')
-    await sidebarLink('Findings').click()
-    await tab('Summary').click()
-    const trend = page.locator('section', { has: page.getByRole('heading', { name: 'Weekly trend of findings' }) })
-    await expect(trend.getByText(/the line, those still open when the week ended/)).toBeVisible()
-    await expect(trend.getByText('Sep 29')).toBeVisible()
-    check(await trend.getByText('Sep 15').count() === 0, 'the trend shows the empty weeks before the first findings')
-    await expect(page.getByRole('heading', { name: 'Time to close findings by risk level' })).toBeVisible()
-    check(await page.getByText('No risk level').count() === 0, 'time to close shows a row with no risk level')
-    await page.waitForTimeout(1800) // recharts draws its series in over 1.5 s
-    await shot('summary', trend)
-    await tab('Before & After').click()
-    const composition = page.locator('section', { has: page.getByRole('heading', { name: 'Risk level composition per group' }) })
-    await expect(composition.getByRole('list', { name: 'Risk level' })).toBeVisible()
-    await shot('composition', composition)
-    await tab('Where the risk is').click()
-    const heatmap = page.locator('section', { has: page.getByRole('heading', { name: 'Where the risk is' }) })
-    await expect(heatmap.getByText('Unknown', { exact: true })).toBeVisible()
-    const assets = page.locator('section', { has: page.getByRole('heading', { name: 'Assets with most findings' }) })
-    await expect(assets.getByRole('list', { name: 'Risk level' })).toBeVisible()
-    await shot('risk', assets)
-    await tab('Threats').click()
-    const tactics = page.locator('section', { has: page.getByRole('heading', { name: 'Findings per tactic' }) })
-    await expect(tactics.getByText('No findings: Resource Dev., Exfiltration')).toBeVisible()
-    check(await tactics.getByRole('button').count() === 0, 'the tactics matrix still has a filter')
-    await shot('tactics', tactics)
-    const body = await page.locator('main').innerText()
-    check(!/\bband\b/i.test(body), 'a chart still says band')
+    await sidebarLink('Configuration').click()
+    await connect()
+    await sidebarLink('Summary').click()
+    check(await tab('Overview').getAttribute('aria-selected') === 'true', 'the Summary did not open on the Overview')
+    await expect(page.getByText(/^Inventory synced /)).toBeVisible()
+    const open = page.getByRole('region', { name: 'Open right now' })
+    await expect(open.getByText('↑ 2 since last Monday')).toBeVisible()
+    const critical = page.getByRole('region', { name: 'Critical, open right now' })
+    await expect(critical.getByText('3 of them are on internet-facing assets')).toBeVisible()
+    const backlog = page.getByRole('img', { name: /^Findings open at the end of each week since Sep 29/ })
+    await expect(page.getByRole('heading', { name: 'The open backlog is growing' })).toBeVisible()
+    await expect(backlog.getByText('12', { exact: true })).toBeVisible()
+    await expect(backlog.getByText('23', { exact: true })).toBeVisible()
+    await shot('overview')
+    const startHere = page.getByRole('region', { name: 'Start here' })
+    await expect(startHere.getByRole('link', { name: 'Open the prioritized list' })).toBeVisible()
+    await expect(startHere.getByText('4 findings, 2 of them Critical')).toBeVisible()
+    const comingBack = page.getByRole('region', { name: 'Coming back soon' })
+    await expect(comingBack.getByText('Nothing set aside comes back in the next 30 days.')).toBeVisible()
+    await shot('start-here-and-coming-back', comingBack)
+    check(await page.getByRole('button', { name: /^About / }).count() === 0, 'the Overview has a ? help popover')
+    for (const retired of ['/findings/breakdown', '/findings/top', '/findings/time-to-close', '/assets/findings-summary']) {
+      check(callsTo('GET', retired).length === 0, `the Overview still calls ${retired}`)
+    }
+    for (const used of ['/cmdb/source', '/findings/summary', '/findings/weekly-trend', '/findings/closed']) {
+      check(callsTo('GET', used).some((c) => c.status === 200), `the Overview did not fetch ${used}`)
+    }
+
+    // A failed Sync comes from iTop, which no UI path in mock mode can make fail after a success.
+    const source = await page.evaluate(() => JSON.parse(localStorage.getItem('barbattack_cmdb_source')))
+    await seedMockBackend('barbattack_cmdb_source', {
+      ...source,
+      last_sync: '2026-11-20T10:00:00Z',
+      last_sync_failure: { at: new Date(Date.now() - 5 * 60_000).toISOString(), error: 'iTop timed out' },
+    })
+    await expect(page.getByText(/^The last inventory sync failed 5 min.* These numbers are from Nov 20, 2026\.$/)).toBeVisible()
+    await expect(open.getByText('↑ 2 since last Monday')).toBeVisible()
+    await shot('failed-sync')
   },
 
-  // Before & After compares the order by Score alone with the prioritization; a row of its most
-  // significant movements opens that Finding's detail over the tab, and closing it comes back.
+  // Before & After and Threats share the Summary's second tab. Before & After compares the order
+  // by Score alone with the prioritization; a row of its most significant movements opens that
+  // Finding's detail over the tab, and closing it comes back. Threats' tactics matrix has no filter
+  // and no empty column.
   async 'before-after'() {
     await signIn('customer_admin')
-    await sidebarLink('Findings').click()
-    await tab('Before & After').click()
-    const movements = page.locator('section', { has: page.getByRole('heading', { name: 'Most significant movements' }) })
+    await tab('Prioritization and threats').click()
+    check(new URL(page.url()).searchParams.get('tab') === 'analysis', 'the second tab is not in the URL')
+    // The tab's own sections hold the Cards' sections, so the innermost one is the Card.
+    const movements = page.locator('section', { has: page.getByRole('heading', { name: 'Most significant movements' }) }).last()
     await expect(movements.getByRole('button', { name: 'Open CVE-2024-23897' })).toBeVisible()
     const headers = await movements.getByRole('columnheader').allTextContents()
     check(!headers.includes('Reason'), `the movements still have a Reason column: ${headers}`)
@@ -867,12 +881,22 @@ const scenarios = {
     await movements.getByRole('row').filter({ has: page.getByRole('button', { name: 'Open CVE-2024-23897' }) }).click({ position: { x: 300, y: 10 } })
     const detail = page.getByRole('dialog', { name: 'CVE-2024-23897' })
     await expect(detail.getByRole('button', { name: /^Prioritization history/ })).toBeVisible()
-    check(new URL(page.url()).searchParams.get('tab') === 'before-after', 'the detail left the Before & After tab')
+    check(new URL(page.url()).searchParams.get('tab') === 'analysis', 'the detail left the second tab')
     await shot('detail', detail)
     await detail.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(detail).toBeHidden()
-    check(await tab('Before & After').getAttribute('aria-selected') === 'true', 'closing the detail left the Before & After tab')
+    check(await tab('Prioritization and threats').getAttribute('aria-selected') === 'true', 'closing the detail left the second tab')
     check(!new URL(page.url()).searchParams.has('finding'), 'the closed detail is still in the URL')
+
+    const tactics = page.locator('section', { has: page.getByRole('heading', { name: 'Findings per tactic' }) }).last()
+    await expect(tactics.getByText('No findings: Resource Dev., Exfiltration')).toBeVisible()
+    const tacticButtons = await tactics.getByRole('button').allTextContents()
+    check(tacticButtons.length === 1 && await tactics.getByRole('button', { name: 'About Findings per tactic' }).count() === 1, `the tactics matrix has more than its ? help: ${tacticButtons}`)
+    await shot('tactics', tactics)
+
+    await goto('/dashboard?tab=before-after')
+    await page.waitForURL('**/dashboard?tab=analysis')
+    check(await tab('Prioritization and threats').getAttribute('aria-selected') === 'true', 'the legacy Before & After link did not open the second tab')
   },
 
   // A viewer closes a Finding by hand as postponed from its detail, sees it counted as closed
