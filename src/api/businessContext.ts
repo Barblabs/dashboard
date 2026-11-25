@@ -2,6 +2,7 @@ import { useIsMutating, useMutation, useQuery, useQueryClient } from '@tanstack/
 import type { AssetsPage } from './assets'
 import { api } from './client'
 import { connectionScopeKey } from './cmdb'
+import { findingsStatsScopeKey } from './findingsSummary'
 import { everyOf, type Known, type Override, type Schemas } from './schemas'
 
 export type Sector = Schemas['ProfileFields']['sectors'][number]
@@ -116,6 +117,17 @@ export const COUNTRIES = [
 export type CountryCode = (typeof COUNTRIES)[number]
 
 export type CriticalService = Known<Schemas['CriticalServiceField']>
+type CriticalServiceHealthResponse = Schemas['CriticalServiceHealthResponse']
+
+/** An open Critical is what makes a service `at_risk` or `watch`, so only those have an oldest one. */
+export type CriticalServiceHealth =
+  | Override<CriticalServiceHealthResponse, { status: 'at_risk' | 'watch'; oldest_critical_days: number }>
+  | Override<CriticalServiceHealthResponse, { status: 'clear'; oldest_critical_days: null }>
+
+type CriticalServiceHealthList = Override<
+  Schemas['CriticalServiceHealthListResponse'],
+  { critical_services: CriticalServiceHealth[] }
+>
 
 /** The `business_context/1` document. Blank text, a blank code or an empty list is "not stated". */
 export interface BusinessContextFields {
@@ -304,5 +316,13 @@ export function useAssetNamesQuery() {
     queryKey: [...connectionScopeKey, 'asset-names'],
     queryFn: () => api.get<AssetsPage>(`/assets?limit=${ASSET_SUGGESTIONS}&active=true`),
     select: (page) => page.assets.map((a) => a.name),
+  })
+}
+
+export function useCriticalServicesQuery() {
+  return useQuery({
+    queryKey: [...findingsStatsScopeKey, 'critical-services'],
+    queryFn: async () =>
+      (await api.get<CriticalServiceHealthList>('/critical-services')).critical_services,
   })
 }

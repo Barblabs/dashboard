@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react'
 
-export type BadgeVariant = 'outline' | 'muted' | 'solid' | 'quiet' | 'critical' | 'warning' | 'caution'
+export type BadgeVariant = 'outline' | 'muted' | 'solid' | 'quiet' | 'critical' | 'warning' | 'caution' | 'good'
 
 type BadgeProps = ComponentProps<'span'> & {
   variant?: BadgeVariant
@@ -19,6 +19,7 @@ const VARIANTS: Record<BadgeVariant, string> = {
   warning: 'border-high bg-high/10 font-medium text-navy',
   // Yellow text is unreadable too, for the same reason.
   caution: 'border-medium bg-medium/15 font-medium text-navy',
+  good: 'border-good font-medium text-good',
 }
 
 export function Badge({ variant = 'outline', className = '', ...props }: BadgeProps) {
