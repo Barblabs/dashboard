@@ -13,7 +13,7 @@ const SUMMARY = { open: 23, critical: 5, high: 8, medium: 7, low: 3, unbanded: 0
 function trendOf(...openAtEnd: number[]) {
   const weeks = openAtEnd.map((open, i) => {
     const startsOn = new Date(Date.UTC(2026, 8, 28 + i * 7)).toISOString().slice(0, 10)
-    return { week: startsOn, starts_on: startsOn, opened: 0, closed: 0, open_at_end: open }
+    return { week: startsOn, starts_on: startsOn, opened: 0, closed: 0, open_at_end: open, critical_open_at_end: 0 }
   })
   server.use(http.get(apiUrl('/findings/weekly-trend'), () => HttpResponse.json({ weeks })))
 }
