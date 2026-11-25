@@ -45,11 +45,31 @@ function closesOf(closes: { current?: Partial<typeof CLOSES.current>; previousFi
 
 let lastAreaId = 0
 
-function area(name: string | null, health: Partial<AreaHealth> = {}): AreaHealth {
+type AreaFlag =
+  | Pick<Extract<AreaHealth, { needs_help: false }>, 'needs_help' | 'reasons'>
+  | Pick<Extract<AreaHealth, { reasons: ['growing'] }>, 'needs_help' | 'reasons'>
+  | Pick<Extract<AreaHealth, { oldest_critical_days: number }>, 'needs_help' | 'reasons' | 'oldest_critical_days'>
+
+const ON_TRACK: AreaFlag = { needs_help: false, reasons: [] }
+const GROWING: AreaFlag = { needs_help: true, reasons: ['growing'] }
+
+function aging(days: number, growing = false): AreaFlag {
+  return {
+    needs_help: true,
+    reasons: growing ? ['aging_critical', 'growing'] : ['aging_critical'],
+    oldest_critical_days: days,
+  }
+}
+
+function area(
+  name: string | null,
+  counts: Partial<Omit<AreaHealth, 'needs_help' | 'reasons'>> = {},
+  flag = ON_TRACK,
+): AreaHealth {
   return {
     id: name === null ? null : ++lastAreaId, name, owner_email: 'lead@test.example', asset_count: 10,
     critical_open: 0, high_open: 1, oldest_critical_days: null, fixed: 2, open_now: 3, open_30_days_ago: 3,
-    needs_help: false, reasons: [], ...health,
+    ...counts, ...flag,
   }
 }
 
@@ -180,7 +200,7 @@ describe('CustomerDashboard', () => {
 
     it('shows no line with no CMDB connected', async () => {
       renderApp('/dashboard')
-      await within(await openCard()).findByText('26 new and 52 closed in the last 30 days')
+      await within(await openCard()).findByText('26 new in the last 30 days')
 
       expect(screen.queryByText(/^Inventory synced|inventory sync failed/)).not.toBeInTheDocument()
     })
@@ -246,11 +266,13 @@ describe('CustomerDashboard', () => {
   })
 
   describe('Open right now', () => {
-    it('says how many were opened and closed in the last 30 days, every way of closing counted', async () => {
+    it('says how many were opened in the last 30 days, and adds up no closes', async () => {
       closesOf({ current: { opened: 15, fixed: 7, went_away: 3, set_aside: 2 } })
       renderApp('/dashboard')
 
-      expect(await within(await openCard()).findByText('15 new and 12 closed in the last 30 days')).toBeInTheDocument()
+      const card = await openCard()
+      expect(await within(card).findByText('15 new in the last 30 days')).toBeInTheDocument()
+      expect(within(card).queryByText(/closed/)).not.toBeInTheDocument()
     })
 
     it('forgets the counts of a CMDB once it is disconnected', async () => {
@@ -510,8 +532,8 @@ describe('CustomerDashboard', () => {
   describe('Areas that need help', () => {
     it('flags each Area with the reason it needs help', async () => {
       areaHealthOf(
-        area('Infrastructure', { critical_open: 2, oldest_critical_days: 47, needs_help: true, reasons: ['aging_critical'] }),
-        area('Data Platform', { needs_help: true, reasons: ['growing'] }),
+        area('Infrastructure', { critical_open: 2 }, aging(47)),
+        area('Data Platform', {}, GROWING),
         area('Payments'),
       )
       renderApp('/dashboard')
@@ -520,6 +542,7 @@ describe('CustomerDashboard', () => {
       const [infrastructure, dataPlatform, payments] = areaRows(card)
       expect(infrastructure).toHaveTextContent('Needs help')
       expect(within(infrastructure).getByText('A Critical open for 47 days')).toBeInTheDocument()
+      expect(within(infrastructure).getByText('47 days')).toHaveClass('text-critical')
       expect(dataPlatform).toHaveTextContent('Needs help')
       expect(within(dataPlatform).getByText('Opened more than it closed three weeks in a row')).toBeInTheDocument()
       expect(payments).not.toHaveTextContent('Needs help')
@@ -527,9 +550,7 @@ describe('CustomerDashboard', () => {
 
     it('joins both reasons in one sentence', async () => {
       areaHealthOf(
-        area('Infrastructure', {
-          critical_open: 1, oldest_critical_days: 31, needs_help: true, reasons: ['aging_critical', 'growing'],
-        }),
+        area('Infrastructure', { critical_open: 1 }, aging(31, true)),
       )
       renderApp('/dashboard')
 
@@ -549,7 +570,7 @@ describe('CustomerDashboard', () => {
 
     it('lists every flagged Area, fills up to 5 rows, and sums the rest until Show all lists them', async () => {
       areaHealthOf(
-        ...['A', 'B', 'C', 'D'].map((name) => area(`Flagged ${name}`, { needs_help: true, reasons: ['growing'] })),
+        ...['A', 'B', 'C', 'D'].map((name) => area(`Flagged ${name}`, {}, GROWING)),
         area('Customer Portal'),
         area('Corporate IT', { high_open: 2 }),
         area(null, { high_open: 3 }),
@@ -572,7 +593,7 @@ describe('CustomerDashboard', () => {
 
     it('lists every flagged Area even past 5 rows', async () => {
       areaHealthOf(
-        ...['A', 'B', 'C', 'D', 'E', 'F'].map((name) => area(`Flagged ${name}`, { needs_help: true, reasons: ['growing'] })),
+        ...['A', 'B', 'C', 'D', 'E', 'F'].map((name) => area(`Flagged ${name}`, {}, GROWING)),
         area('Customer Portal'),
       )
       renderApp('/dashboard')
@@ -592,7 +613,7 @@ describe('CustomerDashboard', () => {
 
       const [infrastructure, payments, dataPlatform] = areaRows(await areasCard('No Area needs help'))
       expect(within(infrastructure).getByText('2 Critical · 3 High')).toBeInTheDocument()
-      expect(within(infrastructure).getByText('12 days')).toBeInTheDocument()
+      expect(within(infrastructure).getByText('12 days')).not.toHaveClass('text-critical')
       expect(within(infrastructure).getByText('↑ 6')).toBeInTheDocument()
       expect(within(payments).getByText('None')).toBeInTheDocument()
       expect(within(payments).getByText('↓ 11')).toBeInTheDocument()

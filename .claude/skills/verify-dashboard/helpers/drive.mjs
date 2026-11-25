@@ -831,7 +831,7 @@ const scenarios = {
     check(await tab('Overview').getAttribute('aria-selected') === 'true', 'the Summary did not open on the Overview')
     await expect(page.getByText(/^Inventory synced /)).toBeVisible()
     const open = page.getByRole('region', { name: 'Open right now' })
-    await expect(open.getByText('26 new and 52 closed in the last 30 days')).toBeVisible()
+    await expect(open.getByText('26 new in the last 30 days')).toBeVisible()
     const critical = page.getByRole('region', { name: 'Critical, open right now' })
     await expect(critical.getByText('3 of them are on internet-facing assets')).toBeVisible()
     const backlog = page.getByRole('img', { name: /^Findings open at the end of each week since Sep 29/ })
@@ -889,7 +889,7 @@ const scenarios = {
       last_sync_failure: { at: new Date(Date.now() - 5 * 60_000).toISOString(), error: 'iTop timed out' },
     })
     await expect(page.getByText(/^The last inventory sync failed 5 min.* These numbers are from Nov 20, 2026\.$/)).toBeVisible()
-    await expect(open.getByText('26 new and 52 closed in the last 30 days')).toBeVisible()
+    await expect(open.getByText('26 new in the last 30 days')).toBeVisible()
     await shot('failed-sync')
   },
 

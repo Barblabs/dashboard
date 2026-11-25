@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAreaHealthQuery, type AreaHealth } from '../../api/areas'
+import { isAging, useAreaHealthQuery, type AreaHealth } from '../../api/areas'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -128,7 +128,7 @@ function AreaRow({ area, name, most }: { area: AreaHealth; name: string; most: n
         {area.oldest_critical_days === null ? (
           t('dashboard.critical.none')
         ) : (
-          <span className={area.oldest_critical_days > 30 ? 'font-semibold text-critical' : ''}>
+          <span className={isAging(area) ? 'font-semibold text-critical' : ''}>
             {t('dashboard.areas.days', { count: area.oldest_critical_days })}
           </span>
         )}
@@ -145,10 +145,9 @@ function AreaRow({ area, name, most }: { area: AreaHealth; name: string; most: n
 
 function Reason({ area }: { area: AreaHealth }) {
   const { t } = useTranslation()
-  const days = area.oldest_critical_days
-  const aging = days !== null && area.reasons.includes('aging_critical')
-  const growing = area.reasons.includes('growing')
-  if (aging && growing) return t('dashboard.areas.reasons.both', { count: days })
-  if (aging) return t('dashboard.areas.reasons.aging', { count: days })
-  return t('dashboard.areas.reasons.growing')
+  if (!isAging(area)) return t('dashboard.areas.reasons.growing')
+  const count = area.oldest_critical_days
+  return area.reasons.length === 2
+    ? t('dashboard.areas.reasons.both', { count })
+    : t('dashboard.areas.reasons.aging', { count })
 }

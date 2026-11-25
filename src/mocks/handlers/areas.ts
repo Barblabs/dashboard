@@ -6,8 +6,7 @@ import { isOneOf, type Known, type Schemas } from '../../api/schemas'
 import { mockAreaHealth } from '../area-health'
 import { areasStore } from '../areas-store'
 import { apiUrl } from '../url'
-import { mockCaller } from './auth'
-import { failure, parsedBody } from './responses'
+import { failure, parsedBody, refusedCaller } from './responses'
 
 const setAreaOwnerBody = z.object({ email: z.string().nullable() }) satisfies ZodType<Known<Schemas['SetAreaOwnerRequest']>>
 
@@ -25,7 +24,8 @@ export const areasHandlers = [
   }),
 
   http.get(apiUrl('/areas/health'), async () => {
-    if (mockCaller().role === 'platform_admin') return failure(403, 'forbidden', 'a platform admin acts for no customer')
+    const refused = refusedCaller()
+    if (refused) return refused
     await delay()
     return HttpResponse.json<Schemas['AreaHealthListResponse']>({ areas: mockAreaHealth })
   }),
