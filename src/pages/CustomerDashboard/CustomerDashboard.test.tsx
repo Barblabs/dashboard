@@ -243,6 +243,68 @@ describe('CustomerDashboard', () => {
     })
   })
 
+  describe('closes panel', () => {
+    it('counts the closes in the last 30 days as Fixed, Went away and Set aside', async () => {
+      closesOf({ current: { fixed: 7, went_away: 3, set_aside: 2 } })
+      renderApp('/dashboard')
+      const panel = await screen.findByRole('region', { name: '12 closed in the last 30 days' })
+
+      expect(within(panel).getAllByRole('listitem').map((row) => row.textContent)).toEqual([
+        '7Fixed: patched, as the CMDB now shows, or marked remediated',
+        '3Went away: asset retired or CVE withdrawn',
+        '2Set aside: accepted risk, postponed or false positive.',
+      ])
+    })
+
+    it('says how many set aside come back in the next 30 days, and by when', async () => {
+      server.use(
+        http.get(apiUrl('/findings/closed'), () =>
+          HttpResponse.json({
+            findings: [
+              closed('CVE-0000-0001', 'postponed', daysFromNow(3)),
+              closed('CVE-0000-0002', 'accepted_risk', daysFromNow(20)),
+              closed('CVE-0000-0003', 'postponed', daysFromNow(40)),
+            ],
+          }),
+        ),
+      )
+      renderApp('/dashboard')
+      const panel = await screen.findByRole('region', { name: /closed in the last 30 days$/ })
+
+      const setAside = within(panel).getAllByRole('listitem')[2]
+      expect(await within(setAside).findByText(/^2 come back before \w{3} \d+, \d{4}$/)).toBeInTheDocument()
+    })
+
+    it('counts a finding closed by hand as Set aside once it is closed', async () => {
+      const user = renderApp('/dashboard')
+      await screen.findByRole('region', { name: '52 closed in the last 30 days' })
+
+      await user.click(screen.getByRole('link', { name: 'Findings' }))
+      await user.click(await screen.findByRole('button', { name: 'Open CVE-2024-6387' }))
+      const detail = await screen.findByRole('dialog', { name: 'CVE-2024-6387' })
+      await user.click(within(detail).getByRole('button', { name: 'Close finding' }))
+      const close = await screen.findByRole('dialog', { name: 'Close CVE-2024-6387' })
+      await user.click(within(close).getByRole('radio', { name: 'Postponed' }))
+      await user.click(within(close).getByRole('button', { name: 'In 30 days' }))
+      await user.type(within(close).getByLabelText('Why'), 'Next maintenance window.')
+      await user.click(within(close).getByRole('button', { name: 'Close finding' }))
+      await within(detail).findByRole('button', { name: 'Reopen' })
+      await user.click(within(detail).getByRole('button', { name: 'Close' }))
+
+      await user.click(screen.getByRole('link', { name: 'Summary' }))
+      const panel = await screen.findByRole('region', { name: '53 closed in the last 30 days' })
+      expect(within(panel).getAllByRole('listitem')[2]).toHaveTextContent(/^6Set aside: /)
+    })
+
+    it('says when nothing was closed in the last 30 days', async () => {
+      closesOf({ current: { fixed: 0, went_away: 0, set_aside: 0 } })
+      renderApp('/dashboard')
+
+      const panel = await screen.findByRole('region', { name: 'Nothing closed in the last 30 days.' })
+      expect(within(panel).queryByRole('listitem')).not.toBeInTheDocument()
+    })
+  })
+
   describe('Start here', () => {
     it('shows the first two groups of the prioritization and how many of each are Critical', async () => {
       renderApp('/dashboard')
