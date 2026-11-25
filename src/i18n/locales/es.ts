@@ -931,7 +931,7 @@ export const es: Translations = {
       lead: 'Los agentes aconsejan y tu equipo decide. Nunca cambian un Score ni cierran un hallazgo.',
       prioritizer: 'Ordena tus hallazgos abiertos según lo que cada activo significa para tu negocio, y explica por qué.',
       luna: 'Escribe el plan de acción de cada hallazgo: los pasos, qué lo mitiga mientras tanto y cómo confirmar la corrección.',
-      editor: 'Escribe tu resumen de noticias, agrupado por por qué cada una te importa.',
+      editor: 'Escribe tu resumen de noticias y agrupa cada noticia según por qué te afecta.',
       drafter: 'Redacta tu contexto empresarial a partir de los documentos que le das, para que lo revises.',
       drafterSample: 'Sectores, servicios críticos, regulaciones, apetito de riesgo',
     },

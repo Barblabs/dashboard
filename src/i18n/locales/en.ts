@@ -927,9 +927,9 @@ export const en = {
     agents: {
       title: 'AI agents for your security team',
       lead: 'The agents advise and your team decides. They never change a Score or close a finding.',
-      prioritizer: 'Puts your open findings in the order to fix them, based on what each asset means to your business, and says why.',
+      prioritizer: 'Orders your open findings by what each asset means to your business, and explains the order.',
       luna: 'Writes the action plan for each finding: the steps, what mitigates it meanwhile and how to confirm the fix.',
-      editor: 'Writes your news digest, grouped by why each item matters to you.',
+      editor: 'Writes your news digest and groups each story by why it concerns you.',
       drafter: 'Drafts your business context from the documents you give it, for you to review.',
       drafterSample: 'Sectors, critical services, regulations, risk appetite',
     },
