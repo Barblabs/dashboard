@@ -1,10 +1,12 @@
-import { http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 import { z, type ZodType } from 'zod'
 import type { Area, AreaListResponse } from '../../api/areas'
 import { ACTIVITY_FILTERS } from '../../api/assets'
 import { isOneOf, type Known, type Schemas } from '../../api/schemas'
+import { mockAreaHealth } from '../area-health'
 import { areasStore } from '../areas-store'
 import { apiUrl } from '../url'
+import { mockCaller } from './auth'
 import { failure, parsedBody } from './responses'
 
 const setAreaOwnerBody = z.object({ email: z.string().nullable() }) satisfies ZodType<Known<Schemas['SetAreaOwnerRequest']>>
@@ -20,6 +22,12 @@ export const areasHandlers = [
       .filter(matches)
       .toSorted((a, b) => a.name.localeCompare(b.name))
     return HttpResponse.json<AreaListResponse>({ areas })
+  }),
+
+  http.get(apiUrl('/areas/health'), async () => {
+    if (mockCaller().role === 'platform_admin') return failure(403, 'forbidden', 'a platform admin acts for no customer')
+    await delay()
+    return HttpResponse.json<Schemas['AreaHealthListResponse']>({ areas: mockAreaHealth })
   }),
 
   http.put(apiUrl('/areas/:id/owner'), async ({ params, request }) => {

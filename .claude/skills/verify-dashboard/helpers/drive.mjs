@@ -850,6 +850,16 @@ const scenarios = {
     )
     await shot('overview')
     await shot('closes', closes)
+    const areas = page.getByRole('region', { name: '3 Areas need help' })
+    await expect(areas.getByText('A Critical open for 47 days and opened more than it closed three weeks in a row')).toBeVisible()
+    await expect(areas.getByText('A Critical open for 34 days', { exact: true })).toBeVisible()
+    await expect(areas.getByText('25 assets · No owner')).toBeVisible()
+    check(await areas.getByRole('row').count() === 6, 'the Areas card does not show 5 rows')
+    await expect(areas.getByText('3 more Areas on track: Corporate IT, Marketing Sites, and Assets without an Area. They hold 2 High findings and no Critical.')).toBeVisible()
+    await shot('areas', areas)
+    await areas.getByRole('button', { name: 'Show all 8 Areas' }).click()
+    check(await areas.getByRole('row').count() === 9, 'Show all did not list every Area')
+    await shot('areas-expanded', areas)
     const startHere = page.getByRole('region', { name: 'Start here' })
     await expect(startHere.getByRole('link', { name: 'Open the prioritized list' })).toBeVisible()
     await expect(startHere.getByText('4 findings, 2 of them Critical')).toBeVisible()
@@ -860,7 +870,7 @@ const scenarios = {
     for (const retired of ['/findings/breakdown', '/findings/top', '/findings/time-to-close', '/assets/findings-summary']) {
       check(callsTo('GET', retired).length === 0, `the Overview still calls ${retired}`)
     }
-    for (const used of ['/cmdb/source', '/findings/summary', '/findings/weekly-trend', '/findings/closed', '/findings/closes']) {
+    for (const used of ['/cmdb/source', '/findings/summary', '/findings/weekly-trend', '/findings/closed', '/findings/closes', '/areas/health']) {
       check(callsTo('GET', used).some((c) => c.status === 200), `the Overview did not fetch ${used}`)
     }
 

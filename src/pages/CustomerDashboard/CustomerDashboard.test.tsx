@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
+import type { AreaHealth } from '../../api/areas'
 import { apiUrl } from '../../mocks/url'
 import { renderApp, seedSource } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
@@ -29,6 +30,28 @@ function closesOf(closes: { current?: Partial<typeof CLOSES.current>; previousFi
     critical_fixed_median_days: closes.median === undefined ? CLOSES.critical_fixed_median_days : closes.median,
   }
   server.use(http.get(apiUrl('/findings/closes'), () => HttpResponse.json(body)))
+}
+
+let lastAreaId = 0
+
+function area(name: string | null, health: Partial<AreaHealth> = {}): AreaHealth {
+  return {
+    id: name === null ? null : ++lastAreaId, name, owner_email: 'lead@test.example', asset_count: 10,
+    critical_open: 0, high_open: 1, oldest_critical_days: null, fixed: 2, open_now: 3, open_30_days_ago: 3,
+    needs_help: false, reasons: [], ...health,
+  }
+}
+
+function areaHealthOf(...areas: AreaHealth[]) {
+  server.use(http.get(apiUrl('/areas/health'), () => HttpResponse.json({ areas })))
+}
+
+async function areasCard(name: string | RegExp) {
+  return screen.findByRole('region', { name })
+}
+
+function areaRows(card: HTMLElement) {
+  return within(card).getAllByRole('row').slice(1)
 }
 
 function minutesAgo(minutes: number) {
@@ -80,7 +103,7 @@ describe('CustomerDashboard', () => {
     expect(screen.queryAllByRole('button', { name: /^About / })).toHaveLength(0)
   })
 
-  it('shows the sync line, the tabs, then the cards, the backlog line, Start here and Coming back soon', async () => {
+  it('shows the sync line, the tabs, then the cards, the backlog line, the Areas, Start here and Coming back soon', async () => {
     seedSource()
     renderApp('/dashboard')
 
@@ -89,6 +112,7 @@ describe('CustomerDashboard', () => {
       screen.getByRole('tablist'),
       await openCard(),
       await screen.findByRole('heading', { name: 'The open backlog is growing' }),
+      await areasCard('3 Areas need help'),
       screen.getByRole('region', { name: 'Start here' }),
       screen.getByRole('region', { name: 'Coming back soon' }),
     ]
@@ -425,6 +449,121 @@ describe('CustomerDashboard', () => {
 
       expect(await within(card).findByText('None')).toHaveClass('text-navy')
       expect(within(card).queryByText(/internet-facing/)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Areas that need help', () => {
+    it('flags each Area with the reason it needs help', async () => {
+      areaHealthOf(
+        area('Infrastructure', { critical_open: 2, oldest_critical_days: 47, needs_help: true, reasons: ['aging_critical'] }),
+        area('Data Platform', { needs_help: true, reasons: ['growing'] }),
+        area('Payments'),
+      )
+      renderApp('/dashboard')
+
+      const card = await areasCard('2 Areas need help')
+      const [infrastructure, dataPlatform, payments] = areaRows(card)
+      expect(infrastructure).toHaveTextContent('Needs help')
+      expect(within(infrastructure).getByText('A Critical open for 47 days')).toBeInTheDocument()
+      expect(dataPlatform).toHaveTextContent('Needs help')
+      expect(within(dataPlatform).getByText('Opened more than it closed three weeks in a row')).toBeInTheDocument()
+      expect(payments).not.toHaveTextContent('Needs help')
+    })
+
+    it('joins both reasons in one sentence', async () => {
+      areaHealthOf(
+        area('Infrastructure', {
+          critical_open: 1, oldest_critical_days: 31, needs_help: true, reasons: ['aging_critical', 'growing'],
+        }),
+      )
+      renderApp('/dashboard')
+
+      const card = await areasCard('1 Area needs help')
+      expect(
+        within(card).getByText('A Critical open for 31 days and opened more than it closed three weeks in a row'),
+      ).toBeInTheDocument()
+    })
+
+    it('says no Area needs help when none is flagged', async () => {
+      areaHealthOf(area('Payments'))
+      renderApp('/dashboard')
+
+      const card = await areasCard('No Area needs help')
+      expect(within(card).queryByText('Needs help')).not.toBeInTheDocument()
+    })
+
+    it('lists every flagged Area, fills up to 5 rows, and sums the rest until Show all lists them', async () => {
+      areaHealthOf(
+        ...['A', 'B', 'C', 'D'].map((name) => area(`Flagged ${name}`, { needs_help: true, reasons: ['growing'] })),
+        area('Customer Portal'),
+        area('Corporate IT', { high_open: 2 }),
+        area(null, { high_open: 3 }),
+      )
+      const user = renderApp('/dashboard')
+
+      const card = await areasCard('4 Areas need help')
+      expect(areaRows(card)).toHaveLength(5)
+      expect(
+        within(card).getByText(
+          '2 more Areas on track: Corporate IT and Assets without an Area. They hold 5 High findings and no Critical.',
+        ),
+      ).toBeInTheDocument()
+
+      await user.click(within(card).getByRole('button', { name: 'Show all 7 Areas' }))
+      expect(areaRows(card)).toHaveLength(7)
+      expect(within(card).getByText('Assets without an Area')).toBeInTheDocument()
+      expect(within(card).queryByRole('button', { name: /^Show all/ })).not.toBeInTheDocument()
+    })
+
+    it('lists every flagged Area even past 5 rows', async () => {
+      areaHealthOf(
+        ...['A', 'B', 'C', 'D', 'E', 'F'].map((name) => area(`Flagged ${name}`, { needs_help: true, reasons: ['growing'] })),
+        area('Customer Portal'),
+      )
+      renderApp('/dashboard')
+
+      const card = await areasCard('6 Areas need help')
+      expect(areaRows(card)).toHaveLength(6)
+      expect(within(card).getByRole('button', { name: 'Show all 7 Areas' })).toBeInTheDocument()
+    })
+
+    it('words each Area\'s open count, oldest Critical and change against 30 days ago, with no links', async () => {
+      areaHealthOf(
+        area('Infrastructure', { critical_open: 2, high_open: 3, oldest_critical_days: 12, open_now: 9, open_30_days_ago: 3 }),
+        area('Payments', { open_now: 2, open_30_days_ago: 13 }),
+        area('Data Platform'),
+      )
+      renderApp('/dashboard')
+
+      const [infrastructure, payments, dataPlatform] = areaRows(await areasCard('No Area needs help'))
+      expect(within(infrastructure).getByText('2 Critical · 3 High')).toBeInTheDocument()
+      expect(within(infrastructure).getByText('12 days')).toBeInTheDocument()
+      expect(within(infrastructure).getByText('↑ 6')).toBeInTheDocument()
+      expect(within(payments).getByText('None')).toBeInTheDocument()
+      expect(within(payments).getByText('↓ 11')).toBeInTheDocument()
+      expect(within(dataPlatform).getByText('No change')).toBeInTheDocument()
+      expect(within(screen.getByRole('region', { name: 'No Area needs help' })).queryByRole('link')).not.toBeInTheDocument()
+    })
+
+    it('counts the Critical the rest of the Areas hold instead of saying they hold none', async () => {
+      areaHealthOf(
+        ...['A', 'B', 'C', 'D', 'E'].map((name) => area(`Young ${name}`, { critical_open: 1, oldest_critical_days: 9 })),
+        area('Customer Portal', { critical_open: 1, high_open: 2, oldest_critical_days: 3 }),
+      )
+      renderApp('/dashboard')
+
+      const card = await areasCard('No Area needs help')
+      expect(
+        within(card).getByText('1 more Area on track: Customer Portal. They hold 2 High and 1 Critical findings.'),
+      ).toBeInTheDocument()
+    })
+
+    it('says No owner for an Area nobody owns yet', async () => {
+      areaHealthOf(area('Data Platform', { owner_email: null, asset_count: 25 }))
+      renderApp('/dashboard')
+
+      const card = await areasCard('No Area needs help')
+      expect(within(card).getByText('25 assets · No owner')).toBeInTheDocument()
     })
   })
 

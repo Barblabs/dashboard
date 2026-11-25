@@ -58,6 +58,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/areas/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Report how each of the Customer's Areas is doing and flag those that need help
+         * @description One entry per Active Area, and one with a null id for the Assets with no Area when they have open Findings. Inactive Areas, and the Findings of their Assets, are left out. An Area needs help for aging_critical, when an open Finding has been Critical for over 30 days, counted from the start of its latest unbroken run of Critical Scores, and for growing, when each of the last 3 complete ISO weeks, in UTC, first opened more of its Findings than it closed. Flagged Areas come first, then the oldest Critical first, with none last, then the most Critical open, then by name, with no Area last. fixed counts remediated, component_removed and no_longer_affected closes in the last 30 days. A Finding closed and then reopened keeps no record of that close, so it is not counted as closed, and counts as open while it was closed. The list is not paged.
+         */
+        get: operations["get-areas-health"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/areas/{id}/owner": {
         parameters: {
             query?: never;
@@ -927,6 +947,58 @@ export interface components {
         };
         AnalistaMessage: {
             message: string;
+        };
+        AreaHealthListResponse: {
+            areas: components["schemas"]["AreaHealthResponse"][];
+        };
+        AreaHealthResponse: {
+            /**
+             * Format: int64
+             * @description Active Assets
+             */
+            asset_count: number;
+            /**
+             * Format: int64
+             * @description Open Findings whose latest Score is Critical
+             */
+            critical_open: number;
+            /**
+             * Format: int64
+             * @description Findings closed as Fixed in the last 30 days
+             */
+            fixed: number;
+            /**
+             * Format: int64
+             * @description Open Findings whose latest Score is High
+             */
+            high_open: number;
+            /**
+             * Format: int64
+             * @description As in GET /areas; null for the Assets with no Area
+             */
+            id: number | null;
+            /** @description Null for the Assets with no Area */
+            name: string | null;
+            /** @description True exactly when reasons is not empty */
+            needs_help: boolean;
+            /**
+             * Format: int64
+             * @description Whole days since the longest-Critical open Finding's latest unbroken run of Critical Scores began; null when none is Critical
+             */
+            oldest_critical_days: number | null;
+            /**
+             * Format: int64
+             * @description Findings open 30 days ago
+             */
+            open_30_days_ago: number;
+            /**
+             * Format: int64
+             * @description Open scored Findings; summed over the entries, open in GET /findings/summary, but for the Findings of Assets in Inactive Areas
+             */
+            open_now: number;
+            /** @description Whom to reach about the Area; null until a Customer Admin states it */
+            owner_email: string | null;
+            reasons: ("aging_critical" | "growing")[];
         };
         AreaListResponse: {
             areas: components["schemas"]["AreaResponse"][];
@@ -2239,6 +2311,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
+    "get-areas-health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AreaHealthListResponse"];
                 };
             };
             /** @description Unauthorized */
