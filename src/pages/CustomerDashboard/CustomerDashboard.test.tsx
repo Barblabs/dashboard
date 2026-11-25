@@ -21,6 +21,21 @@ function lastWeekEndedWith(lastWeek: number) {
   trendOf(12, lastWeek, 23)
 }
 
+const CLOSES = {
+  current: { opened: 26, fixed: 38, went_away: 9, set_aside: 5 },
+  previous: { opened: 30, fixed: 31, went_away: 4, set_aside: 6 },
+  critical_fixed_median_days: 6,
+}
+
+function closesOf(closes: { current?: Partial<typeof CLOSES.current>; previousFixed?: number; median?: number | null }) {
+  const body = {
+    current: { ...CLOSES.current, ...closes.current },
+    previous: { ...CLOSES.previous, fixed: closes.previousFixed ?? CLOSES.previous.fixed },
+    critical_fixed_median_days: closes.median === undefined ? CLOSES.critical_fixed_median_days : closes.median,
+  }
+  server.use(http.get(apiUrl('/findings/closes'), () => HttpResponse.json(body)))
+}
+
 function minutesAgo(minutes: number) {
   return new Date(Date.now() - minutes * 60_000).toISOString()
 }
@@ -39,6 +54,10 @@ function closed(cve: string, reason: string, reopenAt: string | null) {
 
 async function openCard() {
   return screen.findByRole('region', { name: 'Open right now' })
+}
+
+async function fixedCard() {
+  return screen.findByRole('region', { name: 'Fixed by your teams in the last 30 days' })
 }
 
 async function openAnalysisTab() {
@@ -305,6 +324,47 @@ describe('CustomerDashboard', () => {
       const card = await screen.findByRole('region', { name: 'Coming back soon' })
 
       expect(await within(card).findByText('Nothing set aside comes back in the next 30 days.')).toBeInTheDocument()
+    })
+  })
+
+  describe('Fixed by your teams in the last 30 days', () => {
+    it('counts what was fixed and says in green that it is more than the month before', async () => {
+      closesOf({ current: { fixed: 38 }, previousFixed: 31 })
+      renderApp('/dashboard')
+      const card = await fixedCard()
+
+      expect(await within(card).findByText('38')).toBeInTheDocument()
+      expect(within(card).getByText('↑ from 31 the month before')).toHaveClass('text-good')
+    })
+
+    it('says in red that fewer were fixed than the month before', async () => {
+      closesOf({ current: { fixed: 40 }, previousFixed: 52 })
+      renderApp('/dashboard')
+
+      expect(await within(await fixedCard()).findByText('↓ from 52 the month before')).toHaveClass('text-critical')
+    })
+
+    it('says when as many were fixed as the month before', async () => {
+      closesOf({ current: { fixed: 31 }, previousFixed: 31 })
+      renderApp('/dashboard')
+
+      expect(await within(await fixedCard()).findByText('Same as the month before')).toBeInTheDocument()
+    })
+
+    it('says within how many days half of the Critical ones were fixed, rounding the median up', async () => {
+      closesOf({ median: 4.2 })
+      renderApp('/dashboard')
+
+      expect(await within(await fixedCard()).findByText('Half of the Critical ones were fixed within 5 days')).toBeInTheDocument()
+    })
+
+    it('leaves the Critical line out when no Critical one was fixed', async () => {
+      closesOf({ median: null })
+      renderApp('/dashboard')
+      const card = await fixedCard()
+      await within(card).findByText('↑ from 31 the month before')
+
+      expect(within(card).queryByText(/^Half of the Critical/)).not.toBeInTheDocument()
     })
   })
 

@@ -140,6 +140,14 @@ export const es: Translations = {
       up: '↑ {{count}} desde el lunes pasado',
       same: 'Sin cambios desde el lunes pasado',
     },
+    fixed: {
+      label: 'Corregidos por tus equipos en los últimos 30 días',
+      up: '↑ desde {{previous}} el mes anterior',
+      down: '↓ desde {{previous}} el mes anterior',
+      same: 'Igual que el mes anterior',
+      criticalMedian_one: 'La mitad de los críticos se corrigieron en {{count}} día o menos',
+      criticalMedian_other: 'La mitad de los críticos se corrigieron en {{count}} días o menos',
+    },
     critical: {
       label: 'Críticos abiertos ahora',
       none: 'Ninguno',

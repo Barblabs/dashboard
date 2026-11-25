@@ -138,6 +138,14 @@ export const en = {
       up: '↑ {{count}} since last Monday',
       same: 'No change since last Monday',
     },
+    fixed: {
+      label: 'Fixed by your teams in the last 30 days',
+      up: '↑ from {{previous}} the month before',
+      down: '↓ from {{previous}} the month before',
+      same: 'Same as the month before',
+      criticalMedian_one: 'Half of the Critical ones were fixed within {{count}} day',
+      criticalMedian_other: 'Half of the Critical ones were fixed within {{count}} days',
+    },
     critical: {
       label: 'Critical, open right now',
       none: 'None',
