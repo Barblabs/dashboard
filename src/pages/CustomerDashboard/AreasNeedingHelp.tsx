@@ -128,7 +128,7 @@ function AreaRow({ area, name, most }: { area: AreaHealth; name: string; most: n
         {area.oldest_critical_days === null ? (
           t('dashboard.critical.none')
         ) : (
-          <span className={area.oldest_critical_days > 30 ? 'font-semibold text-critical' : ''}>
+          <span className={area.reasons.includes('aging_critical') ? 'font-semibold text-critical' : ''}>
             {t('dashboard.areas.days', { count: area.oldest_critical_days })}
           </span>
         )}

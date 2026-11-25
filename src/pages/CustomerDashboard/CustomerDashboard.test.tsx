@@ -520,6 +520,7 @@ describe('CustomerDashboard', () => {
       const [infrastructure, dataPlatform, payments] = areaRows(card)
       expect(infrastructure).toHaveTextContent('Needs help')
       expect(within(infrastructure).getByText('A Critical open for 47 days')).toBeInTheDocument()
+      expect(within(infrastructure).getByText('47 days')).toHaveClass('text-critical')
       expect(dataPlatform).toHaveTextContent('Needs help')
       expect(within(dataPlatform).getByText('Opened more than it closed three weeks in a row')).toBeInTheDocument()
       expect(payments).not.toHaveTextContent('Needs help')
@@ -592,7 +593,7 @@ describe('CustomerDashboard', () => {
 
       const [infrastructure, payments, dataPlatform] = areaRows(await areasCard('No Area needs help'))
       expect(within(infrastructure).getByText('2 Critical · 3 High')).toBeInTheDocument()
-      expect(within(infrastructure).getByText('12 days')).toBeInTheDocument()
+      expect(within(infrastructure).getByText('12 days')).not.toHaveClass('text-critical')
       expect(within(infrastructure).getByText('↑ 6')).toBeInTheDocument()
       expect(within(payments).getByText('None')).toBeInTheDocument()
       expect(within(payments).getByText('↓ 11')).toBeInTheDocument()
