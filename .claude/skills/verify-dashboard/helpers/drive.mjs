@@ -863,6 +863,13 @@ const scenarios = {
     const startHere = page.getByRole('region', { name: 'Start here' })
     await expect(startHere.getByRole('link', { name: 'Open the prioritized list' })).toBeVisible()
     await expect(startHere.getByText('4 findings, 2 of them Critical')).toBeVisible()
+    const services = page.getByRole('region', { name: 'Your critical services' })
+    await expect(services.getByText('The ones named in your Business Context.')).toBeVisible()
+    await expect(services.getByText('2 Critical open, and 1 of them in the news this week')).toBeVisible()
+    await expect(services.getByText('1 Critical open for 12 days')).toBeVisible()
+    await expect(services.getByText('No Critical open · 1 High')).toBeVisible()
+    await expect(services.getByText('nomina-legacy and hr-portal not found in your inventory')).toBeVisible()
+    await shot('critical-services', services)
     const comingBack = page.getByRole('region', { name: 'Coming back soon' })
     await expect(comingBack.getByText('Nothing set aside comes back in the next 30 days.')).toBeVisible()
     await shot('start-here-and-coming-back', comingBack)
@@ -870,7 +877,7 @@ const scenarios = {
     for (const retired of ['/findings/breakdown', '/findings/top', '/findings/time-to-close', '/assets/findings-summary']) {
       check(callsTo('GET', retired).length === 0, `the Overview still calls ${retired}`)
     }
-    for (const used of ['/cmdb/source', '/findings/summary', '/findings/weekly-trend', '/findings/closed', '/findings/closes', '/areas/health']) {
+    for (const used of ['/cmdb/source', '/findings/summary', '/findings/weekly-trend', '/findings/closed', '/findings/closes', '/areas/health', '/critical-services']) {
       check(callsTo('GET', used).some((c) => c.status === 200), `the Overview did not fetch ${used}`)
     }
 
