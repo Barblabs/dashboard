@@ -205,6 +205,29 @@ describe('CustomerDashboard', () => {
     })
   })
 
+  describe('Start here', () => {
+    it('shows the first two groups of the prioritization and how many of each are Critical', async () => {
+      renderApp('/dashboard')
+      const card = await screen.findByRole('region', { name: 'Start here' })
+
+      const [first, second, ...rest] = await within(card).findAllByRole('listitem')
+      expect(rest).toHaveLength(0)
+      expect(within(first).getByText('Fallos con exploit activo sobre servicios expuestos a internet')).toBeInTheDocument()
+      expect(within(first).getByText('4 findings, 2 of them Critical')).toBeInTheDocument()
+      expect(within(second).getByText('Explotados activamente, activos internos con servicios de pago y CI/CD')).toBeInTheDocument()
+      expect(within(second).getByText('5 findings, 0 of them Critical')).toBeInTheDocument()
+      expect(within(card).getByRole('link', { name: 'Open the prioritized list' })).toHaveAttribute('href', '/findings')
+    })
+
+    it('says there are no findings yet before the first prioritization', async () => {
+      server.use(http.get(apiUrl('/prioritizations'), () => HttpResponse.json({ prioritizations: [] })))
+      renderApp('/dashboard')
+      const card = await screen.findByRole('region', { name: 'Start here' })
+
+      expect(await within(card).findByText(/^No findings yet\./)).toBeInTheDocument()
+    })
+  })
+
   describe('Critical, open right now', () => {
     it('counts the Critical in the Critical colour and how many are internet-facing', async () => {
       renderApp('/dashboard')

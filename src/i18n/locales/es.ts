@@ -111,6 +111,12 @@ export const es: Translations = {
       tooShort: 'La tendencia aparece después de tu segunda semana.',
       chart: 'Hallazgos abiertos al final de cada semana desde el {{start}}: {{first}} entonces, {{highest}} como máximo, {{last}} ahora',
     },
+    startHere: {
+      title: 'Empieza aquí',
+      group_one: '{{count}} hallazgo, {{critical}} crítico',
+      group_other: '{{count}} hallazgos, {{critical}} de ellos críticos',
+      openList: 'Abrir la lista priorizada',
+    },
     tabs: {
       overview: 'Vista general',
       analysis: 'Priorización y amenazas',

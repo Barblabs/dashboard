@@ -109,6 +109,12 @@ export const en = {
       tooShort: 'The trend appears after your second week.',
       chart: 'Findings open at the end of each week since {{start}}: {{first}} then, {{highest}} at the most, {{last}} now',
     },
+    startHere: {
+      title: 'Start here',
+      group_one: '{{count}} finding, {{critical}} Critical',
+      group_other: '{{count}} findings, {{critical}} of them Critical',
+      openList: 'Open the prioritized list',
+    },
     tabs: {
       overview: 'Overview',
       analysis: 'Prioritization and threats',
