@@ -45,11 +45,31 @@ function closesOf(closes: { current?: Partial<typeof CLOSES.current>; previousFi
 
 let lastAreaId = 0
 
-function area(name: string | null, health: Partial<AreaHealth> = {}): AreaHealth {
+type AreaFlag =
+  | Pick<Extract<AreaHealth, { needs_help: false }>, 'needs_help' | 'reasons'>
+  | Pick<Extract<AreaHealth, { reasons: ['growing'] }>, 'needs_help' | 'reasons'>
+  | Pick<Extract<AreaHealth, { oldest_critical_days: number }>, 'needs_help' | 'reasons' | 'oldest_critical_days'>
+
+const ON_TRACK: AreaFlag = { needs_help: false, reasons: [] }
+const GROWING: AreaFlag = { needs_help: true, reasons: ['growing'] }
+
+function aging(days: number, growing = false): AreaFlag {
+  return {
+    needs_help: true,
+    reasons: growing ? ['aging_critical', 'growing'] : ['aging_critical'],
+    oldest_critical_days: days,
+  }
+}
+
+function area(
+  name: string | null,
+  counts: Partial<Omit<AreaHealth, 'needs_help' | 'reasons'>> = {},
+  flag = ON_TRACK,
+): AreaHealth {
   return {
     id: name === null ? null : ++lastAreaId, name, owner_email: 'lead@test.example', asset_count: 10,
     critical_open: 0, high_open: 1, oldest_critical_days: null, fixed: 2, open_now: 3, open_30_days_ago: 3,
-    needs_help: false, reasons: [], ...health,
+    ...counts, ...flag,
   }
 }
 
@@ -510,8 +530,8 @@ describe('CustomerDashboard', () => {
   describe('Areas that need help', () => {
     it('flags each Area with the reason it needs help', async () => {
       areaHealthOf(
-        area('Infrastructure', { critical_open: 2, oldest_critical_days: 47, needs_help: true, reasons: ['aging_critical'] }),
-        area('Data Platform', { needs_help: true, reasons: ['growing'] }),
+        area('Infrastructure', { critical_open: 2 }, aging(47)),
+        area('Data Platform', {}, GROWING),
         area('Payments'),
       )
       renderApp('/dashboard')
@@ -528,9 +548,7 @@ describe('CustomerDashboard', () => {
 
     it('joins both reasons in one sentence', async () => {
       areaHealthOf(
-        area('Infrastructure', {
-          critical_open: 1, oldest_critical_days: 31, needs_help: true, reasons: ['aging_critical', 'growing'],
-        }),
+        area('Infrastructure', { critical_open: 1 }, aging(31, true)),
       )
       renderApp('/dashboard')
 
@@ -550,7 +568,7 @@ describe('CustomerDashboard', () => {
 
     it('lists every flagged Area, fills up to 5 rows, and sums the rest until Show all lists them', async () => {
       areaHealthOf(
-        ...['A', 'B', 'C', 'D'].map((name) => area(`Flagged ${name}`, { needs_help: true, reasons: ['growing'] })),
+        ...['A', 'B', 'C', 'D'].map((name) => area(`Flagged ${name}`, {}, GROWING)),
         area('Customer Portal'),
         area('Corporate IT', { high_open: 2 }),
         area(null, { high_open: 3 }),
@@ -573,7 +591,7 @@ describe('CustomerDashboard', () => {
 
     it('lists every flagged Area even past 5 rows', async () => {
       areaHealthOf(
-        ...['A', 'B', 'C', 'D', 'E', 'F'].map((name) => area(`Flagged ${name}`, { needs_help: true, reasons: ['growing'] })),
+        ...['A', 'B', 'C', 'D', 'E', 'F'].map((name) => area(`Flagged ${name}`, {}, GROWING)),
         area('Customer Portal'),
       )
       renderApp('/dashboard')
