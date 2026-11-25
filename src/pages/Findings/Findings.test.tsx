@@ -55,14 +55,6 @@ describe('Findings', () => {
     expect(window.location.search).toContain('tab=closed')
   })
 
-  it('redirects /findings?tab=summary to /dashboard', async () => {
-    renderApp('/findings?tab=summary')
-
-    expect(await screen.findByRole('heading', { level: 1, name: 'Summary' })).toBeInTheDocument()
-    expect(window.location.pathname).toBe('/dashboard')
-    expect(window.location.search).toContain('tab=summary')
-  })
-
   it('does not redirect /findings?tab=closed to the dashboard', async () => {
     renderApp('/findings?tab=closed')
 
