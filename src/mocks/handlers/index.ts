@@ -7,7 +7,6 @@ import { businessContextHandlers } from './businessContext'
 import { cmdbHandlers } from './cmdb'
 import { customersHandlers } from './customers'
 import { findingsHandlers } from './findings'
-import { findingsRiskHandlers } from './findingsRisk'
 import { newsDigestsHandlers } from './newsDigests'
 import { prioritizationsHandlers } from './prioritizations'
 import { slackHandlers } from './slack'
@@ -24,7 +23,6 @@ export const handlers = [
   ...prioritizationsHandlers,
   ...newsDigestsHandlers,
   ...findingsHandlers,
-  ...findingsRiskHandlers,
   ...attackMatrixHandlers,
   ...adminStatsHandlers,
   ...slackHandlers,
