@@ -18,7 +18,7 @@ export function Priorities() {
   const { t } = useTranslation()
 
   return (
-    <Section id="priorities" lead={t('landing.priorities.lead')}>
+    <Section id="priorities">
       <div aria-hidden="true" className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <ol className="flex flex-col gap-3">
           {GROUPS.map(({ key, findings }, index) => (

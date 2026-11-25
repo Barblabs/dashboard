@@ -7,6 +7,7 @@ const week = (starts_on: string, opened: number, closed: number, open_at_end: nu
   opened,
   closed,
   open_at_end,
+  critical_open_at_end: 0,
 })
 
 describe('fromFirstRecord', () => {

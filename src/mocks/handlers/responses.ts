@@ -1,5 +1,6 @@
 import { HttpResponse } from 'msw'
 import type { ZodType } from 'zod'
+import { mockCaller } from './auth'
 
 // The backend's error body: `code` is what the frontend translates, `error` the raw message.
 export function failure(status: number, code: string, error: string) {
@@ -14,4 +15,9 @@ export async function parsedBody<T>(request: Request, schema: ZodType<T>): Promi
   const body: unknown = await request.json().catch(() => undefined)
   const parsed = schema.safeParse(body)
   return parsed.success ? parsed.data : failure(400, 'invalid_request', 'validation failed')
+}
+
+/** A Platform Admin acts for no Customer, so barbackend refuses it what is a Customer's. */
+export function refusedCaller(): Response | null {
+  return mockCaller().role === 'platform_admin' ? failure(403, 'forbidden', 'a platform admin acts for no customer') : null
 }

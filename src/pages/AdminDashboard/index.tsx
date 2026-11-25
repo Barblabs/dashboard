@@ -136,7 +136,7 @@ function OrgsTable({ customers }: { customers: CustomerStats[] }) {
 
   return (
     <Card>
-      <CardHeader title={t('adminDashboard.orgsTable.title')} />
+      <CardHeader title={t('adminDashboard.orgsTable.title')} help={t('adminDashboard.orgsTable.help')} />
       {customers.length === 0 ? (
         <p className="p-6 font-body text-[0.875rem] text-gray">{t('adminDashboard.orgsTable.empty')}</p>
       ) : wide ? (
@@ -262,7 +262,7 @@ function SyncChart({ days }: { days: SyncDay[] }) {
 
   return (
     <Card>
-      <CardHeader title={t('adminDashboard.syncChart.title')} />
+      <CardHeader title={t('adminDashboard.syncChart.title')} help={t('adminDashboard.syncChart.help')} />
       <div className="p-6">
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
@@ -302,7 +302,7 @@ function SlackBars({ customers }: { customers: CustomerSlackDeliveries[] }) {
 
   return (
     <Card>
-      <CardHeader title={t('adminDashboard.slack.title')} />
+      <CardHeader title={t('adminDashboard.slack.title')} help={t('adminDashboard.slack.help')} />
       <ul className="flex flex-col gap-4 p-6">
         {rows.map((row) => (
           <li key={row.id} className="flex flex-col gap-1">
@@ -378,7 +378,7 @@ function MonthlyChart({ customers }: { customers: CustomerResponse[] }) {
 
   return (
     <Card>
-      <CardHeader title={t('adminDashboard.chart.title')} />
+      <CardHeader title={t('adminDashboard.chart.title')} help={t('adminDashboard.chart.help')} />
       <div className="p-6">
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">

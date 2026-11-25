@@ -9,7 +9,7 @@ import { findingHistoryStore } from '../finding-history-store'
 import { prioritizationsStore } from '../prioritizations-store'
 import { apiUrl } from '../url'
 import { mockCaller } from './auth'
-import { failure, parsedBody } from './responses'
+import { failure, parsedBody, refusedCaller } from './responses'
 
 const closeBody = z.object({
   reason: z.enum(CLOSE_REASONS),
@@ -23,11 +23,6 @@ function invalidClose({ reason, note, reopen_at }: z.infer<typeof closeBody>): b
   if (why === '' || why.length > 2000) return true
   if (closesUntil(reason) !== (reopen_at !== undefined)) return true
   return reopen_at !== undefined && new Date(reopen_at).getTime() <= Date.now()
-}
-
-/** A Platform Admin sees no Customer's Findings. */
-function refusedCaller(): Response | null {
-  return mockCaller().role === 'platform_admin' ? failure(403, 'forbidden', 'a platform admin acts for no customer') : null
 }
 
 /** The Finding as the newest Prioritization that placed it has it. */
@@ -220,32 +215,39 @@ export const findingsHandlers = [
     })
   }),
 
+  // barbackend reads `days` before the caller.
+  http.get(apiUrl('/findings/closes'), async ({ request }) => {
+    const days = new URL(request.url).searchParams.get('days') ?? '30'
+    if (!/^\d+$/.test(days) || Number(days) < 1 || Number(days) > 365) {
+      return failure(400, 'invalid_request', 'days must be from 1 to 365')
+    }
+    const refused = refusedCaller()
+    if (refused) return refused
+    await delay()
+    // A close by hand counts at once; the rest of the counts are fixed.
+    const since = Date.now() - Number(days) * 24 * 60 * 60 * 1000
+    const byHand = closedFindingsStore.load().filter((c) => new Date(c.closed_at).getTime() > since)
+    const fixedByHand = byHand.filter((c) => c.reason === 'remediated').length
+    return HttpResponse.json({
+      current: { opened: 26, fixed: 38 + fixedByHand, went_away: 9, set_aside: 5 + byHand.length - fixedByHand },
+      previous: { opened: 30, fixed: 31, went_away: 4, set_aside: 6 },
+      critical_fixed_median_days: 6,
+    } satisfies Schemas['ClosesResponse'])
+  }),
+
   http.get(apiUrl('/findings/weekly-trend'), async () => {
     await delay()
     return HttpResponse.json({
       weeks: [
         // Nothing before the first Sync, two weeks in: the chart starts there.
-        { week: '2026-W38', starts_on: '2026-09-15', opened: 0, closed: 0, open_at_end: 0 },
-        { week: '2026-W39', starts_on: '2026-09-22', opened: 0, closed: 0, open_at_end: 0 },
-        { week: '2026-W40', starts_on: '2026-09-29', opened: 12, closed: 0, open_at_end: 12 },
-        { week: '2026-W41', starts_on: '2026-10-06', opened: 4, closed: 1, open_at_end: 15 },
-        { week: '2026-W42', starts_on: '2026-10-13', opened: 6, closed: 2, open_at_end: 19 },
-        { week: '2026-W43', starts_on: '2026-10-20', opened: 2, closed: 3, open_at_end: 18 },
-        { week: '2026-W44', starts_on: '2026-10-27', opened: 4, closed: 1, open_at_end: 21 },
-        { week: '2026-W45', starts_on: '2026-11-03', opened: 3, closed: 1, open_at_end: 23 },
-      ],
-    })
-  }),
-
-  http.get(apiUrl('/findings/time-to-close'), async () => {
-    await delay()
-    return HttpResponse.json({
-      bands: [
-        { band: 'critical', median_days: 3.5, average_days: 4.1, closed: 12 },
-        { band: 'high', median_days: 7.2, average_days: 8.0, closed: 25 },
-        { band: 'medium', median_days: 14.1, average_days: 15.3, closed: 18 },
-        { band: 'low', median_days: null, average_days: null, closed: 0 },
-        { band: 'unbanded', median_days: 45.0, average_days: 47.2, closed: 5 },
+        { week: '2026-W38', starts_on: '2026-09-15', opened: 0, closed: 0, open_at_end: 0, critical_open_at_end: 0 },
+        { week: '2026-W39', starts_on: '2026-09-22', opened: 0, closed: 0, open_at_end: 0, critical_open_at_end: 0 },
+        { week: '2026-W40', starts_on: '2026-09-29', opened: 12, closed: 0, open_at_end: 12, critical_open_at_end: 3 },
+        { week: '2026-W41', starts_on: '2026-10-06', opened: 4, closed: 1, open_at_end: 15, critical_open_at_end: 4 },
+        { week: '2026-W42', starts_on: '2026-10-13', opened: 6, closed: 2, open_at_end: 19, critical_open_at_end: 6 },
+        { week: '2026-W43', starts_on: '2026-10-20', opened: 2, closed: 3, open_at_end: 18, critical_open_at_end: 6 },
+        { week: '2026-W44', starts_on: '2026-10-27', opened: 4, closed: 1, open_at_end: 21, critical_open_at_end: 8 },
+        { week: '2026-W45', starts_on: '2026-11-03', opened: 3, closed: 1, open_at_end: 23, critical_open_at_end: 5 },
       ],
     })
   }),

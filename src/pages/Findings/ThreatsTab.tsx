@@ -80,7 +80,7 @@ function CoverageCard({ labeled, open }: { labeled: number; open: number }) {
 
   return (
     <Card>
-      <CardHeader title={t('findings.threats.coverageTitle')} />
+      <CardHeader title={t('findings.threats.coverageTitle')} help={t('findings.threats.coverageHelp')} />
       <div className="flex flex-col gap-3 p-6">
         <p className="font-body text-[0.875rem] text-navy">
           {t('findings.threats.coverageLabel', { labeled, open })}
@@ -108,7 +108,7 @@ function HeatmapCard({ tactics }: { tactics: TacticCount[] }) {
 
   return (
     <Card>
-      <CardHeader title={t('findings.threats.heatmapTitle')} />
+      <CardHeader title={t('findings.threats.heatmapTitle')} help={t('findings.threats.heatmapHelp')} />
       <div className="p-6">
         <HeatmapGrid tactics={tactics} />
       </div>
@@ -227,7 +227,7 @@ function TopTechniquesCard({ techniques }: { techniques: TechniqueCount[] }) {
 
   return (
     <Card>
-      <CardHeader title={t('findings.threats.topTitle')} />
+      <CardHeader title={t('findings.threats.topTitle')} help={t('findings.threats.topHelp')} />
       {techniques.length === 0 ? (
         <p className="p-6 font-body text-[0.875rem] text-gray">{t('findings.threats.topEmpty')}</p>
       ) : (

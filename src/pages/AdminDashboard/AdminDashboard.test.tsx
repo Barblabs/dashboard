@@ -66,6 +66,14 @@ describe('AdminDashboard', () => {
     expect(screen.getByText('No alerts in the last 30 days')).toBeInTheDocument()
   })
 
+  it('explains every chart and table from a ? beside its title', async () => {
+    await renderDashboard()
+
+    for (const title of ['Organizations', 'Syncs per day (30 days)', 'Slack alerts (30 days)', 'New organizations per month']) {
+      expect(await screen.findByRole('button', { name: `About ${title}` })).toBeInTheDocument()
+    }
+  })
+
   it('shows a load error when /customers/stats fails', async () => {
     server.use(http.get(apiUrl('/customers/stats'), () => HttpResponse.error()))
     renderApp('/admin-dashboard', PLATFORM_ADMIN)

@@ -23,7 +23,7 @@ describe('Landing page', () => {
 
     await user.click(screen.getAllByRole('link', { name: 'Open dashboard' })[0])
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Summary' })).toBeInTheDocument()
     expect(window.location.pathname).toBe('/dashboard')
   })
 

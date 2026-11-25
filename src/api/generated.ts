@@ -58,6 +58,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/areas/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Report how each of the Customer's Areas is doing and flag those that need help
+         * @description One entry per Active Area, and one with a null id for the Assets with no Area when they have open Findings. Inactive Areas, and the Findings of their Assets, are left out. An Area needs help for aging_critical, when an open Finding has been Critical for over 30 days, counted from the start of its latest unbroken run of Critical Scores, and for growing, when each of the last 3 complete ISO weeks, in UTC, first opened more of its Findings than it closed. Flagged Areas come first, then the oldest Critical first, with none last, then the most Critical open, then by name, with no Area last. fixed counts remediated, component_removed and no_longer_affected closes in the last 30 days. A Finding closed and then reopened keeps no record of that close, so it is not counted as closed, and counts as open while it was closed. The list is not paged.
+         */
+        get: operations["get-areas-health"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/areas/{id}/owner": {
         parameters: {
             query?: never;
@@ -90,26 +110,6 @@ export interface paths {
          * @description Pages through Assets in a stable order. Pass next_cursor as cursor, with the same filters, to get the next page.
          */
         get: operations["list-assets"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/assets/findings-summary": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Count each Asset's open Findings by Score Band
-         * @description Every Asset of the Customer with an open scored Finding, ordered as GET /assets lists them, with its open Findings counted by the Score Band of their latest Score. A Finding not scored yet is left out.
-         */
-        get: operations["get-assets-findings-summary"];
         put?: never;
         post?: never;
         delete?: never;
@@ -302,6 +302,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/critical-services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Report how each Critical Service is doing with the open Findings of its Assets
+         * @description One entry per Critical Service of the latest Business Context, in its order; none without a Business Context. A listed Asset name matches every Active Asset with the same name once both are trimmed, ignoring case, and a Finding on an Asset matched twice counts once. status is at_risk when an open Critical Finding is in CISA KEV or in the news, otherwise watch when any open Finding is Critical, otherwise clear. A Finding is in the news when a News Item published in the last 7 days names its CVE. The list is not paged.
+         */
+        get: operations["get-critical-services"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/customers": {
         parameters: {
             query?: never;
@@ -457,26 +477,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/findings/breakdown": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Count the Customer's open Findings by Score Band within each Exposure, Criticality or Area
-         * @description By exposure (the effective one) and by criticality every value is there, unknown last, so a heatmap keeps its columns. By area only the Areas with open Findings are, by name, then none for the Assets in no Area. Each Finding is counted in one group. A Finding not scored yet is left out.
-         */
-        get: operations["get-findings-breakdown"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/findings/closed": {
         parameters: {
             query?: never;
@@ -489,6 +489,26 @@ export interface paths {
          * @description Newest close first, so one can be reopened. Findings closed on their own, by a Sync or NVD, are left out.
          */
         get: operations["list-closed-findings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/findings/closes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Count the Customer's Findings closed as Fixed, Went away and Set aside
+         * @description For the last days days ending now, and for the days days before that: Findings first opened, so a reopen is not new, and Findings closed by bucket. fixed is remediated, component_removed and no_longer_affected; went_away is asset_inactive, vulnerability_rejected and vulnerability_revised; set_aside is accepted_risk, postponed and false_positive. The buckets are never added together. A Finding closed and then reopened keeps no record of that close, so it is not counted as closed.
+         */
+        get: operations["get-findings-closes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -517,46 +537,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/findings/time-to-close": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Measure how long closing the Customer's Findings took, by Score Band
-         * @description The scored Findings closed in the last weeks ISO weeks, in UTC and the current week included, by the Score Band of their latest Score: how many, and the median and average days from when each was last opened to its close. A Finding not scored is left out.
-         */
-        get: operations["get-findings-time-to-close"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/findings/top": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List the components and CVEs with the most severe open Findings
-         * @description Each list is ordered by its open Findings' Score Bands, most Critical first, then by how many it has. A component is a Product at one version, so updating it closes its Findings. A Finding not scored yet is left out.
-         */
-        get: operations["get-findings-top"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/findings/weekly-trend": {
         parameters: {
             query?: never;
@@ -566,7 +546,7 @@ export interface paths {
         };
         /**
          * Count the Customer's Findings opened and closed each week
-         * @description One entry per ISO week, in UTC, oldest first and the current week last, with zeros for weeks where nothing happened. opened counts Findings first opened that week; closed counts Findings closed that week; open_at_end counts those still open when it ended. A Finding closed and then reopened keeps no record of that close, so it is not counted as closed, and counts as open while it was closed.
+         * @description One entry per ISO week, in UTC, oldest first and the current week last, with zeros for weeks where nothing happened. opened counts Findings first opened that week; closed counts Findings closed that week; open_at_end counts those still open when it ended; critical_open_at_end counts those of them whose latest Score by then was in the Critical Band, so for the current week it is critical of /findings/summary. A Finding closed and then reopened keeps no record of that close, so it is not counted as closed, and counts as open while it was closed.
          */
         get: operations["get-findings-weekly-trend"];
         put?: never;
@@ -988,6 +968,58 @@ export interface components {
         AnalistaMessage: {
             message: string;
         };
+        AreaHealthListResponse: {
+            areas: components["schemas"]["AreaHealthResponse"][];
+        };
+        AreaHealthResponse: {
+            /**
+             * Format: int64
+             * @description Active Assets
+             */
+            asset_count: number;
+            /**
+             * Format: int64
+             * @description Open Findings whose latest Score is Critical
+             */
+            critical_open: number;
+            /**
+             * Format: int64
+             * @description Findings closed as Fixed in the last 30 days
+             */
+            fixed: number;
+            /**
+             * Format: int64
+             * @description Open Findings whose latest Score is High
+             */
+            high_open: number;
+            /**
+             * Format: int64
+             * @description As in GET /areas; null for the Assets with no Area
+             */
+            id: number | null;
+            /** @description Null for the Assets with no Area */
+            name: string | null;
+            /** @description True exactly when reasons is not empty */
+            needs_help: boolean;
+            /**
+             * Format: int64
+             * @description Whole days since the longest-Critical open Finding's latest unbroken run of Critical Scores began; null when none is Critical
+             */
+            oldest_critical_days: number | null;
+            /**
+             * Format: int64
+             * @description Findings open 30 days ago
+             */
+            open_30_days_ago: number;
+            /**
+             * Format: int64
+             * @description Open scored Findings; summed over the entries, open in GET /findings/summary, but for the Findings of Assets in Inactive Areas
+             */
+            open_now: number;
+            /** @description Whom to reach about the Area; null until a Customer Admin states it */
+            owner_email: string | null;
+            reasons: ("aging_critical" | "growing")[];
+        };
         AreaListResponse: {
             areas: components["schemas"]["AreaResponse"][];
         };
@@ -1015,30 +1047,6 @@ export interface components {
             /** @description The Area's id in its CMDB Source */
             record_id: string;
             source_id: string;
-        };
-        AssetFindingBandsResponse: {
-            /** Format: int64 */
-            critical: number;
-            /** Format: int64 */
-            high: number;
-            /**
-             * Format: int64
-             * @description The Asset's handle, as in GET /assets
-             */
-            id: number;
-            /** Format: int64 */
-            low: number;
-            /** Format: int64 */
-            medium: number;
-            name: string;
-            /**
-             * Format: int64
-             * @description Open Findings whose latest Score is from a Scoring Model before 3, which has no Score Bands; they get one when rescored
-             */
-            unbanded: number;
-        };
-        AssetFindingsSummaryResponse: {
-            assets: components["schemas"]["AssetFindingBandsResponse"][];
         };
         AssetListResponse: {
             assets: components["schemas"]["AssetResponse"][];
@@ -1084,10 +1092,6 @@ export interface components {
             from: string;
             to: string;
         };
-        BreakdownResponse: {
-            by: string;
-            groups: components["schemas"]["GroupResponse"][];
-        };
         BusinessContextFields: {
             footprint: components["schemas"]["FootprintFields"];
             geography: components["schemas"]["GeographyFields"];
@@ -1119,6 +1123,19 @@ export interface components {
         } & {
             [key: string]: unknown;
         };
+        CloseCountsResponse: {
+            /** Format: int64 */
+            fixed: number;
+            /**
+             * Format: int64
+             * @description Findings first opened
+             */
+            opened: number;
+            /** Format: int64 */
+            set_aside: number;
+            /** Format: int64 */
+            went_away: number;
+        };
         CloseRequestBody: {
             /** @description Why, as the User says it */
             note: string;
@@ -1129,22 +1146,6 @@ export interface components {
              * @description Required for accepted_risk and postponed, and must be ahead; not allowed otherwise
              */
             reopen_at?: string;
-        };
-        CloseTimeResponse: {
-            /**
-             * Format: double
-             * @description Null when none was closed
-             */
-            average_days: number | null;
-            /** @enum {string} */
-            band: "critical" | "high" | "medium" | "low" | "unbanded";
-            /** Format: int64 */
-            closed: number;
-            /**
-             * Format: double
-             * @description Null when none was closed
-             */
-            median_days: number | null;
         };
         ClosedFindingResponse: {
             /**
@@ -1175,6 +1176,17 @@ export interface components {
         ClosedFindingsResponse: {
             findings: components["schemas"]["ClosedFindingResponse"][];
         };
+        ClosesResponse: {
+            /**
+             * Format: double
+             * @description Median days from opening to closing of the Fixed Findings of current whose latest Score is Critical; null when there are none
+             */
+            critical_fixed_median_days: number | null;
+            /** @description The last days days, ending now */
+            current: components["schemas"]["CloseCountsResponse"];
+            /** @description The days days before current */
+            previous: components["schemas"]["CloseCountsResponse"];
+        };
         CmdbSourceResponse: {
             /** Format: date-time */
             last_sync: string | null;
@@ -1189,18 +1201,6 @@ export interface components {
             code: string;
             /** @description Readable on its own, shown for a code the dashboard does not know */
             error: string;
-        };
-        ComponentCountResponse: {
-            /**
-             * Format: int64
-             * @description Assets running it with an open Finding
-             */
-            assets: number;
-            /** Format: int64 */
-            findings: number;
-            product: string;
-            vendor: string;
-            version: string;
         };
         ConnectRequest: {
             password: string;
@@ -1253,6 +1253,36 @@ export interface components {
             name: string;
         } & {
             [key: string]: unknown;
+        };
+        CriticalServiceHealthListResponse: {
+            critical_services: components["schemas"]["CriticalServiceHealthResponse"][];
+        };
+        CriticalServiceHealthResponse: {
+            /**
+             * Format: int64
+             * @description Open Findings on its Assets whose latest Score is Critical
+             */
+            critical_open: number;
+            /**
+             * Format: int64
+             * @description Open Findings on its Assets whose latest Score is High
+             */
+            high_open: number;
+            /**
+             * Format: int64
+             * @description Open Critical Findings on its Assets whose CVE a News Item published in the last 7 days names
+             */
+            in_the_news: number;
+            name: string;
+            /**
+             * Format: int64
+             * @description As in GET /areas/health; null when none is Critical
+             */
+            oldest_critical_days: number | null;
+            /** @enum {string} */
+            status: "at_risk" | "watch" | "clear";
+            /** @description The Asset names that match no Active Asset, as the Business Context states them */
+            unmatched_assets: string[];
         };
         CriticalServiceResponse: {
             description: string;
@@ -1325,19 +1355,6 @@ export interface components {
              * @description Its Users who are not disabled, those still invited included
              */
             user_count: number;
-        };
-        CveCountResponse: {
-            /** Format: int64 */
-            assets: number;
-            cve_id: string;
-            /**
-             * Format: double
-             * @description EPSS probability, null when EPSS has no score for the CVE yet
-             */
-            epss: number | null;
-            /** Format: int64 */
-            findings: number;
-            kev: boolean;
         };
         CvssResponse: {
             /** Format: double */
@@ -1543,12 +1560,6 @@ export interface components {
             headquarters: string;
         } & {
             [key: string]: unknown;
-        };
-        GroupResponse: {
-            /** @description The Area's name when grouped by area, null otherwise */
-            name: string | null;
-            /** @description The exposure or criticality code, unknown, the Area's id as in GET /areas, or none for the Assets in no Area */
-            value: string;
         };
         HardwareResponse: {
             model: string;
@@ -2120,14 +2131,6 @@ export interface components {
             error?: string;
             ok: boolean;
         };
-        TimeToCloseResponse: {
-            /** @description critical, high, medium, low, then unbanded */
-            bands: components["schemas"]["CloseTimeResponse"][];
-        };
-        TopResponse: {
-            components: components["schemas"]["ComponentCountResponse"][];
-            cves: components["schemas"]["CveCountResponse"][];
-        };
         UserListResponse: {
             users: components["schemas"]["UserResponse"][];
         };
@@ -2146,6 +2149,11 @@ export interface components {
         WeekResponse: {
             /** Format: int64 */
             closed: number;
+            /**
+             * Format: int64
+             * @description Findings open when the week ended whose latest Score by then was Critical, or open and Critical now for the current week
+             */
+            critical_open_at_end: number;
             /**
              * Format: int64
              * @description Findings open when the week ended, or open now for the current week: the backlog
@@ -2389,6 +2397,53 @@ export interface operations {
             };
         };
     };
+    "get-areas-health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AreaHealthListResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
     "set-area-owner": {
         parameters: {
             query?: never;
@@ -2503,53 +2558,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-        };
-    };
-    "get-assets-findings-summary": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AssetFindingsSummaryResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -3482,6 +3490,53 @@ export interface operations {
             };
         };
     };
+    "get-critical-services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CriticalServiceHealthListResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
     "list-customers": {
         parameters: {
             query?: never;
@@ -4020,64 +4075,6 @@ export interface operations {
             };
         };
     };
-    "get-findings-breakdown": {
-        parameters: {
-            query?: {
-                by?: "exposure" | "criticality" | "area";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BreakdownResponse"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-        };
-    };
     "list-closed-findings": {
         parameters: {
             query?: never;
@@ -4125,6 +4122,65 @@ export interface operations {
             };
         };
     };
+    "get-findings-closes": {
+        parameters: {
+            query?: {
+                /** @description How many days each window lasts */
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClosesResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodedError"];
+                };
+            };
+        };
+    };
     "get-findings-summary": {
         parameters: {
             query?: never;
@@ -4141,124 +4197,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FindingsSummaryResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-        };
-    };
-    "get-findings-time-to-close": {
-        parameters: {
-            query?: {
-                /** @description How many weeks, the current one included */
-                weeks?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TimeToCloseResponse"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
-                };
-            };
-        };
-    };
-    "get-findings-top": {
-        parameters: {
-            query?: {
-                /** @description How many of each list */
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TopResponse"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CodedError"];
                 };
             };
             /** @description Unauthorized */
