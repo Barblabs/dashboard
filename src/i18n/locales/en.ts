@@ -866,7 +866,7 @@ export const en = {
       title: 'Threat intelligence for the assets your business runs on',
       lead: 'barbattack watches every server and application you run, tells you which vulnerabilities to fix first and alerts the person responsible on Slack.',
       secondary: 'See how it works',
-      group: 'Exploited flaws on internet-facing services',
+      group: 'Exploited vulnerabilities on internet-facing services',
     },
     steps: {
       title: 'From your inventory to the person who fixes it',
@@ -884,7 +884,7 @@ export const en = {
       },
       score: {
         title: 'Ranks what to fix first',
-        text: 'Flaws attackers already use, on assets exposed to the internet, go to the top.',
+        text: 'Vulnerabilities attackers already exploit, on assets exposed to the internet, go to the top.',
         exploited: 'Exploited by attackers',
         yes: 'Yes',
       },
@@ -897,10 +897,9 @@ export const en = {
     },
     priorities: {
       title: 'What to fix first, and how',
-      lead: 'barbattack ranks your findings and writes a step-by-step plan to fix each one.',
       groups: {
         exposed: {
-          title: 'Exploited flaws on internet-facing services',
+          title: 'Exploited vulnerabilities on internet-facing services',
           reason: 'Attackers already exploit both, and they run on assets reachable from the internet.',
         },
         bastion: {
@@ -933,7 +932,7 @@ export const en = {
       drafterSample: 'Sectors, critical services, regulations, risk appetite',
     },
     closing: {
-      title: 'Know what to patch first, and who patches it',
+      title: 'Know what to fix first, and who fixes it',
       lead: 'Connect your CMDB. The first sync brings your assets in, and barbattack starts watching them.',
     },
   },

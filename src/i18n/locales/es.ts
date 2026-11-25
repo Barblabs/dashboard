@@ -868,7 +868,7 @@ export const es: Translations = {
       title: 'Inteligencia de amenazas para los activos de los que depende tu negocio',
       lead: 'barbattack vigila cada servidor y aplicación que operas, te dice qué vulnerabilidades corregir primero y avisa por Slack a la persona responsable.',
       secondary: 'Ver cómo funciona',
-      group: 'Fallos con exploit activo en servicios expuestos a internet',
+      group: 'Vulnerabilidades con exploit activo en servicios expuestos a internet',
     },
     steps: {
       title: 'De tu inventario a la persona que lo corrige',
@@ -886,7 +886,7 @@ export const es: Translations = {
       },
       score: {
         title: 'Ordena qué corregir primero',
-        text: 'Los fallos que los atacantes ya usan, en activos expuestos a internet, van primero.',
+        text: 'Las vulnerabilidades que los atacantes ya explotan, en activos expuestos a internet, van primero.',
         exploited: 'Explotado por atacantes',
         yes: 'Sí',
       },
@@ -899,10 +899,9 @@ export const es: Translations = {
     },
     priorities: {
       title: 'Qué corregir primero, y cómo',
-      lead: 'barbattack ordena tus hallazgos y escribe un plan paso a paso para corregir cada uno.',
       groups: {
         exposed: {
-          title: 'Fallos con exploit activo en servicios expuestos a internet',
+          title: 'Vulnerabilidades con exploit activo en servicios expuestos a internet',
           reason: 'Los atacantes ya explotan los dos, y corren en activos alcanzables desde internet.',
         },
         bastion: {
@@ -935,7 +934,7 @@ export const es: Translations = {
       drafterSample: 'Sectores, servicios críticos, regulaciones, apetito de riesgo',
     },
     closing: {
-      title: 'Qué parchear primero, y quién lo parchea',
+      title: 'Qué corregir primero, y quién lo corrige',
       lead: 'Conecta tu CMDB. La primera sincronización trae tus activos y barbattack empieza a vigilarlos.',
     },
   },
