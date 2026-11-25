@@ -177,6 +177,9 @@ export const en = {
       clearHigh_other: 'No Critical open · {{count}} High',
       unmatched: '{{names}} not found in your inventory',
       empty: 'Name your critical services in Business context to see them here.',
+      showAll_one: 'Show all {{count}} services',
+      showAll_other: 'Show all {{count}} services',
+      showFewer: 'Show fewer',
     },
     areas: {
       title_one: '{{count}} Area needs help',

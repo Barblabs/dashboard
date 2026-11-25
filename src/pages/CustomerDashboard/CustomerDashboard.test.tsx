@@ -678,6 +678,31 @@ describe('CustomerDashboard', () => {
       expect(website).not.toHaveTextContent('not found in your inventory')
     })
 
+    it('lists the first 5 services until Show all lists them, and Show fewer folds them back', async () => {
+      criticalServicesOf(...['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((name) => clearService(name)))
+      const user = renderApp('/dashboard')
+
+      const card = await servicesCard()
+      const names = () => within(card).getAllByRole('listitem').map((row) => row.textContent?.charAt(0))
+      await within(card).findAllByRole('listitem')
+      expect(names()).toEqual(['A', 'B', 'C', 'D', 'E'])
+
+      await user.click(within(card).getByRole('button', { name: 'Show all 7 services' }))
+      expect(names()).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G'])
+
+      await user.click(within(card).getByRole('button', { name: 'Show fewer' }))
+      expect(names()).toEqual(['A', 'B', 'C', 'D', 'E'])
+    })
+
+    it('shows no Show all button when 5 services or fewer are named', async () => {
+      criticalServicesOf(...['A', 'B', 'C', 'D', 'E'].map((name) => clearService(name)))
+      renderApp('/dashboard')
+
+      const card = await servicesCard()
+      expect(await within(card).findAllByRole('listitem')).toHaveLength(5)
+      expect(within(card).queryByRole('button')).not.toBeInTheDocument()
+    })
+
     it('sends to Business context to name the services when there are none', async () => {
       criticalServicesOf()
       const user = renderApp('/dashboard')
