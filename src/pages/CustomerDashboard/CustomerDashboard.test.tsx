@@ -200,7 +200,7 @@ describe('CustomerDashboard', () => {
 
     it('shows no line with no CMDB connected', async () => {
       renderApp('/dashboard')
-      await within(await openCard()).findByText('26 new and 52 closed in the last 30 days')
+      await within(await openCard()).findByText('26 new in the last 30 days')
 
       expect(screen.queryByText(/^Inventory synced|inventory sync failed/)).not.toBeInTheDocument()
     })
@@ -266,11 +266,13 @@ describe('CustomerDashboard', () => {
   })
 
   describe('Open right now', () => {
-    it('says how many were opened and closed in the last 30 days, every way of closing counted', async () => {
+    it('says how many were opened in the last 30 days, and adds up no closes', async () => {
       closesOf({ current: { opened: 15, fixed: 7, went_away: 3, set_aside: 2 } })
       renderApp('/dashboard')
 
-      expect(await within(await openCard()).findByText('15 new and 12 closed in the last 30 days')).toBeInTheDocument()
+      const card = await openCard()
+      expect(await within(card).findByText('15 new in the last 30 days')).toBeInTheDocument()
+      expect(within(card).queryByText(/closed/)).not.toBeInTheDocument()
     })
 
     it('forgets the counts of a CMDB once it is disconnected', async () => {

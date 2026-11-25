@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { closedCount, useFindingClosesQuery, type FindingCloses } from '../../api/findingCloses'
+import { useFindingClosesQuery, type FindingCloses } from '../../api/findingCloses'
 import { useFindingsSummaryQuery } from '../../api/findingsSummary'
 import { useWeeklyTrendQuery, type WeeklyTrendPoint } from '../../api/findingsTrend'
 import { STAT_CARD, STAT_LABEL, STAT_VALUE } from '../../components/ui/stat'
@@ -24,10 +24,7 @@ export function HeadlineCards() {
         <span className={STAT_LABEL}>{t('dashboard.open.label')}</span>
         {closes.data && (
           <span className={`${NOTE} text-gray`}>
-            {t('dashboard.open.lastDays', {
-              opened: closes.data.current.opened,
-              closed: closedCount(closes.data.current),
-            })}
+            {t('dashboard.open.newLastDays', { count: closes.data.current.opened })}
           </span>
         )}
       </section>
