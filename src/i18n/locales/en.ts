@@ -14,14 +14,14 @@ export const en = {
     menu: 'Menu',
     signOut: 'Sign out',
     nav: {
-      dashboard: 'Dashboard',
+      dashboard: 'Summary',
       findings: 'Findings',
       news: 'News',
       config: 'Configuration',
       'business-context': 'Business context',
       users: 'Users',
       tenants: 'Organizations',
-      'admin-dashboard': 'Dashboard',
+      'admin-dashboard': 'Summary',
     },
     user: {
       role: {
@@ -97,7 +97,7 @@ export const en = {
     comingSoon: 'Coming soon',
   },
   dashboard: {
-    title: 'Dashboard',
+    title: 'Summary',
     subtitle: 'An overview of your findings.',
   },
   findings: {
@@ -803,7 +803,7 @@ export const en = {
     },
   },
   adminDashboard: {
-    title: 'Dashboard',
+    title: 'Summary',
     loading: 'Loading…',
     loadFailed: 'Could not load dashboard data.',
     networkError: 'Could not reach the server to load the dashboard.',
@@ -866,7 +866,7 @@ export const en = {
       title: 'Threat intelligence for the assets your business runs on',
       lead: 'barbattack watches every server and application you run, tells you which vulnerabilities to fix first and alerts the person responsible on Slack.',
       secondary: 'See how it works',
-      group: 'Exploited flaws on internet-facing services',
+      group: 'Exploited vulnerabilities on internet-facing services',
     },
     steps: {
       title: 'From your inventory to the person who fixes it',
@@ -884,7 +884,7 @@ export const en = {
       },
       score: {
         title: 'Ranks what to fix first',
-        text: 'Flaws attackers already use, on assets exposed to the internet, go to the top.',
+        text: 'Vulnerabilities attackers already exploit, on assets exposed to the internet, go to the top.',
         exploited: 'Exploited by attackers',
         yes: 'Yes',
       },
@@ -896,11 +896,10 @@ export const en = {
       },
     },
     priorities: {
-      title: 'What to fix together, and why',
-      lead: 'barbattack groups the findings to fix at the same time and writes a step-by-step plan for each one.',
+      title: 'What to fix first, and how',
       groups: {
         exposed: {
-          title: 'Exploited flaws on internet-facing services',
+          title: 'Exploited vulnerabilities on internet-facing services',
           reason: 'Attackers already exploit both, and they run on assets reachable from the internet.',
         },
         bastion: {
@@ -925,16 +924,15 @@ export const en = {
       closed: 'The next sync saw Apache 2.4.51 on web-01 and closed the finding on its own.',
     },
     agents: {
-      title: 'AI agents for your security team',
-      lead: 'The agents advise and your team decides. They never change a Score or close a finding.',
-      prioritizer: 'Puts your open findings in the order to fix them, based on what each asset means to your business, and says why.',
+      title: "How barbattack's AI helps your security team",
+      prioritizer: 'Orders your open findings by what each asset means to your business, and explains the order.',
       luna: 'Writes the action plan for each finding: the steps, what mitigates it meanwhile and how to confirm the fix.',
-      editor: 'Writes your news digest, grouped by why each item matters to you.',
+      editor: 'Writes your news digest and groups each story by why it concerns you.',
       drafter: 'Drafts your business context from the documents you give it, for you to review.',
       drafterSample: 'Sectors, critical services, regulations, risk appetite',
     },
     closing: {
-      title: 'Know what to patch first, and who patches it',
+      title: 'Know what to fix first, and who fixes it',
       lead: 'Connect your CMDB. The first sync brings your assets in, and barbattack starts watching them.',
     },
   },

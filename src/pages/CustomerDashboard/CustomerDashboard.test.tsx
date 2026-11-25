@@ -33,7 +33,7 @@ describe('CustomerDashboard', () => {
   it('shows the Dashboard heading with Summary tab selected by default', async () => {
     renderApp('/dashboard')
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Summary' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Summary' })).toHaveAttribute('aria-selected', 'true')
   })
 
@@ -105,7 +105,7 @@ describe('CustomerDashboard', () => {
       await screen.findByRole('heading', { name: 'Choose your CMDB' })
 
       holdRequests('get', '/findings/summary')
-      await user.click(screen.getByRole('link', { name: 'Dashboard' }))
+      await user.click(screen.getByRole('link', { name: 'Summary' }))
       expect(await screen.findByText('Critical on internet-facing')).toBeInTheDocument()
       expect(screen.queryByText('23')).not.toBeInTheDocument()
     })

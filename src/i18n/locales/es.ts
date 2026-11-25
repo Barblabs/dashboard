@@ -16,14 +16,14 @@ export const es: Translations = {
     menu: 'Menú',
     signOut: 'Cerrar sesión',
     nav: {
-      dashboard: 'Dashboard',
+      dashboard: 'Resumen',
       findings: 'Hallazgos',
       news: 'Noticias',
       config: 'Configuración',
       'business-context': 'Contexto empresarial',
       users: 'Usuarios',
       tenants: 'Organizaciones',
-      'admin-dashboard': 'Dashboard',
+      'admin-dashboard': 'Resumen',
     },
     user: {
       role: {
@@ -99,7 +99,7 @@ export const es: Translations = {
     comingSoon: 'Próximamente',
   },
   dashboard: {
-    title: 'Dashboard',
+    title: 'Resumen',
     subtitle: 'Un resumen de tus hallazgos.',
   },
   findings: {
@@ -805,7 +805,7 @@ export const es: Translations = {
     },
   },
   adminDashboard: {
-    title: 'Dashboard',
+    title: 'Resumen',
     loading: 'Cargando…',
     loadFailed: 'No se pudo cargar el dashboard.',
     networkError: 'No se pudo contactar al servidor para cargar el dashboard.',
@@ -868,7 +868,7 @@ export const es: Translations = {
       title: 'Inteligencia de amenazas para los activos de los que depende tu negocio',
       lead: 'barbattack vigila cada servidor y aplicación que operas, te dice qué vulnerabilidades corregir primero y avisa por Slack a la persona responsable.',
       secondary: 'Ver cómo funciona',
-      group: 'Fallos con exploit activo en servicios expuestos a internet',
+      group: 'Vulnerabilidades con exploit activo en servicios expuestos a internet',
     },
     steps: {
       title: 'De tu inventario a la persona que lo corrige',
@@ -886,7 +886,7 @@ export const es: Translations = {
       },
       score: {
         title: 'Ordena qué corregir primero',
-        text: 'Los fallos que los atacantes ya usan, en activos expuestos a internet, van primero.',
+        text: 'Las vulnerabilidades que los atacantes ya explotan, en activos expuestos a internet, van primero.',
         exploited: 'Explotado por atacantes',
         yes: 'Sí',
       },
@@ -898,11 +898,10 @@ export const es: Translations = {
       },
     },
     priorities: {
-      title: 'Qué corregir junto, y por qué',
-      lead: 'barbattack agrupa los hallazgos que conviene corregir a la vez y escribe un plan paso a paso para cada uno.',
+      title: 'Qué corregir primero, y cómo',
       groups: {
         exposed: {
-          title: 'Fallos con exploit activo en servicios expuestos a internet',
+          title: 'Vulnerabilidades con exploit activo en servicios expuestos a internet',
           reason: 'Los atacantes ya explotan los dos, y corren en activos alcanzables desde internet.',
         },
         bastion: {
@@ -927,16 +926,15 @@ export const es: Translations = {
       closed: 'La siguiente sincronización vio Apache 2.4.51 en web-01 y cerró el hallazgo sola.',
     },
     agents: {
-      title: 'Agentes de IA para tu equipo de seguridad',
-      lead: 'Los agentes aconsejan y tu equipo decide. Nunca cambian un Score ni cierran un hallazgo.',
+      title: 'Cómo la IA de barbattack ayuda a tu equipo de seguridad',
       prioritizer: 'Ordena tus hallazgos abiertos según lo que cada activo significa para tu negocio, y explica por qué.',
       luna: 'Escribe el plan de acción de cada hallazgo: los pasos, qué lo mitiga mientras tanto y cómo confirmar la corrección.',
-      editor: 'Escribe tu resumen de noticias, agrupado por por qué cada una te importa.',
+      editor: 'Escribe tu resumen de noticias y agrupa cada noticia según por qué te afecta.',
       drafter: 'Redacta tu contexto empresarial a partir de los documentos que le das, para que lo revises.',
       drafterSample: 'Sectores, servicios críticos, regulaciones, apetito de riesgo',
     },
     closing: {
-      title: 'Qué parchear primero, y quién lo parchea',
+      title: 'Qué corregir primero, y quién lo corrige',
       lead: 'Conecta tu CMDB. La primera sincronización trae tus activos y barbattack empieza a vigilarlos.',
     },
   },
