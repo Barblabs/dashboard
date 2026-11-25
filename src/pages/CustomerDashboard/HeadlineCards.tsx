@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { closedCount, useFindingClosesQuery, type FindingCloses } from '../../api/findingCloses'
 import { useFindingsSummaryQuery } from '../../api/findingsSummary'
+import { useWeeklyTrendQuery, type WeeklyTrendPoint } from '../../api/findingsTrend'
 import { STAT_CARD, STAT_LABEL, STAT_VALUE } from '../../components/ui/stat'
 import { EMPTY } from '../../i18n/format'
+import { fromFirstRecord } from '../Findings/weeks'
 
 const NOTE = 'font-body text-[0.8125rem]'
 
@@ -10,6 +12,7 @@ export function HeadlineCards() {
   const { t } = useTranslation()
   const summary = useFindingsSummaryQuery()
   const closes = useFindingClosesQuery()
+  const trend = useWeeklyTrendQuery()
 
   const open = summary.data?.open
   const critical = summary.data?.critical
@@ -37,6 +40,7 @@ export function HeadlineCards() {
           </span>
         )}
         <span className={STAT_LABEL}>{t('dashboard.critical.label')}</span>
+        {trend.data && <CriticalChange weeks={fromFirstRecord(trend.data.weeks)} />}
         {summary.data && summary.data.critical > 0 && (
           <span className={`${NOTE} text-navy`}>
             {t('dashboard.critical.internetFacing', { count: summary.data.critical_internet_facing })}
@@ -68,7 +72,24 @@ function FixedCard() {
 function FixedChange({ closes: { current, previous } }: { closes: FindingCloses }) {
   const { t } = useTranslation()
   const values = { previous: previous.fixed }
-  if (current.fixed > previous.fixed) return <span className={`${NOTE} text-good`}>{t('dashboard.fixed.up', values)}</span>
-  if (current.fixed < previous.fixed) return <span className={`${NOTE} text-critical`}>{t('dashboard.fixed.down', values)}</span>
-  return <span className={`${NOTE} text-gray`}>{t('dashboard.fixed.same')}</span>
+  if (current.fixed > previous.fixed) return <Change tone="good">{t('dashboard.fixed.up', values)}</Change>
+  if (current.fixed < previous.fixed) return <Change tone="bad">{t('dashboard.fixed.down', values)}</Change>
+  return <Change tone="none">{t('dashboard.fixed.same')}</Change>
+}
+
+function CriticalChange({ weeks }: { weeks: WeeklyTrendPoint[] }) {
+  const { t } = useTranslation()
+  const now = weeks.at(-1)
+  const lastMonday = weeks.at(-2)
+  if (now === undefined || lastMonday === undefined) return null
+  const change = now.critical_open_at_end - lastMonday.critical_open_at_end
+  if (change < 0) return <Change tone="good">{t('dashboard.critical.down', { count: -change })}</Change>
+  if (change > 0) return <Change tone="bad">{t('dashboard.critical.up', { count: change })}</Change>
+  return <Change tone="none">{t('dashboard.critical.same')}</Change>
+}
+
+const TONE = { good: 'text-good', bad: 'text-critical', none: 'text-gray' }
+
+function Change({ tone, children }: { tone: keyof typeof TONE; children: string }) {
+  return <span className={`${NOTE} ${TONE[tone]}`}>{children}</span>
 }

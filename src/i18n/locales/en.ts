@@ -216,6 +216,9 @@ export const en = {
       none: 'None',
       internetFacing_one: '{{count}} of them is on an internet-facing asset',
       internetFacing_other: '{{count}} of them are on internet-facing assets',
+      down: '↓ {{count}} since last Monday',
+      up: '↑ {{count}} since last Monday',
+      same: 'No change since last Monday',
     },
   },
   findings: {

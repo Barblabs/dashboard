@@ -546,7 +546,7 @@ export interface paths {
         };
         /**
          * Count the Customer's Findings opened and closed each week
-         * @description One entry per ISO week, in UTC, oldest first and the current week last, with zeros for weeks where nothing happened. opened counts Findings first opened that week; closed counts Findings closed that week; open_at_end counts those still open when it ended. A Finding closed and then reopened keeps no record of that close, so it is not counted as closed, and counts as open while it was closed.
+         * @description One entry per ISO week, in UTC, oldest first and the current week last, with zeros for weeks where nothing happened. opened counts Findings first opened that week; closed counts Findings closed that week; open_at_end counts those still open when it ended; critical_open_at_end counts those of them whose latest Score by then was in the Critical Band, so for the current week it is critical of /findings/summary. A Finding closed and then reopened keeps no record of that close, so it is not counted as closed, and counts as open while it was closed.
          */
         get: operations["get-findings-weekly-trend"];
         put?: never;
@@ -2149,6 +2149,11 @@ export interface components {
         WeekResponse: {
             /** Format: int64 */
             closed: number;
+            /**
+             * Format: int64
+             * @description Findings open when the week ended whose latest Score by then was Critical, or open and Critical now for the current week
+             */
+            critical_open_at_end: number;
             /**
              * Format: int64
              * @description Findings open when the week ended, or open now for the current week: the backlog

@@ -218,6 +218,9 @@ export const es: Translations = {
       none: 'Ninguno',
       internetFacing_one: '{{count}} de ellos está en un activo expuesto a internet',
       internetFacing_other: '{{count}} de ellos están en activos expuestos a internet',
+      down: '↓ {{count}} desde el lunes pasado',
+      up: '↑ {{count}} desde el lunes pasado',
+      same: 'Sin cambios desde el lunes pasado',
     },
   },
   findings: {

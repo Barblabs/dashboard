@@ -3,6 +3,7 @@ import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { AreaHealth } from '../../api/areas'
 import type { CriticalServiceHealth } from '../../api/businessContext'
+import type { WeeklyTrendPoint } from '../../api/findingsTrend'
 import { apiUrl } from '../../mocks/url'
 import { renderApp, seedSource } from '../../test/render'
 import { holdRequests, server } from '../../test/server'
@@ -11,9 +12,18 @@ const SUMMARY = { open: 23, critical: 5, high: 8, medium: 7, low: 3, unbanded: 0
 
 /** The weekly trend, one week per value of `open_at_end`, the last one the current week. */
 function trendOf(...openAtEnd: number[]) {
-  const weeks = openAtEnd.map((open, i) => {
+  weeklyTrendOf(openAtEnd.map((open) => ({ open_at_end: open })))
+}
+
+/** The weekly trend, one week per value of `critical_open_at_end`, the last one the current week. */
+function criticalTrendOf(...criticalOpenAtEnd: number[]) {
+  weeklyTrendOf(criticalOpenAtEnd.map((critical) => ({ open_at_end: 20, critical_open_at_end: critical })))
+}
+
+function weeklyTrendOf(points: Partial<WeeklyTrendPoint>[]) {
+  const weeks = points.map((point, i) => {
     const startsOn = new Date(Date.UTC(2026, 8, 28 + i * 7)).toISOString().slice(0, 10)
-    return { week: startsOn, starts_on: startsOn, opened: 0, closed: 0, open_at_end: open }
+    return { week: startsOn, starts_on: startsOn, opened: 0, closed: 0, open_at_end: 0, critical_open_at_end: 0, ...point }
   })
   server.use(http.get(apiUrl('/findings/weekly-trend'), () => HttpResponse.json({ weeks })))
 }
@@ -473,6 +483,27 @@ describe('CustomerDashboard', () => {
 
       expect(await within(card).findByText('None')).toHaveClass('text-navy')
       expect(within(card).queryByText(/internet-facing/)).not.toBeInTheDocument()
+    })
+
+    it.each([
+      ['in green that it went down', [4, 9, 6], '↓ 3 since last Monday', 'text-good'],
+      ['in red that it went up', [4, 6, 8], '↑ 2 since last Monday', 'text-critical'],
+      ['that it did not change', [4, 6, 6], 'No change since last Monday', 'text-gray'],
+    ])('says %s since the end of last week', async (_, criticalOpenAtEnd, wording, colour) => {
+      criticalTrendOf(...criticalOpenAtEnd)
+      renderApp('/dashboard')
+      const card = await screen.findByRole('region', { name: 'Critical, open right now' })
+
+      expect(await within(card).findByText(wording)).toHaveClass(colour)
+    })
+
+    it('leaves the change out before a second week of the trend', async () => {
+      trendOf(0, 0, 12)
+      renderApp('/dashboard')
+      await screen.findByText('The trend appears after your second week.')
+
+      const card = screen.getByRole('region', { name: 'Critical, open right now' })
+      expect(within(card).queryByText(/since last Monday/)).not.toBeInTheDocument()
     })
   })
 
