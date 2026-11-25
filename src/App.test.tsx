@@ -11,7 +11,7 @@ describe('Navigation', () => {
     renderApp()
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument()
-    expect(nav().getByRole('link', { name: 'Dashboard' })).toHaveAttribute('aria-current', 'page')
+    expect(nav().getByRole('link', { name: 'Summary' })).toHaveAttribute('aria-current', 'page')
   })
 
   it('switches pages from the sidebar', async () => {
@@ -51,13 +51,13 @@ describe('Pages by role', () => {
   it('shows a Customer Admin every customer page, in order', () => {
     renderApp('/findings')
 
-    expect(navLinks()).toEqual(['Dashboard', 'Findings', 'News', 'Configuration', 'Business context', 'Users'])
+    expect(navLinks()).toEqual(['Summary', 'Findings', 'News', 'Configuration', 'Business context', 'Users'])
   })
 
   it('shows a Viewer the customer pages without Users, and denies it the Users page', () => {
     renderApp('/users', VIEWER)
 
-    expect(navLinks()).toEqual(['Dashboard', 'Findings', 'News', 'Configuration', 'Business context'])
+    expect(navLinks()).toEqual(['Summary', 'Findings', 'News', 'Configuration', 'Business context'])
     expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
   })
 
@@ -65,7 +65,7 @@ describe('Pages by role', () => {
     renderApp('/tenants', PLATFORM_ADMIN)
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Organizations' })).toBeInTheDocument()
-    expect(navLinks()).toEqual(['Organizations', 'Dashboard'])
+    expect(navLinks()).toEqual(['Organizations', 'Summary'])
   })
 
   it('denies a Platform Admin the customer pages', () => {

@@ -14,14 +14,14 @@ export const en = {
     menu: 'Menu',
     signOut: 'Sign out',
     nav: {
-      dashboard: 'Dashboard',
+      dashboard: 'Summary',
       findings: 'Findings',
       news: 'News',
       config: 'Configuration',
       'business-context': 'Business context',
       users: 'Users',
       tenants: 'Organizations',
-      'admin-dashboard': 'Dashboard',
+      'admin-dashboard': 'Summary',
     },
     user: {
       role: {

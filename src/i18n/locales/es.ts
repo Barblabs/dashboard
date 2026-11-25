@@ -16,14 +16,14 @@ export const es: Translations = {
     menu: 'Menú',
     signOut: 'Cerrar sesión',
     nav: {
-      dashboard: 'Dashboard',
+      dashboard: 'Resumen',
       findings: 'Hallazgos',
       news: 'Noticias',
       config: 'Configuración',
       'business-context': 'Contexto empresarial',
       users: 'Usuarios',
       tenants: 'Organizaciones',
-      'admin-dashboard': 'Dashboard',
+      'admin-dashboard': 'Resumen',
     },
     user: {
       role: {

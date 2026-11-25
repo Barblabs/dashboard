@@ -105,7 +105,7 @@ describe('CustomerDashboard', () => {
       await screen.findByRole('heading', { name: 'Choose your CMDB' })
 
       holdRequests('get', '/findings/summary')
-      await user.click(screen.getByRole('link', { name: 'Dashboard' }))
+      await user.click(screen.getByRole('link', { name: 'Summary' }))
       expect(await screen.findByText('Critical on internet-facing')).toBeInTheDocument()
       expect(screen.queryByText('23')).not.toBeInTheDocument()
     })
