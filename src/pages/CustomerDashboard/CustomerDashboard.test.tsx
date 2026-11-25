@@ -25,6 +25,18 @@ function minutesAgo(minutes: number) {
   return new Date(Date.now() - minutes * 60_000).toISOString()
 }
 
+function daysFromNow(days: number) {
+  return new Date(Date.now() + days * 24 * 60 * 60_000).toISOString()
+}
+
+function closed(cve: string, reason: string, reopenAt: string | null) {
+  return {
+    id: cve, cve_id: cve, asset_id: 1, asset_name: 'web-01', vendor: 'apache', product: 'http_server',
+    component_name: 'Apache', component_version: '2.4.49', note: 'Waiting for the vendor',
+    closed_at: daysFromNow(-1), closed_by: 'ana@test.example', reason, reopen_at: reopenAt,
+  }
+}
+
 async function openCard() {
   return screen.findByRole('region', { name: 'Open right now' })
 }
@@ -41,6 +53,34 @@ describe('CustomerDashboard', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Summary' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('has no ? help popover in the header or the Overview', async () => {
+    seedSource()
+    renderApp('/dashboard')
+    await screen.findByText(/^Inventory synced/)
+    await screen.findByRole('heading', { name: 'The open backlog is growing' })
+    await screen.findByRole('link', { name: 'Open the prioritized list' })
+    await screen.findByText('Nothing set aside comes back in the next 30 days.')
+
+    expect(screen.queryAllByRole('button', { name: /^About / })).toHaveLength(0)
+  })
+
+  it('shows the sync line, the tabs, then the cards, the backlog line, Start here and Coming back soon', async () => {
+    seedSource()
+    renderApp('/dashboard')
+
+    const inOrder = [
+      await screen.findByText(/^Inventory synced/),
+      screen.getByRole('tablist'),
+      await openCard(),
+      await screen.findByRole('heading', { name: 'The open backlog is growing' }),
+      screen.getByRole('region', { name: 'Start here' }),
+      screen.getByRole('region', { name: 'Coming back soon' }),
+    ]
+    for (const [before, after] of inOrder.slice(0, -1).map((el, i) => [el, inOrder[i + 1]] as const)) {
+      expect(before.compareDocumentPosition(after) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    }
   })
 
   it('keeps the selected tab in the URL', async () => {
@@ -225,6 +265,46 @@ describe('CustomerDashboard', () => {
       const card = await screen.findByRole('region', { name: 'Start here' })
 
       expect(await within(card).findByText(/^No findings yet\./)).toBeInTheDocument()
+    })
+  })
+
+  describe('Coming back soon', () => {
+    it('lists the soonest three set aside to come back in the next 30 days, and how many more', async () => {
+      server.use(
+        http.get(apiUrl('/findings/closed'), () =>
+          HttpResponse.json({
+            findings: [
+              closed('CVE-0000-0001', 'remediated', null),
+              closed('CVE-0000-0002', 'postponed', daysFromNow(40)),
+              closed('CVE-0000-0003', 'postponed', daysFromNow(-2)),
+              closed('CVE-0000-0004', 'accepted_risk', daysFromNow(20)),
+              closed('CVE-0000-0005', 'postponed', daysFromNow(3)),
+              closed('CVE-0000-0006', 'postponed', daysFromNow(29)),
+              closed('CVE-0000-0007', 'accepted_risk', daysFromNow(10)),
+            ],
+          }),
+        ),
+      )
+      renderApp('/dashboard')
+      const card = await screen.findByRole('region', { name: 'Coming back soon' })
+
+      const rows = await within(card).findAllByRole('listitem')
+      expect(rows.map((r) => r.firstChild?.textContent)).toEqual([
+        'CVE-0000-0005 on web-01',
+        'CVE-0000-0007 on web-01',
+        'CVE-0000-0004 on web-01',
+      ])
+      expect(within(rows[0]).getByText(/^Postponed by ana@test\.example · back \w{3} \d+, \d{4}$/)).toBeInTheDocument()
+      expect(within(rows[1]).getByText(/^Accepted risk by ana@test\.example · back /)).toBeInTheDocument()
+      // CVE-0000-0006, on day 29, is the one left out.
+      expect(within(card).getByText('1 more')).toBeInTheDocument()
+    })
+
+    it('says when nothing set aside comes back in the next 30 days', async () => {
+      renderApp('/dashboard')
+      const card = await screen.findByRole('region', { name: 'Coming back soon' })
+
+      expect(await within(card).findByText('Nothing set aside comes back in the next 30 days.')).toBeInTheDocument()
     })
   })
 

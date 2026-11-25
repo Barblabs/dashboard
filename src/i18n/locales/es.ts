@@ -117,6 +117,14 @@ export const es: Translations = {
       group_other: '{{count}} hallazgos, {{critical}} de ellos críticos',
       openList: 'Abrir la lista priorizada',
     },
+    comingBack: {
+      title: 'Vuelven pronto',
+      finding: '{{cve}} en {{asset}}',
+      setAside: '{{reason}} por {{by}} · vuelve el {{date}}',
+      more_one: '{{count}} más',
+      more_other: '{{count}} más',
+      none: 'Nada de lo apartado vuelve en los próximos 30 días.',
+    },
     tabs: {
       overview: 'Vista general',
       analysis: 'Priorización y amenazas',

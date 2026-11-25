@@ -115,6 +115,14 @@ export const en = {
       group_other: '{{count}} findings, {{critical}} of them Critical',
       openList: 'Open the prioritized list',
     },
+    comingBack: {
+      title: 'Coming back soon',
+      finding: '{{cve}} on {{asset}}',
+      setAside: '{{reason}} by {{by}} · back {{date}}',
+      more_one: '{{count}} more',
+      more_other: '{{count}} more',
+      none: 'Nothing set aside comes back in the next 30 days.',
+    },
     tabs: {
       overview: 'Overview',
       analysis: 'Prioritization and threats',
