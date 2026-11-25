@@ -16,11 +16,6 @@ function trendOf(...openAtEnd: number[]) {
   server.use(http.get(apiUrl('/findings/weekly-trend'), () => HttpResponse.json({ weeks })))
 }
 
-/** Last week ending at `lastWeek` open and the current week at 23, as the summary says. */
-function lastWeekEndedWith(lastWeek: number) {
-  trendOf(12, lastWeek, 23)
-}
-
 const CLOSES = {
   current: { opened: 26, fixed: 38, went_away: 9, set_aside: 5 },
   previous: { opened: 30, fixed: 31, went_away: 4, set_aside: 6 },
@@ -127,7 +122,7 @@ describe('CustomerDashboard', () => {
 
     it('shows no line with no CMDB connected', async () => {
       renderApp('/dashboard')
-      await within(await openCard()).findByText('↑ 2 since last Monday')
+      await within(await openCard()).findByText('26 new and 52 closed in the last 30 days')
 
       expect(screen.queryByText(/^Inventory synced|inventory sync failed/)).not.toBeInTheDocument()
     })
@@ -193,27 +188,11 @@ describe('CustomerDashboard', () => {
   })
 
   describe('Open right now', () => {
-    it('says in green how many fewer are open than last Monday', async () => {
-      lastWeekEndedWith(41)
+    it('says how many were opened and closed in the last 30 days, every way of closing counted', async () => {
+      closesOf({ current: { opened: 15, fixed: 7, went_away: 3, set_aside: 2 } })
       renderApp('/dashboard')
 
-      const change = await within(await openCard()).findByText('↓ 18 since last Monday')
-      expect(change).toHaveClass('text-good')
-    })
-
-    it('says in red how many more are open than last Monday', async () => {
-      lastWeekEndedWith(19)
-      renderApp('/dashboard')
-
-      const change = await within(await openCard()).findByText('↑ 4 since last Monday')
-      expect(change).toHaveClass('text-critical')
-    })
-
-    it('says when as many are open as last Monday', async () => {
-      lastWeekEndedWith(23)
-      renderApp('/dashboard')
-
-      expect(await within(await openCard()).findByText('No change since last Monday')).toBeInTheDocument()
+      expect(await within(await openCard()).findByText('15 new and 12 closed in the last 30 days')).toBeInTheDocument()
     })
 
     it('forgets the counts of a CMDB once it is disconnected', async () => {

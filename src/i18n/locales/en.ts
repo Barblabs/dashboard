@@ -134,9 +134,7 @@ export const en = {
     },
     open: {
       label: 'Open right now',
-      down: '↓ {{count}} since last Monday',
-      up: '↑ {{count}} since last Monday',
-      same: 'No change since last Monday',
+      lastDays: '{{opened}} new and {{closed}} closed in the last 30 days',
     },
     fixed: {
       label: 'Fixed by your teams in the last 30 days',

@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { useFindingClosesQuery, type FindingCloses } from '../../api/findingCloses'
+import { closedCount, useFindingClosesQuery, type FindingCloses } from '../../api/findingCloses'
 import { useFindingsSummaryQuery } from '../../api/findingsSummary'
-import { useWeeklyTrendQuery } from '../../api/findingsTrend'
 import { STAT_CARD, STAT_LABEL, STAT_VALUE } from '../../components/ui/stat'
 import { EMPTY } from '../../i18n/format'
 
@@ -10,20 +9,24 @@ const NOTE = 'font-body text-[0.8125rem]'
 export function HeadlineCards() {
   const { t } = useTranslation()
   const summary = useFindingsSummaryQuery()
-  const trend = useWeeklyTrendQuery()
+  const closes = useFindingClosesQuery()
 
   const open = summary.data?.open
   const critical = summary.data?.critical
-  const weeks = trend.data?.weeks ?? []
-  const lastMonday = weeks.at(-2)?.open_at_end
-  const change = open !== undefined && lastMonday !== undefined ? open - lastMonday : undefined
 
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       <section className={STAT_CARD} aria-label={t('dashboard.open.label')}>
         <span className={`${STAT_VALUE} text-navy`}>{open ?? EMPTY}</span>
         <span className={STAT_LABEL}>{t('dashboard.open.label')}</span>
-        {change !== undefined && <OpenChange change={change} />}
+        {closes.data && (
+          <span className={`${NOTE} text-gray`}>
+            {t('dashboard.open.lastDays', {
+              opened: closes.data.current.opened,
+              closed: closedCount(closes.data.current),
+            })}
+          </span>
+        )}
       </section>
       <section className={STAT_CARD} aria-label={t('dashboard.critical.label')}>
         {critical === 0 ? (
@@ -68,11 +71,4 @@ function FixedChange({ closes: { current, previous } }: { closes: FindingCloses 
   if (current.fixed > previous.fixed) return <span className={`${NOTE} text-good`}>{t('dashboard.fixed.up', values)}</span>
   if (current.fixed < previous.fixed) return <span className={`${NOTE} text-critical`}>{t('dashboard.fixed.down', values)}</span>
   return <span className={`${NOTE} text-gray`}>{t('dashboard.fixed.same')}</span>
-}
-
-function OpenChange({ change }: { change: number }) {
-  const { t } = useTranslation()
-  if (change < 0) return <span className={`${NOTE} text-good`}>{t('dashboard.open.down', { count: -change })}</span>
-  if (change > 0) return <span className={`${NOTE} text-critical`}>{t('dashboard.open.up', { count: change })}</span>
-  return <span className={`${NOTE} text-gray`}>{t('dashboard.open.same')}</span>
 }

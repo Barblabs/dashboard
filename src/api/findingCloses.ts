@@ -41,6 +41,14 @@ export function useClosedFindingsQuery({ enabled = true } = {}) {
 
 export type FindingCloses = Schemas['ClosesResponse']
 
+/**
+ * Every close in a window. Only the closes panel's title and the open count's subline add the
+ * buckets together; Went away and Set aside are not progress, so only Fixed is ever shown as such.
+ */
+export function closedCount({ fixed, went_away, set_aside }: Schemas['CloseCountsResponse']): number {
+  return fixed + went_away + set_aside
+}
+
 /** The Customer's closes in the last 30 days and the 30 before, as Fixed, Went away and Set aside. */
 export function useFindingClosesQuery() {
   return useQuery({

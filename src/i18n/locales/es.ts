@@ -136,9 +136,7 @@ export const es: Translations = {
     },
     open: {
       label: 'Abiertos ahora',
-      down: '↓ {{count}} desde el lunes pasado',
-      up: '↑ {{count}} desde el lunes pasado',
-      same: 'Sin cambios desde el lunes pasado',
+      lastDays: '{{opened}} nuevos y {{closed}} cerrados en los últimos 30 días',
     },
     fixed: {
       label: 'Corregidos por tus equipos en los últimos 30 días',
