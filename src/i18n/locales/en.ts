@@ -103,6 +103,11 @@ export const en = {
       overview: 'Overview',
       analysis: 'Prioritization and threats',
     },
+    sync: {
+      synced: 'Inventory synced {{time}}',
+      failed: 'The last inventory sync failed {{time}}. These numbers are from {{date}}.',
+      failedFirst: 'The last inventory sync failed {{time}}.',
+    },
     open: {
       label: 'Open right now',
       down: '↓ {{count}} since last Monday',

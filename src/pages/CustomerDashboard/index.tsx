@@ -5,6 +5,7 @@ import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { BeforeAfterTabContent } from '../Findings/BeforeAfterTab'
 import { ThreatsTabContent } from '../Findings/ThreatsTab'
 import { Overview } from './Overview'
+import { SyncLine } from './SyncLine'
 
 const OVERVIEW = 'overview'
 const ANALYSIS = 'analysis'
@@ -29,6 +30,7 @@ export function CustomerDashboardPage() {
 
   return (
     <Page title={t('dashboard.title')} subtitle={t('dashboard.subtitle')}>
+      <SyncLine />
       <Tabs value={tab ?? OVERVIEW} onValueChange={changeTab}>
         <TabList label={t('findings.tabs.label')}>
           <Tab value={OVERVIEW}>{t('dashboard.tabs.overview')}</Tab>

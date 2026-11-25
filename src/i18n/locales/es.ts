@@ -105,6 +105,11 @@ export const es: Translations = {
       overview: 'Vista general',
       analysis: 'Priorización y amenazas',
     },
+    sync: {
+      synced: 'Inventario sincronizado {{time}}',
+      failed: 'La última sincronización del inventario falló {{time}}. Estas cifras son del {{date}}.',
+      failedFirst: 'La última sincronización del inventario falló {{time}}.',
+    },
     open: {
       label: 'Abiertos ahora',
       down: '↓ {{count}} desde el lunes pasado',

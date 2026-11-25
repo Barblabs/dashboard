@@ -20,6 +20,10 @@ function lastWeekEndedWith(lastWeek: number) {
   )
 }
 
+function minutesAgo(minutes: number) {
+  return new Date(Date.now() - minutes * 60_000).toISOString()
+}
+
 async function openCard() {
   return screen.findByRole('region', { name: 'Open right now' })
 }
@@ -50,6 +54,53 @@ describe('CustomerDashboard', () => {
     renderApp('/dashboard?tab=analysis')
 
     expect(await screen.findByRole('tab', { name: 'Prioritization and threats' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  describe('sync line', () => {
+    it('says when the inventory was last synced', async () => {
+      seedSource({ last_sync: minutesAgo(5) })
+      renderApp('/dashboard')
+
+      const line = await screen.findByText(/^Inventory synced 5 min/)
+      expect(line.querySelector('span')).toHaveClass('bg-good')
+    })
+
+    it('shows no line with no CMDB connected', async () => {
+      renderApp('/dashboard')
+      await within(await openCard()).findByText('↑ 2 since last Monday')
+
+      expect(screen.queryByText(/^Inventory synced|inventory sync failed/)).not.toBeInTheDocument()
+    })
+
+    it('says the last sync failed and which day the numbers are from', async () => {
+      seedSource({
+        last_sync: '2026-11-20T10:00:00Z',
+        last_sync_failure: { at: minutesAgo(5), error: 'iTop timed out' },
+      })
+      renderApp('/dashboard')
+
+      const line = await screen.findByText(/^The last inventory sync failed 5 min.* These numbers are from Nov 20, 2026\.$/)
+      expect(line.querySelector('span')).toHaveClass('bg-critical')
+      expect(screen.queryByText(/^Inventory synced/)).not.toBeInTheDocument()
+    })
+
+    it('says only that the sync failed when none has succeeded yet', async () => {
+      seedSource({ last_sync: null, last_sync_failure: { at: minutesAgo(5), error: 'iTop timed out' } })
+      renderApp('/dashboard')
+
+      expect(await screen.findByText(/^The last inventory sync failed 5 min\S* ago\.$/)).toBeInTheDocument()
+    })
+
+    it('says it synced when a sync succeeded after the failure', async () => {
+      seedSource({
+        last_sync: minutesAgo(5),
+        last_sync_failure: { at: minutesAgo(60), error: 'iTop timed out' },
+      })
+      renderApp('/dashboard')
+
+      expect(await screen.findByText(/^Inventory synced 5 min/)).toBeInTheDocument()
+      expect(screen.queryByText(/failed/)).not.toBeInTheDocument()
+    })
   })
 
   describe('legacy tabs', () => {
