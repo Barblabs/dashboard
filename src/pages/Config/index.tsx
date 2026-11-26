@@ -84,7 +84,7 @@ function ConfigBody({ source, readOnly }: { source: CmdbSource | null; readOnly:
   }
 
   return (
-    <div className="flex flex-col gap-6 md:flex-row md:items-start">
+    <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
       <ConfigStepPanel activeStep={STEP_NUMBER[step]} />
       {step === 'credentials' ? (
         <ItopForm

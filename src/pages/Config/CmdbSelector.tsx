@@ -33,7 +33,7 @@ export function CmdbSelector({ onSelect, className = '' }: Props) {
         {PROVIDERS.map((p) => (
           <div
             key={p.id}
-            className={`flex items-center gap-3.5 rounded-lg p-4 ${
+            className={`flex flex-wrap items-center gap-3.5 rounded-lg p-4 ${
               p.available ? 'border-2 border-navy bg-white' : 'border border-border-panel bg-panel'
             }`}
           >
@@ -55,7 +55,7 @@ export function CmdbSelector({ onSelect, className = '' }: Props) {
               )}
             </div>
             {p.available ? (
-              <Button className="shrink-0" onClick={onSelect}>
+              <Button className="shrink-0 max-sm:w-full" onClick={onSelect}>
                 {t('config.selector.select')}
               </Button>
             ) : (
