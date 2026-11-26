@@ -143,7 +143,7 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
   if (!active && !totalCount) return null
 
   return (
-    <div className="flex flex-wrap items-center gap-2 font-body text-[0.875rem]">
+    <div className={`flex flex-1 flex-wrap items-center gap-2 font-body text-[0.875rem] ${active ? 'basis-full' : ''}`}>
       {filters.fromChart && chips.length > 0 && <span className="text-gray">{t('findings.chips.fromChart')}</span>}
       {chips.map(({ key, label }) => (
         <span
