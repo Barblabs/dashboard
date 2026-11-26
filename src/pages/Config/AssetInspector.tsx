@@ -53,7 +53,9 @@ function AssetOption({ asset, selected, onSelect }: { asset: Asset; selected: bo
     >
       {/* The spaces between the parts keep the option's name readable; flex and grid don't render them. */}
       <div className="flex min-w-0 flex-col">
-        <span className="truncate text-[0.875rem] font-medium text-navy">{asset.name}</span>{' '}
+        <span title={asset.name} className="truncate text-[0.875rem] font-medium text-navy">
+          {asset.name}
+        </span>{' '}
         <span className="truncate text-[0.75rem] text-gray">
           {t(`config.inventory.kind.${asset.kind}`)} ·{' '}
           {asset.area?.name ?? t('config.inventory.noArea')}

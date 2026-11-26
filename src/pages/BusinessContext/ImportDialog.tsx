@@ -143,7 +143,9 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
             <ul className="flex flex-col divide-y divide-border-panel rounded-lg border border-border-panel">
               {files.map((file) => (
                 <li key={`${file.name}-${file.size}`} className="flex items-center justify-between gap-3 px-3 py-2">
-                  <span className="min-w-0 truncate font-body text-[0.875rem] text-navy">{file.name}</span>
+                  <span title={file.name} className="min-w-0 truncate font-body text-[0.875rem] text-navy">
+                    {file.name}
+                  </span>
                   <span className="flex shrink-0 items-center gap-2">
                     <span className="font-mono text-[0.75rem] text-gray">{sizeOf(file.size)}</span>
                     <button
