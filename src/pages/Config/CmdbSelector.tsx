@@ -29,11 +29,11 @@ export function CmdbSelector({ onSelect, className = '' }: Props) {
     <Panel className={`gap-4 ${className}`}>
       <PanelTitle>{t('config.selector.title')}</PanelTitle>
 
-      <div>
+      <div className="flex flex-col gap-3">
         {PROVIDERS.map((p) => (
           <div
             key={p.id}
-            className={`flex items-center gap-3.5 rounded-[10px] p-4 ${
+            className={`flex items-center gap-3.5 rounded-lg p-4 ${
               p.available ? 'border-2 border-navy bg-white' : 'border border-border-panel bg-panel'
             }`}
           >
