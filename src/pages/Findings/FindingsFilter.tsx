@@ -154,10 +154,10 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
           <button
             type="button"
             onClick={() => onRemove(key)}
-            aria-label={t('findings.chips.remove')}
-            className="focus-ring ml-1 cursor-pointer rounded-full text-gray transition-colors duration-150 ease-[ease] hover:text-navy"
+            aria-label={t('findings.chips.remove', { value: label })}
+            className="focus-ring ml-1 flex size-4 cursor-pointer items-center justify-center rounded-full text-gray transition-colors duration-150 ease-[ease] hover:bg-panel hover:text-navy"
           >
-            <CloseIcon className="h-3.5 w-3.5" />
+            <CloseIcon />
           </button>
         </span>
       ))}

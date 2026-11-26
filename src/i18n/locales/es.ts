@@ -274,7 +274,7 @@ export const es: Translations = {
       text: '"{{value}}"',
       matrix_one: '{{count}} hallazgo de la matriz',
       matrix_other: '{{count}} hallazgos de la matriz',
-      remove: 'Quitar filtro',
+      remove: 'Quitar {{value}}',
       clearAll: 'Quitar todos',
     },
     count: {

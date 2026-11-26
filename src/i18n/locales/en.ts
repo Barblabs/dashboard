@@ -272,7 +272,7 @@ export const en = {
       text: '"{{value}}"',
       matrix_one: '{{count}} finding from matrix',
       matrix_other: '{{count}} findings from matrix',
-      remove: 'Remove filter',
+      remove: 'Remove {{value}}',
       clearAll: 'Clear all',
     },
     count: {
