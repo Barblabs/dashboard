@@ -39,7 +39,7 @@ export function CmdbSelector({ onSelect, className = '' }: Props) {
           >
             <span
               className={`flex size-11 shrink-0 items-center justify-center rounded-lg font-title text-[1.125rem] ${
-                p.available ? 'bg-navy text-cyan' : 'bg-muted-bg text-white'
+                p.available ? 'bg-navy text-cyan' : 'border border-border-panel bg-white text-gray'
               }`}
             >
               {p.initial}
