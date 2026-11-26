@@ -118,7 +118,7 @@ function FindingCard({ order, finding, onOpen }: { order: CurrentOrder; finding:
   return (
     <li
       onClick={() => onOpen(finding.finding_id)}
-      className={`flex cursor-pointer flex-col gap-2 rounded-lg border border-border-row p-4 text-[0.875rem] transition-colors duration-150 hover:bg-row-hover ${closed ? 'text-gray' : 'text-navy'}`}
+      className={`flex cursor-pointer flex-col gap-2 rounded-lg border border-border-panel p-4 text-[0.875rem] transition-colors duration-150 hover:bg-row-hover ${closed ? 'text-gray' : 'text-navy'}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <OpenButton finding={finding} onOpen={onOpen} />

@@ -135,7 +135,7 @@ function ClosedCard({ finding, onReopen }: ItemProps) {
   const reopensText = useReopensText()
   const reopens = reopensText(finding)
   return (
-    <li className="flex flex-col gap-2 rounded-lg border border-border-row bg-white p-4 text-[0.875rem] text-navy">
+    <li className="flex flex-col gap-2 rounded-lg border border-border-panel bg-white p-4 text-[0.875rem] text-navy">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className={`${MONO} font-semibold whitespace-nowrap`}>{finding.cve_id}</span>
         <Badge variant="muted">{t(`findings.closeReasons.${finding.reason}`)}</Badge>
