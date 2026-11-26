@@ -21,7 +21,7 @@ export function HeadlineCards() {
   const critical = summary.data?.critical
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       <section className={STAT_CARD} aria-label={t('dashboard.open.label')}>
         <span className={`${STAT_VALUE} text-navy`}>{open ?? EMPTY}</span>
         <span className={STAT_LABEL}>{t('dashboard.open.label')}</span>
