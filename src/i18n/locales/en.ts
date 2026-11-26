@@ -1077,6 +1077,7 @@ export const en = {
       confirm: {
         text: 'This will disconnect the CMDB. Synced assets are kept, marked as inactive. Continue?',
         confirm: 'Yes, disconnect',
+        pending: 'Disconnecting…',
         cancel: 'Cancel',
       },
     },
@@ -1311,6 +1312,7 @@ export const en = {
         save: 'Save',
         saving: 'Saving…',
         remove: 'Remove owner',
+        removing: 'Removing…',
         cancel: 'Cancel',
         invalidEmail: 'Enter a valid email.',
         saveFailed: 'Could not save the owner.',
@@ -1382,6 +1384,7 @@ export const en = {
       confirm: {
         text: 'This will disconnect the Slack app. Deliveries stop until it is reconnected. Continue?',
         confirm: 'Yes, disconnect',
+        pending: 'Disconnecting…',
         cancel: 'Cancel',
       },
     },
@@ -1394,6 +1397,7 @@ export const en = {
       loadFailed: 'Could not load the failed deliveries.',
       networkError: 'Could not reach the server to load the failed deliveries.',
       retryAll: 'Retry all',
+      retrying: 'Retrying…',
       retrySucceeded: 'Returned {{count}} deliveries to the queue.',
       retryFailed: 'Could not retry the deliveries.',
       columns: {

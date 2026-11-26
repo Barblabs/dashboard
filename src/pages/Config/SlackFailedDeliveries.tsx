@@ -45,7 +45,7 @@ export function SlackFailedDeliveries() {
             loading={retrying}
             onClick={() => retry.mutate()}
           >
-            {t('slack.deliveries.retryAll')}
+            {retrying ? t('slack.deliveries.retrying') : t('slack.deliveries.retryAll')}
           </Button>
         )}
       </div>

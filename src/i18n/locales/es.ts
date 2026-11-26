@@ -1079,6 +1079,7 @@ export const es: Translations = {
       confirm: {
         text: 'Esta acción desconectará el CMDB. Los activos sincronizados se conservan, marcados como inactivos. ¿Continuar?',
         confirm: 'Sí, desconectar',
+        pending: 'Desconectando…',
         cancel: 'Cancelar',
       },
     },
@@ -1313,6 +1314,7 @@ export const es: Translations = {
         save: 'Guardar',
         saving: 'Guardando…',
         remove: 'Quitar dueño',
+        removing: 'Quitando…',
         cancel: 'Cancelar',
         invalidEmail: 'Ingresa un correo válido.',
         saveFailed: 'No se pudo guardar el dueño.',
@@ -1385,6 +1387,7 @@ export const es: Translations = {
       confirm: {
         text: 'Esto desconectará la app de Slack. Las entregas se detendrán hasta reconectarla. ¿Continuar?',
         confirm: 'Sí, desconectar',
+        pending: 'Desconectando…',
         cancel: 'Cancelar',
       },
     },
@@ -1397,6 +1400,7 @@ export const es: Translations = {
       loadFailed: 'No se pudieron cargar las entregas fallidas.',
       networkError: 'No se pudo alcanzar el servidor para cargar las entregas fallidas.',
       retryAll: 'Reintentar todas',
+      retrying: 'Reintentando…',
       retrySucceeded: 'Devolvió {{count}} entregas a la cola.',
       retryFailed: 'No se pudieron reintentar las entregas.',
       columns: {

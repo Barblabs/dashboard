@@ -48,6 +48,7 @@ interface DisconnectConfirmProps {
   /** Replaces the question once a disconnect failed. */
   error: string | null
   confirmLabel: string
+  pendingLabel: string
   cancelLabel: string
   pending: boolean
   onConfirm: () => void
@@ -59,6 +60,7 @@ export function DisconnectConfirm({
   text,
   error,
   confirmLabel,
+  pendingLabel,
   cancelLabel,
   pending,
   onConfirm,
@@ -75,7 +77,7 @@ export function DisconnectConfirm({
       )}
       <div className="flex shrink-0 gap-2">
         <Button variant="danger" size="sm" loading={pending} onClick={onConfirm}>
-          {confirmLabel}
+          {pending ? pendingLabel : confirmLabel}
         </Button>
         <Button variant="secondary" size="sm" onClick={onCancel}>
           {cancelLabel}
