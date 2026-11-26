@@ -2,7 +2,6 @@ import { currentScoreDetails } from '../../api/prioritizations'
 import type { Prioritization, PriorityGroup } from '../../api/prioritizations'
 import type { Band } from './bands'
 
-
 export interface TopChange {
   findingId: string
   cveId: string
@@ -10,7 +9,6 @@ export interface TopChange {
   scoreGroup: number
   agentGroup: number
   delta: number
-  agentGroupTitle: string
 }
 
 export interface MatrixData {
@@ -60,10 +58,9 @@ export function buildMatrix(p: Prioritization): MatrixData {
     if (ag < sg) subio++
     else if (ag > sg) bajo++
     else seMantuvo++
-    const band: Band = (currentScoreDetails(f).band as Band | null) ?? 'unbanded'
+    const band: Band = currentScoreDetails(f).band ?? 'unbanded'
     bandByGroup[ag - 1][band]++
     if (sg !== ag) {
-      const agGroup = groups[ag - 1]
       topChanges.push({
         findingId: f.finding_id,
         cveId: f.cve_id,
@@ -71,7 +68,6 @@ export function buildMatrix(p: Prioritization): MatrixData {
         scoreGroup: sg,
         agentGroup: ag,
         delta: Math.abs(sg - ag),
-        agentGroupTitle: agGroup.title,
       })
     }
   }

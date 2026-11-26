@@ -200,7 +200,8 @@ function AssetStep({ asset: opened, queue }: { asset: Asset; queue?: QueueStep }
    * response that lands last would otherwise bring back the other field as it was before.
    */
   const [asset, setAsset] = useState(opened)
-  const exposureMutation = useExposureMutation({ onSaved: useNotRescoredToast() })
+  const notRescoredToast = useNotRescoredToast()
+  const exposureMutation = useExposureMutation({ onSaved: notRescoredToast })
   const informationClassificationMutation = useInformationClassificationMutation()
 
   const exposure = useDeclarationSection(

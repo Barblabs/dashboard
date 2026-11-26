@@ -1,6 +1,5 @@
 type LoginErrorKey =
   | 'login.errors.badCredentials'
-  | 'login.errors.userDisabled'
   | 'login.errors.network'
   | 'login.errors.passwordPolicy'
 
