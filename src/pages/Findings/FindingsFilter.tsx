@@ -155,7 +155,7 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
             type="button"
             onClick={() => onRemove(key)}
             aria-label={t('findings.chips.remove')}
-            className="focus-ring ml-1 rounded-full text-gray hover:text-navy"
+            className="focus-ring ml-1 cursor-pointer rounded-full text-gray transition-colors duration-150 ease-[ease] hover:text-navy"
           >
             <CloseIcon className="h-3.5 w-3.5" />
           </button>
@@ -165,7 +165,7 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
         <button
           type="button"
           onClick={onClearAll}
-          className="focus-ring rounded-full px-2 py-0.5 text-[0.8125rem] text-gray underline-offset-2 hover:text-navy hover:underline"
+          className="focus-ring cursor-pointer rounded-md px-2 py-1 text-[0.8125rem] font-semibold text-gray transition-colors duration-150 ease-[ease] hover:text-navy"
         >
           {t('findings.chips.clearAll')}
         </button>
