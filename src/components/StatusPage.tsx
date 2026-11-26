@@ -20,7 +20,7 @@ export function StatusPage({ code, title, message }: StatusPageProps) {
       <p className="max-w-md font-body text-[0.9375rem] leading-[1.5] text-gray">{message}</p>
       <Link
         to={user ? homePath(user.role) : '/'}
-        className="focus-ring inline-flex h-11 items-center rounded-md bg-navy px-5 font-body text-[0.875rem] font-semibold text-white transition-opacity duration-150 ease-[ease] hover:opacity-88"
+        className="focus-ring inline-flex h-11 items-center rounded-md bg-navy px-5 font-body text-[0.875rem] font-semibold whitespace-nowrap text-white transition-[opacity,scale] duration-150 ease-[ease] hover:opacity-88 motion-safe:active:scale-[0.97]"
       >
         {t('status.backHome')}
       </Link>
