@@ -35,11 +35,19 @@ describe('Navigation', () => {
     expect(document.title).toBe('Findings - Barbattack')
   })
 
+  it('names the browser tab on the sign-in page', async () => {
+    renderApp('/login', null)
+
+    await screen.findByRole('button', { name: 'Admin (customer_admin)' })
+    expect(document.title).toBe('Sign in - Barbattack')
+  })
+
   it('shows the not found page for unknown URLs', async () => {
     const user = renderApp('/does-not-exist')
 
     expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeInTheDocument()
     expect(window.location.pathname).toBe('/does-not-exist')
+    expect(document.title).toBe('Page not found - Barbattack')
 
     await user.click(screen.getByRole('link', { name: 'Back to home' }))
 
@@ -50,6 +58,7 @@ describe('Navigation', () => {
     renderApp('/forbidden')
 
     expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
+    expect(document.title).toBe('Access denied - Barbattack')
   })
 })
 
@@ -69,6 +78,7 @@ describe('Pages by role', () => {
 
     expect(navLinks()).toEqual(['Summary', 'Findings', 'News', 'Configuration', 'Business context'])
     expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
+    expect(document.title).toBe('Access denied - Barbattack')
   })
 
   it('shows a Platform Admin only its pages', async () => {
@@ -82,6 +92,7 @@ describe('Pages by role', () => {
     renderApp('/config', PLATFORM_ADMIN)
 
     expect(screen.getByRole('heading', { level: 1, name: 'Access denied' })).toBeInTheDocument()
+    expect(document.title).toBe('Access denied - Barbattack')
   })
 })
 

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useCurrentUser } from '../auth/store'
 import { homePath } from '../routes'
+import { useDocumentTitle } from './useDocumentTitle'
 
 type StatusPageProps = {
   code: number
@@ -12,6 +13,7 @@ type StatusPageProps = {
 export function StatusPage({ code, title, message }: StatusPageProps) {
   const { t } = useTranslation()
   const user = useCurrentUser()
+  useDocumentTitle(title)
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-5 text-center md:px-10 md:py-8">

@@ -9,6 +9,7 @@ import { useAuthStore, useCurrentUser, type Role } from './auth/store'
 import { tokens } from './auth/tokenSource'
 import { RestoringSession, ServerUnreachable } from './components/SessionScreens'
 import { Sidebar } from './components/Sidebar'
+import { useDocumentTitle } from './components/useDocumentTitle'
 import { ToastProvider } from './components/ui/Toast'
 import { DeactivatedPage } from './pages/Deactivated'
 import { ForbiddenPage } from './pages/Forbidden'
@@ -80,13 +81,7 @@ function RoleGuard({ roles, children }: { roles: readonly Role[]; children: Reac
 
 function PageTitle({ id }: { id: PageId }) {
   const { t } = useTranslation()
-  const title = t(`sidebar.nav.${id}`)
-  useEffect(() => {
-    document.title = `${title} - Barbattack`
-    return () => {
-      document.title = 'Barbattack'
-    }
-  }, [title])
+  useDocumentTitle(t(`sidebar.nav.${id}`))
   return null
 }
 
