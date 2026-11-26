@@ -573,7 +573,7 @@ export const en = {
       heatmapHelp:
         'The rows are MITRE ATT&CK tactics, the stage of an attack each technique helps with (initial access, execution, privilege escalation, exfiltration and so on), in the order an attack usually moves forward. The columns are the risk levels.\n\nA finding counts once in each tactic of its techniques, so the rows can add up to more than the number of findings. The darker the cell, the more findings it holds.\n\nThe tactics with no findings are listed under the table.',
       tacticLabel: {
-        reconnaissance: 'Reconnaissance',
+        reconnaissance: 'Recon.',
         'resource-development': 'Resource Dev.',
         'initial-access': 'Initial Access',
         execution: 'Execution',

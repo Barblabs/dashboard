@@ -184,7 +184,7 @@ function HeatmapGrid({ tactics: all }: { tactics: TacticCount[] }) {
         <tbody>
           {tactics.map((tac) => (
             <tr key={tac.tactic}>
-              <th scope="row" className="py-1 pr-2 text-left text-[0.75rem] font-semibold text-navy">
+              <th scope="row" className="py-1 pr-2 text-left text-[0.75rem] font-semibold text-navy hyphens-auto">
                 {tacticLabels[tac.tactic] ?? tac.tactic}
               </th>
               {activeBands.map((band) => {
