@@ -159,7 +159,7 @@ export function FindingDetail({ order, finding, onClose, closeButton }: Props) {
                     </span>
                     <ChevronDownIcon
                       size={14}
-                      className="shrink-0 text-gray transition-transform duration-200 ease-[ease] group-data-panel-open:-rotate-180"
+                      className="shrink-0 text-gray transition-transform duration-200 ease-[ease] group-data-panel-open:-rotate-180 motion-reduce:transition-none"
                     />
                   </Collapsible.Trigger>
                 </h3>
