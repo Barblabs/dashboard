@@ -36,7 +36,7 @@ export const PAGES = [
   { id: 'admin-dashboard', Page: AdminDashboardPage, roles: PLATFORM_ADMIN },
 ] as const satisfies readonly PageRoute[]
 
-type PageId = (typeof PAGES)[number]['id']
+export type PageId = (typeof PAGES)[number]['id']
 
 const HOME: Record<Role, PageId> = {
   platform_admin: 'tenants',

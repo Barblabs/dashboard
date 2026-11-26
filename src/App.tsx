@@ -15,7 +15,7 @@ import { ForbiddenPage } from './pages/Forbidden'
 import { LandingPage } from './pages/Landing'
 import { LoginPage } from './pages/Login'
 import { NotFoundPage } from './pages/NotFound'
-import { PAGES } from './routes'
+import { PAGES, type PageId } from './routes'
 
 const ReactQueryDevtools = import.meta.env.DEV
   ? lazy(() =>
@@ -78,6 +78,18 @@ function RoleGuard({ roles, children }: { roles: readonly Role[]; children: Reac
   return <>{children}</>
 }
 
+function PageTitle({ id }: { id: PageId }) {
+  const { t } = useTranslation()
+  const title = t(`sidebar.nav.${id}`)
+  useEffect(() => {
+    document.title = `${title} - Barbattack`
+    return () => {
+      document.title = 'Barbattack'
+    }
+  }, [title])
+  return null
+}
+
 // The page scrolls inside its main, so the sidebar and anything sticky in a page stay in view.
 function AppLayout() {
   return (
@@ -112,7 +124,12 @@ function createAppRouter() {
           children: [
             ...PAGES.map(({ id, Page, roles }) => ({
               path: id,
-              element: <RoleGuard roles={roles}><Page /></RoleGuard>,
+              element: (
+                <RoleGuard roles={roles}>
+                  <PageTitle id={id} />
+                  <Page />
+                </RoleGuard>
+              ),
               errorElement: <RouteErrorPage />,
             })),
             { path: 'forbidden', element: <ForbiddenPage /> },

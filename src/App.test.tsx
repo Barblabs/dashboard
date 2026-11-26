@@ -25,6 +25,16 @@ describe('Navigation', () => {
     expect(nav().getByRole('link', { name: 'Configuration' })).not.toHaveAttribute('aria-current')
   })
 
+  it('names the browser tab after the open page', async () => {
+    const user = renderApp()
+
+    expect(document.title).toBe('Summary - Barbattack')
+
+    await user.click(nav().getByRole('link', { name: 'Findings' }))
+
+    expect(document.title).toBe('Findings - Barbattack')
+  })
+
   it('shows the not found page for unknown URLs', async () => {
     const user = renderApp('/does-not-exist')
 
