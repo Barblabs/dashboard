@@ -259,7 +259,7 @@ function TopChangesTable({
             <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesComponent')}</th>
             <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesScoreGroup')}</th>
             <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesAgentGroup')}</th>
-            <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesDelta')}</th>
+            <th className={`${HEADER_CELL} ${CARD_EDGE} text-right`}>{t('findings.beforeAfter.topChangesDelta')}</th>
           </tr>
         </thead>
         <tbody>
@@ -298,7 +298,7 @@ function TopChangesTable({
                   {t('findings.beforeAfter.groupLabel', { n: c.agentGroup })}{' '}
                   <span className="text-[0.75rem] text-gray">{agGroup.title}</span>
                 </td>
-                <td className={`px-4 py-3 tabular-nums font-semibold text-navy ${CARD_EDGE}`}>
+                <td className={`px-4 py-3 text-right tabular-nums font-semibold text-navy ${CARD_EDGE}`}>
                   {wentUp
                     ? t('findings.beforeAfter.topChangesUp', { n: c.delta })
                     : t('findings.beforeAfter.topChangesDown', { n: c.delta })}
