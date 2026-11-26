@@ -95,6 +95,9 @@ describe('News', () => {
     expect(within(item).getByText(/pg-prod-01 corre Pagos en línea/)).toBeInTheDocument()
     const evidence = within(item).getByRole('list', { name: 'From your business context' })
     expect(within(evidence).getByTitle('/operations/critical_services/0/name')).toHaveTextContent('Critical servicePagos en línea')
+    expect(within(evidence).getByTitle('/operations/critical_services/0/max_downtime')).toHaveTextContent(
+      'Maximum time without itTolerates 1–4 hours',
+    )
     expect(within(item).getByText(/Atacantes explotan CVE-2025-1094 en PostgreSQL/)).toBeInTheDocument()
     expect(within(item).queryByText('Original text')).not.toBeInTheDocument()
     const reasons = within(item).getByRole('list', { name: 'Why it appears' })
@@ -102,12 +105,12 @@ describe('News', () => {
     expect(within(within(item).getByRole('list', { name: 'CVEs' })).getByText('CVE-2025-1094')).toBeInTheDocument()
   })
 
-  it('names the business context field each piece of evidence comes from', async () => {
+  it('names the business context field each piece of evidence comes from, and its coded value as the form does', async () => {
     await renderNews()
 
     const evidence = within(article('ACME Pay')).getByRole('list', { name: 'From your business context' })
-    expect(within(evidence).getByTitle('/operations/data_categories/0')).toHaveTextContent('Data it holdspayment_cards')
-    expect(within(evidence).getByTitle('/operations/regulations/0')).toHaveTextContent('Regulations and standardspci_dss')
+    expect(within(evidence).getByTitle('/operations/data_categories/0')).toHaveTextContent('Data it holdsPayment card data')
+    expect(within(evidence).getByTitle('/operations/regulations/0')).toHaveTextContent('Regulations and standardsPCI DSS')
   })
 
   it('shows the original text of an item with no summary, marked as such', async () => {
