@@ -154,7 +154,7 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
                         edit()
                         setFiles(files.filter((f) => f !== file))
                       }}
-                      className="flex size-6 cursor-pointer items-center justify-center rounded-md text-gray enabled:hover:bg-panel enabled:hover:text-critical focus-ring disabled:cursor-not-allowed disabled:opacity-45"
+                      className="flex size-6 cursor-pointer items-center justify-center rounded-md text-gray transition-colors duration-150 ease-[ease] enabled:hover:bg-panel enabled:hover:text-critical focus-ring disabled:cursor-not-allowed disabled:opacity-45"
                     >
                       <CloseIcon />
                     </button>
