@@ -49,7 +49,7 @@ function AssetOption({ asset, selected, onSelect }: { asset: Asset; selected: bo
       role="option"
       aria-selected={selected}
       onClick={onSelect}
-      className={`grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border-row px-5 py-2.5 ${selected ? 'bg-row-hover shadow-[inset_2px_0_0_var(--color-navy)]' : 'hover:bg-row-hover/60'} ${asset.active ? '' : 'opacity-55'}`}
+      className={`grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border-row px-5 py-2.5 ${selected ? 'bg-row-hover shadow-[inset_2px_0_0_var(--color-navy)]' : 'hover:bg-row-hover/60'} ${asset.active ? '' : 'opacity-55 contrast-more:opacity-100'}`}
     >
       {/* The spaces between the parts keep the option's name readable; flex and grid don't render them. */}
       <div className="flex min-w-0 flex-col">

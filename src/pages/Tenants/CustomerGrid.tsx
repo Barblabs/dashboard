@@ -28,7 +28,7 @@ function CustomerCard({
   return (
     <div
       data-testid="customer-card"
-      className={`flex flex-col gap-4 rounded-xl border border-border-panel p-5 ${isDeactivated ? 'bg-panel opacity-75' : 'bg-white'}`}
+      className={`flex flex-col gap-4 rounded-xl border border-border-panel p-5 ${isDeactivated ? 'bg-panel opacity-75 contrast-more:opacity-100' : 'bg-white'}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">

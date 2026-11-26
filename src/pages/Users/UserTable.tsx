@@ -71,7 +71,7 @@ export function UserTable({
                 return (
                   <tr
                     key={user.id}
-                    className={`hover:bg-row-hover [&:last-child>td]:border-0 ${userStatus(user) === 'disabled' ? '*:opacity-50' : ''}`}
+                    className={`hover:bg-row-hover [&:last-child>td]:border-0 ${userStatus(user) === 'disabled' ? '*:opacity-50 contrast-more:*:opacity-100' : ''}`}
                   >
                     <td className={CELL}>
                       <UserIdentity user={user} isSelf={isSelf} />
@@ -95,7 +95,7 @@ export function UserTable({
             return (
               <li
                 key={user.id}
-                className={`flex flex-col gap-3 rounded-lg border border-border-panel bg-white p-4 text-[0.875rem] text-navy ${userStatus(user) === 'disabled' ? '*:opacity-50' : ''}`}
+                className={`flex flex-col gap-3 rounded-lg border border-border-panel bg-white p-4 text-[0.875rem] text-navy ${userStatus(user) === 'disabled' ? '*:opacity-50 contrast-more:*:opacity-100' : ''}`}
               >
                 <UserIdentity user={user} isSelf={isSelf} />
                 <div className="flex items-center justify-between gap-2">
