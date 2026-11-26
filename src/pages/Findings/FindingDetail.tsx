@@ -488,7 +488,7 @@ function Vulnerability({ details, planMitigation }: { details: FindingDetails; p
         </div>
       )}
       {details.unavailable_feeds.length > 0 && (
-        <p className={`${META} text-high`}>
+        <p className={`${META} text-gray`}>
           {t('findings.detail.vulnerability.unavailable', { feeds: details.unavailable_feeds.join(', ') })}
         </p>
       )}

@@ -207,7 +207,7 @@ export function FindingHistory({ findingId, newestReasonShown }: { findingId: st
   if (history.isError) {
     return (
       <div className="flex flex-wrap items-center gap-3">
-        <p className={`${META} text-high`}>
+        <p className={`${META} text-critical`}>
           {requestErrorText(history.error, t, {
             fallback: 'findings.detail.history.failed',
             network: 'findings.detail.history.network',
