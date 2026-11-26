@@ -655,8 +655,6 @@ export const es: Translations = {
     period: 'Noticias del {{period}}',
     picker: {
       label: 'Edición',
-      option_one: '{{period}}, {{count}} noticia',
-      option_other: '{{period}}, {{count}} noticias',
       named_one: '{{count}} los nombra',
       named_other: '{{count}} los nombran',
     },

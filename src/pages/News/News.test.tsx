@@ -210,13 +210,13 @@ describe('News', () => {
     expect(screen.getAllByText(/The summary for this digest couldn't be written/)).toHaveLength(1)
   })
 
-  it('lists the earlier digests with their period and how many items they hold', async () => {
+  it('lists the earlier digests with their period and how many items name the organization', async () => {
     await renderNews()
 
     const options = within(screen.getByLabelText('Digest')).getAllByRole('option')
     expect(options.map((o) => plain(o.textContent))).toEqual([
-      'Nov 16 – 17, 2026, 7 news items, 1 names you',
-      'Nov 15 – 16, 2026, 2 news items',
+      'Nov 16 – 17, 2026 · 1 names you',
+      'Nov 15 – 16, 2026',
     ])
   })
 

@@ -653,8 +653,6 @@ export const en = {
     period: 'News from {{period}}',
     picker: {
       label: 'Digest',
-      option_one: '{{period}}, {{count}} news item',
-      option_other: '{{period}}, {{count}} news items',
       named_one: '{{count}} names you',
       named_other: '{{count}} name you',
     },
