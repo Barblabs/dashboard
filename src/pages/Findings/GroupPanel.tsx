@@ -46,10 +46,10 @@ export function GroupPanel({ order, group, onOpen }: Props) {
           {/* Fixed column widths, so each group's columns line up with the groups above and below it. */}
           <table className="w-full min-w-[56rem] table-fixed border-collapse text-[0.875rem]">
             <colgroup>
+              <col className="w-[16%]" />
+              <col className="w-[12%]" />
+              <col className="w-[26%]" />
               <col className="w-[15%]" />
-              <col className="w-[11%]" />
-              <col className="w-[27%]" />
-              <col className="w-[13%]" />
               <col className="w-[8%]" />
               <col />
             </colgroup>
@@ -99,7 +99,7 @@ function FindingRow({ order, finding, onOpen }: { order: CurrentOrder; finding: 
       <td className={`${CELL} ${MONO}`}>
         {finding.component} {finding.version}
       </td>
-      <td className={`${CELL} ${MONO}`}>
+      <td className={`${CELL} ${MONO} whitespace-nowrap`}>
         {scorePoints(currentScore(finding))}
         <ScoreBandBadge band={currentScoreDetails(finding).band} className="ml-2" />
       </td>
@@ -155,7 +155,7 @@ function OpenButton({ finding, onOpen }: { finding: Finding; onOpen: (id: string
         onOpen(finding.finding_id)
       }}
       aria-label={t('findings.open', { cve: finding.cve_id })}
-      className={`focus-ring cursor-pointer rounded-xs font-semibold underline-offset-2 hover:underline ${MONO} ${closed ? 'text-gray line-through' : 'text-navy'}`}
+      className={`focus-ring cursor-pointer rounded-xs text-left font-semibold whitespace-nowrap underline-offset-2 hover:underline ${MONO} ${closed ? 'text-gray line-through' : 'text-navy'}`}
     >
       {finding.cve_id}
     </button>
