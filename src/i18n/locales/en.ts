@@ -825,6 +825,7 @@ export const en = {
       step1: {
         title: 'New organization',
         label: 'Organization name',
+        cancel: 'Cancel',
         next: 'Next',
         required: 'The name is required.',
       },

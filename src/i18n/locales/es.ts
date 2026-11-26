@@ -827,6 +827,7 @@ export const es: Translations = {
       step1: {
         title: 'Nueva organización',
         label: 'Nombre de la organización',
+        cancel: 'Cancelar',
         next: 'Siguiente',
         required: 'El nombre es obligatorio.',
       },
