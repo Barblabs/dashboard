@@ -4,6 +4,7 @@ import type { TacticCount, TechniqueCount } from '../../api/attackMatrix'
 import { Badge } from '../../components/ui/Badge'
 import { Card, CardHeader } from '../../components/ui/Card'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
+import { Message } from '../../components/ui/Message'
 import { CARD_EDGE, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { BAND_COLORS, BANDS, type Band } from './bands'
@@ -230,7 +231,7 @@ function TopTechniquesCard({ techniques }: { techniques: TechniqueCount[] }) {
     <Card>
       <CardHeader title={t('findings.threats.topTitle')} help={t('findings.threats.topHelp')} />
       {techniques.length === 0 ? (
-        <p className="p-6 font-body text-[0.875rem] text-gray">{t('findings.threats.topEmpty')}</p>
+        <Message>{t('findings.threats.topEmpty')}</Message>
       ) : (
         <div className="overflow-x-auto">
           <TechniquesTable techniques={techniques} />
