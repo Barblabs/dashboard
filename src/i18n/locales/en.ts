@@ -104,6 +104,7 @@ export const en = {
       growing: 'The open backlog is growing',
       steady: 'The open backlog is holding steady',
       tooShort: 'The trend appears after your second week.',
+      now: 'Now',
       chart: 'Findings open at the end of each week since {{start}}: {{first}} then, {{highest}} at the most, {{last}} now',
     },
     startHere: {
@@ -116,8 +117,8 @@ export const en = {
       title: 'Coming back soon',
       finding: '{{cve}} on {{asset}}',
       setAside: '{{reason}} by {{by}} · back {{date}}',
-      more_one: '{{count}} more',
-      more_other: '{{count}} more',
+      more_one: '{{count}} more in Manual closures',
+      more_other: '{{count}} more in Manual closures',
       none: 'Nothing set aside comes back in the next 30 days.',
     },
     tabs: {

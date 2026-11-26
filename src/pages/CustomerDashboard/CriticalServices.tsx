@@ -5,7 +5,7 @@ import { useCriticalServicesQuery, type CriticalServiceHealth } from '../../api/
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge, type BadgeVariant } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { Card } from '../../components/ui/Card'
+import { Card, CardHeader } from '../../components/ui/Card'
 import { useListFormat } from '../../i18n/format'
 
 const TEXT_LINK = 'focus-ring rounded-sm font-body font-semibold text-nav-active-bg hover:underline'
@@ -24,10 +24,7 @@ export function CriticalServices() {
   const query = useCriticalServicesQuery()
   return (
     <Card aria-labelledby={titleId}>
-      <div className="flex flex-col gap-1 border-b border-border-panel px-6 py-4">
-        <h2 id={titleId} className="font-title text-[1rem] text-navy">{t('dashboard.services.title')}</h2>
-        <p className="font-body text-[0.8125rem] text-gray">{t('dashboard.services.rule')}</p>
-      </div>
+      <CardHeader id={titleId} title={t('dashboard.services.title')} subtitle={t('dashboard.services.rule')} />
       <QueryBoundary
         query={query}
         keys={{ loading: 'dashboard.loading', failed: 'dashboard.failed', network: 'dashboard.network' }}

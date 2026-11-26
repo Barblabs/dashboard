@@ -275,6 +275,27 @@ describe('CustomerDashboard', () => {
       expect(within(card).queryByText(/closed/)).not.toBeInTheDocument()
     })
 
+    it('says the count failed to load, and loads it on Retry', async () => {
+      let failed = false
+      server.use(
+        http.get(apiUrl('/findings/summary'), () => {
+          if (failed) return undefined
+          failed = true
+          return HttpResponse.json({ code: 'internal_error', error: 'boom' }, { status: 500 })
+        }),
+      )
+      const user = renderApp('/dashboard')
+      const card = await openCard()
+
+      const alert = await within(card).findByRole('alert')
+      expect(alert).toHaveTextContent('The server had an internal error. Try again.')
+
+      await user.click(within(alert).getByRole('button', { name: 'Retry' }))
+
+      expect(await within(card).findByText('23')).toBeInTheDocument()
+      expect(within(card).queryByRole('alert')).not.toBeInTheDocument()
+    })
+
     it('forgets the counts of a CMDB once it is disconnected', async () => {
       seedSource()
       const user = renderApp('/dashboard')
@@ -312,6 +333,15 @@ describe('CustomerDashboard', () => {
       expect(within(chart).getByText('30')).toBeInTheDocument()
       expect(within(chart).getByText('18')).toBeInTheDocument()
       expect(within(chart).queryByText('25')).not.toBeInTheDocument()
+    })
+
+    it('marks the first week and now under the line', async () => {
+      trendOf(0, 0, 12, 30, 25, 18)
+      renderApp('/dashboard')
+
+      const chart = await screen.findByRole('img', { name: /^Findings open at the end of each week/ })
+      expect(within(chart).getByText('Oct 12')).toBeInTheDocument()
+      expect(within(chart).getByText('Now')).toBeInTheDocument()
     })
 
     it('waits for a second week before drawing a trend', async () => {
@@ -437,7 +467,10 @@ describe('CustomerDashboard', () => {
       expect(within(rows[0]).getByText(/^Postponed by ana@test\.example · back \w{3} \d+, \d{4}$/)).toBeInTheDocument()
       expect(within(rows[1]).getByText(/^Accepted risk by ana@test\.example · back /)).toBeInTheDocument()
       // CVE-0000-0006, on day 29, is the one left out.
-      expect(within(card).getByText('1 more')).toBeInTheDocument()
+      expect(within(card).getByRole('link', { name: '1 more in Manual closures' })).toHaveAttribute(
+        'href',
+        '/findings?tab=closed',
+      )
     })
 
     it('says when nothing set aside comes back in the next 30 days', async () => {
