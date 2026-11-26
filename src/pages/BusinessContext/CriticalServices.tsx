@@ -85,7 +85,7 @@ export function CriticalServices() {
         <button
           type="button"
           onClick={() => append({ name: '', description: '', impact: '', max_downtime: '', assets: [] })}
-          className="cursor-pointer rounded-lg border border-dashed border-muted-bg py-3 font-body text-[0.875rem] font-semibold text-gray transition-colors hover:border-navy hover:text-navy focus-ring"
+          className="cursor-pointer rounded-lg border border-dashed border-muted-bg py-3 font-body text-[0.875rem] font-semibold text-gray transition-colors duration-150 ease-[ease] hover:border-navy hover:text-navy focus-ring"
         >
           + {t('businessContext.fields.criticalServices.add')}
         </button>

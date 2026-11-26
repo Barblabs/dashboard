@@ -46,7 +46,7 @@ function CustomerCard({
           <button
             type="button"
             aria-label={t('tenants.actions.rename')}
-            className="cursor-pointer rounded-md p-1.5 text-gray transition-colors hover:bg-panel hover:text-navy focus-ring"
+            className="cursor-pointer rounded-md p-1.5 text-gray transition-colors duration-150 ease-[ease] hover:bg-panel hover:text-navy focus-ring"
             onClick={onRename}
           >
             <PencilIcon />
@@ -56,7 +56,7 @@ function CustomerCard({
               type="button"
               aria-label={t('tenants.actions.reactivate')}
               disabled={reactivate.isPending}
-              className="cursor-pointer rounded-md p-1.5 text-navy transition-colors enabled:hover:bg-panel focus-ring disabled:cursor-not-allowed disabled:opacity-45"
+              className="cursor-pointer rounded-md p-1.5 text-navy transition-colors duration-150 ease-[ease] enabled:hover:bg-panel focus-ring disabled:cursor-not-allowed disabled:opacity-45"
               onClick={() => reactivate.mutate(customer.id)}
             >
               <RestoreIcon />
@@ -65,7 +65,7 @@ function CustomerCard({
             <button
               type="button"
               aria-label={t('tenants.actions.deactivate')}
-              className="cursor-pointer rounded-md p-1.5 text-critical transition-colors hover:bg-critical/10 focus-ring"
+              className="cursor-pointer rounded-md p-1.5 text-critical transition-colors duration-150 ease-[ease] hover:bg-critical/10 focus-ring"
               onClick={onDeactivate}
             >
               <PowerOffIcon />

@@ -17,7 +17,7 @@ export function InfoTip({ title, text }: { title: string; text: string }) {
         delay={150}
         closeDelay={150}
         aria-label={t('common.infoTip', { title })}
-        className="focus-ring inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-gray transition-colors duration-150 hover:text-navy data-popup-open:text-navy"
+        className="focus-ring inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-gray transition-colors duration-150 ease-[ease] hover:text-navy data-popup-open:text-navy"
       >
         <QuestionIcon />
       </Popover.Trigger>

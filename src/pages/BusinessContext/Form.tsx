@@ -125,7 +125,7 @@ export function BusinessContextForm({
               type="button"
               aria-label={t('businessContext.import.dismiss')}
               onClick={() => setApplied(null)}
-              className="cursor-pointer rounded-sm p-1 text-gray transition-colors hover:text-navy focus-ring"
+              className="cursor-pointer rounded-sm p-1 text-gray transition-colors duration-150 ease-[ease] hover:text-navy focus-ring"
             >
               <CloseIcon />
             </button>

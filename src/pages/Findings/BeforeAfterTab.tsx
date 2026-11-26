@@ -272,7 +272,7 @@ function TopChangesTable({
                 key={c.findingId}
                 // The whole row is the mouse target; the button stays the keyboard and screen reader path.
                 onClick={() => onOpen(c.findingId)}
-                className="cursor-pointer border-b border-border-row transition-colors duration-150 last:border-0 hover:bg-row-hover"
+                className="cursor-pointer border-b border-border-row transition-colors duration-150 ease-[ease] last:border-0 hover:bg-row-hover"
               >
                 <td className={`px-4 py-3 whitespace-nowrap ${CARD_EDGE}`}>
                   <button

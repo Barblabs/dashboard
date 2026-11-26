@@ -134,7 +134,7 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
               e.preventDefault()
               add([...e.dataTransfer.files])
             }}
-            className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-dashed border-muted-bg bg-panel px-4 py-6 font-body text-[0.875rem] text-gray transition-colors enabled:hover:border-navy enabled:hover:text-navy focus-ring disabled:cursor-not-allowed disabled:opacity-45"
+            className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-dashed border-muted-bg bg-panel px-4 py-6 font-body text-[0.875rem] text-gray transition-colors duration-150 ease-[ease] enabled:hover:border-navy enabled:hover:text-navy focus-ring disabled:cursor-not-allowed disabled:opacity-45"
           >
             <span className="font-semibold text-navy">{t('businessContext.import.choose')}</span>
             <span className="text-[0.75rem]">{t('businessContext.import.fileHelp')}</span>

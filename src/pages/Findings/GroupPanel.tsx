@@ -90,7 +90,7 @@ function FindingRow({ order, finding, onOpen }: { order: CurrentOrder; finding: 
     <tr
       // The whole row is the mouse target; the button stays the keyboard and screen reader path.
       onClick={() => onOpen(finding.finding_id)}
-      className={`cursor-pointer transition-colors duration-150 hover:bg-row-hover ${closed ? '*:opacity-60 contrast-more:*:opacity-100' : ''}`}
+      className={`cursor-pointer transition-colors duration-150 ease-[ease] hover:bg-row-hover ${closed ? '*:opacity-60 contrast-more:*:opacity-100' : ''}`}
     >
       <td className={CELL}>
         <OpenButton finding={finding} onOpen={onOpen} />
@@ -118,7 +118,7 @@ function FindingCard({ order, finding, onOpen }: { order: CurrentOrder; finding:
   return (
     <li
       onClick={() => onOpen(finding.finding_id)}
-      className={`flex cursor-pointer flex-col gap-2 rounded-lg border border-border-panel p-4 text-[0.875rem] text-navy transition-colors duration-150 hover:bg-row-hover ${closed ? '*:opacity-60 contrast-more:*:opacity-100' : ''}`}
+      className={`flex cursor-pointer flex-col gap-2 rounded-lg border border-border-panel p-4 text-[0.875rem] text-navy transition-colors duration-150 ease-[ease] hover:bg-row-hover ${closed ? '*:opacity-60 contrast-more:*:opacity-100' : ''}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <OpenButton finding={finding} onOpen={onOpen} />

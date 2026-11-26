@@ -51,7 +51,7 @@ export function Tab({ value, children }: { value: string; children: ReactNode })
   return (
     <BaseTabs.Tab
       value={value}
-      className="group flex cursor-pointer items-center gap-2 px-3 py-4 font-body text-[0.9375rem] whitespace-nowrap text-gray outline-none transition-colors hover:text-navy data-active:font-semibold data-active:text-navy focus-visible:rounded-sm focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-navy"
+      className="group flex cursor-pointer items-center gap-2 px-3 py-4 font-body text-[0.9375rem] whitespace-nowrap text-gray outline-none transition-colors duration-150 ease-[ease] hover:text-navy data-active:font-semibold data-active:text-navy focus-visible:rounded-sm focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-navy"
     >
       {children}
     </BaseTabs.Tab>
