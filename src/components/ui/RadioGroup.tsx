@@ -38,13 +38,13 @@ export function RadioGroup<T extends string>({ label, value, onValueChange, opti
           return (
             <label
               key={option.value}
-              className="flex cursor-pointer items-start gap-3 rounded-md border border-border-panel px-3 py-2.5 transition-[border-color,background-color] duration-150 ease-[ease] not-has-data-disabled:hover:border-navy/50 has-data-checked:border-navy has-data-checked:bg-navy/4 has-data-disabled:cursor-not-allowed has-data-disabled:opacity-60"
+              className="flex cursor-pointer items-start gap-3 rounded-md border border-border-panel bg-white px-3 py-2.5 transition-[border-color,background-color] duration-150 ease-[ease] not-has-data-disabled:hover:border-navy/50 has-data-checked:border-navy has-data-checked:bg-navy/4 has-data-disabled:cursor-not-allowed has-data-disabled:opacity-60 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-navy"
             >
               <Radio.Root
                 value={option.value}
                 aria-labelledby={`${optionId}-label`}
                 aria-describedby={option.description ? `${optionId}-description` : undefined}
-                className="focus-ring mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border border-gray bg-white data-checked:border-navy"
+                className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border border-gray bg-white outline-none data-checked:border-navy"
               >
                 <Radio.Indicator className="size-2 rounded-full bg-navy" />
               </Radio.Root>
