@@ -63,6 +63,7 @@ describe('Restoring the session on startup', () => {
     reopen('/config')
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Organization deactivated' })).toBeInTheDocument()
+    expect(document.title).toBe('Organization deactivated - Barbattack')
   })
 
   it.each([
