@@ -80,6 +80,6 @@ export function Shown({ value }: { value: string }) {
   return value.trim() ? (
     <p className="whitespace-pre-wrap font-body text-[0.9375rem] leading-[1.5] text-navy">{value}</p>
   ) : (
-    <p className="font-body text-[0.9375rem] text-muted-bg">{EMPTY}</p>
+    <p className="font-body text-[0.9375rem] text-gray">{EMPTY}</p>
   )
 }

@@ -20,7 +20,7 @@ export function CriticalServices() {
       <span className={`font-body font-semibold ${readOnly ? 'text-[0.8125rem] text-gray' : 'text-[0.875rem] text-navy'}`}>
         {t('businessContext.fields.criticalServices.label')}
       </span>
-      {readOnly && fields.length === 0 && <p className="font-body text-[0.9375rem] text-muted-bg">{EMPTY}</p>}
+      {readOnly && fields.length === 0 && <p className="font-body text-[0.9375rem] text-gray">{EMPTY}</p>}
       {fields.map((item, index) =>
         readOnly ? (
           <ShownService key={item.id} index={index} />
