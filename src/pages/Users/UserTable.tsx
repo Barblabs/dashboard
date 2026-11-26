@@ -73,7 +73,7 @@ export function UserTable({
                 return (
                   <tr
                     key={user.id}
-                    className={`hover:bg-row-hover [&:last-child>td]:border-0 ${userStatus(user) === 'disabled' ? '*:opacity-50 contrast-more:*:opacity-100' : ''}`}
+                    className={`hover:bg-row-hover ${userStatus(user) === 'disabled' ? '*:opacity-50 contrast-more:*:opacity-100' : ''}`}
                   >
                     <td className={CELL}>
                       <UserIdentity user={user} isSelf={isSelf} />
