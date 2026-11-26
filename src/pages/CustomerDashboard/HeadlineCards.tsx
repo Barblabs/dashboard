@@ -9,7 +9,7 @@ import { requestErrorText } from '../../i18n/errors'
 import { EMPTY } from '../../i18n/format'
 import { fromFirstRecord } from '../Findings/weeks'
 
-const NOTE = 'font-body text-[0.8125rem]'
+const NOTE = 'font-body text-[0.8125rem] text-balance'
 
 export function HeadlineCards() {
   const { t } = useTranslation()
