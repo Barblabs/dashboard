@@ -104,6 +104,7 @@ export const en = {
       growing: 'The open backlog is growing',
       steady: 'The open backlog is holding steady',
       tooShort: 'The trend appears after your second week.',
+      now: 'Now',
       chart: 'Findings open at the end of each week since {{start}}: {{first}} then, {{highest}} at the most, {{last}} now',
     },
     startHere: {

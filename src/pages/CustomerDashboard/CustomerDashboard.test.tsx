@@ -335,6 +335,15 @@ describe('CustomerDashboard', () => {
       expect(within(chart).queryByText('25')).not.toBeInTheDocument()
     })
 
+    it('marks the first week and now under the line', async () => {
+      trendOf(0, 0, 12, 30, 25, 18)
+      renderApp('/dashboard')
+
+      const chart = await screen.findByRole('img', { name: /^Findings open at the end of each week/ })
+      expect(within(chart).getByText('Oct 12')).toBeInTheDocument()
+      expect(within(chart).getByText('Now')).toBeInTheDocument()
+    })
+
     it('waits for a second week before drawing a trend', async () => {
       trendOf(0, 0, 12)
       renderApp('/dashboard')

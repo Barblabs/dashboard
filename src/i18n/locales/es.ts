@@ -106,6 +106,7 @@ export const es: Translations = {
       growing: 'Los hallazgos abiertos están subiendo',
       steady: 'Los hallazgos abiertos se mantienen',
       tooShort: 'La tendencia aparece después de tu segunda semana.',
+      now: 'Ahora',
       chart: 'Hallazgos abiertos al final de cada semana desde el {{start}}: {{first}} entonces, {{highest}} como máximo, {{last}} ahora',
     },
     startHere: {

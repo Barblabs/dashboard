@@ -91,6 +91,10 @@ function Backlog({ weeks }: { weeks: WeeklyTrendPoint[] }) {
             </span>
           ))}
         </div>
+        <div aria-hidden="true" className="mt-2 flex justify-between font-body text-[0.8125rem] text-gray">
+          <span>{formatDay(first.starts_on)}</span>
+          <span>{t('dashboard.backlog.now')}</span>
+        </div>
       </div>
     </>
   )
