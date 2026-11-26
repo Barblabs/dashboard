@@ -22,6 +22,7 @@ function DeactivateBody({ customer, onClose }: { customer: CustomerResponse; onC
       text={t('tenants.deactivate.body')}
       cancelLabel={t('tenants.deactivate.cancel')}
       confirmLabel={t('tenants.deactivate.confirm')}
+      pendingLabel={t('tenants.deactivate.pending')}
       pending={deactivate.isPending}
       error={requestErrorText(deactivate.error, t, { fallback: 'tenants.deactivate.failed' })}
       onConfirm={() => deactivate.mutate(customer.id, { onSuccess: onClose })}

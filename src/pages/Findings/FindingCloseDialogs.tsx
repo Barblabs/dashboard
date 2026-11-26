@@ -151,6 +151,7 @@ function ReopenBody({ finding, onDone }: { finding: FindingRef; onDone: () => vo
       text={t('findings.reopen.text')}
       cancelLabel={t('findings.reopen.cancel')}
       confirmLabel={t('findings.reopen.confirm')}
+      pendingLabel={t('findings.reopen.pending')}
       pending={reopen.isPending}
       error={requestErrorText(reopen.error, t, { fallback: 'findings.reopen.failed' })}
       onConfirm={() => reopen.mutate(finding.id, { onSuccess: onDone })}

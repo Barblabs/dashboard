@@ -18,6 +18,7 @@ function DisableBody({ user, onClose }: { user: UserResponse; onClose: () => voi
       text={t('users.confirm.text')}
       cancelLabel={t('users.confirm.cancel')}
       confirmLabel={t('users.confirm.confirm')}
+      pendingLabel={t('users.confirm.pending')}
       pending={disable.isPending}
       error={requestErrorText(disable.error, t, { fallback: 'users.actions.disableFailed' })}
       onConfirm={() => disable.mutate(user.id, { onSuccess: onClose })}

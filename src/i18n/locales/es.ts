@@ -350,6 +350,7 @@ export const es: Translations = {
       text: 'Vuelve a contar como abierto y toma su lugar en la siguiente actualización del orden.',
       cancel: 'Cancelar',
       confirm: 'Sí, reabrir',
+      pending: 'Reabriendo…',
       failed: 'No se pudo reabrir el hallazgo.',
     },
     closedByHand: {
@@ -772,6 +773,7 @@ export const es: Translations = {
     confirm: {
       text: 'Este usuario ya no podrá iniciar sesión. ¿Continuar?',
       confirm: 'Sí, deshabilitar',
+      pending: 'Deshabilitando…',
       cancel: 'Cancelar',
     },
   },
@@ -812,6 +814,7 @@ export const es: Translations = {
       title: 'Desactivar organización',
       body: 'Los usuarios de esta organización ya no podrán iniciar sesión.',
       confirm: 'Sí, desactivar',
+      pending: 'Desactivando…',
       cancel: 'Cancelar',
       failed: 'No se pudo desactivar la organización.',
     },

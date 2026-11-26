@@ -348,6 +348,7 @@ export const en = {
       text: 'It counts as open again and takes its place in the next update of the order.',
       cancel: 'Cancel',
       confirm: 'Yes, reopen',
+      pending: 'Reopening…',
       failed: "Couldn't reopen the finding.",
     },
     closedByHand: {
@@ -770,6 +771,7 @@ export const en = {
     confirm: {
       text: 'This user will no longer be able to sign in. Continue?',
       confirm: 'Yes, disable',
+      pending: 'Disabling…',
       cancel: 'Cancel',
     },
   },
@@ -810,6 +812,7 @@ export const en = {
       title: 'Deactivate organization',
       body: 'Users of this organization will no longer be able to sign in.',
       confirm: 'Yes, deactivate',
+      pending: 'Deactivating…',
       cancel: 'Cancel',
       failed: 'Could not deactivate the organization.',
     },
