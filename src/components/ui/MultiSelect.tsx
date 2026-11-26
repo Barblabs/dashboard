@@ -47,7 +47,7 @@ export function MultiSelect({
         if (!open && details.reason === 'item-press') details.cancel()
       }}
     >
-      <Combobox.InputGroup className="flex min-h-11 w-full cursor-text flex-wrap items-center gap-1.5 rounded-md border border-border-panel bg-white px-2 py-1.5 transition-[border-color] duration-150 ease-[ease] focus-within:border-navy data-disabled:cursor-not-allowed data-disabled:opacity-60">
+      <Combobox.InputGroup className="flex min-h-11 w-full cursor-text flex-wrap items-center gap-1.5 rounded-md border border-border-panel bg-white px-2 py-1.5 transition-[border-color] duration-150 ease-[ease] focus-within:border-navy has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-navy data-disabled:cursor-not-allowed data-disabled:opacity-60">
         <Combobox.Chips className="flex w-full flex-wrap items-center gap-1.5">
           {value.map((v) => (
             <Combobox.Chip
