@@ -95,7 +95,7 @@ function AreaRow({ area, name, most }: { area: AreaHealth; name: string; most: n
   const change = area.open_now - area.open_30_days_ago
 
   return (
-    <tr className={area.needs_help ? '' : 'opacity-60'}>
+    <tr className={area.needs_help ? '' : 'opacity-60 contrast-more:opacity-100'}>
       <td className={`${CELL} ${CARD_EDGE}`}>
         <div className="flex flex-col gap-0.5">
           <span className="flex flex-wrap items-center gap-2">
