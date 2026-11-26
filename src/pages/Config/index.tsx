@@ -39,7 +39,7 @@ export function ConfigPage() {
   return (
     <Page title={t('config.header.title')}>
       <Tabs defaultValue="cmdb">
-        <TabList label={t('config.tabs.pageLabel')}>
+        <TabList label={t('config.tabs.pageLabel')} flush>
           <Tab value="cmdb">{t('config.tabs.cmdb')}</Tab>
           <Tab value="slack">{t('config.tabs.slack')}</Tab>
         </TabList>

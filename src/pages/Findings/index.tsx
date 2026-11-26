@@ -42,7 +42,7 @@ export function FindingsPage() {
   return (
     <Page title={t('findings.title')} subtitle={t('findings.subtitle')}>
       <Tabs value={tab} onValueChange={changeTab}>
-        <TabList label={t('findings.tabs.label')}>
+        <TabList label={t('findings.tabs.label')} flush>
           <Tab value="prioritized">{t('findings.tabs.prioritized')}</Tab>
           <Tab value="closed">{t('findings.tabs.closed')}</Tab>
         </TabList>
