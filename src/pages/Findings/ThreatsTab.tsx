@@ -6,6 +6,7 @@ import { Card, CardHeader } from '../../components/ui/Card'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { Message } from '../../components/ui/Message'
 import { CARD_EDGE, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
+import { useWideLayout } from '../../components/ui/useWideLayout'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { EMPTY } from '../../i18n/format'
 import { BAND_COLORS, BANDS, type Band } from './bands'
@@ -222,22 +223,23 @@ function HeatmapGrid({ tactics: all }: { tactics: TacticCount[] }) {
 
 function TopTechniquesCard({ techniques }: { techniques: TechniqueCount[] }) {
   const { t } = useTranslation()
+  const wide = useWideLayout()
 
   return (
     <Card>
       <CardHeader title={t('findings.threats.topTitle')} help={t('findings.threats.topHelp')} />
       {techniques.length === 0 ? (
         <Message>{t('findings.threats.topEmpty')}</Message>
+      ) : wide ? (
+        <TechniquesTable techniques={techniques} />
       ) : (
-        <div className="overflow-x-auto">
-          <TechniquesTable techniques={techniques} />
-        </div>
+        <TechniquesList techniques={techniques} />
       )}
     </Card>
   )
 }
 
-function TechniquesTable({ techniques }: { techniques: TechniqueCount[] }) {
+function RoleBadges({ roles }: { roles: string[] }) {
   const { t } = useTranslation()
 
   const roleLabels: Record<string, string> = {
@@ -246,48 +248,92 @@ function TechniquesTable({ techniques }: { techniques: TechniqueCount[] }) {
     secondary_impact: t('findings.threats.roleValue.secondary_impact'),
   }
 
-  const maxFindings = Math.max(...techniques.map((tc) => tc.findings), 1)
+  return (
+    <div className="flex flex-wrap gap-1">
+      {roles.map((r) => (
+        <Badge key={r} variant="muted">
+          {roleLabels[r] ?? r}
+        </Badge>
+      ))}
+    </div>
+  )
+}
+
+function FindingsBar({ findings, max }: { findings: number; max: number }) {
+  return (
+    <div className="flex items-center justify-end gap-2">
+      <div className="h-1.5 w-12 overflow-hidden rounded-full bg-panel">
+        <div className="h-full rounded-full bg-navy" style={{ width: `${(findings / max) * 100}%` }} />
+      </div>
+      <span className="w-5 tabular-nums font-semibold text-navy">{findings}</span>
+    </div>
+  )
+}
+
+function maxFindingsOf(techniques: TechniqueCount[]): number {
+  return Math.max(...techniques.map((tc) => tc.findings), 1)
+}
+
+function TechniquesList({ techniques }: { techniques: TechniqueCount[] }) {
+  const { t } = useTranslation()
+  const maxFindings = maxFindingsOf(techniques)
 
   return (
-    <table className="w-full min-w-[40rem] border-collapse font-body text-[0.875rem]">
-      <thead>
-        <tr className={HEADER_ROW}>
-          <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.threats.topId')}</th>
-          <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.threats.topName')}</th>
-          <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.threats.topTactics')}</th>
-          <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.threats.topRole')}</th>
-          <th className={`${HEADER_CELL} ${CARD_EDGE} text-right`}>{t('findings.threats.topFindings')}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {techniques.map((tc) => (
-          <tr key={tc.attack_id} className="border-t border-border-row hover:bg-row-hover">
-            <td className={`px-4 py-2 font-mono text-[0.8125rem] font-semibold text-navy ${CARD_EDGE}`}>{tc.attack_id}</td>
-            <td className={`px-4 py-2 text-navy ${CARD_EDGE}`}>{tc.name}</td>
-            <td className={`px-4 py-2 font-body text-[0.75rem] text-gray ${CARD_EDGE}`}>{tc.tactics.join(', ')}</td>
-            <td className={`px-4 py-2 ${CARD_EDGE}`}>
-              <div className="flex flex-wrap gap-1">
-                {tc.roles.map((r) => (
-                  <Badge key={r} variant="muted">
-                    {roleLabels[r] ?? r}
-                  </Badge>
-                ))}
-              </div>
-            </td>
-            <td className={`px-4 py-2 text-right ${CARD_EDGE}`}>
-              <div className="flex items-center justify-end gap-2">
-                <div className="h-1.5 w-12 overflow-hidden rounded-full bg-panel">
-                  <div
-                    className="h-full rounded-full bg-navy"
-                    style={{ width: `${(tc.findings / maxFindings) * 100}%` }}
-                  />
-                </div>
-                <span className="w-5 tabular-nums font-semibold text-navy">{tc.findings}</span>
-              </div>
-            </td>
+    <ul className="border-t-2 border-border-row font-body text-[0.875rem] text-navy">
+      {techniques.map((tc) => (
+        <li key={tc.attack_id} className="flex flex-col gap-2 border-t border-border-row px-6 py-4 first:border-t-0">
+          <div className="flex items-start justify-between gap-3">
+            <span className="flex min-w-0 flex-col gap-0.5">
+              <span className="font-mono text-[0.8125rem] font-semibold">{tc.attack_id}</span>
+              <span>{tc.name}</span>
+            </span>
+            <span className="flex shrink-0 flex-col items-end gap-0.5">
+              <span className="text-[0.75rem] text-gray">{t('findings.threats.topFindings')}</span>
+              <FindingsBar findings={tc.findings} max={maxFindings} />
+            </span>
+          </div>
+          <p className="text-[0.75rem] text-gray">{tc.tactics.join(', ')}</p>
+          <RoleBadges roles={tc.roles} />
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function TechniquesTable({ techniques }: { techniques: TechniqueCount[] }) {
+  const { t } = useTranslation()
+  const maxFindings = maxFindingsOf(techniques)
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[40rem] border-collapse font-body text-[0.875rem]">
+        <thead>
+          <tr className={HEADER_ROW}>
+            <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.threats.topId')}</th>
+            <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.threats.topName')}</th>
+            <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.threats.topTactics')}</th>
+            <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.threats.topRole')}</th>
+            <th className={`${HEADER_CELL} ${CARD_EDGE} text-right`}>{t('findings.threats.topFindings')}</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {techniques.map((tc) => (
+            <tr key={tc.attack_id} className="border-t border-border-row hover:bg-row-hover">
+              <td className={`px-4 py-2 font-mono text-[0.8125rem] font-semibold text-navy ${CARD_EDGE}`}>
+                {tc.attack_id}
+              </td>
+              <td className={`px-4 py-2 text-navy ${CARD_EDGE}`}>{tc.name}</td>
+              <td className={`px-4 py-2 font-body text-[0.75rem] text-gray ${CARD_EDGE}`}>{tc.tactics.join(', ')}</td>
+              <td className={`px-4 py-2 ${CARD_EDGE}`}>
+                <RoleBadges roles={tc.roles} />
+              </td>
+              <td className={`px-4 py-2 text-right ${CARD_EDGE}`}>
+                <FindingsBar findings={tc.findings} max={maxFindings} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
