@@ -1402,14 +1402,8 @@ export const es: Translations = {
       retrying: 'Reintentando…',
       retrySucceeded: 'Devolvió {{count}} entregas a la cola.',
       retryFailed: 'No se pudieron reintentar las entregas.',
-      columns: {
-        target: 'Destino',
-        kind: 'Tipo de destino',
-        attempts: 'Intentos',
-        created: 'Creado',
-        code: 'Código de fallo',
-        error: 'Detalle',
-      },
+      attempts_one: '{{count}} intento',
+      attempts_other: '{{count}} intentos',
     },
     codes: {
       owner_unreachable: 'Slack no reconoce a este destinatario.',

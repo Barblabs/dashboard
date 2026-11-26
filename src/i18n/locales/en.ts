@@ -1399,14 +1399,8 @@ export const en = {
       retrying: 'Retrying…',
       retrySucceeded: 'Returned {{count}} deliveries to the queue.',
       retryFailed: 'Could not retry the deliveries.',
-      columns: {
-        target: 'Target',
-        kind: 'Target kind',
-        attempts: 'Attempts',
-        created: 'Created',
-        code: 'Failure code',
-        error: 'Details',
-      },
+      attempts_one: '{{count}} attempt',
+      attempts_other: '{{count}} attempts',
     },
     codes: {
       owner_unreachable: 'Slack does not recognize this owner.',
