@@ -75,27 +75,28 @@ export function AdminDashboardPage() {
 // ── stats row ─────────────────────────────────────────────────────────────────
 
 function StatsSection() {
-  const { t } = useTranslation()
   const statsQuery = useCustomersStatsQuery()
   const syncQuery = useSyncHealthQuery()
 
-  const statsData = statsQuery.data
-  const syncData = syncQuery.data
+  return (
+    <QueryBoundary query={statsQuery} keys={KEYS}>
+      {(stats) => (
+        <QueryBoundary query={syncQuery} keys={KEYS}>
+          {(sync) => <StatsRow customers={stats.customers} days={sync.days} />}
+        </QueryBoundary>
+      )}
+    </QueryBoundary>
+  )
+}
 
-  if ((!statsData && statsQuery.error) || (!syncData && syncQuery.error)) {
-    return <Message tone="error">{t('adminDashboard.loadFailed')}</Message>
-  }
-
-  if (!statsData || !syncData) {
-    return <Message>{t('adminDashboard.loading')}</Message>
-  }
-
-  const active = statsData.customers.filter((c) => c.active).length
-  const deactivated = statsData.customers.filter((c) => !c.active).length
-  const usersTotal = statsData.customers.reduce((s, c) => s + c.user_count, 0)
-  const cmdbN = statsData.customers.filter((c) => c.cmdb_connected).length
-  const cmdbM = statsData.customers.length
-  const failedSyncs = syncData.days.reduce((s, d) => s + d.failed, 0)
+function StatsRow({ customers, days }: { customers: CustomerStats[]; days: SyncDay[] }) {
+  const { t } = useTranslation()
+  const active = customers.filter((c) => c.active).length
+  const deactivated = customers.filter((c) => !c.active).length
+  const usersTotal = customers.reduce((s, c) => s + c.user_count, 0)
+  const cmdbN = customers.filter((c) => c.cmdb_connected).length
+  const cmdbM = customers.length
+  const failedSyncs = days.reduce((s, d) => s + d.failed, 0)
 
   return (
     <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
