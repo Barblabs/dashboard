@@ -10,8 +10,7 @@ import type { Known, Schemas } from './schemas'
 
 /*
  * Slack delivery state: one installation per Customer, plus the failed deliveries the
- * worker gave up on. Everything hangs off this root key, so disconnecting removes the
- * whole tree (mirrors `connectionScopeKey` in cmdb.ts).
+ * worker gave up on.
  */
 const SLACK_KEY = ['slack'] as const
 const SLACK_INSTALLATION_KEY = [...SLACK_KEY, 'installation'] as const
@@ -114,7 +113,8 @@ export function useDisconnectSlackMutation() {
     mutationFn: () => api.delete('/slack/installation'),
     onSuccess: () => {
       queryClient.setQueryData(installationQuery.queryKey, null)
-      queryClient.removeQueries({ queryKey: SLACK_KEY })
+      queryClient.removeQueries({ queryKey: SLACK_CHANNELS_KEY })
+      queryClient.removeQueries({ queryKey: SLACK_FAILED_KEY })
     },
     onError: () => refetchInstallation(queryClient),
   })
