@@ -1,8 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from './client'
 import { findingsStatsScopeKey } from './findingsSummary'
-import type { Schemas } from './schemas'
-import type { Override } from './schemas'
+import type { Override, Schemas } from './schemas'
 
 // Band counts come from an embedded Go struct not reflected in the OpenAPI spec.
 export type TacticCount = Override<

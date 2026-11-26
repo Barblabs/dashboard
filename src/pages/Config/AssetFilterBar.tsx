@@ -115,7 +115,7 @@ export function AssetFilterBar({
             {activeCount > 0
               ? t('config.inventory.filters.moreActive', { count: activeCount })
               : t('config.inventory.filters.more')}
-            <ChevronDownIcon className="text-gray transition-transform duration-200 ease-[ease] group-data-panel-open:-rotate-180" />
+            <ChevronDownIcon className="text-gray transition-transform duration-200 ease-[ease] group-data-panel-open:-rotate-180 motion-reduce:transition-none" />
           </Collapsible.Trigger>
           {activeCount > 0 && (
             <button

@@ -32,7 +32,7 @@ export function CustomerDashboardPage() {
     <Page title={t('dashboard.title')} subtitle={t('dashboard.subtitle')}>
       <SyncLine />
       <Tabs value={tab ?? OVERVIEW} onValueChange={changeTab}>
-        <TabList label={t('findings.tabs.label')}>
+        <TabList label={t('findings.tabs.label')} flush>
           <Tab value={OVERVIEW}>{t('dashboard.tabs.overview')}</Tab>
           <Tab value={ANALYSIS}>{t('dashboard.tabs.analysis')}</Tab>
         </TabList>

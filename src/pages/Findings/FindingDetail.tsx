@@ -159,7 +159,7 @@ export function FindingDetail({ order, finding, onClose, closeButton }: Props) {
                     </span>
                     <ChevronDownIcon
                       size={14}
-                      className="shrink-0 text-gray transition-transform duration-200 ease-[ease] group-data-panel-open:-rotate-180"
+                      className="shrink-0 text-gray transition-transform duration-200 ease-[ease] group-data-panel-open:-rotate-180 motion-reduce:transition-none"
                     />
                   </Collapsible.Trigger>
                 </h3>
@@ -488,7 +488,7 @@ function Vulnerability({ details, planMitigation }: { details: FindingDetails; p
         </div>
       )}
       {details.unavailable_feeds.length > 0 && (
-        <p className={`${META} text-high`}>
+        <p className={`${META} text-gray`}>
           {t('findings.detail.vulnerability.unavailable', { feeds: details.unavailable_feeds.join(', ') })}
         </p>
       )}

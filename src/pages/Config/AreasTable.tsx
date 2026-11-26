@@ -51,7 +51,7 @@ function AreaRows({ areas, onEditOwner }: AreaRowsProps) {
         {areas.map((area) => (
           <li
             key={area.id}
-            className={`flex flex-col gap-3 rounded-lg border border-border-panel bg-white p-4 text-[0.875rem] text-navy ${area.active ? '' : '*:opacity-50'}`}
+            className={`flex flex-col gap-3 rounded-lg border border-border-panel bg-white p-4 text-[0.875rem] text-navy ${area.active ? '' : '*:opacity-50 contrast-more:*:opacity-100'}`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -77,14 +77,18 @@ function AreaRows({ areas, onEditOwner }: AreaRowsProps) {
             <th className={HEADER_CELL}>{t('config.areas.columns.area')}</th>
             <th className={HEADER_CELL}>{t('config.areas.columns.owner')}</th>
             <th className={HEADER_CELL}>{t('config.areas.columns.status')}</th>
-            {onEditOwner && <th className={HEADER_CELL} />}
+            {onEditOwner && (
+              <th className={HEADER_CELL}>
+                <span className="sr-only">{t('common.actions')}</span>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
           {areas.map((area) => (
             <tr
               key={area.id}
-              className={`hover:bg-row-hover ${area.active ? '' : '*:opacity-50'}`}
+              className={`hover:bg-row-hover ${area.active ? '' : '*:opacity-50 contrast-more:*:opacity-100'}`}
             >
               <td className={CELL}>
                 <AreaName area={area} />

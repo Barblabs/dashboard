@@ -15,8 +15,8 @@ export function FindingsFilterBar({ filters, onFilter }: FilterBarProps) {
   // Every field grows from a width of its own (flex-auto, or the search's 20rem) rather than from 0, so on
   // a narrow screen the fields wrap to the next line instead of squeezing past its edge.
   return (
-    <div className="flex flex-wrap gap-3">
-      <div className="relative flex-[2_1_20rem]">
+    <div className="flex flex-wrap gap-3 max-sm:grid max-sm:grid-cols-[auto_1fr]">
+      <div className="relative flex-[2_1_20rem] max-sm:col-span-2">
         <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray" />
         <Input
           type="search"
@@ -28,7 +28,7 @@ export function FindingsFilterBar({ filters, onFilter }: FilterBarProps) {
         />
       </div>
 
-      <label className="flex flex-auto items-center gap-2 font-body text-[0.875rem]">
+      <label className="flex flex-auto items-center gap-2 font-body text-[0.875rem] max-sm:col-span-2 max-sm:grid max-sm:grid-cols-subgrid">
         <span className="shrink-0 text-gray">{t('findings.filter.band')}</span>
         <Select
           value={filters.band}
@@ -44,7 +44,7 @@ export function FindingsFilterBar({ filters, onFilter }: FilterBarProps) {
         </Select>
       </label>
 
-      <label className="flex flex-auto items-center gap-2 font-body text-[0.875rem]">
+      <label className="flex flex-auto items-center gap-2 font-body text-[0.875rem] max-sm:col-span-2 max-sm:grid max-sm:grid-cols-subgrid">
         <span className="shrink-0 text-gray">{t('findings.filter.exposure')}</span>
         <Select
           value={filters.exposure}
@@ -58,7 +58,7 @@ export function FindingsFilterBar({ filters, onFilter }: FilterBarProps) {
         </Select>
       </label>
 
-      <label className="flex flex-auto items-center gap-2 font-body text-[0.875rem]">
+      <label className="flex flex-auto items-center gap-2 font-body text-[0.875rem] max-sm:col-span-2 max-sm:grid max-sm:grid-cols-subgrid">
         <span className="shrink-0 text-gray">{t('findings.filter.status')}</span>
         <Select
           value={filters.status}
@@ -71,7 +71,7 @@ export function FindingsFilterBar({ filters, onFilter }: FilterBarProps) {
         </Select>
       </label>
 
-      <label className="flex shrink-0 cursor-pointer items-center gap-2 font-body text-[0.875rem]">
+      <label className="flex shrink-0 cursor-pointer items-center gap-2 font-body text-[0.875rem] max-sm:col-start-2">
         <input
           type="checkbox"
           checked={filters.kev}
@@ -132,17 +132,6 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
       }),
     })
   if (filters.kev) chips.push({ key: 'kev', label: t('findings.chips.kev') })
-  if (filters.criticality)
-    chips.push({ key: 'criticality', label: t('findings.chips.criticality', { value: filters.criticality }) })
-  if (filters.assetName)
-    chips.push({ key: 'asset', label: t('findings.chips.asset', { value: filters.assetName }) })
-  if (filters.area)
-    chips.push({
-      key: 'area',
-      label: t('findings.chips.area', {
-        value: filters.area === 'none' ? t('findings.chips.areaNoArea') : filters.area,
-      }),
-    })
   if (filters.ids.size > 0)
     chips.push({ key: 'ids', label: t('findings.chips.matrix', { count: filters.ids.size }) })
 
@@ -154,12 +143,8 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
   if (!active && !totalCount) return null
 
   return (
-    <div className="flex flex-wrap items-center gap-2 font-body text-[0.875rem]">
-      {(filters.fromChart || filters.fromDashboard) && chips.length > 0 && (
-        <span className="text-gray">
-          {filters.fromDashboard ? t('findings.chips.fromDashboard') : t('findings.chips.fromChart')}
-        </span>
-      )}
+    <div className={`flex flex-1 flex-wrap items-center gap-2 font-body text-[0.875rem] ${active ? 'basis-full' : ''}`}>
+      {filters.fromChart && chips.length > 0 && <span className="text-gray">{t('findings.chips.fromChart')}</span>}
       {chips.map(({ key, label }) => (
         <span
           key={key}
@@ -169,10 +154,10 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
           <button
             type="button"
             onClick={() => onRemove(key)}
-            aria-label={t('findings.chips.remove')}
-            className="focus-ring ml-1 rounded-full text-gray hover:text-navy"
+            aria-label={t('findings.chips.remove', { value: label })}
+            className="focus-ring ml-1 flex size-4 cursor-pointer items-center justify-center rounded-full text-gray transition-colors duration-150 ease-[ease] hover:bg-panel hover:text-navy"
           >
-            <CloseIcon className="h-3.5 w-3.5" />
+            <CloseIcon />
           </button>
         </span>
       ))}
@@ -180,13 +165,13 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
         <button
           type="button"
           onClick={onClearAll}
-          className="focus-ring rounded-full px-2 py-0.5 text-[0.8125rem] text-gray underline-offset-2 hover:text-navy hover:underline"
+          className="focus-ring cursor-pointer rounded-md px-2 py-1 text-[0.8125rem] font-semibold text-gray transition-colors duration-150 ease-[ease] hover:text-navy"
         >
           {t('findings.chips.clearAll')}
         </button>
       )}
       <span className="ml-auto text-gray">{countText}</span>
-      {(filters.fromChart || filters.fromDashboard) && lastRunAt && (
+      {filters.fromChart && lastRunAt && (
         <span className="w-full font-body text-[0.75rem] text-gray">
           {t('findings.chips.fromChartRun', { date: lastRunAt })}
         </span>

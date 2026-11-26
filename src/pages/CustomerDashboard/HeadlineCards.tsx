@@ -2,11 +2,14 @@ import { useTranslation } from 'react-i18next'
 import { useFindingClosesQuery, type FindingCloses } from '../../api/findingCloses'
 import { useFindingsSummaryQuery } from '../../api/findingsSummary'
 import { useWeeklyTrendQuery, type WeeklyTrendPoint } from '../../api/findingsTrend'
+import type { Loadable } from '../../api/loadable'
+import { Button } from '../../components/ui/Button'
 import { STAT_CARD, STAT_LABEL, STAT_VALUE } from '../../components/ui/stat'
+import { requestErrorText } from '../../i18n/errors'
 import { EMPTY } from '../../i18n/format'
 import { fromFirstRecord } from '../Findings/weeks'
 
-const NOTE = 'font-body text-[0.8125rem]'
+const NOTE = 'font-body text-[0.8125rem] text-balance'
 
 export function HeadlineCards() {
   const { t } = useTranslation()
@@ -18,10 +21,11 @@ export function HeadlineCards() {
   const critical = summary.data?.critical
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       <section className={STAT_CARD} aria-label={t('dashboard.open.label')}>
         <span className={`${STAT_VALUE} text-navy`}>{open ?? EMPTY}</span>
         <span className={STAT_LABEL}>{t('dashboard.open.label')}</span>
+        <Failed query={summary} />
         {closes.data && (
           <span className={`${NOTE} text-gray`}>
             {t('dashboard.open.newLastDays', { count: closes.data.current.opened })}
@@ -37,6 +41,7 @@ export function HeadlineCards() {
           </span>
         )}
         <span className={STAT_LABEL}>{t('dashboard.critical.label')}</span>
+        <Failed query={summary} />
         {trend.data && <CriticalChange weeks={fromFirstRecord(trend.data.weeks)} />}
         {summary.data && summary.data.critical > 0 && (
           <span className={`${NOTE} text-navy`}>
@@ -53,9 +58,10 @@ function FixedCard() {
   const { t } = useTranslation()
   const closes = useFindingClosesQuery()
   return (
-    <section className={STAT_CARD} aria-label={t('dashboard.fixed.label')}>
+    <section className={`${STAT_CARD} sm:max-lg:col-span-2`} aria-label={t('dashboard.fixed.label')}>
       <span className={`${STAT_VALUE} text-navy`}>{closes.data?.current.fixed ?? EMPTY}</span>
       <span className={STAT_LABEL}>{t('dashboard.fixed.label')}</span>
+      <Failed query={closes} />
       {closes.data && <FixedChange closes={closes.data} />}
       {closes.data && closes.data.critical_fixed_median_days !== null && (
         <span className={`${NOTE} text-navy`}>
@@ -89,4 +95,17 @@ const TONE = { good: 'text-good', bad: 'text-critical', none: 'text-gray' }
 
 function Change({ tone, children }: { tone: keyof typeof TONE; children: string }) {
   return <span className={`${NOTE} ${TONE[tone]}`}>{children}</span>
+}
+
+function Failed({ query }: { query: Loadable<unknown> }) {
+  const { t } = useTranslation()
+  if (query.data !== undefined || !query.error) return null
+  return (
+    <span role="alert" className={`${NOTE} flex flex-wrap items-baseline gap-x-2 text-critical`}>
+      {requestErrorText(query.error, t, { fallback: 'dashboard.failed', network: 'dashboard.network' })}
+      <Button variant="link" size="sm" className="font-semibold" onClick={() => void query.refetch()}>
+        {t('common.retry')}
+      </Button>
+    </span>
+  )
 }

@@ -177,6 +177,7 @@ export function SlackInstallationBar({ installation, readOnly = false }: Props) 
           text={t('slack.connected.confirm.text')}
           error={requestErrorText(disconnectMutation.error, t, { fallback: 'slack.connected.disconnectFailed' })}
           confirmLabel={t('slack.connected.confirm.confirm')}
+          pendingLabel={t('slack.connected.confirm.pending')}
           cancelLabel={t('slack.connected.confirm.cancel')}
           pending={disconnectMutation.isPending}
           onConfirm={() => disconnectMutation.mutate()}

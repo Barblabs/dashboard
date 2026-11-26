@@ -62,7 +62,9 @@ export function UserTable({
               <tr className={HEADER_ROW}>
                 <th className={HEADER_CELL}>{t('users.columns.email')}</th>
                 <th className={HEADER_CELL}>{t('users.columns.role')}</th>
-                <th className={HEADER_CELL} />
+                <th className={HEADER_CELL}>
+                  <span className="sr-only">{t('common.actions')}</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -71,7 +73,7 @@ export function UserTable({
                 return (
                   <tr
                     key={user.id}
-                    className={`[&:last-child>td]:border-0 ${userStatus(user) === 'disabled' ? 'opacity-50' : ''}`}
+                    className={`hover:bg-row-hover ${userStatus(user) === 'disabled' ? '*:opacity-50 contrast-more:*:opacity-100' : ''}`}
                   >
                     <td className={CELL}>
                       <UserIdentity user={user} isSelf={isSelf} />
@@ -95,7 +97,7 @@ export function UserTable({
             return (
               <li
                 key={user.id}
-                className={`flex flex-col gap-3 rounded-lg border border-border-panel bg-white p-4 text-[0.875rem] text-navy ${userStatus(user) === 'disabled' ? 'opacity-50' : ''}`}
+                className={`flex flex-col gap-3 rounded-lg border border-border-panel bg-white p-4 text-[0.875rem] text-navy ${userStatus(user) === 'disabled' ? '*:opacity-50 contrast-more:*:opacity-100' : ''}`}
               >
                 <UserIdentity user={user} isSelf={isSelf} />
                 <div className="flex items-center justify-between gap-2">
@@ -152,7 +154,7 @@ function UserActions({
       <button
         type="button"
         aria-label={t('users.actions.editRole')}
-        className="cursor-pointer rounded-md p-1.5 text-gray transition-colors hover:bg-panel hover:text-navy focus-ring"
+        className="cursor-pointer rounded-md p-1.5 text-gray transition-colors duration-150 ease-[ease] hover:bg-panel hover:text-navy focus-ring"
         onClick={() => onEditRole(user)}
       >
         <PencilIcon />
@@ -161,7 +163,7 @@ function UserActions({
         type="button"
         aria-label={t('users.actions.disable')}
         disabled={isSelf}
-        className="cursor-pointer rounded-md p-1.5 text-critical transition-colors hover:bg-critical/10 focus-ring disabled:cursor-not-allowed disabled:opacity-30"
+        className="cursor-pointer rounded-md p-1.5 text-critical transition-colors duration-150 ease-[ease] enabled:hover:bg-critical/10 focus-ring disabled:cursor-not-allowed disabled:opacity-45"
         onClick={() => onDisable(user)}
       >
         <BanIcon />

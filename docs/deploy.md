@@ -1,6 +1,6 @@
 # Despliegue (S3 + CloudFront)
 
-Cada push a `main` que pasa el check `ci` (build, lint y test) ejecuta el job
+Cada push a `main` que pasa el check `ci` (build, lint, knip y test) ejecuta el job
 `deploy` de `.github/workflows/ci.yml`: compila con los valores del
 environment `production`, sube `dist/` al bucket y crea una invalidación de
 `/index.html`. `dev` nunca despliega. El job está fuera del check `ci`, así que

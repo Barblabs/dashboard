@@ -112,7 +112,7 @@ describe('Closing a finding by hand', () => {
     await user.click(within(close).getByRole('button', { name: 'Close finding' }))
     await waitFor(() => expect(closedFindingsStore.load()).toHaveLength(1))
 
-    expect(within(close).getByRole('button', { name: 'Close finding' })).toHaveAttribute('aria-busy', 'true')
+    expect(within(close).getByRole('button', { name: 'Closing…' })).toHaveAttribute('aria-busy', 'true')
     release()
     expect(await within(dialog).findByRole('button', { name: 'Reopen' })).toBeInTheDocument()
   })

@@ -94,7 +94,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         {user && (
           <div className="flex flex-col gap-2 border-t border-white/10 pt-3">
             <div className="flex min-w-0 flex-col gap-0.5">
-              <p className="truncate font-body text-[0.8125rem] leading-[1.4] text-nav-text">
+              <p title={user.email} className="truncate font-body text-[0.8125rem] leading-[1.4] text-nav-text">
                 {user.email}
               </p>
               <p className="font-body text-[0.8125rem] leading-[1.4] text-nav-text-dim">

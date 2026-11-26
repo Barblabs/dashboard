@@ -23,10 +23,10 @@ export function FindingsPreview() {
       <table className="w-full table-fixed border-collapse text-[0.8125rem]">
         <thead>
           <tr className={HEADER_ROW}>
-            <th className={`${HEADER_CELL} w-[55%] pl-5 sm:w-[28%] lg:w-[42%] xl:w-[28%]`}>{t('findings.columns.cve')}</th>
+            <th className={`${HEADER_CELL} w-[55%] pl-5 sm:w-[26%] lg:w-[42%] xl:w-[26%]`}>{t('findings.columns.cve')}</th>
             <th className={`${HEADER_CELL} hidden sm:table-cell lg:hidden xl:table-cell`}>{t('findings.columns.component')}</th>
-            <th className={`${HEADER_CELL} w-[22%] max-sm:hidden`}>{t('findings.columns.asset')}</th>
-            <th className={`${HEADER_CELL} pr-5 sm:w-[24%]`}>{t('findings.columns.score')}</th>
+            <th className={`${HEADER_CELL} w-[18%] max-sm:hidden`}>{t('findings.columns.asset')}</th>
+            <th className={`${HEADER_CELL} pr-5 sm:w-[23%]`}>{t('findings.columns.score')}</th>
           </tr>
         </thead>
         <tbody>

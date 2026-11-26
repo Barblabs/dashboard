@@ -73,7 +73,7 @@ describe('Areas', () => {
     expect(queries).toEqual(['all', 'true'])
     expect(screen.getByText('2 areas')).toBeInTheDocument()
     expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual([
-      'Area', 'Owner', 'Status', '',
+      'Area', 'Owner', 'Status', 'Actions',
     ])
     expect(areaNames()).toEqual(['Data Platform', 'Infrastructure'])
     expect(screen.getByRole('row', { name: /Infrastructure/ })).toHaveTextContent(

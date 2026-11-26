@@ -1,10 +1,10 @@
+import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFailedDeliveriesQuery, useRetryFailedDeliveriesMutation } from '../../api/slack'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Message } from '../../components/ui/Message'
-import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { CELL, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
+import { Card } from '../../components/ui/Card'
 import { requestErrorText } from '../../i18n/errors'
 import { useDateFormat } from '../../i18n/format'
 import { useCanEdit } from '../../auth/permissions'
@@ -20,6 +20,7 @@ export function SlackFailedDeliveries() {
   const { t } = useTranslation()
   const formatDate = useDateFormat()
   const canEdit = useCanEdit()
+  const titleId = useId()
   const query = useFailedDeliveriesQuery()
   const retry = useRetryFailedDeliveriesMutation()
 
@@ -27,10 +28,10 @@ export function SlackFailedDeliveries() {
   const retrying = retry.isPending
 
   return (
-    <section>
+    <Card aria-labelledby={titleId}>
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border-panel px-6 pt-5 pb-4">
         <div className="flex items-baseline gap-3">
-          <h2 className="font-title text-[1rem] text-navy">{t('slack.deliveries.title')}</h2>
+          <h2 id={titleId} className="font-title text-[1rem] text-navy">{t('slack.deliveries.title')}</h2>
           {query.isSuccess && (
             <span className="font-body text-[0.8125rem] text-gray">
               {t('slack.deliveries.count', { count: deliveries.length })}
@@ -45,7 +46,7 @@ export function SlackFailedDeliveries() {
             loading={retrying}
             onClick={() => retry.mutate()}
           >
-            {t('slack.deliveries.retryAll')}
+            {retrying ? t('slack.deliveries.retrying') : t('slack.deliveries.retryAll')}
           </Button>
         )}
       </div>
@@ -70,52 +71,34 @@ export function SlackFailedDeliveries() {
           rows.length === 0 ? (
             <Message>{t('slack.deliveries.empty')}</Message>
           ) : (
-            <div className="animate-fade-in overflow-x-auto">
-              <table className="w-full border-collapse text-[0.875rem]">
-                <thead>
-                  <tr className={HEADER_ROW}>
-                    <th className={HEADER_CELL}>{t('slack.deliveries.columns.target')}</th>
-                    <th className={HEADER_CELL}>{t('slack.deliveries.columns.kind')}</th>
-                    <th className={HEADER_CELL}>{t('slack.deliveries.columns.attempts')}</th>
-                    <th className={HEADER_CELL}>{t('slack.deliveries.columns.created')}</th>
-                    <th className={HEADER_CELL}>{t('slack.deliveries.columns.code')}</th>
-                    <th className={HEADER_CELL}>{t('slack.deliveries.columns.error')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((delivery) => {
-                    const code = delivery.failure_code ?? 'slack_error'
-                    const codeKey = slackCodeKey(code)
-                    return (
-                      <tr key={`${delivery.target}-${delivery.created_at}`} className="hover:bg-row-hover">
-                        <td className={CELL}>
-                          <span className="block font-medium">{delivery.target}</span>
-                        </td>
-                        <td className={CELL}>
-                          <span className="font-mono text-[0.8125rem]">{delivery.target_kind}</span>
-                        </td>
-                        <td className={CELL}>{delivery.attempts}</td>
-                        <td className={CELL}>{formatDate(delivery.created_at)}</td>
-                        <td className={CELL}>
-                          <div className="flex flex-col gap-0.5">
-                            <Badge variant="muted">{codeKey ? t(codeKey) : code}</Badge>
-                            <span className="font-mono text-[0.6875rem] text-gray">{code}</span>
-                          </div>
-                        </td>
-                        <td className={CELL}>
-                          <span className="font-mono text-[0.8125rem] text-gray">
-                            {delivery.last_error ?? '-'}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <ul className="animate-fade-in font-body text-[0.875rem] text-navy">
+              {rows.map((delivery) => {
+                const code = delivery.failure_code ?? 'slack_error'
+                const codeKey = slackCodeKey(code)
+                return (
+                  <li
+                    key={`${delivery.target}-${delivery.created_at}`}
+                    className="flex flex-col gap-1 border-t border-border-row px-6 py-4 first:border-t-0"
+                  >
+                    <span className="flex flex-wrap items-baseline gap-x-2">
+                      <span className="font-semibold break-all">{delivery.target}</span>
+                      <span className="font-mono text-[0.8125rem] text-gray">{delivery.target_kind}</span>
+                    </span>
+                    <span className="text-[0.8125rem] text-gray">
+                      {t('slack.deliveries.attempts', { count: delivery.attempts })} ·{' '}
+                      {formatDate(delivery.created_at)}
+                    </span>
+                    {codeKey && <span>{t(codeKey)}</span>}
+                    <span className="font-mono text-[0.75rem] break-all text-gray">
+                      {delivery.last_error ? `${code}: ${delivery.last_error}` : code}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
           )
         }
       </QueryBoundary>
-    </section>
+    </Card>
   )
 }

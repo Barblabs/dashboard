@@ -98,6 +98,7 @@ export function ConnectedBar({ source, onEdit, readOnly = false }: Props) {
           text={t('config.connected.confirm.text')}
           error={requestErrorText(disconnectMutation.error, t, { fallback: 'config.connected.disconnectFailed' })}
           confirmLabel={t('config.connected.confirm.confirm')}
+          pendingLabel={t('config.connected.confirm.pending')}
           cancelLabel={t('config.connected.confirm.cancel')}
           pending={disconnectMutation.isPending}
           onConfirm={() => disconnectMutation.mutate()}

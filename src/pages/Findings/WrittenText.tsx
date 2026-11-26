@@ -80,7 +80,7 @@ export function ClampedText({ text }: { text: string }) {
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="focus-ring cursor-pointer self-start rounded-sm font-body text-[0.8125rem] font-semibold text-nav-active-bg hover:underline"
+        className="focus-ring cursor-pointer self-start rounded-sm font-body text-[0.875rem] font-semibold text-nav-active-bg hover:underline"
       >
         {open ? t('findings.detail.showLess') : t('findings.detail.readMore', { count: rest })}
       </button>

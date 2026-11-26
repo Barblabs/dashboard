@@ -7,7 +7,7 @@ export function Fab({ label, onClick }: { label: string; onClick: () => void }) 
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="fixed right-[calc(2rem+env(safe-area-inset-right))] bottom-[calc(2rem+env(safe-area-inset-bottom))] z-floating cursor-pointer flex size-14 items-center justify-center rounded-full bg-navy text-white shadow-lg transition-transform hover:scale-105 focus-ring"
+      className="fixed right-[calc(2rem+env(safe-area-inset-right))] bottom-[calc(2rem+env(safe-area-inset-bottom))] z-floating cursor-pointer flex size-14 items-center justify-center rounded-full bg-navy text-white shadow-lg transition-[opacity,scale] duration-150 ease-[ease] hover:opacity-88 motion-safe:active:scale-[0.97] focus-ring"
     >
       <PlusIcon />
     </button>

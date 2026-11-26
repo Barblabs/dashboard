@@ -78,7 +78,8 @@ describe('Business context', () => {
     expect(screen.getByText('shoes.example')).toBeInTheDocument()
 
     await user.click(screen.getByRole('tab', { name: /Risk/ }))
-    await user.selectOptions(screen.getByLabelText('Risk appetite'), 'Cautious: accept some risk for clear benefits')
+    await user.selectOptions(screen.getByLabelText('Risk appetite'), 'Cautious')
+    expect(screen.getByLabelText('Risk appetite')).toHaveAccessibleDescription('Accept some risk for clear benefits.')
 
     await user.click(save)
 

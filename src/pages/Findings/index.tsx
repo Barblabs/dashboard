@@ -42,7 +42,7 @@ export function FindingsPage() {
   return (
     <Page title={t('findings.title')} subtitle={t('findings.subtitle')}>
       <Tabs value={tab} onValueChange={changeTab}>
-        <TabList label={t('findings.tabs.label')}>
+        <TabList label={t('findings.tabs.label')} flush>
           <Tab value="prioritized">{t('findings.tabs.prioritized')}</Tab>
           <Tab value="closed">{t('findings.tabs.closed')}</Tab>
         </TabList>
@@ -78,7 +78,7 @@ function PrioritizedTabContent() {
     setParams((prev) => {
       const next = new URLSearchParams(prev)
       next.delete(key)
-      if (key === 'ids' || key === 'asset' || key === 'criticality' || key === 'area') next.delete('from')
+      if (key === 'ids') next.delete('from')
       if (!hasActiveFilters(parseFilters(next))) next.delete('from')
       return next
     })
@@ -86,7 +86,7 @@ function PrioritizedTabContent() {
   const clearFilters = () =>
     setParams((prev) => {
       const next = new URLSearchParams(prev)
-      for (const k of ['band', 'exposure', 'criticality', 'asset', 'area', 'status', 'kev', 'q', 'from', 'ids']) next.delete(k)
+      for (const k of ['band', 'exposure', 'status', 'kev', 'q', 'from', 'ids']) next.delete(k)
       return next
     })
 
@@ -171,26 +171,28 @@ function OrderContent({
 
   return (
     <>
-      <p className="flex flex-wrap gap-x-3 gap-y-1 font-body text-[0.875rem] text-gray">
-        <span>{t('findings.summary.updated', { date: formatDate(prioritization.created_at) })}</span>
-        <span aria-hidden="true">·</span>
-        <span>
-          {prioritization.business_context_version === null
-            ? t('findings.summary.noBusinessContext')
-            : t('findings.summary.businessContext', {
-                version: prioritization.business_context_version,
-              })}
-        </span>
-      </p>
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-5">
+        <p className="flex flex-wrap gap-x-3 gap-y-1 font-body text-[0.875rem] text-gray">
+          <span>{t('findings.summary.updated', { date: formatDate(prioritization.created_at) })}</span>
+          <span aria-hidden="true">·</span>
+          <span>
+            {prioritization.business_context_version === null
+              ? t('findings.summary.noBusinessContext')
+              : t('findings.summary.businessContext', {
+                  version: prioritization.business_context_version,
+                })}
+          </span>
+        </p>
 
-      <FilterChips
-        filters={filters}
-        totalCount={prioritization.findings.length}
-        filteredCount={filteredSet.size}
-        onRemove={onRemoveChip}
-        onClearAll={onClearAll}
-        lastRunAt={formatDate(prioritization.created_at)}
-      />
+        <FilterChips
+          filters={filters}
+          totalCount={prioritization.findings.length}
+          filteredCount={filteredSet.size}
+          onRemove={onRemoveChip}
+          onClearAll={onClearAll}
+          lastRunAt={formatDate(prioritization.created_at)}
+        />
+      </div>
 
       {filteredGroups.map((group) => (
         <GroupPanel key={group.position} order={order} group={group} onOpen={onOpen} />

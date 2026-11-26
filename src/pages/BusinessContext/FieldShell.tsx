@@ -35,6 +35,7 @@ export function Shell({ id, label, help, error, aside, suggested, readOnly, hide
         )}
         {children}
         {hideLabel && aside && <div className="self-end">{aside}</div>}
+        {help && <p className="font-body text-[0.75rem] leading-[1.4] text-gray">{help}</p>}
       </div>
     )
   }
@@ -80,6 +81,6 @@ export function Shown({ value }: { value: string }) {
   return value.trim() ? (
     <p className="whitespace-pre-wrap font-body text-[0.9375rem] leading-[1.5] text-navy">{value}</p>
   ) : (
-    <p className="font-body text-[0.9375rem] text-muted-bg">{EMPTY}</p>
+    <p className="font-body text-[0.9375rem] text-gray">{EMPTY}</p>
   )
 }

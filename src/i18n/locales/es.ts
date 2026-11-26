@@ -10,6 +10,7 @@ export const es: Translations = {
     hidePassword: 'Ocultar contraseña',
     chartError: 'No se pudo mostrar esta sección.',
     infoTip: 'Acerca de {{title}}',
+    actions: 'Acciones',
   },
   sidebar: {
     superAdmin: 'Super Admin',
@@ -95,9 +96,6 @@ export const es: Translations = {
       retry: 'Reintentar',
     },
   },
-  placeholder: {
-    comingSoon: 'Próximamente',
-  },
   dashboard: {
     title: 'Resumen',
     subtitle: 'Un resumen de tus hallazgos.',
@@ -109,6 +107,7 @@ export const es: Translations = {
       growing: 'Los hallazgos abiertos están subiendo',
       steady: 'Los hallazgos abiertos se mantienen',
       tooShort: 'La tendencia aparece después de tu segunda semana.',
+      now: 'Ahora',
       chart: 'Hallazgos abiertos al final de cada semana desde el {{start}}: {{first}} entonces, {{highest}} como máximo, {{last}} ahora',
     },
     startHere: {
@@ -121,8 +120,8 @@ export const es: Translations = {
       title: 'Vuelven pronto',
       finding: '{{cve}} en {{asset}}',
       setAside: '{{reason}} por {{by}} · vuelve el {{date}}',
-      more_one: '{{count}} más',
-      more_other: '{{count}} más',
+      more_one: '{{count}} más en Cierres manuales',
+      more_other: '{{count}} más en Cierres manuales',
       none: 'Nada de lo apartado vuelve en los próximos 30 días.',
     },
     tabs: {
@@ -243,7 +242,7 @@ export const es: Translations = {
       closed: 'Cierres manuales',
     },
     filter: {
-      search: 'Buscar CVE, componente o activo',
+      search: 'Buscar CVE, componente o activo…',
       band: 'Nivel de riesgo',
       exposure: 'Exposición',
       status: 'Estado',
@@ -267,20 +266,15 @@ export const es: Translations = {
     },
     chips: {
       fromChart: 'Desde la gráfica:',
-      fromDashboard: 'Desde el dashboard:',
       fromChartRun: 'Mostrando la última actualización ({{date}})',
       band: 'Nivel de riesgo: {{value}}',
       exposure: 'Exposición: {{value}}',
-      criticality: 'Criticidad: {{value}}',
-      asset: 'Activo: {{value}}',
-      area: 'Área: {{value}}',
-      areaNoArea: 'Sin área',
       status: 'Estado: {{value}}',
       kev: 'Solo KEV',
       text: '"{{value}}"',
       matrix_one: '{{count}} hallazgo de la matriz',
       matrix_other: '{{count}} hallazgos de la matriz',
-      remove: 'Quitar filtro',
+      remove: 'Quitar {{value}}',
       clearAll: 'Quitar todos',
     },
     count: {
@@ -337,6 +331,7 @@ export const es: Translations = {
     },
     close: {
       action: 'Cerrar hallazgo',
+      closing: 'Cerrando…',
       title: 'Cerrar {{cve}}',
       reason: 'Motivo',
       reopenAt: 'Se reabre después del',
@@ -355,6 +350,7 @@ export const es: Translations = {
       text: 'Vuelve a contar como abierto y toma su lugar en la siguiente actualización del orden.',
       cancel: 'Cancelar',
       confirm: 'Sí, reabrir',
+      pending: 'Reabriendo…',
       failed: 'No se pudo reabrir el hallazgo.',
     },
     closedByHand: {
@@ -372,7 +368,6 @@ export const es: Translations = {
       reason: 'Motivo',
       closed: 'Cerrado',
       reopensOn: 'Se reabre el',
-      actions: 'Acciones',
     },
     errors: {
       notFound: 'Este hallazgo ya no existe.',
@@ -381,7 +376,6 @@ export const es: Translations = {
     detail: {
       placed: 'Colocado {{date}}',
       closedOn: 'Cerrado {{date}}',
-      onThisFinding: 'En este hallazgo',
       readMore_one: 'Leer {{count}} párrafo más',
       readMore_other: 'Leer {{count}} párrafos más',
       showLess: 'Mostrar menos',
@@ -406,11 +400,9 @@ export const es: Translations = {
         threats: 'Cómo lo atacarían',
         advisories: 'Avisos de fabricantes',
         plan: 'Plan de acción',
-        feedback: 'Retroalimentación',
         history: 'Historial de priorización',
       },
       why: {
-        evidence: 'Evidencia',
         contextEvidence: 'De tu contexto empresarial',
       },
       score: {
@@ -551,7 +543,6 @@ export const es: Translations = {
       },
       feedback: {
         empty: 'Nadie ha dicho nada de este hallazgo todavía.',
-        verdict: '¿Qué opinas?',
         question: '¿Está bien en este lugar?',
         history_one: 'Lo que se ha dicho ({{count}})',
         history_other: 'Lo que se ha dicho ({{count}})',
@@ -580,8 +571,9 @@ export const es: Translations = {
       coverageLabel: '{{labeled}} de {{open}} hallazgos abiertos tienen etiqueta ATT&CK',
       emptyTactics: 'Sin hallazgos: {{tactics}}',
       heatmapTitle: 'Hallazgos por táctica',
+      tactic: 'Táctica',
       heatmapHelp:
-        'Las columnas son tácticas de MITRE ATT&CK, la etapa de un ataque a la que ayuda cada técnica (acceso inicial, ejecución, escalada de privilegios, exfiltración, etc.), en el orden en que suele avanzar un ataque. Las filas son los niveles de riesgo.\n\nUn hallazgo cuenta una vez en cada táctica de sus técnicas, así que las columnas pueden sumar más que el total de hallazgos. Entre más oscura la celda, más hallazgos tiene.\n\nLas tácticas sin hallazgos se listan debajo de la tabla.',
+        'Las filas son tácticas de MITRE ATT&CK, la etapa de un ataque a la que ayuda cada técnica (acceso inicial, ejecución, escalada de privilegios, exfiltración, etc.), en el orden en que suele avanzar un ataque. Las columnas son los niveles de riesgo.\n\nUn hallazgo cuenta una vez en cada táctica de sus técnicas, así que las filas pueden sumar más que el total de hallazgos. Entre más oscura la celda, más hallazgos tiene.\n\nLas tácticas sin hallazgos se listan debajo de la tabla.',
       tacticLabel: {
         reconnaissance: 'Reconocimiento',
         'resource-development': 'Recursos',
@@ -664,8 +656,6 @@ export const es: Translations = {
     period: 'Noticias del {{period}}',
     picker: {
       label: 'Edición',
-      option_one: '{{period}}, {{count}} noticia',
-      option_other: '{{period}}, {{count}} noticias',
       named_one: '{{count}} los nombra',
       named_other: '{{count}} los nombran',
     },
@@ -680,7 +670,7 @@ export const es: Translations = {
       named: {
         title: 'Los nombran a ustedes',
         description: 'La víctima es su organización: su dominio o su marca, en la noticia o en un sitio de filtración.',
-        short: 'Los nombran',
+        short: 'Su nombre',
       },
       finding: {
         title: 'Mencionan vulnerabilidades abiertas en sus activos',
@@ -770,6 +760,7 @@ export const es: Translations = {
     changeRole: {
       title: 'Cambiar rol',
       save: 'Guardar',
+      saving: 'Guardando…',
     },
     disable: {
       title: 'Deshabilitar usuario',
@@ -781,6 +772,7 @@ export const es: Translations = {
     confirm: {
       text: 'Este usuario ya no podrá iniciar sesión. ¿Continuar?',
       confirm: 'Sí, deshabilitar',
+      pending: 'Deshabilitando…',
       cancel: 'Cancelar',
     },
   },
@@ -813,6 +805,7 @@ export const es: Translations = {
       title: 'Renombrar organización',
       label: 'Nombre',
       save: 'Guardar',
+      saving: 'Guardando…',
       cancel: 'Cancelar',
       failed: 'No se pudo renombrar la organización.',
     },
@@ -820,6 +813,7 @@ export const es: Translations = {
       title: 'Desactivar organización',
       body: 'Los usuarios de esta organización ya no podrán iniciar sesión.',
       confirm: 'Sí, desactivar',
+      pending: 'Desactivando…',
       cancel: 'Cancelar',
       failed: 'No se pudo desactivar la organización.',
     },
@@ -832,6 +826,7 @@ export const es: Translations = {
       step1: {
         title: 'Nueva organización',
         label: 'Nombre de la organización',
+        cancel: 'Cancelar',
         next: 'Siguiente',
         required: 'El nombre es obligatorio.',
       },
@@ -867,7 +862,6 @@ export const es: Translations = {
       title: 'Organizaciones',
       help:
         'Cada organización cliente con su estado, cuántos usuarios habilitados tiene (contando a los invitados que aún no entran), si tiene una CMDB conectada y hace cuánto terminó su última sincronización exitosa.\n\nSi la sincronización más reciente falló, debajo aparece en rojo la fecha del fallo, y los activos y hallazgos de esa organización pueden estar desactualizados hasta que vuelva a sincronizar. Esta vista nunca muestra los activos ni los hallazgos de los clientes.',
-      empty: 'Aún no hay organizaciones.',
       name: 'Nombre',
       status: 'Estado',
       users: 'Usuarios',
@@ -1085,6 +1079,7 @@ export const es: Translations = {
       confirm: {
         text: 'Esta acción desconectará el CMDB. Los activos sincronizados se conservan, marcados como inactivos. ¿Continuar?',
         confirm: 'Sí, desconectar',
+        pending: 'Desconectando…',
         cancel: 'Cancelar',
       },
     },
@@ -1319,6 +1314,7 @@ export const es: Translations = {
         save: 'Guardar',
         saving: 'Guardando…',
         remove: 'Quitar dueño',
+        removing: 'Quitando…',
         cancel: 'Cancelar',
         invalidEmail: 'Ingresa un correo válido.',
         saveFailed: 'No se pudo guardar el dueño.',
@@ -1371,7 +1367,6 @@ export const es: Translations = {
       notSet: 'Sin asignar',
       help: 'Es obligatorio para completar la conexión. Agrega la app al canal, o Slack rechaza las entregas.',
       select: 'Selecciona un canal…',
-      loading: 'Cargando canales…',
       loadFailed: 'No se pudo cargar la lista de canales.',
       changeFailed: 'No se pudo guardar el canal. Inténtalo de nuevo.',
       viewer: 'El administrador debe elegir el canal. Contáctalo para terminar la configuración.',
@@ -1380,7 +1375,6 @@ export const es: Translations = {
       badge: 'Slack conectado',
       needsReauth: 'Slack revocó la autorización. Reauthoriza para retomar las entregas.',
       reauthorise: 'Reautorizar',
-      reauthorised: 'Slack reautorizado.',
       actions: {
         disconnect: 'Desconectar',
         test: 'Probar mensaje',
@@ -1389,12 +1383,11 @@ export const es: Translations = {
       testSucceeded: 'Mensaje de prueba enviado a {{channel}}.',
       testSucceededNoChannel: 'Mensaje de prueba enviado.',
       testFailed: 'No se pudo enviar el mensaje de prueba.',
-      testFailedWith: 'El mensaje de prueba falló: {{code}}',
-      testNetwork: 'No se pudo alcanzar Slack para enviar el mensaje. Inténtalo en un momento.',
       disconnectFailed: 'No se pudo desconectar Slack.',
       confirm: {
         text: 'Esto desconectará la app de Slack. Las entregas se detendrán hasta reconectarla. ¿Continuar?',
         confirm: 'Sí, desconectar',
+        pending: 'Desconectando…',
         cancel: 'Cancelar',
       },
     },
@@ -1410,14 +1403,8 @@ export const es: Translations = {
       retrying: 'Reintentando…',
       retrySucceeded: 'Devolvió {{count}} entregas a la cola.',
       retryFailed: 'No se pudieron reintentar las entregas.',
-      columns: {
-        target: 'Destino',
-        kind: 'Tipo de destino',
-        attempts: 'Intentos',
-        created: 'Creado',
-        code: 'Código de fallo',
-        error: 'Detalle',
-      },
+      attempts_one: '{{count}} intento',
+      attempts_other: '{{count}} intentos',
     },
     codes: {
       owner_unreachable: 'Slack no reconoce a este destinatario.',
@@ -1436,7 +1423,6 @@ export const es: Translations = {
       slackError: 'Slack rechazó la petición.',
       unavailable: 'No se pudo alcanzar Slack. Inténtalo en un momento.',
       invalidState: 'El paso de autorización de Slack no es válido ya. Inicia la conexión de nuevo.',
-      internalError: 'El servidor tuvo un error interno. Inténtalo de nuevo.',
     },
   },
   businessContext: {
@@ -1476,16 +1462,17 @@ export const es: Translations = {
         label: 'Servicios críticos',
         add: 'Agregar servicio crítico',
         remove: 'Quitar servicio',
+        removeNamed: 'Quitar {{name}}',
         name: 'Servicio',
         namePlaceholder: 'p. ej. Pagos en línea',
         description: 'Qué hace',
-        descriptionPlaceholder: 'Qué hace, en una frase',
+        descriptionPlaceholder: 'Qué hace',
         assets: 'Activos que lo sostienen',
-        assetsPlaceholder: 'Activos que lo sostienen, p. ej. srv-pagos-01',
+        assetsPlaceholder: 'Activos, p. ej. srv-01',
         impact: 'Impacto si se cae',
         impactPlaceholder: 'Impacto si se cae…',
         maxDowntime: 'Tiempo máximo sin el servicio',
-        maxDowntimePlaceholder: 'Tiempo máximo sin el servicio…',
+        maxDowntimePlaceholder: 'Máximo sin servicio…',
       },
       dataCategories: 'Datos que maneja',
       regulations: 'Regulaciones y estándares',
@@ -1496,6 +1483,13 @@ export const es: Translations = {
       thirdParties: 'Terceros con acceso',
       appetite: 'Apetito de riesgo',
       appetiteHint: 'De toda la organización, como lo define la dirección.',
+      appetiteMeaning: {
+        averse: 'Evitamos riesgos aunque perdamos oportunidades.',
+        minimal: 'Solo aceptamos riesgos muy bajos.',
+        cautious: 'Aceptamos algo de riesgo si el beneficio es claro.',
+        open: 'Aceptamos riesgo para innovar o crecer.',
+        eager: 'Buscamos riesgo por mayores beneficios.',
+      },
       concerns: 'Principales preocupaciones',
       pastIncidents: { label: 'Incidentes de seguridad pasados', placeholder: 'Qué pasó y cuándo.' },
       constraints: {
@@ -1748,11 +1742,11 @@ export const es: Translations = {
         cryptojacking: 'Cryptojacking',
       },
       appetite: {
-        averse: 'Adverso: evitamos riesgos aunque perdamos oportunidades',
-        minimal: 'Mínimo: solo aceptamos riesgos muy bajos',
-        cautious: 'Cauteloso: aceptamos algo de riesgo si el beneficio es claro',
-        open: 'Abierto: aceptamos riesgo para innovar o crecer',
-        eager: 'Arriesgado: buscamos riesgo por mayores beneficios',
+        averse: 'Adverso',
+        minimal: 'Mínimo',
+        cautious: 'Cauteloso',
+        open: 'Abierto',
+        eager: 'Arriesgado',
       },
       impact: {
         critical: 'Impacto crítico',
@@ -1761,7 +1755,7 @@ export const es: Translations = {
         low: 'Impacto bajo',
       },
       downtime: {
-        under_1h: 'Aguanta menos de 1 hora',
+        under_1h: 'Aguanta < 1 hora',
         '1h_4h': 'Aguanta 1–4 horas',
         '4h_24h': 'Aguanta 4–24 horas',
         '1d_3d': 'Aguanta 1–3 días',

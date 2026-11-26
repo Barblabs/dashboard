@@ -10,6 +10,7 @@ import type {
   SaveBusinessContext,
   Section,
 } from '../../api/businessContext'
+import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { CloseIcon } from '../../components/ui/icons'
 import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
@@ -116,19 +117,19 @@ export function BusinessContextForm({
         {!started && <StartScreen readOnly={readOnly} onImport={() => onImportOpenChange(true)} onStart={onStart} />}
 
         {applied !== null && (
-          <div role="status" className="flex items-center justify-between gap-4 rounded-lg bg-cyan/10 px-4 py-2.5">
-            <p className="font-body text-[0.875rem] text-navy">
+          <Alert tone="success" className="flex items-center justify-between gap-4 py-2.5">
+            <p>
               {applied > 0 ? t('businessContext.import.applied', { count: applied }) : t('businessContext.import.nothingNew')}
             </p>
             <button
               type="button"
               aria-label={t('businessContext.import.dismiss')}
               onClick={() => setApplied(null)}
-              className="cursor-pointer rounded-sm p-1 text-gray transition-colors hover:text-navy focus-ring"
+              className="cursor-pointer rounded-sm p-1 text-gray transition-colors duration-150 ease-[ease] hover:text-navy focus-ring"
             >
               <CloseIcon />
             </button>
-          </div>
+          </Alert>
         )}
 
         {started && (

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import { useClosedFindingsQuery } from '../../api/findingCloses'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Card, CardHeader } from '../../components/ui/Card'
@@ -54,7 +55,12 @@ function Returns({ findings }: { findings: Returning[] }) {
         ))}
       </ul>
       {more > 0 && (
-        <span className="font-body text-[0.8125rem] text-gray">{t('dashboard.comingBack.more', { count: more })}</span>
+        <Link
+          to="/findings?tab=closed"
+          className="focus-ring self-start rounded-sm font-body text-[0.875rem] font-semibold text-nav-active-bg hover:underline"
+        >
+          {t('dashboard.comingBack.more', { count: more })}
+        </Link>
       )}
     </div>
   )

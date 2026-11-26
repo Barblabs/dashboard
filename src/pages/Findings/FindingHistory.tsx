@@ -16,10 +16,10 @@ import { requestErrorText } from '../../i18n/errors'
 import { useDateFormat } from '../../i18n/format'
 import { scorePoints } from './score'
 import { META } from './styles'
+import { WrittenText } from './WrittenText'
 
 /** The history reads at the size of the reason it explains, not of the notes around it. */
 const ENTRY_TEXT = 'font-body text-[0.9375rem] leading-[1.5]'
-import { WrittenText } from './WrittenText'
 
 type Movement = 'up' | 'down' | 'same'
 
@@ -115,7 +115,6 @@ function standingOf(rank: number, order: OrderRange): Standing {
   return 'matches'
 }
 
-
 /**
  * Where its Score alone would put it against where the order put it. The Score shows here
  * unless what changed already says how it moved.
@@ -208,7 +207,7 @@ export function FindingHistory({ findingId, newestReasonShown }: { findingId: st
   if (history.isError) {
     return (
       <div className="flex flex-wrap items-center gap-3">
-        <p className={`${META} text-high`}>
+        <p className={`${META} text-critical`}>
           {requestErrorText(history.error, t, {
             fallback: 'findings.detail.history.failed',
             network: 'findings.detail.history.network',
@@ -278,7 +277,7 @@ function Entry({ entry, offerReason }: { entry: HistoryEntry; offerReason: boole
               type="button"
               aria-expanded={open}
               onClick={() => setOpen((o) => !o)}
-              className="focus-ring flex cursor-pointer items-center gap-1 self-start rounded-sm font-body text-[0.9375rem] font-semibold text-nav-active-bg hover:underline"
+              className="focus-ring flex cursor-pointer items-center gap-1 self-start rounded-sm font-body text-[0.875rem] font-semibold text-nav-active-bg hover:underline"
             >
               <ChevronRightIcon
                 className={`shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none ${open ? 'rotate-90' : ''}`}

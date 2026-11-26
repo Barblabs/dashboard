@@ -53,7 +53,7 @@ export function SheetHeader({ title, eyebrow }: { title: ReactNode; eyebrow?: Re
       </div>
       <Dialog.Close
         aria-label={t('common.close')}
-        className="focus-ring mt-1 cursor-pointer rounded-sm p-1.5 text-gray transition-colors duration-150 hover:text-navy"
+        className="focus-ring mt-1 cursor-pointer rounded-sm p-1.5 text-gray transition-colors duration-150 ease-[ease] hover:text-navy"
       >
         <CloseIcon size={12} />
       </Dialog.Close>

@@ -5,8 +5,8 @@ import { useCriticalServicesQuery, type CriticalServiceHealth } from '../../api/
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge, type BadgeVariant } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { Card } from '../../components/ui/Card'
-import { useLocale } from '../../i18n/format'
+import { Card, CardHeader } from '../../components/ui/Card'
+import { useListFormat } from '../../i18n/format'
 
 const TEXT_LINK = 'focus-ring rounded-sm font-body font-semibold text-nav-active-bg hover:underline'
 
@@ -24,10 +24,7 @@ export function CriticalServices() {
   const query = useCriticalServicesQuery()
   return (
     <Card aria-labelledby={titleId}>
-      <div className="flex flex-col gap-1 border-b border-border-panel px-6 py-4">
-        <h2 id={titleId} className="font-title text-[1rem] text-navy">{t('dashboard.services.title')}</h2>
-        <p className="font-body text-[0.8125rem] text-gray">{t('dashboard.services.rule')}</p>
-      </div>
+      <CardHeader id={titleId} title={t('dashboard.services.title')} subtitle={t('dashboard.services.rule')} />
       <QueryBoundary
         query={query}
         keys={{ loading: 'dashboard.loading', failed: 'dashboard.failed', network: 'dashboard.network' }}
@@ -82,7 +79,7 @@ function ServiceList({ services }: { services: CriticalServiceHealth[] }) {
 
 function ServiceRow({ service }: { service: CriticalServiceHealth }) {
   const { t } = useTranslation()
-  const locale = useLocale()
+  const formatList = useListFormat()
   return (
     <li className="flex flex-col gap-0.5">
       <span className="flex flex-wrap items-center gap-2">
@@ -95,7 +92,7 @@ function ServiceRow({ service }: { service: CriticalServiceHealth }) {
       {service.unmatched_assets.length > 0 && (
         <span className="font-body text-[0.8125rem] text-gray [overflow-wrap:anywhere]">
           {t('dashboard.services.unmatched', {
-            names: new Intl.ListFormat(locale, { type: 'conjunction' }).format(service.unmatched_assets),
+            names: formatList(service.unmatched_assets),
           })}
         </span>
       )}

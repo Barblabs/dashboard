@@ -31,16 +31,28 @@ export const MOCK_CUSTOMER_STATS = [
   },
 ]
 
-const SYNC_DAYS = [
-  { date: '2026-11-15', succeeded: 2, failed: 0 },
-  { date: '2026-11-14', succeeded: 1, failed: 1 },
-  { date: '2026-11-13', succeeded: 2, failed: 0 },
-  { date: '2026-11-12', succeeded: 2, failed: 0 },
-  { date: '2026-11-11', succeeded: 1, failed: 1 },
-  { date: '2026-11-10', succeeded: 2, failed: 0 },
-  { date: '2026-11-09', succeeded: 2, failed: 0 },
-  { date: '2026-11-08', succeeded: 1, failed: 1 },
+// Syncs that finished n days before today, newest first.
+const SYNCS_BY_DAYS_AGO = [
+  { succeeded: 2, failed: 0 },
+  { succeeded: 1, failed: 1 },
+  { succeeded: 2, failed: 0 },
+  { succeeded: 2, failed: 0 },
+  { succeeded: 1, failed: 1 },
+  { succeeded: 2, failed: 0 },
+  { succeeded: 2, failed: 0 },
+  { succeeded: 1, failed: 1 },
 ]
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
+function syncDays(days: number) {
+  const today = Date.now()
+  return Array.from({ length: days }, (_, i) => {
+    const daysAgo = days - 1 - i
+    const date = new Date(today - daysAgo * DAY_MS).toISOString().slice(0, 10)
+    return { date, ...(SYNCS_BY_DAYS_AGO[daysAgo] ?? { succeeded: 0, failed: 0 }) }
+  })
+}
 
 const SLACK_DELIVERIES = [
   { id: 'customer-1', name: 'Acme Corp', sent: 10, failed: 1, pending: 0 },
@@ -52,8 +64,8 @@ export const adminStatsHandlers = [
   http.get(apiUrl('/customers/stats'), () =>
     HttpResponse.json({ customers: MOCK_CUSTOMER_STATS }),
   ),
-  http.get(apiUrl('/customers/sync-health'), () =>
-    HttpResponse.json({ days: SYNC_DAYS }),
+  http.get(apiUrl('/customers/sync-health'), ({ request }) =>
+    HttpResponse.json({ days: syncDays(Number(new URL(request.url).searchParams.get('days') ?? 30)) }),
   ),
   http.get(apiUrl('/customers/slack-deliveries'), () =>
     HttpResponse.json({ customers: SLACK_DELIVERIES }),

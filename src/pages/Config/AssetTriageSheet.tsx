@@ -200,7 +200,8 @@ function AssetStep({ asset: opened, queue }: { asset: Asset; queue?: QueueStep }
    * response that lands last would otherwise bring back the other field as it was before.
    */
   const [asset, setAsset] = useState(opened)
-  const exposureMutation = useExposureMutation({ onSaved: useNotRescoredToast() })
+  const notRescoredToast = useNotRescoredToast()
+  const exposureMutation = useExposureMutation({ onSaved: notRescoredToast })
   const informationClassificationMutation = useInformationClassificationMutation()
 
   const exposure = useDeclarationSection(
@@ -532,7 +533,7 @@ function ChoiceCards<V extends string>({ name, legend, options, value, onChange,
       {options.map((option) => (
         <label
           key={option.value}
-          className="flex cursor-pointer items-start gap-2.5 rounded-md border border-border-panel bg-white px-3 py-2.5 transition-[border-color,background-color] duration-150 ease-out hover:border-navy/50 has-checked:border-navy has-checked:bg-navy/[0.03] has-disabled:cursor-not-allowed has-disabled:opacity-60 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-navy"
+          className="flex cursor-pointer items-start gap-3 rounded-md border border-border-panel bg-white px-3 py-2.5 transition-[border-color,background-color] duration-150 ease-[ease] not-has-disabled:hover:border-navy/50 has-checked:border-navy has-checked:bg-navy/4 has-disabled:cursor-not-allowed has-disabled:opacity-60 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-navy"
         >
           <input
             type="radio"
@@ -540,11 +541,11 @@ function ChoiceCards<V extends string>({ name, legend, options, value, onChange,
             value={option.value}
             checked={value === option.value}
             onChange={() => onChange(option.value)}
-            className="mt-0.5 size-3.5 accent-navy outline-none"
+            className="mt-0.5 size-4 shrink-0 accent-navy outline-none"
           />
-          <span className="flex flex-col font-body leading-[1.35]">
+          <span className="flex flex-col gap-0.5 font-body">
             <span className="text-[0.875rem] font-semibold text-navy">{option.label}</span>
-            <span className="text-[0.75rem] text-gray">{option.help}</span>
+            <span className="text-[0.75rem] leading-[1.4] text-gray">{option.help}</span>
           </span>
         </label>
       ))}

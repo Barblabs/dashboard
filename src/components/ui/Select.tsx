@@ -6,7 +6,7 @@ import { ChevronDownIcon } from './icons'
 // The native arrow can't be positioned, so it is hidden and drawn as an icon with its own inset.
 // As tall as an Input, so a select beside a text field or a filter MultiSelect lines up with it.
 const SELECT =
-  `${FIELD_SURFACE} h-11 cursor-pointer appearance-none pr-9 pl-3 text-base md:text-[0.875rem] focus:border-navy disabled:cursor-not-allowed disabled:bg-panel disabled:text-gray aria-invalid:border-critical`
+  `${FIELD_SURFACE} h-11 cursor-pointer appearance-none pr-9 pl-3 text-base md:text-[0.9375rem] focus:border-navy disabled:cursor-not-allowed disabled:bg-panel disabled:text-gray aria-invalid:border-critical`
 
 /*
  * Rendered through Base UI's field control, like Input: inside a Field its label and help

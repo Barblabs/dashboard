@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useValidationText } from '../../i18n/validation'
 import { z } from 'zod'
-import { useInviteUserMutation, type UserResponse } from '../../api/users'
+import { CUSTOMER_ROLES, useInviteUserMutation, type UserResponse } from '../../api/users'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { DialogLayout } from '../../components/ui/Dialog'
@@ -17,7 +17,7 @@ import { RoleOptions } from './RoleOptions'
 
 const inviteSchema = z.object({
   email: z.string().trim().min(1, 'users.invite.email.required').pipe(z.email('users.invite.email.invalid')),
-  role: z.enum(['customer_admin', 'viewer']),
+  role: z.enum(CUSTOMER_ROLES),
 })
 type InviteFields = z.infer<typeof inviteSchema>
 
