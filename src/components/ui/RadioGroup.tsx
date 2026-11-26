@@ -38,7 +38,7 @@ export function RadioGroup<T extends string>({ label, value, onValueChange, opti
           return (
             <label
               key={option.value}
-              className="flex cursor-pointer items-start gap-3 rounded-md border border-border-panel px-3 py-2.5 transition-[border-color,background-color] duration-150 ease-[ease] has-data-checked:border-navy has-data-checked:bg-navy/4 has-data-disabled:cursor-not-allowed has-data-disabled:opacity-60"
+              className="flex cursor-pointer items-start gap-3 rounded-md border border-border-panel px-3 py-2.5 transition-[border-color,background-color] duration-150 ease-[ease] not-has-data-disabled:hover:border-navy/50 has-data-checked:border-navy has-data-checked:bg-navy/4 has-data-disabled:cursor-not-allowed has-data-disabled:opacity-60"
             >
               <Radio.Root
                 value={option.value}
