@@ -62,7 +62,9 @@ export function UserTable({
               <tr className={HEADER_ROW}>
                 <th className={HEADER_CELL}>{t('users.columns.email')}</th>
                 <th className={HEADER_CELL}>{t('users.columns.role')}</th>
-                <th className={HEADER_CELL} />
+                <th className={HEADER_CELL}>
+                  <span className="sr-only">{t('common.actions')}</span>
+                </th>
               </tr>
             </thead>
             <tbody>

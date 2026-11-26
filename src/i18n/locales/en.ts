@@ -8,6 +8,7 @@ export const en = {
     hidePassword: 'Hide password',
     chartError: 'This section could not be displayed.',
     infoTip: 'About {{title}}',
+    actions: 'Actions',
   },
   sidebar: {
     superAdmin: 'Super Admin',
@@ -363,7 +364,6 @@ export const en = {
       reason: 'Reason',
       closed: 'Closed',
       reopensOn: 'Reopens on',
-      actions: 'Actions',
     },
     errors: {
       notFound: 'This finding no longer exists.',

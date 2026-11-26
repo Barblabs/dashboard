@@ -10,6 +10,7 @@ export const es: Translations = {
     hidePassword: 'Ocultar contraseña',
     chartError: 'No se pudo mostrar esta sección.',
     infoTip: 'Acerca de {{title}}',
+    actions: 'Acciones',
   },
   sidebar: {
     superAdmin: 'Super Admin',
@@ -365,7 +366,6 @@ export const es: Translations = {
       reason: 'Motivo',
       closed: 'Cerrado',
       reopensOn: 'Se reabre el',
-      actions: 'Acciones',
     },
     errors: {
       notFound: 'Este hallazgo ya no existe.',

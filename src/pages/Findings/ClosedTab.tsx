@@ -70,7 +70,7 @@ function ClosedList({ closed, onReopen }: ListProps) {
             <th className={HEADER_CELL}>{t('findings.closedList.closed')}</th>
             <th className={HEADER_CELL}>{t('findings.closedList.reopensOn')}</th>
             <th className={HEADER_CELL}>
-              <span className="sr-only">{t('findings.closedList.actions')}</span>
+              <span className="sr-only">{t('common.actions')}</span>
             </th>
           </tr>
         </thead>

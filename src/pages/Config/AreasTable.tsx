@@ -77,7 +77,11 @@ function AreaRows({ areas, onEditOwner }: AreaRowsProps) {
             <th className={HEADER_CELL}>{t('config.areas.columns.area')}</th>
             <th className={HEADER_CELL}>{t('config.areas.columns.owner')}</th>
             <th className={HEADER_CELL}>{t('config.areas.columns.status')}</th>
-            {onEditOwner && <th className={HEADER_CELL} />}
+            {onEditOwner && (
+              <th className={HEADER_CELL}>
+                <span className="sr-only">{t('common.actions')}</span>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
