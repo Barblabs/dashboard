@@ -4,7 +4,7 @@ import { isAging, useAreaHealthQuery, type AreaHealth } from '../../api/areas'
 import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
-import { Card } from '../../components/ui/Card'
+import { Card, CardHeader } from '../../components/ui/Card'
 import { CARD_EDGE, CELL, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { useListFormat } from '../../i18n/format'
 
@@ -38,12 +38,11 @@ function AreaTable({ areas, titleId }: { areas: AreaHealth[]; titleId: string })
 
   return (
     <>
-      <div className="flex flex-col gap-1 border-b border-border-panel px-6 py-4">
-        <h2 id={titleId} className="font-title text-[1rem] text-navy">
-          {flagged === 0 ? t('dashboard.areas.none') : t('dashboard.areas.title', { count: flagged })}
-        </h2>
-        <p className="font-body text-[0.8125rem] text-gray">{t('dashboard.areas.rule')}</p>
-      </div>
+      <CardHeader
+        id={titleId}
+        title={flagged === 0 ? t('dashboard.areas.none') : t('dashboard.areas.title', { count: flagged })}
+        subtitle={t('dashboard.areas.rule')}
+      />
       <div className="overflow-x-auto">
         <table className="w-full border-collapse font-body text-[0.875rem]">
           <thead>

@@ -1,16 +1,15 @@
 import { useTranslation } from 'react-i18next'
 import { useWeeklyTrendQuery, type WeeklyTrendPoint } from '../../api/findingsTrend'
 import { QueryBoundary } from '../../components/QueryBoundary'
-import { Card } from '../../components/ui/Card'
+import { Card, CardHeader } from '../../components/ui/Card'
+import { Message } from '../../components/ui/Message'
 import { useDayFormat } from '../../i18n/format'
 import { fromFirstRecord } from '../Findings/weeks'
-
-const TITLE = 'font-title text-[1rem] text-navy'
 
 export function BacklogLine() {
   const query = useWeeklyTrendQuery()
   return (
-    <Card className="flex flex-col gap-4 p-6">
+    <Card>
       <QueryBoundary
         query={query}
         keys={{ loading: 'dashboard.loading', failed: 'dashboard.failed', network: 'dashboard.network' }}
@@ -28,7 +27,7 @@ function Backlog({ weeks }: { weeks: WeeklyTrendPoint[] }) {
   const first = weeks.at(0)
   const last = weeks.at(-1)
   if (first === undefined || last === undefined || weeks.length < 2) {
-    return <p className="font-body text-[0.875rem] text-gray">{t('dashboard.backlog.tooShort')}</p>
+    return <Message>{t('dashboard.backlog.tooShort')}</Message>
   }
 
   const values = weeks.map((w) => w.open_at_end)
@@ -44,7 +43,7 @@ function Backlog({ weeks }: { weeks: WeeklyTrendPoint[] }) {
 
   return (
     <>
-      <h2 className={TITLE}>{t(`dashboard.backlog.${direction}`)}</h2>
+      <CardHeader title={t(`dashboard.backlog.${direction}`)} />
       <div
         role="img"
         aria-label={t('dashboard.backlog.chart', {
@@ -53,9 +52,9 @@ function Backlog({ weeks }: { weeks: WeeklyTrendPoint[] }) {
           highest,
           last: last.open_at_end,
         })}
-        className="px-4"
+        className="px-10 pt-10 pb-6"
       >
-        <div className="relative mt-6 h-32">
+        <div className="relative h-32">
           <svg
             className="absolute inset-0 h-full w-full overflow-visible"
             viewBox="0 0 100 100"
