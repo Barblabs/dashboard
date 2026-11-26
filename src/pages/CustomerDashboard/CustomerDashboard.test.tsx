@@ -467,7 +467,10 @@ describe('CustomerDashboard', () => {
       expect(within(rows[0]).getByText(/^Postponed by ana@test\.example · back \w{3} \d+, \d{4}$/)).toBeInTheDocument()
       expect(within(rows[1]).getByText(/^Accepted risk by ana@test\.example · back /)).toBeInTheDocument()
       // CVE-0000-0006, on day 29, is the one left out.
-      expect(within(card).getByText('1 more')).toBeInTheDocument()
+      expect(within(card).getByRole('link', { name: '1 more in Manual closures' })).toHaveAttribute(
+        'href',
+        '/findings?tab=closed',
+      )
     })
 
     it('says when nothing set aside comes back in the next 30 days', async () => {

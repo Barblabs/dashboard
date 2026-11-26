@@ -119,8 +119,8 @@ export const es: Translations = {
       title: 'Vuelven pronto',
       finding: '{{cve}} en {{asset}}',
       setAside: '{{reason}} por {{by}} · vuelve el {{date}}',
-      more_one: '{{count}} más',
-      more_other: '{{count}} más',
+      more_one: '{{count}} más en Cierres manuales',
+      more_other: '{{count}} más en Cierres manuales',
       none: 'Nada de lo apartado vuelve en los próximos 30 días.',
     },
     tabs: {
