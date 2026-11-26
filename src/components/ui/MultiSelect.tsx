@@ -47,12 +47,12 @@ export function MultiSelect({
         if (!open && details.reason === 'item-press') details.cancel()
       }}
     >
-      <Combobox.InputGroup className="flex min-h-11 w-full cursor-text flex-wrap items-center gap-1.5 rounded-md border border-border-panel bg-white px-2 py-1.5 transition-[border-color] duration-150 ease-[ease] focus-within:border-navy has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-navy data-disabled:cursor-not-allowed data-disabled:opacity-60">
+      <Combobox.InputGroup className="flex min-h-11 w-full cursor-text flex-wrap items-center gap-1.5 rounded-md border border-border-panel bg-white px-2 py-1.5 transition-[border-color] duration-150 ease-[ease] focus-within:border-navy has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-navy data-disabled:cursor-not-allowed data-disabled:bg-panel">
         <Combobox.Chips className="flex w-full flex-wrap items-center gap-1.5">
           {value.map((v) => (
             <Combobox.Chip
               key={v}
-              className="flex items-center gap-1 rounded-sm bg-panel py-0.5 pr-1 pl-2 font-body text-[0.8125rem] text-navy outline-none focus-within:bg-navy focus-within:text-white"
+              className="flex items-center gap-1 rounded-sm bg-panel py-0.5 pr-1 pl-2 font-body text-[0.8125rem] text-navy outline-none focus-within:bg-navy focus-within:text-white in-data-disabled:bg-white in-data-disabled:text-gray"
             >
               {labels.get(v) ?? v}
               <Combobox.ChipRemove
@@ -66,7 +66,7 @@ export function MultiSelect({
           <Combobox.Input
             id={id}
             placeholder={value.length > 0 ? '' : placeholder}
-            className="h-7 min-w-24 flex-1 bg-transparent px-1 font-body text-base md:text-[0.9375rem] text-navy outline-none placeholder:text-gray"
+            className="h-7 min-w-24 flex-1 bg-transparent px-1 font-body text-base md:text-[0.9375rem] text-navy outline-none placeholder:text-gray disabled:cursor-not-allowed"
           />
         </Combobox.Chips>
       </Combobox.InputGroup>
