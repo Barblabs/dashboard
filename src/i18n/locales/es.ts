@@ -671,7 +671,7 @@ export const es: Translations = {
       named: {
         title: 'Los nombran a ustedes',
         description: 'La víctima es su organización: su dominio o su marca, en la noticia o en un sitio de filtración.',
-        short: 'Los nombran',
+        short: 'Su nombre',
       },
       finding: {
         title: 'Mencionan vulnerabilidades abiertas en sus activos',

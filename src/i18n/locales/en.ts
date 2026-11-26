@@ -669,7 +669,7 @@ export const en = {
       named: {
         title: 'They name you',
         description: 'The victim is your organization: your domain or your brand, in the news or on a leak site.',
-        short: 'Name you',
+        short: 'Your name',
       },
       finding: {
         title: 'They mention vulnerabilities open on your assets',

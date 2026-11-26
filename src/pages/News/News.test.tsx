@@ -63,7 +63,7 @@ describe('News', () => {
     expect(screen.getByText('Weighed with business context v1')).toBeInTheDocument()
     const counts = screen.getByRole('list', { name: 'News by relevance' })
     expect(within(counts).getAllByRole('listitem').map((c) => c.textContent)).toEqual([
-      'Name you 1',
+      'Your name 1',
       'Open vulnerabilities 1',
       'Technology and suppliers 2',
       'Your sector 3',
