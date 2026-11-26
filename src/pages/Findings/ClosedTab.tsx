@@ -93,7 +93,7 @@ function ClosedRow({ finding, onReopen }: ItemProps) {
   const { t } = useTranslation()
   const formatDate = useDateFormat()
   return (
-    <tr>
+    <tr className="hover:bg-row-hover">
       <td className={`${CELL} ${MONO} whitespace-nowrap`}>{finding.cve_id}</td>
       <td className={CELL}>
         <span className="flex flex-col gap-0.5">
