@@ -1207,7 +1207,7 @@ const browser = await chromium.launch({ executablePath, headless: !headed })
 const PHONE = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }
 const DESKTOP = { viewport: { width: 1280, height: 900 } }
 // Nothing outside the dev server, the mocked API base and the web fonts may be reached (Slack's consent page, for one).
-const ALLOWED = [FRONT, API, 'https://fonts.googleapis.com/', 'https://fonts.gstatic.com/']
+const ALLOWED = [FRONT, API]
 
 // Fresh context = empty localStorage = fresh mock data and no session; English forced so selectors below are stable.
 async function openContext(device) {

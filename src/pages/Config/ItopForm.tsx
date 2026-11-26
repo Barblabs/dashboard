@@ -170,7 +170,7 @@ export function ItopForm({
         >
           <Input
             type="url"
-            placeholder="http://10.0.0.5:8000"
+            placeholder="http://192.0.2.10:8000"
             autoComplete="off"
             disabled={busy}
             {...register('url', { onChange: () => edit('url') })}
