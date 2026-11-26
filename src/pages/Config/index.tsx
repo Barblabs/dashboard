@@ -4,6 +4,7 @@ import { useSourceQuery, type CmdbSource } from '../../api/cmdb'
 import { useCanEdit } from '../../auth/permissions'
 import { Page } from '../../components/Page'
 import { QueryBoundary } from '../../components/QueryBoundary'
+import { Message } from '../../components/ui/Message'
 import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { ConfigStepPanel } from './ConfigStepPanel'
 import { CmdbSelector } from './CmdbSelector'
@@ -76,9 +77,9 @@ function ConfigBody({ source, readOnly }: { source: CmdbSource | null; readOnly:
 
   if (readOnly) {
     return (
-      <p className="animate-fade-in py-12 text-center font-body text-[0.9375rem] text-gray">
+      <Message className="animate-fade-in rounded-xl border border-border-panel bg-white">
         {t('config.viewer.notConnected')}
-      </p>
+      </Message>
     )
   }
 
