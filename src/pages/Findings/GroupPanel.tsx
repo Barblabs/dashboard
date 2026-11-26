@@ -23,7 +23,7 @@ interface Props {
 
 export function GroupPanel({ order, group, onOpen }: Props) {
   const { t } = useTranslation()
-  const wide = useWideLayout()
+  const wide = useWideLayout(1280)
   const findings = group.finding_ids
     .map((id) => order.prioritization.findings.find((f) => f.finding_id === id))
     .filter((f): f is Finding => f !== undefined)
