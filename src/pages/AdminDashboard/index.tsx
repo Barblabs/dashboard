@@ -172,7 +172,7 @@ function OrgsTable({ customers }: { customers: CustomerStats[] }) {
       ) : (
         <ul className="font-body text-[0.875rem]">
           {customers.map((c) => (
-            <li key={c.id} className="flex flex-col gap-3 border-t border-border-panel px-4 py-4 first:border-t-0">
+            <li key={c.id} className="flex flex-col gap-3 border-t border-border-row px-6 py-4 first:border-t-0">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="min-w-0 font-semibold wrap-anywhere text-navy">{c.name}</span>
                 <OrgStatus customer={c} />
