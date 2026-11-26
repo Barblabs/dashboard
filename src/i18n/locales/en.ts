@@ -93,9 +93,6 @@ export const en = {
       retry: 'Retry',
     },
   },
-  placeholder: {
-    comingSoon: 'Coming soon',
-  },
   dashboard: {
     title: 'Summary',
     subtitle: 'An overview of your findings.',
@@ -374,7 +371,6 @@ export const en = {
     detail: {
       placed: 'Placed {{date}}',
       closedOn: 'Closed {{date}}',
-      onThisFinding: 'On this finding',
       readMore_one: 'Read {{count}} more paragraph',
       readMore_other: 'Read {{count}} more paragraphs',
       showLess: 'Show less',
@@ -399,11 +395,9 @@ export const en = {
         threats: 'How it would be attacked',
         advisories: 'Vendor advisories',
         plan: 'Action plan',
-        feedback: 'Feedback',
         history: 'Prioritization history',
       },
       why: {
-        evidence: 'Evidence',
         contextEvidence: 'From your business context',
       },
       score: {
@@ -544,7 +538,6 @@ export const en = {
       },
       feedback: {
         empty: 'Nobody has said anything about this finding yet.',
-        verdict: 'What do you say?',
         question: 'Is it in the right place?',
         history_one: 'What was said ({{count}})',
         history_other: 'What was said ({{count}})',
@@ -1363,7 +1356,6 @@ export const en = {
       notSet: 'Not set',
       help: 'Required to finish the connection. Add the app to the channel, or Slack refuses deliveries.',
       select: 'Select a channel…',
-      loading: 'Loading channels…',
       loadFailed: 'Could not load the channel list.',
       changeFailed: 'Could not save the channel. Try again.',
       viewer: 'The admin chooses the channel. Contact them to finish the setup.',
@@ -1372,7 +1364,6 @@ export const en = {
       badge: 'Slack connected',
       needsReauth: 'Slack authorization was revoked. Re-authorise to resume deliveries.',
       reauthorise: 'Re-authorise',
-      reauthorised: 'Slack re-authorised.',
       actions: {
         disconnect: 'Disconnect',
         test: 'Send test',
@@ -1381,8 +1372,6 @@ export const en = {
       testSucceeded: 'Test message sent to {{channel}}.',
       testSucceededNoChannel: 'Test message sent.',
       testFailed: 'Could not send the test message.',
-      testFailedWith: 'The test message failed: {{code}}',
-      testNetwork: 'Could not reach Slack to send the test. Try again in a moment.',
       disconnectFailed: 'Could not disconnect the Slack installation.',
       confirm: {
         text: 'This will disconnect the Slack app. Deliveries stop until it is reconnected. Continue?',
@@ -1399,7 +1388,6 @@ export const en = {
       loadFailed: 'Could not load the failed deliveries.',
       networkError: 'Could not reach the server to load the failed deliveries.',
       retryAll: 'Retry all',
-      retrying: 'Retrying…',
       retrySucceeded: 'Returned {{count}} deliveries to the queue.',
       retryFailed: 'Could not retry the deliveries.',
       columns: {
@@ -1428,7 +1416,6 @@ export const en = {
       slackError: 'Slack refused the request.',
       unavailable: 'Slack could not be reached. Try again in a moment.',
       invalidState: 'The Slack authorization step is no longer valid. Start the connection again.',
-      internalError: 'The server had an internal error. Try again.',
     },
   },
   businessContext: {
