@@ -1466,6 +1466,7 @@ export const en = {
         label: 'Critical services',
         add: 'Add critical service',
         remove: 'Remove service',
+        removeNamed: 'Remove {{name}}',
         name: 'Service',
         namePlaceholder: 'e.g. Online payments',
         description: 'What it does',

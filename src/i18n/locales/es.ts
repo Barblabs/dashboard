@@ -1469,6 +1469,7 @@ export const es: Translations = {
         label: 'Servicios críticos',
         add: 'Agregar servicio crítico',
         remove: 'Quitar servicio',
+        removeNamed: 'Quitar {{name}}',
         name: 'Servicio',
         namePlaceholder: 'p. ej. Pagos en línea',
         description: 'Qué hace',

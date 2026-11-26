@@ -70,14 +70,7 @@ export function CriticalServices() {
                 hideLabel
               />
             </div>
-            <button
-              type="button"
-              aria-label={t('businessContext.fields.criticalServices.remove')}
-              onClick={() => remove(index)}
-              className="mt-2.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-gray hover:bg-panel hover:text-critical focus-ring"
-            >
-              <CloseIcon size={12} />
-            </button>
+            <RemoveServiceButton index={index} onRemove={() => remove(index)} />
           </div>
         ),
       )}
@@ -91,6 +84,26 @@ export function CriticalServices() {
         </button>
       )}
     </div>
+  )
+}
+
+function RemoveServiceButton({ index, onRemove }: { index: number; onRemove: () => void }) {
+  const { t } = useTranslation()
+  const { control } = useFormContext<BusinessContextFields>()
+  const name = useWatch({ control, name: `operations.critical_services.${index}.name` }).trim()
+  return (
+    <button
+      type="button"
+      aria-label={
+        name
+          ? t('businessContext.fields.criticalServices.removeNamed', { name })
+          : t('businessContext.fields.criticalServices.remove')
+      }
+      onClick={onRemove}
+      className="mt-2.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-gray transition-colors duration-150 ease-[ease] hover:bg-panel hover:text-critical focus-ring"
+    >
+      <CloseIcon size={12} />
+    </button>
   )
 }
 
