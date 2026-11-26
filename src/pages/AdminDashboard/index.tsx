@@ -99,7 +99,7 @@ function StatsRow({ customers, days }: { customers: CustomerStats[]; days: SyncD
   const failedSyncs = days.reduce((s, d) => s + d.failed, 0)
 
   return (
-    <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <dl className="grid grid-cols-2 gap-6 lg:grid-cols-4">
       <StatCard
         label={t('adminDashboard.stats.organizations')}
         value={active + deactivated}
