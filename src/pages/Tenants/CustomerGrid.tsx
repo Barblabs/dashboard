@@ -56,7 +56,7 @@ function CustomerCard({
               type="button"
               aria-label={t('tenants.actions.reactivate')}
               disabled={reactivate.isPending}
-              className="cursor-pointer rounded-md p-1.5 text-navy transition-colors hover:bg-panel focus-ring disabled:cursor-not-allowed disabled:opacity-30"
+              className="cursor-pointer rounded-md p-1.5 text-navy transition-colors enabled:hover:bg-panel focus-ring disabled:cursor-not-allowed disabled:opacity-45"
               onClick={() => reactivate.mutate(customer.id)}
             >
               <RestoreIcon />

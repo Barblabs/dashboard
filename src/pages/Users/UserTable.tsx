@@ -161,7 +161,7 @@ function UserActions({
         type="button"
         aria-label={t('users.actions.disable')}
         disabled={isSelf}
-        className="cursor-pointer rounded-md p-1.5 text-critical transition-colors hover:bg-critical/10 focus-ring disabled:cursor-not-allowed disabled:opacity-30"
+        className="cursor-pointer rounded-md p-1.5 text-critical transition-colors enabled:hover:bg-critical/10 focus-ring disabled:cursor-not-allowed disabled:opacity-45"
         onClick={() => onDisable(user)}
       >
         <BanIcon />
