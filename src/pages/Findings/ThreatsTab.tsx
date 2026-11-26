@@ -7,6 +7,7 @@ import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { Message } from '../../components/ui/Message'
 import { CARD_EDGE, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { QueryBoundary } from '../../components/QueryBoundary'
+import { EMPTY } from '../../i18n/format'
 import { BAND_COLORS, BANDS, type Band } from './bands'
 
 // ── constants ─────────────────────────────────────────────────────────────────
@@ -203,7 +204,7 @@ function HeatmapGrid({ tactics: all }: { tactics: TacticCount[] }) {
                           tactic: tacticLabels[tac.tactic] ?? tac.tactic,
                         })}
                       >
-                        {count === 0 ? '–' : count}
+                        {count === 0 ? EMPTY : count}
                       </div>
                     </td>
                   )

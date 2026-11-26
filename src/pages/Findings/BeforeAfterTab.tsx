@@ -8,6 +8,7 @@ import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { InfoTip } from '../../components/ui/InfoTip'
 import { CARD_EDGE, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { QueryBoundary } from '../../components/QueryBoundary'
+import { EMPTY } from '../../i18n/format'
 import { Message } from '../../components/ui/Message'
 import { Modal } from '../../components/ui/Modal'
 import { buildMatrix } from './beforeAfterAlgorithm'
@@ -212,7 +213,7 @@ function MatrixGrid({
                           : undefined
                       }
                     >
-                      {count === 0 ? '–' : count}
+                      {count === 0 ? EMPTY : count}
                     </div>
                   </td>
                 )
