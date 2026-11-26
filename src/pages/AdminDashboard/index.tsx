@@ -152,7 +152,7 @@ function OrgsTable({ customers }: { customers: CustomerStats[] }) {
           </thead>
           <tbody>
             {customers.map((c) => (
-              <tr key={c.id} className="border-t border-border-row hover:bg-panel">
+              <tr key={c.id} className="border-t border-border-row hover:bg-row-hover">
                 <td className={`px-4 py-3 font-semibold text-navy ${CARD_EDGE}`}>{c.name}</td>
                 <td className={`px-4 py-3 ${CARD_EDGE}`}>
                   <OrgStatus customer={c} />

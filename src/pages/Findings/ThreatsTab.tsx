@@ -264,7 +264,7 @@ function TechniquesTable({ techniques }: { techniques: TechniqueCount[] }) {
       </thead>
       <tbody>
         {techniques.map((tc) => (
-          <tr key={tc.attack_id} className="border-t border-border-row hover:bg-panel">
+          <tr key={tc.attack_id} className="border-t border-border-row hover:bg-row-hover">
             <td className={`px-4 py-2 font-mono text-[0.8125rem] font-semibold text-navy ${CARD_EDGE}`}>{tc.attack_id}</td>
             <td className={`px-4 py-2 text-navy ${CARD_EDGE}`}>{tc.name}</td>
             <td className={`px-4 py-2 font-body text-[0.75rem] text-gray ${CARD_EDGE}`}>{tc.tactics.join(', ')}</td>
