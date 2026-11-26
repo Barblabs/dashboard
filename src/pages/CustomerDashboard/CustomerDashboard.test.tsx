@@ -275,6 +275,27 @@ describe('CustomerDashboard', () => {
       expect(within(card).queryByText(/closed/)).not.toBeInTheDocument()
     })
 
+    it('says the count failed to load, and loads it on Retry', async () => {
+      let failed = false
+      server.use(
+        http.get(apiUrl('/findings/summary'), () => {
+          if (failed) return undefined
+          failed = true
+          return HttpResponse.json({ code: 'internal_error', error: 'boom' }, { status: 500 })
+        }),
+      )
+      const user = renderApp('/dashboard')
+      const card = await openCard()
+
+      const alert = await within(card).findByRole('alert')
+      expect(alert).toHaveTextContent('The server had an internal error. Try again.')
+
+      await user.click(within(alert).getByRole('button', { name: 'Retry' }))
+
+      expect(await within(card).findByText('23')).toBeInTheDocument()
+      expect(within(card).queryByRole('alert')).not.toBeInTheDocument()
+    })
+
     it('forgets the counts of a CMDB once it is disconnected', async () => {
       seedSource()
       const user = renderApp('/dashboard')
