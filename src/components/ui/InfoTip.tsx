@@ -23,7 +23,7 @@ export function InfoTip({ title, text }: { title: string; text: string }) {
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner className="z-popover outline-none" side="bottom" align="start" sideOffset={6} collisionPadding={16}>
-          <Popover.Popup className="flex w-max max-w-[min(24rem,var(--available-width))] origin-[var(--transform-origin)] flex-col gap-2 rounded-lg border border-border-panel bg-white p-4 font-body text-[0.8125rem] leading-relaxed text-navy shadow-lg outline-none transition-[scale,opacity] duration-150 data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0">
+          <Popover.Popup className="flex w-max max-w-[min(24rem,var(--available-width))] origin-[var(--transform-origin)] flex-col gap-2 rounded-lg border border-border-panel bg-white p-4 font-body text-[0.8125rem] leading-relaxed text-navy shadow-lg outline-none transition-[scale,opacity] duration-150 ease-out data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0">
             <Popover.Title render={<p />} className="font-semibold">
               {title}
             </Popover.Title>

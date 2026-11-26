@@ -195,7 +195,7 @@ function MatrixGrid({
                 return (
                   <td key={agIdx} className="py-1 text-center">
                     <div
-                      className={`mx-auto flex h-10 w-10 items-center justify-center rounded-lg font-body ${count > 0 ? 'font-semibold' : ''} ${textColorClass} ${clickable ? 'focus-ring cursor-pointer transition-[filter] duration-150 hover:brightness-90' : ''}`}
+                      className={`mx-auto flex h-10 w-10 items-center justify-center rounded-lg font-body ${count > 0 ? 'font-semibold' : ''} ${textColorClass} ${clickable ? 'focus-ring cursor-pointer transition-[filter] duration-150 ease-[ease] hover:brightness-90' : ''}`}
                       style={{ backgroundColor: bg, boxShadow }}
                       aria-label={t('findings.beforeAfter.cellLabel', { count, sg: sgIdx + 1, ag: agIdx + 1 })}
                       title={clickable ? t('findings.beforeAfter.cellClickable', { count }) : undefined}

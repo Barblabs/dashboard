@@ -73,7 +73,7 @@ export function MultiSelect({
 
       <Combobox.Portal>
         <Combobox.Positioner className="z-popover outline-none" sideOffset={6}>
-          <Combobox.Popup className="max-h-[min(var(--available-height),18rem)] w-[var(--anchor-width)] max-w-[var(--available-width)] origin-[var(--transform-origin)] overflow-y-auto overscroll-contain rounded-lg border border-border-panel bg-white py-1 shadow-lg transition-[scale,opacity] duration-150 data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0">
+          <Combobox.Popup className="max-h-[min(var(--available-height),18rem)] w-[var(--anchor-width)] max-w-[var(--available-width)] origin-[var(--transform-origin)] overflow-y-auto overscroll-contain rounded-lg border border-border-panel bg-white py-1 shadow-lg transition-[scale,opacity] duration-150 ease-out data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0">
             <Combobox.Empty>
               <p className="px-3 py-2 font-body text-[0.875rem] text-gray">{emptyText}</p>
             </Combobox.Empty>
