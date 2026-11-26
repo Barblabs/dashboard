@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useAttackMatrixQuery } from '../../api/attackMatrix'
 import type { TacticCount, TechniqueCount } from '../../api/attackMatrix'
+import { Badge } from '../../components/ui/Badge'
 import { Card, CardHeader } from '../../components/ui/Card'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { CARD_EDGE, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
@@ -268,14 +269,13 @@ function TechniquesTable({ techniques }: { techniques: TechniqueCount[] }) {
             <td className={`px-4 py-2 text-navy ${CARD_EDGE}`}>{tc.name}</td>
             <td className={`px-4 py-2 font-body text-[0.75rem] text-gray ${CARD_EDGE}`}>{tc.tactics.join(', ')}</td>
             <td className={`px-4 py-2 ${CARD_EDGE}`}>
-              {tc.roles.map((r) => (
-                <span
-                  key={r}
-                  className="mr-1 inline-block rounded bg-panel px-1.5 py-0.5 font-body text-[0.75rem] whitespace-nowrap text-navy"
-                >
-                  {roleLabels[r] ?? r}
-                </span>
-              ))}
+              <div className="flex flex-wrap gap-1">
+                {tc.roles.map((r) => (
+                  <Badge key={r} variant="muted">
+                    {roleLabels[r] ?? r}
+                  </Badge>
+                ))}
+              </div>
             </td>
             <td className={`px-4 py-2 text-right ${CARD_EDGE}`}>
               <div className="flex items-center justify-end gap-2">
