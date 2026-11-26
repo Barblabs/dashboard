@@ -48,7 +48,7 @@ export function matchesFinding(f: Finding, filters: FindingsFilters): boolean {
     )
       return false
   }
-  if (band && currentScoreDetails(f).band !== band) return false
+  if (band && (currentScoreDetails(f).band ?? 'unbanded') !== band) return false
   if (exposure) {
     const eff = f.current?.asset.exposure ?? f.details.asset.exposure
     if (eff !== exposure) return false
