@@ -70,7 +70,7 @@ export function TagField({ name, label, placeholder, hideLabel, suggestions, can
                 type="button"
                 aria-label={t('businessContext.remove', { value: entry })}
                 onClick={() => onChange(value.filter((v) => v !== entry))}
-                className="flex size-4 cursor-pointer items-center justify-center rounded-xs text-gray hover:bg-border-panel hover:text-navy focus-ring"
+                className="flex size-4 cursor-pointer items-center justify-center rounded-xs text-gray transition-colors duration-150 ease-[ease] hover:bg-border-panel hover:text-navy focus-ring"
               >
                 <CloseIcon />
               </button>

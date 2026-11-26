@@ -57,7 +57,7 @@ export function MultiSelect({
               {labels.get(v) ?? v}
               <Combobox.ChipRemove
                 aria-label={removeLabel(labels.get(v) ?? v)}
-                className="flex size-4 cursor-pointer items-center justify-center rounded-xs text-gray hover:bg-border-panel hover:text-navy"
+                className="flex size-4 cursor-pointer items-center justify-center rounded-xs text-gray transition-colors duration-150 ease-[ease] hover:bg-border-panel hover:text-navy"
               >
                 <CloseIcon />
               </Combobox.ChipRemove>
