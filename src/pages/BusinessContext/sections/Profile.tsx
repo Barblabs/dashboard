@@ -15,7 +15,7 @@ export function Profile() {
         rows={4}
       />
       <MultiSelectField name="profile.sectors" vocab="sectors" label={t('businessContext.fields.sectors')} />
-      <div className="grid gap-5 md:grid-cols-3">
+      <div className="grid gap-5 lg:grid-cols-3">
         <SelectField
           name="profile.organization_type"
           vocab="organizationTypes"

@@ -26,8 +26,8 @@ export function CriticalServices() {
           <ShownService key={item.id} index={index} />
         ) : (
           <div key={item.id} className="flex items-start gap-3 rounded-lg border border-border-panel p-3">
-            <div className="grid min-w-0 flex-1 gap-2 md:grid-cols-4">
-              <div className="md:col-span-2">
+            <div className="grid min-w-0 flex-1 gap-2 lg:grid-cols-2">
+              <div>
                 <TextField
                   name={`operations.critical_services.${index}.name`}
                   label={t('businessContext.fields.criticalServices.name')}
@@ -37,7 +37,7 @@ export function CriticalServices() {
                   className="font-semibold"
                 />
               </div>
-              <div className="md:col-span-2">
+              <div>
                 <TagField
                   name={`operations.critical_services.${index}.assets`}
                   label={t('businessContext.fields.criticalServices.assets')}
@@ -46,7 +46,7 @@ export function CriticalServices() {
                   hideLabel
                 />
               </div>
-              <div className="md:col-span-2">
+              <div className="lg:col-span-2">
                 <TextField
                   name={`operations.critical_services.${index}.description`}
                   label={t('businessContext.fields.criticalServices.description')}
