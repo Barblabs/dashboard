@@ -1488,6 +1488,13 @@ export const es: Translations = {
       thirdParties: 'Terceros con acceso',
       appetite: 'Apetito de riesgo',
       appetiteHint: 'De toda la organización, como lo define la dirección.',
+      appetiteMeaning: {
+        averse: 'Evitamos riesgos aunque perdamos oportunidades.',
+        minimal: 'Solo aceptamos riesgos muy bajos.',
+        cautious: 'Aceptamos algo de riesgo si el beneficio es claro.',
+        open: 'Aceptamos riesgo para innovar o crecer.',
+        eager: 'Buscamos riesgo por mayores beneficios.',
+      },
       concerns: 'Principales preocupaciones',
       pastIncidents: { label: 'Incidentes de seguridad pasados', placeholder: 'Qué pasó y cuándo.' },
       constraints: {
@@ -1740,11 +1747,11 @@ export const es: Translations = {
         cryptojacking: 'Cryptojacking',
       },
       appetite: {
-        averse: 'Adverso: evitamos riesgos aunque perdamos oportunidades',
-        minimal: 'Mínimo: solo aceptamos riesgos muy bajos',
-        cautious: 'Cauteloso: aceptamos algo de riesgo si el beneficio es claro',
-        open: 'Abierto: aceptamos riesgo para innovar o crecer',
-        eager: 'Arriesgado: buscamos riesgo por mayores beneficios',
+        averse: 'Adverso',
+        minimal: 'Mínimo',
+        cautious: 'Cauteloso',
+        open: 'Abierto',
+        eager: 'Arriesgado',
       },
       impact: {
         critical: 'Impacto crítico',

@@ -35,6 +35,7 @@ export function Shell({ id, label, help, error, aside, suggested, readOnly, hide
         )}
         {children}
         {hideLabel && aside && <div className="self-end">{aside}</div>}
+        {help && <p className="font-body text-[0.75rem] leading-[1.4] text-gray">{help}</p>}
       </div>
     )
   }

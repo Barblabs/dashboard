@@ -1485,6 +1485,13 @@ export const en = {
       thirdParties: 'Third parties with access',
       appetite: 'Risk appetite',
       appetiteHint: 'For the whole organization, as leadership sets it.',
+      appetiteMeaning: {
+        averse: 'Avoid risk even at the cost of opportunities.',
+        minimal: 'Accept only the lowest risks.',
+        cautious: 'Accept some risk for clear benefits.',
+        open: 'Accept risk for innovation or growth.',
+        eager: 'Seek risk for higher rewards.',
+      },
       concerns: 'Main concerns',
       pastIncidents: { label: 'Past security incidents', placeholder: 'What happened and when.' },
       constraints: {
@@ -1737,11 +1744,11 @@ export const en = {
         cryptojacking: 'Cryptojacking',
       },
       appetite: {
-        averse: 'Averse: avoid risk even at the cost of opportunities',
-        minimal: 'Minimal: accept only the lowest risks',
-        cautious: 'Cautious: accept some risk for clear benefits',
-        open: 'Open: accept risk for innovation or growth',
-        eager: 'Eager: seek risk for higher rewards',
+        averse: 'Averse',
+        minimal: 'Minimal',
+        cautious: 'Cautious',
+        open: 'Open',
+        eager: 'Eager',
       },
       impact: {
         critical: 'Critical impact',
