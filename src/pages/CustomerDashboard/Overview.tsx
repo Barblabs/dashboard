@@ -10,12 +10,12 @@ export function Overview() {
   return (
     <div className="flex flex-col gap-6">
       <HeadlineCards />
-      <div className="grid items-start gap-6 lg:grid-cols-[3fr_2fr]">
+      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
         <BacklogLine />
         <ClosesPanel />
       </div>
       <AreasNeedingHelp />
-      <div className="grid items-start gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         <StartHere />
         <CriticalServices />
         <ComingBackSoon />
