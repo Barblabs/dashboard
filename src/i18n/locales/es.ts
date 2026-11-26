@@ -241,7 +241,7 @@ export const es: Translations = {
       closed: 'Cierres manuales',
     },
     filter: {
-      search: 'Buscar CVE, componente o activo',
+      search: 'Buscar CVE, componente o activo…',
       band: 'Nivel de riesgo',
       exposure: 'Exposición',
       status: 'Estado',

@@ -239,7 +239,7 @@ export const en = {
       closed: 'Manual closures',
     },
     filter: {
-      search: 'Search CVE, component or asset',
+      search: 'Search CVE, component or asset…',
       band: 'Risk level',
       exposure: 'Exposure',
       status: 'Status',
