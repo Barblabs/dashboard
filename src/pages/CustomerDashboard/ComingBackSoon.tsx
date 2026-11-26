@@ -57,7 +57,7 @@ function Returns({ findings }: { findings: Returning[] }) {
       {more > 0 && (
         <Link
           to="/findings?tab=closed"
-          className="focus-ring self-start rounded-sm font-body text-[0.8125rem] font-semibold text-nav-active-bg hover:underline"
+          className="focus-ring self-start rounded-sm font-body text-[0.875rem] font-semibold text-nav-active-bg hover:underline"
         >
           {t('dashboard.comingBack.more', { count: more })}
         </Link>
