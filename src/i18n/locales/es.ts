@@ -856,7 +856,6 @@ export const es: Translations = {
       title: 'Organizaciones',
       help:
         'Cada organización cliente con su estado, cuántos usuarios habilitados tiene (contando a los invitados que aún no entran), si tiene una CMDB conectada y hace cuánto terminó su última sincronización exitosa.\n\nSi la sincronización más reciente falló, debajo aparece en rojo la fecha del fallo, y los activos y hallazgos de esa organización pueden estar desactualizados hasta que vuelva a sincronizar. Esta vista nunca muestra los activos ni los hallazgos de los clientes.',
-      empty: 'Aún no hay organizaciones.',
       name: 'Nombre',
       status: 'Estado',
       users: 'Usuarios',

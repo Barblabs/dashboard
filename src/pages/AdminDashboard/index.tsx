@@ -138,7 +138,7 @@ function OrgsTable({ customers }: { customers: CustomerStats[] }) {
     <Card>
       <CardHeader title={t('adminDashboard.orgsTable.title')} help={t('adminDashboard.orgsTable.help')} />
       {customers.length === 0 ? (
-        <p className="p-6 font-body text-[0.875rem] text-gray">{t('adminDashboard.orgsTable.empty')}</p>
+        <Message>{t('tenants.empty')}</Message>
       ) : wide ? (
         <table className="w-full border-collapse font-body text-[0.875rem]">
           <thead>

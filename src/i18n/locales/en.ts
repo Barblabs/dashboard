@@ -854,7 +854,6 @@ export const en = {
       title: 'Organizations',
       help:
         'Each customer organization with its status, how many enabled users it has (counting those invited who have not signed in yet), whether it has a CMDB connected and how long ago its last successful sync finished.\n\nWhen the most recent sync failed, its date shows in red underneath, and the organization’s assets and findings may be out of date until syncing works again. This view never shows any customer’s assets or findings.',
-      empty: 'No organizations yet.',
       name: 'Name',
       status: 'Status',
       users: 'Users',
