@@ -35,3 +35,11 @@ Si falta alguna, el job falla antes de compilar y lista las que faltan.
   responder `/index.html` con status 200 ante errores 403 y 404 (custom error
   responses); si no, abrir `/tenants` directamente falla.
 - La app se sirve desde la raíz de la distribución (Vite usa `base: '/'`).
+- **Cabeceras de seguridad**: la distribución tiene una response headers
+  policy (`aws_cloudfront_response_headers_policy.dashboard` en
+  `runtime/frontend.tf` de barbinfra) con CSP, HSTS, `X-Frame-Options`,
+  `X-Content-Type-Options` y `Referrer-Policy`. La CSP solo permite el propio
+  origen, la API y el endpoint de Cognito: si la app empieza a cargar o llamar
+  a otro origen (fuentes, imágenes, un SDK), hay que agregarlo ahí. Las fuentes
+  van en el bundle (`@fontsource`) y zod corre sin `eval` (`src/zodConfig.ts`)
+  para no necesitar `'unsafe-eval'`.
