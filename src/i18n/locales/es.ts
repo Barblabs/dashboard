@@ -571,8 +571,9 @@ export const es: Translations = {
       coverageLabel: '{{labeled}} de {{open}} hallazgos abiertos tienen etiqueta ATT&CK',
       emptyTactics: 'Sin hallazgos: {{tactics}}',
       heatmapTitle: 'Hallazgos por táctica',
+      tactic: 'Táctica',
       heatmapHelp:
-        'Las columnas son tácticas de MITRE ATT&CK, la etapa de un ataque a la que ayuda cada técnica (acceso inicial, ejecución, escalada de privilegios, exfiltración, etc.), en el orden en que suele avanzar un ataque. Las filas son los niveles de riesgo.\n\nUn hallazgo cuenta una vez en cada táctica de sus técnicas, así que las columnas pueden sumar más que el total de hallazgos. Entre más oscura la celda, más hallazgos tiene.\n\nLas tácticas sin hallazgos se listan debajo de la tabla.',
+        'Las filas son tácticas de MITRE ATT&CK, la etapa de un ataque a la que ayuda cada técnica (acceso inicial, ejecución, escalada de privilegios, exfiltración, etc.), en el orden en que suele avanzar un ataque. Las columnas son los niveles de riesgo.\n\nUn hallazgo cuenta una vez en cada táctica de sus técnicas, así que las filas pueden sumar más que el total de hallazgos. Entre más oscura la celda, más hallazgos tiene.\n\nLas tácticas sin hallazgos se listan debajo de la tabla.',
       tacticLabel: {
         reconnaissance: 'Reconocimiento',
         'resource-development': 'Recursos',

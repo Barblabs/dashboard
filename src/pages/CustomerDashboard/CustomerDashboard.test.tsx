@@ -816,16 +816,16 @@ describe('CustomerDashboard', () => {
       expect(await screen.findByText('22 of 35 open findings have an ATT&CK label')).toBeInTheDocument()
     })
 
-    it('shows every role together, a column only for the tactics some finding leads to, and names the rest', async () => {
+    it('shows every role together, a row only for the tactics some finding leads to, and names the rest', async () => {
       await openAnalysisTab()
       const matrix = (await screen.findByRole('heading', { name: 'Findings per tactic' })).closest('section')!
 
       expect(within(matrix).queryByRole('group')).not.toBeInTheDocument()
-      const columns = within(matrix).getAllByRole('columnheader').map((h) => h.textContent)
-      expect(columns).toContain('Initial Access')
-      expect(columns).toContain('Impact')
-      expect(columns).not.toContain('Exfiltration')
-      expect(columns).not.toContain('Resource Dev.')
+      const rows = within(matrix).getAllByRole('rowheader').map((h) => h.textContent)
+      expect(rows).toContain('Initial Access')
+      expect(rows).toContain('Impact')
+      expect(rows).not.toContain('Exfiltration')
+      expect(rows).not.toContain('Resource Dev.')
       expect(within(matrix).getByText('No findings: Resource Dev., Exfiltration')).toBeInTheDocument()
     })
 

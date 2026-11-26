@@ -122,7 +122,7 @@ function HeatmapCard({ tactics }: { tactics: TacticCount[] }) {
 function HeatmapGrid({ tactics: all }: { tactics: TacticCount[] }) {
   const { t } = useTranslation()
 
-  // Only the tactics some Finding leads to take a column; the rest are named in one line below.
+  // Only the tactics some Finding leads to take a row; the rest are named in one line below.
   const tactics = all.filter((tac) => BANDS.some((b) => tac[b] > 0))
   const withFindings = new Set(tactics.map((tac) => tac.tactic))
   const empty = TACTIC_ORDER.filter((tactic) => !withFindings.has(tactic))
@@ -164,56 +164,51 @@ function HeatmapGrid({ tactics: all }: { tactics: TacticCount[] }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse font-body text-[0.875rem]">
-          <thead>
-            <tr>
-              <th className="pb-3 pr-4 text-left text-[0.75rem] font-normal text-gray">
-                {t('findings.filter.band')}
-              </th>
-              {tactics.map((tac) => (
-                <th key={tac.tactic} className="pb-3 px-1 text-center text-[0.6875rem] font-semibold text-navy">
-                  {tacticLabels[tac.tactic] ?? tac.tactic}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
+      <table className="w-full max-w-2xl border-collapse font-body text-[0.875rem]">
+        <thead>
+          <tr>
+            <th className="pb-3 pr-2 text-left align-bottom text-[0.75rem] font-normal text-gray">
+              {t('findings.threats.tactic')}
+            </th>
             {activeBands.map((band) => (
-              <tr key={band}>
-                <td className="py-1 pr-4">
-                  <span className="flex items-center gap-1.5 font-body text-[0.75rem] font-semibold text-navy">
-                    <span
-                      className="inline-block h-2 w-2 shrink-0 rounded-sm"
-                      style={{ backgroundColor: BAND_COLORS[band] }}
-                    />
-                    {bandLabels[band]}
-                  </span>
-                </td>
-                {tactics.map((tac) => {
-                  const count = tac[band]
-                  const level = heatLevel(count)
-                  return (
-                    <td key={tac.tactic} className="px-1 py-1 text-center">
-                      <div
-                        className={`mx-auto flex h-8 w-8 items-center justify-center rounded-md font-body text-[0.75rem] ${count > 0 ? 'font-semibold' : ''} ${cellText(level)}`}
-                        style={{ backgroundColor: cellBg(level) }}
-                        aria-label={t('findings.threats.cellLabel', {
-                          count,
-                          band: bandLabels[band],
-                          tactic: tacticLabels[tac.tactic] ?? tac.tactic,
-                        })}
-                      >
-                        {count === 0 ? EMPTY : count}
-                      </div>
-                    </td>
-                  )
-                })}
-              </tr>
+              <th key={band} className="px-0.5 pb-3 align-bottom text-[0.6875rem] font-semibold text-navy">
+                <span className="flex flex-col items-center gap-1">
+                  <span className="inline-block h-2 w-2 rounded-sm" style={{ backgroundColor: BAND_COLORS[band] }} />
+                  {bandLabels[band]}
+                </span>
+              </th>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </tr>
+        </thead>
+        <tbody>
+          {tactics.map((tac) => (
+            <tr key={tac.tactic}>
+              <th scope="row" className="py-1 pr-2 text-left text-[0.75rem] font-semibold text-navy">
+                {tacticLabels[tac.tactic] ?? tac.tactic}
+              </th>
+              {activeBands.map((band) => {
+                const count = tac[band]
+                const level = heatLevel(count)
+                return (
+                  <td key={band} className="px-0.5 py-1 text-center">
+                    <div
+                      className={`mx-auto flex h-8 w-8 items-center justify-center rounded-md font-body text-[0.75rem] ${count > 0 ? 'font-semibold' : ''} ${cellText(level)}`}
+                      style={{ backgroundColor: cellBg(level) }}
+                      aria-label={t('findings.threats.cellLabel', {
+                        count,
+                        band: bandLabels[band],
+                        tactic: tacticLabels[tac.tactic] ?? tac.tactic,
+                      })}
+                    >
+                      {count === 0 ? EMPTY : count}
+                    </div>
+                  </td>
+                )
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
       {empty.length > 0 && (
         <p className="font-body text-[0.875rem] text-gray">
           {t('findings.threats.emptyTactics', { tactics: empty.map((tactic) => tacticLabels[tactic]).join(', ') })}
