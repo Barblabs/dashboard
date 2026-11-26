@@ -95,9 +95,6 @@ export const es: Translations = {
       retry: 'Reintentar',
     },
   },
-  placeholder: {
-    comingSoon: 'Próximamente',
-  },
   dashboard: {
     title: 'Resumen',
     subtitle: 'Un resumen de tus hallazgos.',
@@ -267,14 +264,9 @@ export const es: Translations = {
     },
     chips: {
       fromChart: 'Desde la gráfica:',
-      fromDashboard: 'Desde el dashboard:',
       fromChartRun: 'Mostrando la última actualización ({{date}})',
       band: 'Nivel de riesgo: {{value}}',
       exposure: 'Exposición: {{value}}',
-      criticality: 'Criticidad: {{value}}',
-      asset: 'Activo: {{value}}',
-      area: 'Área: {{value}}',
-      areaNoArea: 'Sin área',
       status: 'Estado: {{value}}',
       kev: 'Solo KEV',
       text: '"{{value}}"',
@@ -381,7 +373,6 @@ export const es: Translations = {
     detail: {
       placed: 'Colocado {{date}}',
       closedOn: 'Cerrado {{date}}',
-      onThisFinding: 'En este hallazgo',
       readMore_one: 'Leer {{count}} párrafo más',
       readMore_other: 'Leer {{count}} párrafos más',
       showLess: 'Mostrar menos',
@@ -406,11 +397,9 @@ export const es: Translations = {
         threats: 'Cómo lo atacarían',
         advisories: 'Avisos de fabricantes',
         plan: 'Plan de acción',
-        feedback: 'Retroalimentación',
         history: 'Historial de priorización',
       },
       why: {
-        evidence: 'Evidencia',
         contextEvidence: 'De tu contexto empresarial',
       },
       score: {
@@ -551,7 +540,6 @@ export const es: Translations = {
       },
       feedback: {
         empty: 'Nadie ha dicho nada de este hallazgo todavía.',
-        verdict: '¿Qué opinas?',
         question: '¿Está bien en este lugar?',
         history_one: 'Lo que se ha dicho ({{count}})',
         history_other: 'Lo que se ha dicho ({{count}})',
@@ -1371,7 +1359,6 @@ export const es: Translations = {
       notSet: 'Sin asignar',
       help: 'Es obligatorio para completar la conexión. Agrega la app al canal, o Slack rechaza las entregas.',
       select: 'Selecciona un canal…',
-      loading: 'Cargando canales…',
       loadFailed: 'No se pudo cargar la lista de canales.',
       changeFailed: 'No se pudo guardar el canal. Inténtalo de nuevo.',
       viewer: 'El administrador debe elegir el canal. Contáctalo para terminar la configuración.',
@@ -1380,7 +1367,6 @@ export const es: Translations = {
       badge: 'Slack conectado',
       needsReauth: 'Slack revocó la autorización. Reauthoriza para retomar las entregas.',
       reauthorise: 'Reautorizar',
-      reauthorised: 'Slack reautorizado.',
       actions: {
         disconnect: 'Desconectar',
         test: 'Probar mensaje',
@@ -1389,8 +1375,6 @@ export const es: Translations = {
       testSucceeded: 'Mensaje de prueba enviado a {{channel}}.',
       testSucceededNoChannel: 'Mensaje de prueba enviado.',
       testFailed: 'No se pudo enviar el mensaje de prueba.',
-      testFailedWith: 'El mensaje de prueba falló: {{code}}',
-      testNetwork: 'No se pudo alcanzar Slack para enviar el mensaje. Inténtalo en un momento.',
       disconnectFailed: 'No se pudo desconectar Slack.',
       confirm: {
         text: 'Esto desconectará la app de Slack. Las entregas se detendrán hasta reconectarla. ¿Continuar?',
@@ -1407,7 +1391,6 @@ export const es: Translations = {
       loadFailed: 'No se pudieron cargar las entregas fallidas.',
       networkError: 'No se pudo alcanzar el servidor para cargar las entregas fallidas.',
       retryAll: 'Reintentar todas',
-      retrying: 'Reintentando…',
       retrySucceeded: 'Devolvió {{count}} entregas a la cola.',
       retryFailed: 'No se pudieron reintentar las entregas.',
       columns: {
@@ -1436,7 +1419,6 @@ export const es: Translations = {
       slackError: 'Slack rechazó la petición.',
       unavailable: 'No se pudo alcanzar Slack. Inténtalo en un momento.',
       invalidState: 'El paso de autorización de Slack no es válido ya. Inicia la conexión de nuevo.',
-      internalError: 'El servidor tuvo un error interno. Inténtalo de nuevo.',
     },
   },
   businessContext: {

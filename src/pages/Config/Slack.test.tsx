@@ -1,4 +1,5 @@
 import { renderApp, seedSource, seedSlackDeliveries, seedSlackInstallation, VIEWER } from '../../test/render'
+import { server } from '../../test/server'
 import type { AuthUser } from '../../auth/store'
 import { screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
@@ -40,6 +41,22 @@ describe('Slack tab', () => {
     await user.click(retry)
 
     expect(await screen.findByText('No failed deliveries.')).toBeInTheDocument()
+  })
+
+  it('disconnecting shows the not-connected state without asking for the installation again', async () => {
+    let installationReads = 0
+    server.events.on('request:start', ({ request }) => {
+      if (request.method === 'GET' && new URL(request.url).pathname === '/slack/installation') installationReads++
+    })
+    const user = renderConnected()
+    await screen.findByText('iTop connected')
+    await user.click(screen.getByRole('tab', { name: 'Slack' }))
+
+    await user.click(await screen.findByRole('button', { name: 'Disconnect' }))
+    await user.click(await screen.findByRole('button', { name: 'Yes, disconnect' }))
+
+    expect(await screen.findByRole('heading', { name: "BARBATTACK isn't delivering to Slack yet" })).toBeInTheDocument()
+    expect(installationReads).toBe(1)
   })
 
   it('says so when the browser blocks the Slack window', async () => {

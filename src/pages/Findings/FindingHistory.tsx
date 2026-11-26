@@ -16,10 +16,10 @@ import { requestErrorText } from '../../i18n/errors'
 import { useDateFormat } from '../../i18n/format'
 import { scorePoints } from './score'
 import { META } from './styles'
+import { WrittenText } from './WrittenText'
 
 /** The history reads at the size of the reason it explains, not of the notes around it. */
 const ENTRY_TEXT = 'font-body text-[0.9375rem] leading-[1.5]'
-import { WrittenText } from './WrittenText'
 
 type Movement = 'up' | 'down' | 'same'
 
@@ -114,7 +114,6 @@ function standingOf(rank: number, order: OrderRange): Standing {
   if (rank < order.from) return 'behind'
   return 'matches'
 }
-
 
 /**
  * Where its Score alone would put it against where the order put it. The Score shows here

@@ -132,17 +132,6 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
       }),
     })
   if (filters.kev) chips.push({ key: 'kev', label: t('findings.chips.kev') })
-  if (filters.criticality)
-    chips.push({ key: 'criticality', label: t('findings.chips.criticality', { value: filters.criticality }) })
-  if (filters.assetName)
-    chips.push({ key: 'asset', label: t('findings.chips.asset', { value: filters.assetName }) })
-  if (filters.area)
-    chips.push({
-      key: 'area',
-      label: t('findings.chips.area', {
-        value: filters.area === 'none' ? t('findings.chips.areaNoArea') : filters.area,
-      }),
-    })
   if (filters.ids.size > 0)
     chips.push({ key: 'ids', label: t('findings.chips.matrix', { count: filters.ids.size }) })
 
@@ -155,11 +144,7 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
 
   return (
     <div className="flex flex-wrap items-center gap-2 font-body text-[0.875rem]">
-      {(filters.fromChart || filters.fromDashboard) && chips.length > 0 && (
-        <span className="text-gray">
-          {filters.fromDashboard ? t('findings.chips.fromDashboard') : t('findings.chips.fromChart')}
-        </span>
-      )}
+      {filters.fromChart && chips.length > 0 && <span className="text-gray">{t('findings.chips.fromChart')}</span>}
       {chips.map(({ key, label }) => (
         <span
           key={key}
@@ -186,7 +171,7 @@ export function FilterChips({ filters, totalCount, filteredCount, onRemove, onCl
         </button>
       )}
       <span className="ml-auto text-gray">{countText}</span>
-      {(filters.fromChart || filters.fromDashboard) && lastRunAt && (
+      {filters.fromChart && lastRunAt && (
         <span className="w-full font-body text-[0.75rem] text-gray">
           {t('findings.chips.fromChartRun', { date: lastRunAt })}
         </span>

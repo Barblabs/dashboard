@@ -78,7 +78,7 @@ function PrioritizedTabContent() {
     setParams((prev) => {
       const next = new URLSearchParams(prev)
       next.delete(key)
-      if (key === 'ids' || key === 'asset' || key === 'criticality' || key === 'area') next.delete('from')
+      if (key === 'ids') next.delete('from')
       if (!hasActiveFilters(parseFilters(next))) next.delete('from')
       return next
     })
@@ -86,7 +86,7 @@ function PrioritizedTabContent() {
   const clearFilters = () =>
     setParams((prev) => {
       const next = new URLSearchParams(prev)
-      for (const k of ['band', 'exposure', 'criticality', 'asset', 'area', 'status', 'kev', 'q', 'from', 'ids']) next.delete(k)
+      for (const k of ['band', 'exposure', 'status', 'kev', 'q', 'from', 'ids']) next.delete(k)
       return next
     })
 

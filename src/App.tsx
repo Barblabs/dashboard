@@ -16,7 +16,6 @@ import { LandingPage } from './pages/Landing'
 import { LoginPage } from './pages/Login'
 import { NotFoundPage } from './pages/NotFound'
 import { PAGES } from './routes'
-import './i18n'
 
 const ReactQueryDevtools = import.meta.env.DEV
   ? lazy(() =>

@@ -6,7 +6,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { CELL, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { requestErrorText } from '../../i18n/errors'
-import { useDateFormat } from '../../i18n/format'
+import { EMPTY, useDateFormat } from '../../i18n/format'
 import { useCanEdit } from '../../auth/permissions'
 import { slackCodeKey } from './slackCodes'
 
@@ -104,7 +104,7 @@ export function SlackFailedDeliveries() {
                         </td>
                         <td className={CELL}>
                           <span className="font-mono text-[0.8125rem] text-gray">
-                            {delivery.last_error ?? '-'}
+                            {delivery.last_error ?? EMPTY}
                           </span>
                         </td>
                       </tr>

@@ -6,7 +6,7 @@ import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { CARD_EDGE, CELL, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
-import { useLocale } from '../../i18n/format'
+import { useListFormat } from '../../i18n/format'
 
 const ROWS = 5
 
@@ -27,7 +27,7 @@ export function AreasNeedingHelp() {
 
 function AreaTable({ areas, titleId }: { areas: AreaHealth[]; titleId: string }) {
   const { t } = useTranslation()
-  const locale = useLocale()
+  const formatList = useListFormat()
   const [expanded, setExpanded] = useState(false)
 
   const flagged = areas.filter((a) => a.needs_help).length
@@ -67,7 +67,7 @@ function AreaTable({ areas, titleId }: { areas: AreaHealth[]; titleId: string })
           <span>
             {t('dashboard.areas.rest', {
               count: rest.length,
-              names: new Intl.ListFormat(locale, { type: 'conjunction' }).format(rest.map(nameOf)),
+              names: formatList(rest.map(nameOf)),
             })}{' '}
             <Holding rest={rest} />
           </span>

@@ -6,7 +6,7 @@ import { QueryBoundary } from '../../components/QueryBoundary'
 import { Badge, type BadgeVariant } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
-import { useLocale } from '../../i18n/format'
+import { useListFormat } from '../../i18n/format'
 
 const TEXT_LINK = 'focus-ring rounded-sm font-body font-semibold text-nav-active-bg hover:underline'
 
@@ -82,7 +82,7 @@ function ServiceList({ services }: { services: CriticalServiceHealth[] }) {
 
 function ServiceRow({ service }: { service: CriticalServiceHealth }) {
   const { t } = useTranslation()
-  const locale = useLocale()
+  const formatList = useListFormat()
   return (
     <li className="flex flex-col gap-0.5">
       <span className="flex flex-wrap items-center gap-2">
@@ -95,7 +95,7 @@ function ServiceRow({ service }: { service: CriticalServiceHealth }) {
       {service.unmatched_assets.length > 0 && (
         <span className="font-body text-[0.8125rem] text-gray [overflow-wrap:anywhere]">
           {t('dashboard.services.unmatched', {
-            names: new Intl.ListFormat(locale, { type: 'conjunction' }).format(service.unmatched_assets),
+            names: formatList(service.unmatched_assets),
           })}
         </span>
       )}

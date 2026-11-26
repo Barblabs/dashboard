@@ -587,12 +587,20 @@ describe('Findings', () => {
       expect(window.location.search).toContain('band=critical')
     })
 
-    it('shows no-results message when no findings match the filter', async () => {
+    it('filters by no risk level, the Scores of a Model without Bands', async () => {
       await renderFindings()
 
       fireEvent.change(screen.getByRole('combobox', { name: 'Risk level' }), {
         target: { value: 'unbanded' },
       })
+
+      expect(await screen.findByRole('button', { name: 'Open CVE-2024-6387' })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Open CVE-2021-41773' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Open CVE-2025-1094' })).not.toBeInTheDocument()
+    })
+
+    it('shows no-results message when no findings match the filter', async () => {
+      renderApp('/findings?band=critical&status=closed')
 
       expect(await screen.findByText('No findings match the active filters.')).toBeInTheDocument()
     })
