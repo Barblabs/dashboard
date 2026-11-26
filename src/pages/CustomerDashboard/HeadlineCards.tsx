@@ -58,7 +58,7 @@ function FixedCard() {
   const { t } = useTranslation()
   const closes = useFindingClosesQuery()
   return (
-    <section className={STAT_CARD} aria-label={t('dashboard.fixed.label')}>
+    <section className={`${STAT_CARD} sm:max-lg:col-span-2`} aria-label={t('dashboard.fixed.label')}>
       <span className={`${STAT_VALUE} text-navy`}>{closes.data?.current.fixed ?? EMPTY}</span>
       <span className={STAT_LABEL}>{t('dashboard.fixed.label')}</span>
       <Failed query={closes} />
