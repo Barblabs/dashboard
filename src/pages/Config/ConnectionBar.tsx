@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 
@@ -28,13 +28,19 @@ export function ConnectionBar({ badge, details, actions, children }: ConnectionB
       <div className="flex flex-wrap items-center gap-4 bg-white px-6 py-4">
         <div className="flex min-w-0 basis-full flex-wrap items-center gap-2 md:flex-1">
           <Badge variant="solid">{badge}</Badge>
-          {shown.map((detail, index) => (
-            // The facts are a fixed list per bar, so their position is their identity.
-            <Fragment key={index}>
-              {index > 0 && <span className="text-[0.875rem] text-border-panel">·</span>}
-              {detail}
-            </Fragment>
-          ))}
+          <div className="min-w-0 flex-1 basis-48 overflow-hidden">
+            <div className="-ml-5 flex flex-wrap items-center gap-y-2">
+              {shown.map((detail, index) => (
+                // The facts are a fixed list per bar, so their position is their identity.
+                <span key={index} className="flex min-w-0 items-center">
+                  <span aria-hidden="true" className="w-5 shrink-0 text-center text-[0.875rem] text-border-panel">
+                    ·
+                  </span>
+                  {detail}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
         {actions && <div className="flex flex-wrap gap-2 md:shrink-0">{actions}</div>}
       </div>
