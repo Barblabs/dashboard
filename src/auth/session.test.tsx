@@ -74,6 +74,7 @@ describe('Restoring the session on startup', () => {
     const user = reopen('/business-context')
 
     await screen.findByRole('heading', { level: 1, name: 'Cannot connect to the server' })
+    expect(document.title).toBe('Cannot connect to the server - Barbattack')
     expect(mockTokens.hasStored()).toBe(true)
 
     await user.click(screen.getByRole('button', { name: 'Retry' }))
