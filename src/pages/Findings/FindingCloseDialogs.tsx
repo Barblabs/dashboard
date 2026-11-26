@@ -98,7 +98,7 @@ function CloseBody({ finding, onDone }: { finding: FindingRef; onDone: () => voi
             {t('findings.close.cancel')}
           </Button>
           <Button type="submit" size="sm" loading={close.isPending} disabled={!hasWhy(note)}>
-            {t('findings.close.action')}
+            {close.isPending ? t('findings.close.closing') : t('findings.close.action')}
           </Button>
         </>
       }

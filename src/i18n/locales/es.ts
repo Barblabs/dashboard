@@ -331,6 +331,7 @@ export const es: Translations = {
     },
     close: {
       action: 'Cerrar hallazgo',
+      closing: 'Cerrando…',
       title: 'Cerrar {{cve}}',
       reason: 'Motivo',
       reopenAt: 'Se reabre después del',
@@ -759,6 +760,7 @@ export const es: Translations = {
     changeRole: {
       title: 'Cambiar rol',
       save: 'Guardar',
+      saving: 'Guardando…',
     },
     disable: {
       title: 'Deshabilitar usuario',
@@ -802,6 +804,7 @@ export const es: Translations = {
       title: 'Renombrar organización',
       label: 'Nombre',
       save: 'Guardar',
+      saving: 'Guardando…',
       cancel: 'Cancelar',
       failed: 'No se pudo renombrar la organización.',
     },

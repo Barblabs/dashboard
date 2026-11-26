@@ -329,6 +329,7 @@ export const en = {
     },
     close: {
       action: 'Close finding',
+      closing: 'Closing…',
       title: 'Close {{cve}}',
       reason: 'Reason',
       reopenAt: 'Reopens after',
@@ -757,6 +758,7 @@ export const en = {
     changeRole: {
       title: 'Change role',
       save: 'Save',
+      saving: 'Saving…',
     },
     disable: {
       title: 'Disable user',
@@ -800,6 +802,7 @@ export const en = {
       title: 'Rename organization',
       label: 'Name',
       save: 'Save',
+      saving: 'Saving…',
       cancel: 'Cancel',
       failed: 'Could not rename the organization.',
     },
