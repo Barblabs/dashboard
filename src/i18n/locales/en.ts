@@ -8,6 +8,7 @@ export const en = {
     hidePassword: 'Hide password',
     chartError: 'This section could not be displayed.',
     infoTip: 'About {{title}}',
+    actions: 'Actions',
   },
   sidebar: {
     superAdmin: 'Super Admin',
@@ -239,7 +240,7 @@ export const en = {
       closed: 'Manual closures',
     },
     filter: {
-      search: 'Search CVE, component or asset',
+      search: 'Search CVE, component or asset…',
       band: 'Risk level',
       exposure: 'Exposure',
       status: 'Status',
@@ -271,7 +272,7 @@ export const en = {
       text: '"{{value}}"',
       matrix_one: '{{count}} finding from matrix',
       matrix_other: '{{count}} findings from matrix',
-      remove: 'Remove filter',
+      remove: 'Remove {{value}}',
       clearAll: 'Clear all',
     },
     count: {
@@ -328,6 +329,7 @@ export const en = {
     },
     close: {
       action: 'Close finding',
+      closing: 'Closing…',
       title: 'Close {{cve}}',
       reason: 'Reason',
       reopenAt: 'Reopens after',
@@ -346,6 +348,7 @@ export const en = {
       text: 'It counts as open again and takes its place in the next update of the order.',
       cancel: 'Cancel',
       confirm: 'Yes, reopen',
+      pending: 'Reopening…',
       failed: "Couldn't reopen the finding.",
     },
     closedByHand: {
@@ -363,7 +366,6 @@ export const en = {
       reason: 'Reason',
       closed: 'Closed',
       reopensOn: 'Reopens on',
-      actions: 'Actions',
     },
     errors: {
       notFound: 'This finding no longer exists.',
@@ -567,10 +569,11 @@ export const en = {
       coverageLabel: '{{labeled}} of {{open}} open findings have an ATT&CK label',
       emptyTactics: 'No findings: {{tactics}}',
       heatmapTitle: 'Findings per tactic',
+      tactic: 'Tactic',
       heatmapHelp:
-        'The columns are MITRE ATT&CK tactics, the stage of an attack each technique helps with (initial access, execution, privilege escalation, exfiltration and so on), in the order an attack usually moves forward. The rows are the risk levels.\n\nA finding counts once in each tactic of its techniques, so the columns can add up to more than the number of findings. The darker the cell, the more findings it holds.\n\nThe tactics with no findings are listed under the table.',
+        'The rows are MITRE ATT&CK tactics, the stage of an attack each technique helps with (initial access, execution, privilege escalation, exfiltration and so on), in the order an attack usually moves forward. The columns are the risk levels.\n\nA finding counts once in each tactic of its techniques, so the rows can add up to more than the number of findings. The darker the cell, the more findings it holds.\n\nThe tactics with no findings are listed under the table.',
       tacticLabel: {
-        reconnaissance: 'Reconnaissance',
+        reconnaissance: 'Recon.',
         'resource-development': 'Resource Dev.',
         'initial-access': 'Initial Access',
         execution: 'Execution',
@@ -651,8 +654,6 @@ export const en = {
     period: 'News from {{period}}',
     picker: {
       label: 'Digest',
-      option_one: '{{period}}, {{count}} news item',
-      option_other: '{{period}}, {{count}} news items',
       named_one: '{{count}} names you',
       named_other: '{{count}} name you',
     },
@@ -667,7 +668,7 @@ export const en = {
       named: {
         title: 'They name you',
         description: 'The victim is your organization: your domain or your brand, in the news or on a leak site.',
-        short: 'Name you',
+        short: 'Your name',
       },
       finding: {
         title: 'They mention vulnerabilities open on your assets',
@@ -757,6 +758,7 @@ export const en = {
     changeRole: {
       title: 'Change role',
       save: 'Save',
+      saving: 'Saving…',
     },
     disable: {
       title: 'Disable user',
@@ -768,6 +770,7 @@ export const en = {
     confirm: {
       text: 'This user will no longer be able to sign in. Continue?',
       confirm: 'Yes, disable',
+      pending: 'Disabling…',
       cancel: 'Cancel',
     },
   },
@@ -800,6 +803,7 @@ export const en = {
       title: 'Rename organization',
       label: 'Name',
       save: 'Save',
+      saving: 'Saving…',
       cancel: 'Cancel',
       failed: 'Could not rename the organization.',
     },
@@ -807,6 +811,7 @@ export const en = {
       title: 'Deactivate organization',
       body: 'Users of this organization will no longer be able to sign in.',
       confirm: 'Yes, deactivate',
+      pending: 'Deactivating…',
       cancel: 'Cancel',
       failed: 'Could not deactivate the organization.',
     },
@@ -819,6 +824,7 @@ export const en = {
       step1: {
         title: 'New organization',
         label: 'Organization name',
+        cancel: 'Cancel',
         next: 'Next',
         required: 'The name is required.',
       },
@@ -854,7 +860,6 @@ export const en = {
       title: 'Organizations',
       help:
         'Each customer organization with its status, how many enabled users it has (counting those invited who have not signed in yet), whether it has a CMDB connected and how long ago its last successful sync finished.\n\nWhen the most recent sync failed, its date shows in red underneath, and the organization’s assets and findings may be out of date until syncing works again. This view never shows any customer’s assets or findings.',
-      empty: 'No organizations yet.',
       name: 'Name',
       status: 'Status',
       users: 'Users',
@@ -1072,6 +1077,7 @@ export const en = {
       confirm: {
         text: 'This will disconnect the CMDB. Synced assets are kept, marked as inactive. Continue?',
         confirm: 'Yes, disconnect',
+        pending: 'Disconnecting…',
         cancel: 'Cancel',
       },
     },
@@ -1306,6 +1312,7 @@ export const en = {
         save: 'Save',
         saving: 'Saving…',
         remove: 'Remove owner',
+        removing: 'Removing…',
         cancel: 'Cancel',
         invalidEmail: 'Enter a valid email.',
         saveFailed: 'Could not save the owner.',
@@ -1377,6 +1384,7 @@ export const en = {
       confirm: {
         text: 'This will disconnect the Slack app. Deliveries stop until it is reconnected. Continue?',
         confirm: 'Yes, disconnect',
+        pending: 'Disconnecting…',
         cancel: 'Cancel',
       },
     },
@@ -1389,16 +1397,11 @@ export const en = {
       loadFailed: 'Could not load the failed deliveries.',
       networkError: 'Could not reach the server to load the failed deliveries.',
       retryAll: 'Retry all',
+      retrying: 'Retrying…',
       retrySucceeded: 'Returned {{count}} deliveries to the queue.',
       retryFailed: 'Could not retry the deliveries.',
-      columns: {
-        target: 'Target',
-        kind: 'Target kind',
-        attempts: 'Attempts',
-        created: 'Created',
-        code: 'Failure code',
-        error: 'Details',
-      },
+      attempts_one: '{{count}} attempt',
+      attempts_other: '{{count}} attempts',
     },
     codes: {
       owner_unreachable: 'Slack does not recognize this owner.',
@@ -1456,16 +1459,17 @@ export const en = {
         label: 'Critical services',
         add: 'Add critical service',
         remove: 'Remove service',
+        removeNamed: 'Remove {{name}}',
         name: 'Service',
         namePlaceholder: 'e.g. Online payments',
         description: 'What it does',
-        descriptionPlaceholder: 'What it does, in one sentence',
+        descriptionPlaceholder: 'What it does',
         assets: 'Assets that run it',
-        assetsPlaceholder: 'Assets that run it, e.g. srv-pay-01',
+        assetsPlaceholder: 'Assets, e.g. srv-pay-01',
         impact: 'Impact if it goes down',
         impactPlaceholder: 'Impact if it goes down…',
         maxDowntime: 'Maximum time without it',
-        maxDowntimePlaceholder: 'Maximum time without it…',
+        maxDowntimePlaceholder: 'Max downtime…',
       },
       dataCategories: 'Data it holds',
       regulations: 'Regulations and standards',
@@ -1476,6 +1480,13 @@ export const en = {
       thirdParties: 'Third parties with access',
       appetite: 'Risk appetite',
       appetiteHint: 'For the whole organization, as leadership sets it.',
+      appetiteMeaning: {
+        averse: 'Avoid risk even at the cost of opportunities.',
+        minimal: 'Accept only the lowest risks.',
+        cautious: 'Accept some risk for clear benefits.',
+        open: 'Accept risk for innovation or growth.',
+        eager: 'Seek risk for higher rewards.',
+      },
       concerns: 'Main concerns',
       pastIncidents: { label: 'Past security incidents', placeholder: 'What happened and when.' },
       constraints: {
@@ -1728,11 +1739,11 @@ export const en = {
         cryptojacking: 'Cryptojacking',
       },
       appetite: {
-        averse: 'Averse: avoid risk even at the cost of opportunities',
-        minimal: 'Minimal: accept only the lowest risks',
-        cautious: 'Cautious: accept some risk for clear benefits',
-        open: 'Open: accept risk for innovation or growth',
-        eager: 'Eager: seek risk for higher rewards',
+        averse: 'Averse',
+        minimal: 'Minimal',
+        cautious: 'Cautious',
+        open: 'Open',
+        eager: 'Eager',
       },
       impact: {
         critical: 'Critical impact',

@@ -6,8 +6,10 @@ import type { CurrentOrder, PriorityGroup } from '../../api/prioritizations'
 import { Card, CardHeader } from '../../components/ui/Card'
 import { ChartErrorBoundary } from '../../components/ui/ChartErrorBoundary'
 import { InfoTip } from '../../components/ui/InfoTip'
+import { useWideLayout } from '../../components/ui/useWideLayout'
 import { CARD_EDGE, HEADER_CELL, HEADER_ROW } from '../../components/ui/table'
 import { QueryBoundary } from '../../components/QueryBoundary'
+import { EMPTY } from '../../i18n/format'
 import { Message } from '../../components/ui/Message'
 import { Modal } from '../../components/ui/Modal'
 import { buildMatrix } from './beforeAfterAlgorithm'
@@ -156,7 +158,7 @@ function MatrixGrid({
               {t('findings.beforeAfter.byScore')} / {t('findings.beforeAfter.byAgent')}
             </th>
             {groups.map((g) => (
-              <th key={g.position} className="pb-3 text-center font-semibold text-navy">
+              <th key={g.position} className="pb-3 text-center text-[0.75rem] font-semibold text-navy">
                 {t('findings.beforeAfter.groupLabel', { n: g.position })}
               </th>
             ))}
@@ -194,7 +196,7 @@ function MatrixGrid({
                 return (
                   <td key={agIdx} className="py-1 text-center">
                     <div
-                      className={`mx-auto flex h-10 w-10 items-center justify-center rounded-lg font-body ${count > 0 ? 'font-semibold' : ''} ${textColorClass} ${clickable ? 'cursor-pointer' : ''}`}
+                      className={`mx-auto flex h-10 w-10 items-center justify-center rounded-lg font-body ${count > 0 ? 'font-semibold' : ''} ${textColorClass} ${clickable ? 'focus-ring cursor-pointer transition-[filter] duration-150 ease-[ease] hover:brightness-90' : ''}`}
                       style={{ backgroundColor: bg, boxShadow }}
                       aria-label={t('findings.beforeAfter.cellLabel', { count, sg: sgIdx + 1, ag: agIdx + 1 })}
                       title={clickable ? t('findings.beforeAfter.cellClickable', { count }) : undefined}
@@ -212,7 +214,7 @@ function MatrixGrid({
                           : undefined
                       }
                     >
-                      {count === 0 ? '–' : count}
+                      {count === 0 ? EMPTY : count}
                     </div>
                   </td>
                 )
@@ -236,18 +238,50 @@ function MatrixGrid({
   )
 }
 
-function TopChangesTable({
-  topChanges,
-  groups,
-  rankRanges,
-  onOpen,
-}: {
+interface TopChangesProps {
   topChanges: TopChange[]
   groups: PriorityGroup[]
   rankRanges: [number, number][]
   onOpen: (findingId: string) => void
-}) {
+}
+
+function TopChangesTable({ topChanges, groups, rankRanges, onOpen }: TopChangesProps) {
   const { t } = useTranslation()
+  const wide = useWideLayout()
+
+  if (!wide) {
+    return (
+      <ul className="border-t-2 border-border-row font-body text-[0.875rem] text-navy">
+        {topChanges.map((c) => (
+          <li
+            key={c.findingId}
+            onClick={() => onOpen(c.findingId)}
+            className="flex cursor-pointer flex-col gap-2 border-t border-border-row px-6 py-4 transition-colors duration-150 ease-[ease] first:border-t-0 hover:bg-row-hover"
+          >
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <OpenCveButton cveId={c.cveId} onOpen={() => onOpen(c.findingId)} />
+                <span>{c.component}</span>
+              </span>
+              <span className="shrink-0 tabular-nums font-semibold">
+                <Delta change={c} />
+              </span>
+            </div>
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 tabular-nums">
+              <dt className="text-[0.75rem] text-gray">{t('findings.beforeAfter.topChangesScoreGroup')}</dt>
+              <dd>
+                <ScoreGroup change={c} rankRanges={rankRanges} />
+              </dd>
+              <dt className="text-[0.75rem] text-gray">{t('findings.beforeAfter.topChangesAgentGroup')}</dt>
+              <dd>
+                <AgentGroup change={c} groups={groups} />
+              </dd>
+            </dl>
+          </li>
+        ))}
+      </ul>
+    )
+  }
 
   return (
     <div className="overflow-x-auto">
@@ -258,57 +292,81 @@ function TopChangesTable({
             <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesComponent')}</th>
             <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesScoreGroup')}</th>
             <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesAgentGroup')}</th>
-            <th className={`${HEADER_CELL} ${CARD_EDGE}`}>{t('findings.beforeAfter.topChangesDelta')}</th>
+            <th className={`${HEADER_CELL} ${CARD_EDGE} text-right`}>{t('findings.beforeAfter.topChangesDelta')}</th>
           </tr>
         </thead>
         <tbody>
-          {topChanges.map((c) => {
-            const wentUp = c.agentGroup < c.scoreGroup
-            const sgRange = rankRanges[c.scoreGroup - 1]
-            const agGroup = groups[c.agentGroup - 1]
-            return (
-              <tr
-                key={c.findingId}
-                // The whole row is the mouse target; the button stays the keyboard and screen reader path.
-                onClick={() => onOpen(c.findingId)}
-                className="cursor-pointer border-b border-border-row transition-colors duration-150 last:border-0 hover:bg-row-hover"
-              >
-                <td className={`px-4 py-3 whitespace-nowrap ${CARD_EDGE}`}>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      onOpen(c.findingId)
-                    }}
-                    aria-label={t('findings.open', { cve: c.cveId })}
-                    className="focus-ring cursor-pointer rounded-xs font-mono text-[0.8125rem] font-semibold text-navy underline-offset-2 hover:underline"
-                  >
-                    {c.cveId}
-                  </button>
-                </td>
-                <td className={`px-4 py-3 text-navy ${CARD_EDGE}`}>{c.component}</td>
-                <td className={`px-4 py-3 whitespace-nowrap tabular-nums text-navy ${CARD_EDGE}`}>
-                  {t('findings.beforeAfter.groupLabel', { n: c.scoreGroup })}{' '}
-                  <span className="text-gray">
-                    {t('findings.beforeAfter.rankRange', { min: sgRange[0], max: sgRange[1] })}
-                  </span>
-                </td>
-                <td className={`px-4 py-3 tabular-nums text-navy ${CARD_EDGE}`}>
-                  {t('findings.beforeAfter.groupLabel', { n: c.agentGroup })}{' '}
-                  <span className="text-[0.75rem] text-gray">{agGroup.title}</span>
-                </td>
-                <td className={`px-4 py-3 tabular-nums font-semibold text-navy ${CARD_EDGE}`}>
-                  {wentUp
-                    ? t('findings.beforeAfter.topChangesUp', { n: c.delta })
-                    : t('findings.beforeAfter.topChangesDown', { n: c.delta })}
-                </td>
-              </tr>
-            )
-          })}
+          {topChanges.map((c) => (
+            <tr
+              key={c.findingId}
+              // The whole row is the mouse target; the button stays the keyboard and screen reader path.
+              onClick={() => onOpen(c.findingId)}
+              className="cursor-pointer border-b border-border-row transition-colors duration-150 ease-[ease] last:border-0 hover:bg-row-hover"
+            >
+              <td className={`px-4 py-3 whitespace-nowrap ${CARD_EDGE}`}>
+                <OpenCveButton cveId={c.cveId} onOpen={() => onOpen(c.findingId)} />
+              </td>
+              <td className={`px-4 py-3 text-navy ${CARD_EDGE}`}>{c.component}</td>
+              <td className={`px-4 py-3 whitespace-nowrap tabular-nums text-navy ${CARD_EDGE}`}>
+                <ScoreGroup change={c} rankRanges={rankRanges} />
+              </td>
+              <td className={`px-4 py-3 tabular-nums text-navy ${CARD_EDGE}`}>
+                <AgentGroup change={c} groups={groups} />
+              </td>
+              <td className={`px-4 py-3 text-right tabular-nums font-semibold text-navy ${CARD_EDGE}`}>
+                <Delta change={c} />
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
   )
+}
+
+function OpenCveButton({ cveId, onOpen }: { cveId: string; onOpen: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation()
+        onOpen()
+      }}
+      aria-label={t('findings.open', { cve: cveId })}
+      className="focus-ring cursor-pointer self-start rounded-xs font-mono text-[0.8125rem] font-semibold text-navy underline-offset-2 hover:underline"
+    >
+      {cveId}
+    </button>
+  )
+}
+
+function ScoreGroup({ change, rankRanges }: { change: TopChange; rankRanges: [number, number][] }) {
+  const { t } = useTranslation()
+  const [min, max] = rankRanges[change.scoreGroup - 1]
+  return (
+    <>
+      {t('findings.beforeAfter.groupLabel', { n: change.scoreGroup })}{' '}
+      <span className="text-gray">{t('findings.beforeAfter.rankRange', { min, max })}</span>
+    </>
+  )
+}
+
+function AgentGroup({ change, groups }: { change: TopChange; groups: PriorityGroup[] }) {
+  const { t } = useTranslation()
+  return (
+    <>
+      {t('findings.beforeAfter.groupLabel', { n: change.agentGroup })}{' '}
+      <span className="text-[0.75rem] text-gray">{groups[change.agentGroup - 1].title}</span>
+    </>
+  )
+}
+
+function Delta({ change }: { change: TopChange }) {
+  const { t } = useTranslation()
+  return change.agentGroup < change.scoreGroup
+    ? t('findings.beforeAfter.topChangesUp', { n: change.delta })
+    : t('findings.beforeAfter.topChangesDown', { n: change.delta })
 }
 
 function BandComposition({

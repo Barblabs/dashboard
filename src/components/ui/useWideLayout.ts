@@ -1,17 +1,14 @@
-import { useSyncExternalStore } from 'react'
+import { useCallback, useSyncExternalStore } from 'react'
 
-const WIDE = '(min-width: 768px)'
-
-function subscribe(onChange: () => void) {
-  const query = window.matchMedia?.(WIDE)
-  query?.addEventListener('change', onChange)
-  return () => query?.removeEventListener('change', onChange)
-}
-
-function isWide() {
-  return window.matchMedia?.(WIDE).matches ?? true
-}
-
-export function useWideLayout() {
-  return useSyncExternalStore(subscribe, isWide)
+export function useWideLayout(minWidth = 1024) {
+  const query = `(min-width: ${minWidth}px)`
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      const list = window.matchMedia?.(query)
+      list?.addEventListener('change', onChange)
+      return () => list?.removeEventListener('change', onChange)
+    },
+    [query],
+  )
+  return useSyncExternalStore(subscribe, () => window.matchMedia?.(query).matches ?? true)
 }

@@ -30,7 +30,7 @@ function ChangeRoleBody({ user, onClose }: { user: UserResponse; onClose: () => 
             {t('users.confirm.cancel')}
           </Button>
           <Button type="submit" loading={changeRole.isPending} size="sm">
-            {t('users.changeRole.save')}
+            {changeRole.isPending ? t('users.changeRole.saving') : t('users.changeRole.save')}
           </Button>
         </>
       }

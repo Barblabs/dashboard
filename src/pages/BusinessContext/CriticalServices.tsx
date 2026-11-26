@@ -20,14 +20,14 @@ export function CriticalServices() {
       <span className={`font-body font-semibold ${readOnly ? 'text-[0.8125rem] text-gray' : 'text-[0.875rem] text-navy'}`}>
         {t('businessContext.fields.criticalServices.label')}
       </span>
-      {readOnly && fields.length === 0 && <p className="font-body text-[0.9375rem] text-muted-bg">{EMPTY}</p>}
+      {readOnly && fields.length === 0 && <p className="font-body text-[0.9375rem] text-gray">{EMPTY}</p>}
       {fields.map((item, index) =>
         readOnly ? (
           <ShownService key={item.id} index={index} />
         ) : (
           <div key={item.id} className="flex items-start gap-3 rounded-lg border border-border-panel p-3">
-            <div className="grid min-w-0 flex-1 gap-2 md:grid-cols-4">
-              <div className="md:col-span-2">
+            <div className="grid min-w-0 flex-1 gap-2 lg:grid-cols-2">
+              <div>
                 <TextField
                   name={`operations.critical_services.${index}.name`}
                   label={t('businessContext.fields.criticalServices.name')}
@@ -37,7 +37,7 @@ export function CriticalServices() {
                   className="font-semibold"
                 />
               </div>
-              <div className="md:col-span-2">
+              <div>
                 <TagField
                   name={`operations.critical_services.${index}.assets`}
                   label={t('businessContext.fields.criticalServices.assets')}
@@ -46,7 +46,7 @@ export function CriticalServices() {
                   hideLabel
                 />
               </div>
-              <div className="md:col-span-2">
+              <div className="lg:col-span-2">
                 <TextField
                   name={`operations.critical_services.${index}.description`}
                   label={t('businessContext.fields.criticalServices.description')}
@@ -70,14 +70,7 @@ export function CriticalServices() {
                 hideLabel
               />
             </div>
-            <button
-              type="button"
-              aria-label={t('businessContext.fields.criticalServices.remove')}
-              onClick={() => remove(index)}
-              className="mt-2.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-gray hover:bg-panel hover:text-critical focus-ring"
-            >
-              <CloseIcon size={12} />
-            </button>
+            <RemoveServiceButton index={index} onRemove={() => remove(index)} />
           </div>
         ),
       )}
@@ -85,12 +78,32 @@ export function CriticalServices() {
         <button
           type="button"
           onClick={() => append({ name: '', description: '', impact: '', max_downtime: '', assets: [] })}
-          className="cursor-pointer rounded-lg border border-dashed border-muted-bg py-3 font-body text-[0.875rem] font-semibold text-gray transition-colors hover:border-navy hover:text-navy focus-ring"
+          className="cursor-pointer rounded-lg border border-dashed border-muted-bg py-3 font-body text-[0.875rem] font-semibold text-gray transition-colors duration-150 ease-[ease] hover:border-navy hover:text-navy focus-ring"
         >
           + {t('businessContext.fields.criticalServices.add')}
         </button>
       )}
     </div>
+  )
+}
+
+function RemoveServiceButton({ index, onRemove }: { index: number; onRemove: () => void }) {
+  const { t } = useTranslation()
+  const { control } = useFormContext<BusinessContextFields>()
+  const name = useWatch({ control, name: `operations.critical_services.${index}.name` }).trim()
+  return (
+    <button
+      type="button"
+      aria-label={
+        name
+          ? t('businessContext.fields.criticalServices.removeNamed', { name })
+          : t('businessContext.fields.criticalServices.remove')
+      }
+      onClick={onRemove}
+      className="mt-2.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-gray transition-colors duration-150 ease-[ease] hover:bg-panel hover:text-critical focus-ring"
+    >
+      <CloseIcon size={12} />
+    </button>
   )
 }
 

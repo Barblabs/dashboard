@@ -63,7 +63,7 @@ describe('News', () => {
     expect(screen.getByText('Weighed with business context v1')).toBeInTheDocument()
     const counts = screen.getByRole('list', { name: 'News by relevance' })
     expect(within(counts).getAllByRole('listitem').map((c) => c.textContent)).toEqual([
-      'Name you 1',
+      'Your name 1',
       'Open vulnerabilities 1',
       'Technology and suppliers 2',
       'Your sector 3',
@@ -95,6 +95,9 @@ describe('News', () => {
     expect(within(item).getByText(/pg-prod-01 corre Pagos en línea/)).toBeInTheDocument()
     const evidence = within(item).getByRole('list', { name: 'From your business context' })
     expect(within(evidence).getByTitle('/operations/critical_services/0/name')).toHaveTextContent('Critical servicePagos en línea')
+    expect(within(evidence).getByTitle('/operations/critical_services/0/max_downtime')).toHaveTextContent(
+      'Maximum time without itTolerates 1–4 hours',
+    )
     expect(within(item).getByText(/Atacantes explotan CVE-2025-1094 en PostgreSQL/)).toBeInTheDocument()
     expect(within(item).queryByText('Original text')).not.toBeInTheDocument()
     const reasons = within(item).getByRole('list', { name: 'Why it appears' })
@@ -102,12 +105,12 @@ describe('News', () => {
     expect(within(within(item).getByRole('list', { name: 'CVEs' })).getByText('CVE-2025-1094')).toBeInTheDocument()
   })
 
-  it('names the business context field each piece of evidence comes from', async () => {
+  it('names the business context field each piece of evidence comes from, and its coded value as the form does', async () => {
     await renderNews()
 
     const evidence = within(article('ACME Pay')).getByRole('list', { name: 'From your business context' })
-    expect(within(evidence).getByTitle('/operations/data_categories/0')).toHaveTextContent('Data it holdspayment_cards')
-    expect(within(evidence).getByTitle('/operations/regulations/0')).toHaveTextContent('Regulations and standardspci_dss')
+    expect(within(evidence).getByTitle('/operations/data_categories/0')).toHaveTextContent('Data it holdsPayment card data')
+    expect(within(evidence).getByTitle('/operations/regulations/0')).toHaveTextContent('Regulations and standardsPCI DSS')
   })
 
   it('shows the original text of an item with no summary, marked as such', async () => {
@@ -207,13 +210,13 @@ describe('News', () => {
     expect(screen.getAllByText(/The summary for this digest couldn't be written/)).toHaveLength(1)
   })
 
-  it('lists the earlier digests with their period and how many items they hold', async () => {
+  it('lists the earlier digests with their period and how many items name the organization', async () => {
     await renderNews()
 
     const options = within(screen.getByLabelText('Digest')).getAllByRole('option')
     expect(options.map((o) => plain(o.textContent))).toEqual([
-      'Nov 16 – 17, 2026, 7 news items, 1 names you',
-      'Nov 15 – 16, 2026, 2 news items',
+      'Nov 16 – 17, 2026 · 1 names you',
+      'Nov 15 – 16, 2026',
     ])
   })
 

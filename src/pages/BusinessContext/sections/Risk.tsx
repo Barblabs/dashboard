@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { LIMITS } from '../../../api/businessContext'
+import { LIMITS, RISK_APPETITES } from '../../../api/businessContext'
+import { isOneOf } from '../../../api/schemas'
 import { MultiSelectField, SelectField, TextField } from '../fields'
 import { ROW } from './layout'
 
@@ -13,6 +14,7 @@ export function Risk() {
           vocab="appetite"
           label={t('businessContext.fields.appetite')}
           hint={t('businessContext.fields.appetiteHint')}
+          meaningOf={(code) => (isOneOf(RISK_APPETITES, code) ? t(`businessContext.fields.appetiteMeaning.${code}`) : '')}
         />
         <MultiSelectField name="risk.concerns" vocab="concerns" label={t('businessContext.fields.concerns')} />
       </div>

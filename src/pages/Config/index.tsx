@@ -4,6 +4,7 @@ import { useSourceQuery, type CmdbSource } from '../../api/cmdb'
 import { useCanEdit } from '../../auth/permissions'
 import { Page } from '../../components/Page'
 import { QueryBoundary } from '../../components/QueryBoundary'
+import { Message } from '../../components/ui/Message'
 import { Tab, TabList, TabPanel, Tabs } from '../../components/ui/Tabs'
 import { ConfigStepPanel } from './ConfigStepPanel'
 import { CmdbSelector } from './CmdbSelector'
@@ -38,7 +39,7 @@ export function ConfigPage() {
   return (
     <Page title={t('config.header.title')}>
       <Tabs defaultValue="cmdb">
-        <TabList label={t('config.tabs.pageLabel')}>
+        <TabList label={t('config.tabs.pageLabel')} flush>
           <Tab value="cmdb">{t('config.tabs.cmdb')}</Tab>
           <Tab value="slack">{t('config.tabs.slack')}</Tab>
         </TabList>
@@ -76,14 +77,14 @@ function ConfigBody({ source, readOnly }: { source: CmdbSource | null; readOnly:
 
   if (readOnly) {
     return (
-      <p className="animate-fade-in py-12 text-center font-body text-[0.9375rem] text-gray">
+      <Message className="animate-fade-in rounded-xl border border-border-panel bg-white">
         {t('config.viewer.notConnected')}
-      </p>
+      </Message>
     )
   }
 
   return (
-    <div className="flex flex-col gap-6 md:flex-row md:items-start">
+    <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
       <ConfigStepPanel activeStep={STEP_NUMBER[step]} />
       {step === 'credentials' ? (
         <ItopForm

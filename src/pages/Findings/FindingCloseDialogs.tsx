@@ -98,7 +98,7 @@ function CloseBody({ finding, onDone }: { finding: FindingRef; onDone: () => voi
             {t('findings.close.cancel')}
           </Button>
           <Button type="submit" size="sm" loading={close.isPending} disabled={!hasWhy(note)}>
-            {t('findings.close.action')}
+            {close.isPending ? t('findings.close.closing') : t('findings.close.action')}
           </Button>
         </>
       }
@@ -151,6 +151,7 @@ function ReopenBody({ finding, onDone }: { finding: FindingRef; onDone: () => vo
       text={t('findings.reopen.text')}
       cancelLabel={t('findings.reopen.cancel')}
       confirmLabel={t('findings.reopen.confirm')}
+      pendingLabel={t('findings.reopen.pending')}
       pending={reopen.isPending}
       error={requestErrorText(reopen.error, t, { fallback: 'findings.reopen.failed' })}
       onConfirm={() => reopen.mutate(finding.id, { onSuccess: onDone })}

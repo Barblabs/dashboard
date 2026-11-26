@@ -24,7 +24,7 @@ export function PasswordInput({ className = '', ...props }: InputProps) {
         pressed={visible}
         onPressedChange={setVisible}
         aria-label={visible ? t('common.hidePassword') : t('common.showPassword')}
-        className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-sm p-1 text-gray hover:text-navy focus-ring"
+        className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-sm p-1 text-gray transition-colors duration-150 ease-[ease] hover:text-navy focus-ring"
       >
         {visible ? <EyeOffIcon /> : <EyeIcon />}
       </Toggle>

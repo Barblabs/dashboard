@@ -207,7 +207,7 @@ export function FindingHistory({ findingId, newestReasonShown }: { findingId: st
   if (history.isError) {
     return (
       <div className="flex flex-wrap items-center gap-3">
-        <p className={`${META} text-high`}>
+        <p className={`${META} text-critical`}>
           {requestErrorText(history.error, t, {
             fallback: 'findings.detail.history.failed',
             network: 'findings.detail.history.network',
@@ -277,7 +277,7 @@ function Entry({ entry, offerReason }: { entry: HistoryEntry; offerReason: boole
               type="button"
               aria-expanded={open}
               onClick={() => setOpen((o) => !o)}
-              className="focus-ring flex cursor-pointer items-center gap-1 self-start rounded-sm font-body text-[0.9375rem] font-semibold text-nav-active-bg hover:underline"
+              className="focus-ring flex cursor-pointer items-center gap-1 self-start rounded-sm font-body text-[0.875rem] font-semibold text-nav-active-bg hover:underline"
             >
               <ChevronRightIcon
                 className={`shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none ${open ? 'rotate-90' : ''}`}

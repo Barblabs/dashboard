@@ -28,25 +28,30 @@ function CustomerCard({
   return (
     <div
       data-testid="customer-card"
-      className={`flex flex-col gap-4 rounded-xl border border-border-panel p-5 ${isDeactivated ? 'bg-panel opacity-75' : 'bg-white'}`}
+      className={`flex flex-col gap-4 rounded-xl border border-border-panel p-5 ${isDeactivated ? 'bg-panel opacity-75 contrast-more:opacity-100' : 'bg-white'}`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <h3 className="font-title text-[1rem] leading-snug text-navy">
-            {customer.name}
-          </h3>
-          <p className="mt-0.5 font-body text-[0.8125rem] text-gray">
-            {t('tenants.created', {
-              date: formatDate(customer.created_at),
-            })}
-          </p>
-        </div>
+      <div className="min-w-0">
+        <h3 className="font-title text-[1rem] leading-snug text-navy">
+          {customer.name}
+        </h3>
+        <p className="mt-0.5 font-body text-[0.8125rem] text-gray">
+          {t('tenants.created', {
+            date: formatDate(customer.created_at),
+          })}
+        </p>
+      </div>
 
-        <div className="flex items-center gap-0.5">
+      <div className="flex items-center justify-between gap-2">
+        {/* The same status badge as the organizations table on the dashboard. */}
+        <Badge variant={isDeactivated ? 'muted' : 'outline'}>
+          {isDeactivated ? t('tenants.status.deactivated') : t('tenants.status.active')}
+        </Badge>
+
+        <div className="-my-1.5 -mr-1.5 flex items-center gap-0.5">
           <button
             type="button"
             aria-label={t('tenants.actions.rename')}
-            className="cursor-pointer rounded-md p-1.5 text-gray transition-colors hover:bg-panel hover:text-navy focus-ring"
+            className="cursor-pointer rounded-md p-1.5 text-gray transition-colors duration-150 ease-[ease] hover:bg-panel hover:text-navy focus-ring"
             onClick={onRename}
           >
             <PencilIcon />
@@ -56,7 +61,7 @@ function CustomerCard({
               type="button"
               aria-label={t('tenants.actions.reactivate')}
               disabled={reactivate.isPending}
-              className="cursor-pointer rounded-md p-1.5 text-navy transition-colors hover:bg-panel focus-ring disabled:cursor-not-allowed disabled:opacity-30"
+              className="cursor-pointer rounded-md p-1.5 text-navy transition-colors duration-150 ease-[ease] enabled:hover:bg-panel focus-ring disabled:cursor-not-allowed disabled:opacity-45"
               onClick={() => reactivate.mutate(customer.id)}
             >
               <RestoreIcon />
@@ -65,7 +70,7 @@ function CustomerCard({
             <button
               type="button"
               aria-label={t('tenants.actions.deactivate')}
-              className="cursor-pointer rounded-md p-1.5 text-critical transition-colors hover:bg-critical/10 focus-ring"
+              className="cursor-pointer rounded-md p-1.5 text-critical transition-colors duration-150 ease-[ease] hover:bg-critical/10 focus-ring"
               onClick={onDeactivate}
             >
               <PowerOffIcon />
@@ -73,11 +78,6 @@ function CustomerCard({
           )}
         </div>
       </div>
-
-      {/* The same status badge as the organizations table on the dashboard. */}
-      <Badge variant={isDeactivated ? 'muted' : 'outline'} className="self-start">
-        {isDeactivated ? t('tenants.status.deactivated') : t('tenants.status.active')}
-      </Badge>
 
       {reactivateError && <Alert tone="error">{reactivateError}</Alert>}
     </div>

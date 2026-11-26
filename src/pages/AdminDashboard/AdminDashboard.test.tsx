@@ -74,9 +74,11 @@ describe('AdminDashboard', () => {
     }
   })
 
-  it('shows a load error when /customers/stats fails', async () => {
+  it('offers a retry in the stats row and the organizations table when /customers/stats is unreachable', async () => {
     server.use(http.get(apiUrl('/customers/stats'), () => HttpResponse.error()))
     renderApp('/admin-dashboard', PLATFORM_ADMIN)
-    expect(await screen.findByText('Could not load dashboard data.')).toBeInTheDocument()
+    const messages = await screen.findAllByText('Could not reach the server to load the dashboard.')
+    expect(messages).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: 'Retry' })).toHaveLength(2)
   })
 })

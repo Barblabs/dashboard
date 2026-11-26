@@ -56,7 +56,7 @@ function AreaOwnerBody({ area, onClose }: { area: Area; onClose: () => void }) {
               className="mr-auto"
               onClick={() => save(null)}
             >
-              {t('config.areas.owner.remove')}
+              {removing ? t('config.areas.owner.removing') : t('config.areas.owner.remove')}
             </Button>
           )}
           <Button variant="secondary" size="sm" onClick={onClose}>

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../auth/store'
 import { Button } from './ui/Button'
+import { useDocumentTitle } from './useDocumentTitle'
 
 // Most restorations finish before the delay is up, so the screen just stays blank. The fade is
 // opacity-only, so it stays on under reduced motion: dropping it would flash the text instead.
@@ -21,6 +22,7 @@ export function RestoringSession() {
 export function ServerUnreachable() {
   const { t } = useTranslation()
   const retryRestoring = useAuthStore((s) => s.retryRestoring)
+  useDocumentTitle(t('session.unreachable.title'))
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-panel px-8 text-center">

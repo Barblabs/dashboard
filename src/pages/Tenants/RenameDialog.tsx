@@ -48,7 +48,7 @@ function RenameBody({ customer, onClose }: { customer: CustomerResponse; onClose
             {t('tenants.rename.cancel')}
           </Button>
           <Button type="submit" loading={rename.isPending} size="sm">
-            {t('tenants.rename.save')}
+            {rename.isPending ? t('tenants.rename.saving') : t('tenants.rename.save')}
           </Button>
         </>
       }

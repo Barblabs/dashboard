@@ -68,9 +68,14 @@ function CreateBody({ onClose }: { onClose: () => void }) {
         title={t('tenants.create.step1.title')}
         onSubmit={handleNext}
         actions={
-          <Button type="submit" size="sm">
-            {t('tenants.create.step1.next')}
-          </Button>
+          <>
+            <Button variant="secondary" size="sm" onClick={onClose}>
+              {t('tenants.create.step1.cancel')}
+            </Button>
+            <Button type="submit" size="sm">
+              {t('tenants.create.step1.next')}
+            </Button>
+          </>
         }
       >
         <Field

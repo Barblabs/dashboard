@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../components/ui/Button'
+import { Message } from '../../components/ui/Message'
 
 interface StartScreenProps {
   readOnly: boolean
@@ -12,9 +13,7 @@ export function StartScreen({ readOnly, onImport, onStart }: StartScreenProps) {
   const { t } = useTranslation()
   if (readOnly) {
     return (
-      <p className="rounded-xl border border-border-panel bg-white px-6 py-10 text-center font-body text-[0.9375rem] text-gray">
-        {t('businessContext.empty')}
-      </p>
+      <Message className="rounded-xl border border-border-panel bg-white">{t('businessContext.empty')}</Message>
     )
   }
   return (

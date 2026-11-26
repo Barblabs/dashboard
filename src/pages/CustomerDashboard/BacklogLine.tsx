@@ -9,7 +9,7 @@ import { fromFirstRecord } from '../Findings/weeks'
 export function BacklogLine() {
   const query = useWeeklyTrendQuery()
   return (
-    <Card>
+    <Card className="flex flex-col">
       <QueryBoundary
         query={query}
         keys={{ loading: 'dashboard.loading', failed: 'dashboard.failed', network: 'dashboard.network' }}
@@ -52,9 +52,9 @@ function Backlog({ weeks }: { weeks: WeeklyTrendPoint[] }) {
           highest,
           last: last.open_at_end,
         })}
-        className="px-10 pt-10 pb-6"
+        className="flex flex-1 flex-col px-10 pt-10 pb-6"
       >
-        <div className="relative h-32">
+        <div className="relative min-h-32 flex-1">
           <svg
             className="absolute inset-0 h-full w-full overflow-visible"
             viewBox="0 0 100 100"

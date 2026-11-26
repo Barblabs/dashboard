@@ -29,17 +29,17 @@ export function CmdbSelector({ onSelect, className = '' }: Props) {
     <Panel className={`gap-4 ${className}`}>
       <PanelTitle>{t('config.selector.title')}</PanelTitle>
 
-      <div>
+      <div className="flex flex-col gap-3">
         {PROVIDERS.map((p) => (
           <div
             key={p.id}
-            className={`flex items-center gap-3.5 rounded-[10px] p-4 ${
+            className={`flex flex-wrap items-center gap-3.5 rounded-lg p-4 ${
               p.available ? 'border-2 border-navy bg-white' : 'border border-border-panel bg-panel'
             }`}
           >
             <span
               className={`flex size-11 shrink-0 items-center justify-center rounded-lg font-title text-[1.125rem] ${
-                p.available ? 'bg-navy text-cyan' : 'bg-muted-bg text-white'
+                p.available ? 'bg-navy text-cyan' : 'border border-border-panel bg-white text-gray'
               }`}
             >
               {p.initial}
@@ -55,7 +55,7 @@ export function CmdbSelector({ onSelect, className = '' }: Props) {
               )}
             </div>
             {p.available ? (
-              <Button className="shrink-0" onClick={onSelect}>
+              <Button className="shrink-0 max-sm:w-full" onClick={onSelect}>
                 {t('config.selector.select')}
               </Button>
             ) : (

@@ -10,7 +10,7 @@ const MONO = 'font-mono text-[0.8125rem]'
 const LABEL = 'font-body text-[0.75rem] font-semibold text-gray'
 // The chrome of the facts that open the triage sheet; each adds its text color, border and background.
 const TRIAGE_BUTTON =
-  'focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-sm border px-2.5 py-[3px] font-body text-[0.75rem] font-medium whitespace-nowrap transition-[border-color] duration-150 ease-out hover:border-navy'
+  'focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-sm border px-2.5 py-[3px] font-body text-[0.75rem] font-medium whitespace-nowrap transition-[border-color] duration-150 ease-[ease] hover:border-navy'
 
 function AssetStatus({ asset }: { asset: Asset }) {
   const { t } = useTranslation()
@@ -105,7 +105,10 @@ function SoftwareComponents({ asset }: { asset: Asset }) {
             // Components have no identity of their own; the list order is the backend's.
             <li key={index} className="flex items-center gap-3 border-b border-border-row px-3.5 py-2.5 last:border-0">
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className={`${MONO} truncate text-navy`}>
+                <span
+                  title={component.version ? `${component.name} ${component.version}` : component.name}
+                  className={`${MONO} truncate text-navy`}
+                >
                   {component.name}
                   {component.version && <span className="text-gray"> {component.version}</span>}
                 </span>

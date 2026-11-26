@@ -3,6 +3,7 @@ import { Navigate } from 'react-router'
 import { signOut } from '../../auth/signOut'
 import { useAuthStore, useCurrentUser } from '../../auth/store'
 import { Button } from '../../components/ui/Button'
+import { useDocumentTitle } from '../../components/useDocumentTitle'
 import { homePath } from '../../routes'
 
 // Only a deactivated session sees this page; signing out moves the session, and the redirect follows.
@@ -10,6 +11,7 @@ export function DeactivatedPage() {
   const { t } = useTranslation()
   const deactivated = useAuthStore((s) => s.session.status === 'deactivated')
   const user = useCurrentUser()
+  useDocumentTitle(t('deactivated.title'))
 
   if (!deactivated) return <Navigate to={user ? homePath(user.role) : '/login'} replace />
 

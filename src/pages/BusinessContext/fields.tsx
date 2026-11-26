@@ -71,18 +71,21 @@ type SelectProps = OneOf & {
   /** What the select shows while nothing is chosen. */
   emptyLabel?: string
   hint?: string
+  /** What the chosen option means, shown under it in place of the hint. */
+  meaningOf?: (code: string) => string
   hideLabel?: boolean
 }
 
-export function SelectField({ name, vocab, label, emptyLabel, hint, hideLabel }: SelectProps) {
+export function SelectField({ name, vocab, label, emptyLabel, hint, meaningOf, hideLabel }: SelectProps) {
   const { t } = useTranslation()
   const meta = useMeta(name)
   const { codes, labelOf } = useVocab(vocab)
   const errorText = useValidationText()
   const { field, fieldState } = useController<BusinessContextFields, OneOf['name']>({ name })
   const error = errorText(fieldState.error?.message)
+  const meaning = field.value && meaningOf ? meaningOf(field.value) : undefined
   return (
-    <Shell label={label} error={error} help={meta.readOnly ? undefined : hint} hideLabel={hideLabel} {...meta}>
+    <Shell label={label} error={error} help={meta.readOnly ? meaning : (meaning ?? hint)} hideLabel={hideLabel} {...meta}>
       {meta.readOnly ? (
         <Shown value={field.value ? labelOf(field.value) : ''} />
       ) : (

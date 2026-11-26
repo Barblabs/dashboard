@@ -70,7 +70,7 @@ function ClosedList({ closed, onReopen }: ListProps) {
             <th className={HEADER_CELL}>{t('findings.closedList.closed')}</th>
             <th className={HEADER_CELL}>{t('findings.closedList.reopensOn')}</th>
             <th className={HEADER_CELL}>
-              <span className="sr-only">{t('findings.closedList.actions')}</span>
+              <span className="sr-only">{t('common.actions')}</span>
             </th>
           </tr>
         </thead>
@@ -93,7 +93,7 @@ function ClosedRow({ finding, onReopen }: ItemProps) {
   const { t } = useTranslation()
   const formatDate = useDateFormat()
   return (
-    <tr>
+    <tr className="hover:bg-row-hover">
       <td className={`${CELL} ${MONO} whitespace-nowrap`}>{finding.cve_id}</td>
       <td className={CELL}>
         <span className="flex flex-col gap-0.5">
@@ -135,7 +135,7 @@ function ClosedCard({ finding, onReopen }: ItemProps) {
   const reopensText = useReopensText()
   const reopens = reopensText(finding)
   return (
-    <li className="flex flex-col gap-2 rounded-lg border border-border-row bg-white p-4 text-[0.875rem] text-navy">
+    <li className="flex flex-col gap-2 rounded-lg border border-border-panel bg-white p-4 text-[0.875rem] text-navy">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className={`${MONO} font-semibold whitespace-nowrap`}>{finding.cve_id}</span>
         <Badge variant="muted">{t(`findings.closeReasons.${finding.reason}`)}</Badge>

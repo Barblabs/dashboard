@@ -134,7 +134,7 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
               e.preventDefault()
               add([...e.dataTransfer.files])
             }}
-            className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-dashed border-muted-bg bg-panel px-4 py-6 font-body text-[0.875rem] text-gray transition-colors hover:border-navy hover:text-navy focus-ring disabled:cursor-not-allowed"
+            className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-dashed border-muted-bg bg-panel px-4 py-6 font-body text-[0.875rem] text-gray transition-colors duration-150 ease-[ease] enabled:hover:border-navy enabled:hover:text-navy focus-ring disabled:cursor-not-allowed disabled:opacity-45"
           >
             <span className="font-semibold text-navy">{t('businessContext.import.choose')}</span>
             <span className="text-[0.75rem]">{t('businessContext.import.fileHelp')}</span>
@@ -143,7 +143,9 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
             <ul className="flex flex-col divide-y divide-border-panel rounded-lg border border-border-panel">
               {files.map((file) => (
                 <li key={`${file.name}-${file.size}`} className="flex items-center justify-between gap-3 px-3 py-2">
-                  <span className="min-w-0 truncate font-body text-[0.875rem] text-navy">{file.name}</span>
+                  <span title={file.name} className="min-w-0 truncate font-body text-[0.875rem] text-navy">
+                    {file.name}
+                  </span>
                   <span className="flex shrink-0 items-center gap-2">
                     <span className="font-mono text-[0.75rem] text-gray">{sizeOf(file.size)}</span>
                     <button
@@ -154,7 +156,7 @@ function ImportBody({ onClose, onDraft }: Omit<ImportDialogProps, 'open'>) {
                         edit()
                         setFiles(files.filter((f) => f !== file))
                       }}
-                      className="flex size-6 cursor-pointer items-center justify-center rounded-md text-gray hover:bg-panel hover:text-critical focus-ring"
+                      className="flex size-6 cursor-pointer items-center justify-center rounded-md text-gray transition-colors duration-150 ease-[ease] enabled:hover:bg-panel enabled:hover:text-critical focus-ring disabled:cursor-not-allowed disabled:opacity-45"
                     >
                       <CloseIcon />
                     </button>

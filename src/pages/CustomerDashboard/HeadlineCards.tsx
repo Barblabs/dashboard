@@ -9,7 +9,7 @@ import { requestErrorText } from '../../i18n/errors'
 import { EMPTY } from '../../i18n/format'
 import { fromFirstRecord } from '../Findings/weeks'
 
-const NOTE = 'font-body text-[0.8125rem]'
+const NOTE = 'font-body text-[0.8125rem] text-balance'
 
 export function HeadlineCards() {
   const { t } = useTranslation()
@@ -21,7 +21,7 @@ export function HeadlineCards() {
   const critical = summary.data?.critical
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       <section className={STAT_CARD} aria-label={t('dashboard.open.label')}>
         <span className={`${STAT_VALUE} text-navy`}>{open ?? EMPTY}</span>
         <span className={STAT_LABEL}>{t('dashboard.open.label')}</span>
@@ -58,7 +58,7 @@ function FixedCard() {
   const { t } = useTranslation()
   const closes = useFindingClosesQuery()
   return (
-    <section className={STAT_CARD} aria-label={t('dashboard.fixed.label')}>
+    <section className={`${STAT_CARD} sm:max-lg:col-span-2`} aria-label={t('dashboard.fixed.label')}>
       <span className={`${STAT_VALUE} text-navy`}>{closes.data?.current.fixed ?? EMPTY}</span>
       <span className={STAT_LABEL}>{t('dashboard.fixed.label')}</span>
       <Failed query={closes} />

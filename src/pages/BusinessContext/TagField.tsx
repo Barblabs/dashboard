@@ -56,7 +56,7 @@ export function TagField({ name, label, placeholder, hideLabel, suggestions, can
         <Shown value={value.join(', ')} />
       ) : (
         <div
-          className={`flex min-h-11 w-full cursor-text flex-wrap items-center gap-1.5 rounded-md border bg-white px-2 py-1.5 transition-[border-color] duration-150 focus-within:border-navy ${
+          className={`flex min-h-11 w-full cursor-text flex-wrap items-center gap-1.5 rounded-md border bg-white px-2 py-1.5 transition-[border-color] duration-150 ease-[ease] focus-within:border-navy has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-navy ${
             error ? 'border-critical' : 'border-border-panel'
           }`}
         >
@@ -70,7 +70,7 @@ export function TagField({ name, label, placeholder, hideLabel, suggestions, can
                 type="button"
                 aria-label={t('businessContext.remove', { value: entry })}
                 onClick={() => onChange(value.filter((v) => v !== entry))}
-                className="flex size-4 cursor-pointer items-center justify-center rounded-xs text-gray hover:bg-border-panel hover:text-navy focus-ring"
+                className="flex size-4 cursor-pointer items-center justify-center rounded-xs text-gray transition-colors duration-150 ease-[ease] hover:bg-border-panel hover:text-navy focus-ring"
               >
                 <CloseIcon />
               </button>

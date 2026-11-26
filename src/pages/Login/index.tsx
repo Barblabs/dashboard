@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Navigate, useLocation } from 'react-router'
 import { returnToOf } from '../../auth/returnTo'
+import { useDocumentTitle } from '../../components/useDocumentTitle'
 import { useAuthStore, useCurrentUser } from '../../auth/store'
 import { MOCK_MODE } from '../../mockMode'
 import { canOpen, homePath } from '../../routes'
@@ -20,6 +22,8 @@ export function LoginPage() {
   const returnTo = returnToOf(useLocation().state)
   const deactivated = useAuthStore((s) => s.session.status === 'deactivated')
   const [step, setStep] = useState<Step>('credentials')
+  const { t } = useTranslation()
+  useDocumentTitle(t('login.form.title'))
 
   if (deactivated) return <Navigate to="/deactivated" replace />
   if (user) {

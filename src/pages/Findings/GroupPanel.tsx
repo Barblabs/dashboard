@@ -23,7 +23,7 @@ interface Props {
 
 export function GroupPanel({ order, group, onOpen }: Props) {
   const { t } = useTranslation()
-  const wide = useWideLayout()
+  const wide = useWideLayout(1280)
   const findings = group.finding_ids
     .map((id) => order.prioritization.findings.find((f) => f.finding_id === id))
     .filter((f): f is Finding => f !== undefined)
@@ -46,10 +46,10 @@ export function GroupPanel({ order, group, onOpen }: Props) {
           {/* Fixed column widths, so each group's columns line up with the groups above and below it. */}
           <table className="w-full min-w-[56rem] table-fixed border-collapse text-[0.875rem]">
             <colgroup>
+              <col className="w-[16%]" />
+              <col className="w-[12%]" />
+              <col className="w-[26%]" />
               <col className="w-[15%]" />
-              <col className="w-[11%]" />
-              <col className="w-[27%]" />
-              <col className="w-[13%]" />
               <col className="w-[8%]" />
               <col />
             </colgroup>
@@ -90,7 +90,7 @@ function FindingRow({ order, finding, onOpen }: { order: CurrentOrder; finding: 
     <tr
       // The whole row is the mouse target; the button stays the keyboard and screen reader path.
       onClick={() => onOpen(finding.finding_id)}
-      className={`cursor-pointer transition-colors duration-150 hover:bg-row-hover ${closed ? 'opacity-60' : ''}`}
+      className={`cursor-pointer transition-colors duration-150 ease-[ease] hover:bg-row-hover ${closed ? '*:opacity-60 contrast-more:*:opacity-100' : ''}`}
     >
       <td className={CELL}>
         <OpenButton finding={finding} onOpen={onOpen} />
@@ -99,7 +99,7 @@ function FindingRow({ order, finding, onOpen }: { order: CurrentOrder; finding: 
       <td className={`${CELL} ${MONO}`}>
         {finding.component} {finding.version}
       </td>
-      <td className={`${CELL} ${MONO}`}>
+      <td className={`${CELL} ${MONO} whitespace-nowrap`}>
         {scorePoints(currentScore(finding))}
         <ScoreBandBadge band={currentScoreDetails(finding).band} className="ml-2" />
       </td>
@@ -118,7 +118,7 @@ function FindingCard({ order, finding, onOpen }: { order: CurrentOrder; finding:
   return (
     <li
       onClick={() => onOpen(finding.finding_id)}
-      className={`flex cursor-pointer flex-col gap-2 rounded-lg border border-border-row p-4 text-[0.875rem] transition-colors duration-150 hover:bg-row-hover ${closed ? 'text-gray' : 'text-navy'}`}
+      className={`flex cursor-pointer flex-col gap-2 rounded-lg border border-border-panel p-4 text-[0.875rem] text-navy transition-colors duration-150 ease-[ease] hover:bg-row-hover ${closed ? '*:opacity-60 contrast-more:*:opacity-100' : ''}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <OpenButton finding={finding} onOpen={onOpen} />
@@ -155,7 +155,7 @@ function OpenButton({ finding, onOpen }: { finding: Finding; onOpen: (id: string
         onOpen(finding.finding_id)
       }}
       aria-label={t('findings.open', { cve: finding.cve_id })}
-      className={`focus-ring cursor-pointer rounded-xs font-semibold underline-offset-2 hover:underline ${MONO} ${closed ? 'text-gray line-through' : 'text-navy'}`}
+      className={`focus-ring cursor-pointer rounded-xs text-left font-semibold whitespace-nowrap underline-offset-2 hover:underline ${MONO} ${closed ? 'text-gray line-through' : 'text-navy'}`}
     >
       {finding.cve_id}
     </button>

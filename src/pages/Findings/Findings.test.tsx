@@ -611,7 +611,7 @@ describe('Findings', () => {
 
       expect(screen.getByText('Risk level: Critical')).toBeInTheDocument()
 
-      await user.click(screen.getByRole('button', { name: 'Remove filter' }))
+      await user.click(screen.getByRole('button', { name: 'Remove Risk level: Critical' }))
 
       await waitFor(() => expect(screen.queryByText('Risk level: Critical')).not.toBeInTheDocument())
     })
@@ -620,7 +620,7 @@ describe('Findings', () => {
       const user = renderApp('/findings?band=critical&from=chart')
       await screen.findByRole('region', { name: 'Fallos con exploit activo sobre servicios expuestos a internet' })
 
-      await user.click(screen.getByRole('button', { name: 'Remove filter' }))
+      await user.click(screen.getByRole('button', { name: 'Remove Risk level: Critical' }))
 
       await waitFor(() => {
         expect(screen.queryByText('From the chart:')).not.toBeInTheDocument()
